@@ -1,0 +1,908 @@
+# Copyright 2020 Björn Kautler
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+name: "Build and Test"
+on:
+  "push": null
+  "pull_request": null
+  "schedule":
+  - cron: "0 0 * * FRI"
+jobs:
+  "build":
+    name: "Build"
+    runs-on: "windows-latest"
+    steps:
+    - name: "Configure Git"
+      run: "git config --global core.autocrlf input"
+    - name: "Checkout"
+      uses: "actions/checkout@v2"
+    - name: "Build"
+      uses: "burrunan/gradle-cache-action@v1"
+      with:
+        "arguments": "build"
+        "debug": "false"
+        "concurrent": "true"
+        "gradle-dependencies-cache-key": "buildSrc/**/Versions.kt"
+    - name: "Save built artifacts to cache"
+      uses: "actions/cache@v2"
+      with:
+        "path": "action.yml\nbuild/distributions/\n"
+        "key": "${{ github.run_id }}"
+  "build_windows_2016":
+    name: "Build on windows-2016"
+    runs-on: "windows-2016"
+    steps:
+    - name: "Configure Git"
+      run: "git config --global core.autocrlf input"
+    - name: "Checkout"
+      uses: "actions/checkout@v2"
+    - name: "Build"
+      uses: "burrunan/gradle-cache-action@v1"
+      with:
+        "arguments": "build"
+        "debug": "false"
+        "concurrent": "true"
+        "gradle-dependencies-cache-key": "buildSrc/**/Versions.kt"
+    - name: "Save built artifacts to cache"
+      uses: "actions/cache@v2"
+      with:
+        "key": "${{ github.run_id }}-windows_2016"
+        "path": "action.yml\nbuild/distributions/\n"
+  "test_invalid_windows_environment":
+    name: "Test 'windows-2016' environment"
+    needs: "build_windows_2016"
+    runs-on: "windows-2016"
+    steps:
+    - name: "Restore built artifacts from cache"
+      uses: "actions/cache@v2"
+      with:
+        "key": "${{ github.run_id }}-windows_2016"
+        "path": "action.yml\nbuild/distributions/\n"
+    - id: "execute_action"
+      name: "Execute action"
+      uses: "./"
+      continue-on-error: true
+    - name: "Test - action should fail if an invalid windows environment is given"
+      run: "if '${{ steps.execute_action.outcome }}' NEQ 'failure' exit 1\n"
+      shell: "cmd"
+  "test_invalid_distribution":
+    name: "Test '${{ matrix.distribution.label }}' distribution"
+    needs: "build"
+    runs-on: "windows-latest"
+    steps:
+    - name: "Restore built artifacts from cache"
+      uses: "actions/cache@v2"
+      with:
+        "path": "action.yml\nbuild/distributions/\n"
+        "key": "${{ github.run_id }}"
+    - id: "execute_action"
+      name: "Execute action"
+      uses: "./"
+      with:
+        "distribution": "${{ matrix.distribution.id }}"
+      continue-on-error: true
+    - name: "Test - action should fail if an invalid distribution is given"
+      run: "if '${{ steps.execute_action.outcome }}' NEQ 'failure' exit 1\n"
+      shell: "cmd"
+    strategy:
+      matrix:
+        "distribution":
+        - "id": "invalid"
+          "label": "invalid"
+        - "id": ""
+          "label": ""
+        - "id": null
+          "label": "null"
+      fail-fast: false
+  "test_default_distribution":
+    name: "Test default distribution ${{ matrix.nothing }}"
+    needs: "build"
+    runs-on: "windows-latest"
+    steps:
+    - name: "Restore built artifacts from cache"
+      uses: "actions/cache@v2"
+      with:
+        "path": "action.yml\nbuild/distributions/\n"
+        "key": "${{ github.run_id }}"
+    - id: "execute_action"
+      name: "Execute action"
+      uses: "./"
+      with:
+        "update": "true"
+    - if: "always() && (steps.execute_action.outcome == 'success')"
+      name: "Test - wsl-bash should be available as custom shell"
+      run: ":\n"
+      shell: "wsl-bash {0}"
+    - id: "set_e_provocation"
+      if: "always() && (steps.execute_action.outcome == 'success')"
+      name: "Test - wsl-bash should fail if one of the commands fails (provocation)"
+      run: "false\n:\n"
+      shell: "wsl-bash {0}"
+      continue-on-error: true
+    - if: "always() && (steps.execute_action.outcome == 'success')"
+      name: "Test - wsl-bash should fail if one of the commands fails (verfication)"
+      run: "[ '${{ steps.set_e_provocation.outcome }}' == 'failure' ] || exit 1\n"
+      shell: "wsl-bash {0}"
+    - id: "set_u_provocation"
+      if: "always() && (steps.execute_action.outcome == 'success')"
+      name: "Test - wsl-bash should fail if an undefined variable is used (provocation)"
+      run: "$foo"
+      shell: "wsl-bash {0}"
+      continue-on-error: true
+    - if: "always() && (steps.execute_action.outcome == 'success')"
+      name: "Test - wsl-bash should fail if an undefined variable is used (verfication)"
+      run: "[ '${{ steps.set_u_provocation.outcome }}' == 'failure' ]\n"
+      shell: "wsl-bash {0}"
+    - id: "set_pipefail_provocation"
+      if: "always() && (steps.execute_action.outcome == 'success')"
+      name: "Test - wsl-bash should fail if any command in a pipe fails (provocation)"
+      run: "false | true"
+      shell: "wsl-bash {0}"
+      continue-on-error: true
+    - if: "always() && (steps.execute_action.outcome == 'success')"
+      name: "Test - wsl-bash should fail if any command in a pipe fails (verfication)"
+      run: "[ '${{ steps.set_pipefail_provocation.outcome }}' == 'failure' ]\n"
+      shell: "wsl-bash {0}"
+    - if: "always() && (steps.execute_action.outcome == 'success')"
+      name: "Test - the default distribution should be correct"
+      run: "wslconfig.exe /list | iconv -f UTF-16LE -t UTF-8\n[[ \"$(wslconfig.exe\
+        \ /list | iconv -f UTF-16LE -t UTF-8)\" == *${{ matrix.distribution.id }}\\\
+        \ \\(Default\\)* ]]\n"
+      shell: "wsl-bash {0}"
+    - if: "always() && (steps.execute_action.outcome == 'success')"
+      name: "Test - wsl-bash should use the correct distribution"
+      run: "cat <(lsb_release -a || true) <(uname -a || true) <([ -d /etc ] && find\
+        \ /etc -maxdepth 1 -type f \\( -name '*release' -or -name 'issue*' \\) -exec\
+        \ cat {} + || true) <([ -d /etc/products.d ] && find /etc/products.d -maxdepth\
+        \ 1 -type f -name '*.prod' -exec cat {} + || true) <([ -f /proc/version ]\
+        \ && cat /proc/version || true)\n[[ \"$(cat <(lsb_release -a || true) <(uname\
+        \ -a || true) <([ -d /etc ] && find /etc -maxdepth 1 -type f \\( -name '*release'\
+        \ -or -name 'issue*' \\) -exec cat {} + || true) <([ -d /etc/products.d ]\
+        \ && find /etc/products.d -maxdepth 1 -type f -name '*.prod' -exec cat {}\
+        \ + || true) <([ -f /proc/version ] && cat /proc/version || true))\" == ${{\
+        \ matrix.distribution.match-pattern }} ]]\n"
+      shell: "wsl-bash {0}"
+    - if: "always() && (steps.execute_action.outcome == 'success')"
+      name: "Test - multi-line commands should not be disturbed by CRLF line endings"
+      run: ": # this comment catches the CR if present\n! grep -q $'\\r' \"$0\" #\
+        \ this comment catches the CR if present\n"
+      shell: "wsl-bash {0}"
+    strategy:
+      matrix:
+        "distribution":
+        - "id": "Debian"
+          "match-pattern": "*Debian*"
+          "default-absent-tool": "dos2unix"
+      fail-fast: false
+  "test":
+    name: "Test '${{ matrix.distribution.id }}' distribution"
+    needs: "build"
+    runs-on: "windows-latest"
+    steps:
+    - name: "Restore built artifacts from cache"
+      uses: "actions/cache@v2"
+      with:
+        "path": "action.yml\nbuild/distributions/\n"
+        "key": "${{ github.run_id }}"
+    - id: "execute_action1"
+      name: "Execute action"
+      uses: "./"
+      with:
+        "distribution": "${{ matrix.distribution.id }}"
+    - id: "no_default_bash_provocation"
+      if: "matrix.distribution.id == 'Alpine'"
+      name: "Test - wsl-bash should fail if bash is not present by default (provocation)"
+      run: ":\n"
+      shell: "wsl-bash {0}"
+      continue-on-error: true
+    - if: "always() && (matrix.distribution.id == 'Alpine') && (steps.execute_action1.outcome\
+        \ == 'success')"
+      name: "Test - wsl-bash should fail if bash is not present by default (verfication)"
+      run: "wsl sh -euc \"[ '${{ steps.no_default_bash_provocation.outcome }}' = 'failure'\
+        \ ]\"\n"
+    - id: "execute_action2"
+      if: "always() && (matrix.distribution.id == 'Alpine') && (steps.execute_action1.outcome\
+        \ == 'success')"
+      name: "Install Bash on Alpine"
+      uses: "./"
+      with:
+        "distribution": "${{ matrix.distribution.id }}"
+        "additional-packages": "bash"
+    - if: "always() && (steps.execute_action.outcome == 'success')"
+      name: "Test - wsl-bash should be available as custom shell"
+      run: ":\n"
+      shell: "wsl-bash {0}"
+    - id: "set_e_provocation"
+      if: "always() && (steps.execute_action.outcome == 'success')"
+      name: "Test - wsl-bash should fail if one of the commands fails (provocation)"
+      run: "false\n:\n"
+      shell: "wsl-bash {0}"
+      continue-on-error: true
+    - if: "always() && (steps.execute_action.outcome == 'success')"
+      name: "Test - wsl-bash should fail if one of the commands fails (verfication)"
+      run: "[ '${{ steps.set_e_provocation.outcome }}' == 'failure' ] || exit 1\n"
+      shell: "wsl-bash {0}"
+    - id: "set_u_provocation"
+      if: "always() && (steps.execute_action.outcome == 'success')"
+      name: "Test - wsl-bash should fail if an undefined variable is used (provocation)"
+      run: "$foo"
+      shell: "wsl-bash {0}"
+      continue-on-error: true
+    - if: "always() && (steps.execute_action.outcome == 'success')"
+      name: "Test - wsl-bash should fail if an undefined variable is used (verfication)"
+      run: "[ '${{ steps.set_u_provocation.outcome }}' == 'failure' ]\n"
+      shell: "wsl-bash {0}"
+    - id: "set_pipefail_provocation"
+      if: "always() && (steps.execute_action.outcome == 'success')"
+      name: "Test - wsl-bash should fail if any command in a pipe fails (provocation)"
+      run: "false | true"
+      shell: "wsl-bash {0}"
+      continue-on-error: true
+    - if: "always() && (steps.execute_action.outcome == 'success')"
+      name: "Test - wsl-bash should fail if any command in a pipe fails (verfication)"
+      run: "[ '${{ steps.set_pipefail_provocation.outcome }}' == 'failure' ]\n"
+      shell: "wsl-bash {0}"
+    - if: "always() && (steps.execute_action.outcome == 'success')"
+      name: "Test - the default distribution should be correct"
+      run: "wslconfig.exe /list | iconv -f UTF-16LE -t UTF-8\n[[ \"$(wslconfig.exe\
+        \ /list | iconv -f UTF-16LE -t UTF-8)\" == *${{ matrix.distribution.id }}\\\
+        \ \\(Default\\)* ]]\n"
+      shell: "wsl-bash {0}"
+    - if: "always() && (steps.execute_action.outcome == 'success')"
+      name: "Test - wsl-bash should use the correct distribution"
+      run: "cat <(lsb_release -a || true) <(uname -a || true) <([ -d /etc ] && find\
+        \ /etc -maxdepth 1 -type f \\( -name '*release' -or -name 'issue*' \\) -exec\
+        \ cat {} + || true) <([ -d /etc/products.d ] && find /etc/products.d -maxdepth\
+        \ 1 -type f -name '*.prod' -exec cat {} + || true) <([ -f /proc/version ]\
+        \ && cat /proc/version || true)\n[[ \"$(cat <(lsb_release -a || true) <(uname\
+        \ -a || true) <([ -d /etc ] && find /etc -maxdepth 1 -type f \\( -name '*release'\
+        \ -or -name 'issue*' \\) -exec cat {} + || true) <([ -d /etc/products.d ]\
+        \ && find /etc/products.d -maxdepth 1 -type f -name '*.prod' -exec cat {}\
+        \ + || true) <([ -f /proc/version ] && cat /proc/version || true))\" == ${{\
+        \ matrix.distribution.match-pattern }} ]]\n"
+      shell: "wsl-bash {0}"
+    - if: "always() && (steps.execute_action.outcome == 'success')"
+      name: "Test - multi-line commands should not be disturbed by CRLF line endings"
+      run: ": # this comment catches the CR if present\n! grep -q $'\\r' \"$0\" #\
+        \ this comment catches the CR if present\n"
+      shell: "wsl-bash {0}"
+    - id: "default_absent_tool_absent_provocation"
+      if: "always() && (steps.execute_action1.outcome == 'success')"
+      name: "Test - ${{ matrix.distribution.default-absent-tool }} should not be installed\
+        \ by default (provocation)"
+      run: "${{ matrix.distribution.default-absent-tool }} --version"
+      shell: "wsl-bash {0}"
+      continue-on-error: true
+    - if: "always() && (steps.execute_action1.outcome == 'success')"
+      name: "Test - ${{ matrix.distribution.default-absent-tool }} should not be installed\
+        \ by default (verfication)"
+      run: "[ '${{ steps.default_absent_tool_absent_provocation.outcome }}' == 'failure'\
+        \ ]\n"
+      shell: "wsl-bash {0}"
+    - if: "always() && (steps.execute_action1.outcome == 'success')"
+      name: "Test - bash should be installed by default"
+      run: "bash -c true"
+      shell: "wsl-bash {0}"
+    - if: "always() && (steps.execute_action1.outcome == 'success')"
+      name: "Test - sh should be installed by default"
+      run: "sh -c true"
+      shell: "wsl-bash {0}"
+    - id: "wsl-sh_absent_provocation"
+      if: "always() && (steps.execute_action1.outcome == 'success')"
+      name: "Test - wsl-sh should not be present (provocation)"
+      run: ":\n"
+      shell: "wsl-sh {0}"
+      continue-on-error: true
+    - if: "always() && (steps.execute_action1.outcome == 'success')"
+      name: "Test - wsl-sh should not be present (verfication)"
+      run: "[ '${{ steps.wsl-sh_absent_provocation.outcome }}' == 'failure' ]\n"
+      shell: "wsl-bash {0}"
+    - id: "execute_action3"
+      name: "Add wsl-sh wrapper"
+      uses: "./"
+      with:
+        "distribution": "${{ matrix.distribution.id }}"
+        "wsl-shell-command": "sh -eu"
+    - if: "always() && (steps.execute_action1.outcome == 'success') && (steps.execute_action3.outcome\
+        \ == 'success')"
+      name: "Test - wsl-sh should be present"
+      run: ":\n"
+      shell: "wsl-sh {0}"
+    - if: "always() && (steps.execute_action1.outcome == 'success') && (steps.execute_action3.outcome\
+        \ == 'success')"
+      name: "Test - wsl-bash should use bash"
+      run: "ps -o pid='' -o comm='' | grep \"^\\s\\+$$\\s\\+\" | grep -o '\\S\\+$'\n\
+        [ \"$(ps -o pid='' -o comm='' 2>/dev/null | grep \"^\\s\\+$$\\s\\+\" | grep\
+        \ -o '\\S\\+$')\" == 'bash' ]\n"
+      shell: "wsl-bash {0}"
+    - if: "always() && (steps.execute_action1.outcome == 'success') && (steps.execute_action3.outcome\
+        \ == 'success')"
+      name: "Test - wsl-sh should use sh"
+      run: "ps -o pid='' -o comm='' | grep \"^\\s\\+$$\\s\\+\" | grep -o '\\S\\+$'\n\
+        [ \"$(ps -o pid='' -o comm='' 2>/dev/null | grep \"^\\s\\+$$\\s\\+\" | grep\
+        \ -o '\\S\\+$')\" = 'sh' ]\n"
+      shell: "wsl-sh {0}"
+    - if: "always() && (steps.execute_action1.outcome == 'success') && (steps.execute_action3.outcome\
+        \ == 'success')"
+      name: "Test - delete wsl-bash"
+      run: "find \"`wslpath '${{ runner.temp }}'`\" -name wsl-bash.bat -print -delete\
+        \ 2>/dev/null"
+      shell: "wsl-sh {0}"
+    - id: "wsl-bash_absent_provocation"
+      if: "always() && (steps.execute_action1.outcome == 'success') && (steps.execute_action3.outcome\
+        \ == 'success')"
+      name: "Test - wsl-bash should not be present (provocation)"
+      run: ":\n"
+      shell: "wsl-bash {0}"
+      continue-on-error: true
+    - if: "always() && (steps.execute_action1.outcome == 'success') && (steps.execute_action3.outcome\
+        \ == 'success')"
+      name: "Test - wsl-bash should not be present (verfication)"
+      run: "[ '${{ steps.wsl-bash_absent_provocation.outcome }}' = 'failure' ]\n"
+      shell: "wsl-sh {0}"
+    - id: "execute_action4"
+      name: "Re-add wsl-bash wrapper"
+      uses: "./"
+      with:
+        "distribution": "${{ matrix.distribution.id }}"
+        "wsl-shell-command": "bash"
+    - if: "always() && (steps.execute_action1.outcome == 'success') && (steps.execute_action3.outcome\
+        \ == 'success') && (steps.execute_action4.outcome == 'success')"
+      name: "Test - wsl-bash should be present"
+      run: ":\n"
+      shell: "wsl-bash {0}"
+    - if: "always() && (steps.execute_action1.outcome == 'success') && (steps.execute_action3.outcome\
+        \ == 'success') && (steps.execute_action4.outcome == 'success')"
+      name: "Test - wsl-bash should use bash"
+      run: "ps -o pid='' -o comm='' | grep \"^\\s\\+$$\\s\\+\" | grep -o '\\S\\+$'\n\
+        [ \"$(ps -o pid='' -o comm='' 2>/dev/null | grep \"^\\s\\+$$\\s\\+\" | grep\
+        \ -o '\\S\\+$')\" == 'bash' ]\n"
+      shell: "wsl-bash {0}"
+    strategy:
+      matrix:
+        "distribution":
+        - "id": "Debian"
+          "match-pattern": "*Debian*"
+          "default-absent-tool": "dos2unix"
+        - "id": "Alpine"
+          "match-pattern": "*Alpine*"
+          "default-absent-tool": "dos2unix"
+        - "id": "kali-linux"
+          "match-pattern": "*Kali*"
+          "default-absent-tool": "dos2unix"
+        - "id": "openSUSE-Leap-15.2"
+          "match-pattern": "*openSUSE*Leap*15.2*"
+          "default-absent-tool": "which"
+        - "id": "Ubuntu-20.04"
+          "match-pattern": "*Ubuntu*20.04*"
+          "default-absent-tool": "dos2unix"
+        - "id": "Ubuntu-18.04"
+          "match-pattern": "*Ubuntu*18.04*"
+          "default-absent-tool": "dos2unix"
+        - "id": "Ubuntu-16.04"
+          "match-pattern": "*Ubuntu*16.04*"
+          "default-absent-tool": "dos2unix"
+      fail-fast: false
+  "test_additional_packages":
+    name: "Test additional packages for '${{ matrix.distribution.id }}' distribution"
+    needs: "build"
+    runs-on: "windows-latest"
+    steps:
+    - name: "Restore built artifacts from cache"
+      uses: "actions/cache@v2"
+      with:
+        "path": "action.yml\nbuild/distributions/\n"
+        "key": "${{ github.run_id }}"
+    - id: "execute_action"
+      name: "Execute action"
+      uses: "./"
+      with:
+        "distribution": "${{ matrix.distribution.id }}"
+        "additional-packages": "${{ matrix.distribution.default-absent-tool }} bash\n"
+    - if: "always() && (steps.execute_action.outcome == 'success')"
+      name: "Test - ${{ matrix.distribution.default-absent-tool }} should be installed"
+      run: "${{ matrix.distribution.default-absent-tool }} --version"
+      shell: "wsl-bash {0}"
+    - if: "always() && (steps.execute_action.outcome == 'success')"
+      name: "Test - bash should be installed"
+      run: "bash -c true"
+      shell: "wsl-bash {0}"
+    strategy:
+      matrix:
+        "distribution":
+        - "id": "Debian"
+          "match-pattern": "*Debian*"
+          "default-absent-tool": "dos2unix"
+        - "id": "Alpine"
+          "match-pattern": "*Alpine*"
+          "default-absent-tool": "dos2unix"
+        - "id": "kali-linux"
+          "match-pattern": "*Kali*"
+          "default-absent-tool": "dos2unix"
+        - "id": "openSUSE-Leap-15.2"
+          "match-pattern": "*openSUSE*Leap*15.2*"
+          "default-absent-tool": "which"
+        - "id": "Ubuntu-20.04"
+          "match-pattern": "*Ubuntu*20.04*"
+          "default-absent-tool": "dos2unix"
+        - "id": "Ubuntu-18.04"
+          "match-pattern": "*Ubuntu*18.04*"
+          "default-absent-tool": "dos2unix"
+        - "id": "Ubuntu-16.04"
+          "match-pattern": "*Ubuntu*16.04*"
+          "default-absent-tool": "dos2unix"
+      fail-fast: false
+  "test_multiple_usage_with_different_distributions":
+    name: "Test multiple usage with different distributions ('${{ matrix.distributions.distribution1.id\
+      \ }}' / '${{ matrix.distributions.distribution2.id }}' / '${{ matrix.distributions.distribution3.id\
+      \ }}')"
+    needs: "build"
+    runs-on: "windows-latest"
+    steps:
+    - name: "Restore built artifacts from cache"
+      uses: "actions/cache@v2"
+      with:
+        "path": "action.yml\nbuild/distributions/\n"
+        "key": "${{ github.run_id }}"
+    - id: "execute_action1"
+      name: "Execute action for ${{ matrix.distributions.distribution1.id }}"
+      uses: "./"
+      with:
+        "distribution": "${{ matrix.distributions.distribution1.id }}"
+    - id: "execute_action2"
+      name: "Execute action for ${{ matrix.distributions.distribution2.id }}"
+      uses: "./"
+      with:
+        "distribution": "${{ matrix.distributions.distribution2.id }}"
+    - id: "execute_action3"
+      name: "Execute action for ${{ matrix.distributions.distribution3.id }}"
+      uses: "./"
+      with:
+        "distribution": "${{ matrix.distributions.distribution3.id }}"
+        "set-as-default": "false"
+    - id: "execute_action4"
+      name: "Execute action for ${{ matrix.distributions.distribution1.id }} again"
+      uses: "./"
+      with:
+        "distribution": "${{ matrix.distributions.distribution1.id }}"
+    - if: "always() && (steps.execute_action1.outcome == 'success') && (steps.execute_action2.outcome\
+        \ == 'success') && (steps.execute_action3.outcome == 'success') && (steps.execute_action4.outcome\
+        \ == 'success')"
+      name: "Test - the default distribution should be the last installed distribution\
+        \ with set-as-default true"
+      run: "wslconfig.exe /list\nwslconfig.exe /list | iconv -f UTF-16LE -t UTF-8\n\
+        [[ \"$(wslconfig.exe /list | iconv -f UTF-16LE -t UTF-8)\" == *${{ matrix.distributions.distribution2.id\
+        \ }}\\ \\(Default\\)* ]]\n"
+      shell: "wsl-bash {0}"
+    - if: "always() && (steps.execute_action1.outcome == 'success') && (steps.execute_action2.outcome\
+        \ == 'success') && (steps.execute_action3.outcome == 'success') && (steps.execute_action4.outcome\
+        \ == 'success')"
+      name: "Test - wsl-bash should use the last installed distribution with set-as-default\
+        \ true"
+      run: "cat <(lsb_release -a || true) <(uname -a || true) <([ -d /etc ] && find\
+        \ /etc -maxdepth 1 -type f \\( -name '*release' -or -name 'issue*' \\) -exec\
+        \ cat {} + || true) <([ -d /etc/products.d ] && find /etc/products.d -maxdepth\
+        \ 1 -type f -name '*.prod' -exec cat {} + || true) <([ -f /proc/version ]\
+        \ && cat /proc/version || true)\n[[ \"$(cat <(lsb_release -a || true) <(uname\
+        \ -a || true) <([ -d /etc ] && find /etc -maxdepth 1 -type f \\( -name '*release'\
+        \ -or -name 'issue*' \\) -exec cat {} + || true) <([ -d /etc/products.d ]\
+        \ && find /etc/products.d -maxdepth 1 -type f -name '*.prod' -exec cat {}\
+        \ + || true) <([ -f /proc/version ] && cat /proc/version || true))\" == ${{\
+        \ matrix.distributions.distribution2.match-pattern }} ]]\n"
+      shell: "wsl-bash {0}"
+    strategy:
+      matrix:
+        "distributions":
+        - "distribution1":
+            "id": "Debian"
+            "match-pattern": "*Debian*"
+            "default-absent-tool": "dos2unix"
+          "distribution2":
+            "id": "Ubuntu-20.04"
+            "match-pattern": "*Ubuntu*20.04*"
+            "default-absent-tool": "dos2unix"
+          "distribution3":
+            "id": "Ubuntu-18.04"
+            "match-pattern": "*Ubuntu*18.04*"
+            "default-absent-tool": "dos2unix"
+        - "distribution1":
+            "id": "Debian"
+            "match-pattern": "*Debian*"
+            "default-absent-tool": "dos2unix"
+          "distribution2":
+            "id": "Ubuntu-18.04"
+            "match-pattern": "*Ubuntu*18.04*"
+            "default-absent-tool": "dos2unix"
+          "distribution3":
+            "id": "Ubuntu-20.04"
+            "match-pattern": "*Ubuntu*20.04*"
+            "default-absent-tool": "dos2unix"
+        - "distribution1":
+            "id": "Ubuntu-20.04"
+            "match-pattern": "*Ubuntu*20.04*"
+            "default-absent-tool": "dos2unix"
+          "distribution2":
+            "id": "Debian"
+            "match-pattern": "*Debian*"
+            "default-absent-tool": "dos2unix"
+          "distribution3":
+            "id": "Ubuntu-18.04"
+            "match-pattern": "*Ubuntu*18.04*"
+            "default-absent-tool": "dos2unix"
+        - "distribution1":
+            "id": "Ubuntu-20.04"
+            "match-pattern": "*Ubuntu*20.04*"
+            "default-absent-tool": "dos2unix"
+          "distribution2":
+            "id": "Ubuntu-18.04"
+            "match-pattern": "*Ubuntu*18.04*"
+            "default-absent-tool": "dos2unix"
+          "distribution3":
+            "id": "Debian"
+            "match-pattern": "*Debian*"
+            "default-absent-tool": "dos2unix"
+        - "distribution1":
+            "id": "Ubuntu-18.04"
+            "match-pattern": "*Ubuntu*18.04*"
+            "default-absent-tool": "dos2unix"
+          "distribution2":
+            "id": "Debian"
+            "match-pattern": "*Debian*"
+            "default-absent-tool": "dos2unix"
+          "distribution3":
+            "id": "Ubuntu-20.04"
+            "match-pattern": "*Ubuntu*20.04*"
+            "default-absent-tool": "dos2unix"
+        - "distribution1":
+            "id": "Ubuntu-18.04"
+            "match-pattern": "*Ubuntu*18.04*"
+            "default-absent-tool": "dos2unix"
+          "distribution2":
+            "id": "Ubuntu-20.04"
+            "match-pattern": "*Ubuntu*20.04*"
+            "default-absent-tool": "dos2unix"
+          "distribution3":
+            "id": "Debian"
+            "match-pattern": "*Debian*"
+            "default-absent-tool": "dos2unix"
+      fail-fast: false
+  "test_multiple_usage_with_same_distribution":
+    name: "Test multiple usage with '${{ matrix.distribution.id }}' distribution"
+    needs: "build"
+    runs-on: "windows-latest"
+    steps:
+    - name: "Restore built artifacts from cache"
+      uses: "actions/cache@v2"
+      with:
+        "path": "action.yml\nbuild/distributions/\n"
+        "key": "${{ github.run_id }}"
+    - id: "execute_action1"
+      name: "Execute action"
+      uses: "./"
+      with:
+        "distribution": "${{ matrix.distribution.id }}"
+        "additional-packages": "bash"
+    - id: "execute_action2"
+      if: "matrix.distribution.id != 'kali-linux'"
+      name: "Update distribution"
+      uses: "./"
+      with:
+        "distribution": "${{ matrix.distribution.id }}"
+        "update": "true"
+    - id: "execute_action3"
+      name: "Install default absent tool"
+      uses: "./"
+      with:
+        "distribution": "${{ matrix.distribution.id }}"
+        "additional-packages": "${{ matrix.distribution.default-absent-tool }}"
+    - if: "always() && (steps.execute_action1.outcome == 'success') && ((steps.execute_action2.outcome\
+        \ == 'success') || (matrix.distribution.id == 'kali-linux')) && (steps.execute_action3.outcome\
+        \ == 'success')"
+      name: "Test - ${{ matrix.distribution.default-absent-tool }} should be installed"
+      run: "${{ matrix.distribution.default-absent-tool }} --version"
+      shell: "wsl-bash {0}"
+    - id: "execute_action4"
+      name: "Execute action for ${{ matrix.distributions.distribution2.id }}"
+      uses: "./"
+      with:
+        "distribution": "${{ matrix.distribution2.id }}"
+    - if: "always() && (steps.execute_action1.outcome == 'success') && ((steps.execute_action2.outcome\
+        \ == 'success') || (matrix.distribution.id == 'kali-linux')) && (steps.execute_action3.outcome\
+        \ == 'success') && (steps.execute_action4.outcome == 'success')"
+      name: "Test - '${{ matrix.distribution2.id }}' should be the default distribution\
+        \ after installation"
+      run: "cat <(lsb_release -a || true) <(uname -a || true) <([ -d /etc ] && find\
+        \ /etc -maxdepth 1 -type f \\( -name '*release' -or -name 'issue*' \\) -exec\
+        \ cat {} + || true) <([ -d /etc/products.d ] && find /etc/products.d -maxdepth\
+        \ 1 -type f -name '*.prod' -exec cat {} + || true) <([ -f /proc/version ]\
+        \ && cat /proc/version || true)\n[[ \"$(cat <(lsb_release -a || true) <(uname\
+        \ -a || true) <([ -d /etc ] && find /etc -maxdepth 1 -type f \\( -name '*release'\
+        \ -or -name 'issue*' \\) -exec cat {} + || true) <([ -d /etc/products.d ]\
+        \ && find /etc/products.d -maxdepth 1 -type f -name '*.prod' -exec cat {}\
+        \ + || true) <([ -f /proc/version ] && cat /proc/version || true))\" == ${{\
+        \ matrix.distribution2.match-pattern }} ]]\n"
+      shell: "wsl-bash {0}"
+    - id: "execute_action5"
+      name: "Re-execute action"
+      uses: "./"
+      with:
+        "distribution": "${{ matrix.distribution.id }}"
+    - if: "always() && (steps.execute_action1.outcome == 'success') && ((steps.execute_action2.outcome\
+        \ == 'success') || (matrix.distribution.id == 'kali-linux')) && (steps.execute_action3.outcome\
+        \ == 'success') && (steps.execute_action4.outcome == 'success') && (steps.execute_action5.outcome\
+        \ == 'success')"
+      name: "Test - '${{ matrix.distribution2.id }}' should still be the default distribution\
+        \ after re-running for '${{ matrix.distribution.id }}'"
+      run: "cat <(lsb_release -a || true) <(uname -a || true) <([ -d /etc ] && find\
+        \ /etc -maxdepth 1 -type f \\( -name '*release' -or -name 'issue*' \\) -exec\
+        \ cat {} + || true) <([ -d /etc/products.d ] && find /etc/products.d -maxdepth\
+        \ 1 -type f -name '*.prod' -exec cat {} + || true) <([ -f /proc/version ]\
+        \ && cat /proc/version || true)\n[[ \"$(cat <(lsb_release -a || true) <(uname\
+        \ -a || true) <([ -d /etc ] && find /etc -maxdepth 1 -type f \\( -name '*release'\
+        \ -or -name 'issue*' \\) -exec cat {} + || true) <([ -d /etc/products.d ]\
+        \ && find /etc/products.d -maxdepth 1 -type f -name '*.prod' -exec cat {}\
+        \ + || true) <([ -f /proc/version ] && cat /proc/version || true))\" == ${{\
+        \ matrix.distribution2.match-pattern }} ]]\n"
+      shell: "wsl-bash {0}"
+    - id: "execute_action6"
+      name: "Set as default"
+      uses: "./"
+      with:
+        "distribution": "${{ matrix.distribution.id }}"
+        "set-as-default": "true"
+    - if: "always() && (steps.execute_action1.outcome == 'success') && ((steps.execute_action2.outcome\
+        \ == 'success') || (matrix.distribution.id == 'kali-linux')) && (steps.execute_action3.outcome\
+        \ == 'success') && (steps.execute_action4.outcome == 'success') && (steps.execute_action5.outcome\
+        \ == 'success') && (steps.execute_action6.outcome == 'success')"
+      name: "Test - '${{ matrix.distribution.id }}' should be the default distribution\
+        \ after re-running with set-as-default true"
+      run: "cat <(lsb_release -a || true) <(uname -a || true) <([ -d /etc ] && find\
+        \ /etc -maxdepth 1 -type f \\( -name '*release' -or -name 'issue*' \\) -exec\
+        \ cat {} + || true) <([ -d /etc/products.d ] && find /etc/products.d -maxdepth\
+        \ 1 -type f -name '*.prod' -exec cat {} + || true) <([ -f /proc/version ]\
+        \ && cat /proc/version || true)\n[[ \"$(cat <(lsb_release -a || true) <(uname\
+        \ -a || true) <([ -d /etc ] && find /etc -maxdepth 1 -type f \\( -name '*release'\
+        \ -or -name 'issue*' \\) -exec cat {} + || true) <([ -d /etc/products.d ]\
+        \ && find /etc/products.d -maxdepth 1 -type f -name '*.prod' -exec cat {}\
+        \ + || true) <([ -f /proc/version ] && cat /proc/version || true))\" == ${{\
+        \ matrix.distribution.match-pattern }} ]]\n"
+      shell: "wsl-bash {0}"
+    strategy:
+      matrix:
+        "distribution":
+        - "id": "Debian"
+          "match-pattern": "*Debian*"
+          "default-absent-tool": "dos2unix"
+        - "id": "Alpine"
+          "match-pattern": "*Alpine*"
+          "default-absent-tool": "dos2unix"
+        - "id": "kali-linux"
+          "match-pattern": "*Kali*"
+          "default-absent-tool": "dos2unix"
+        - "id": "openSUSE-Leap-15.2"
+          "match-pattern": "*openSUSE*Leap*15.2*"
+          "default-absent-tool": "which"
+        - "id": "Ubuntu-20.04"
+          "match-pattern": "*Ubuntu*20.04*"
+          "default-absent-tool": "dos2unix"
+        - "id": "Ubuntu-18.04"
+          "match-pattern": "*Ubuntu*18.04*"
+          "default-absent-tool": "dos2unix"
+        - "id": "Ubuntu-16.04"
+          "match-pattern": "*Ubuntu*16.04*"
+          "default-absent-tool": "dos2unix"
+        "distribution2":
+        - "id": "Debian"
+          "match-pattern": "*Debian*"
+          "default-absent-tool": "dos2unix"
+        "exclude":
+        - "distribution":
+            "id": "Debian"
+            "match-pattern": "*Debian*"
+            "default-absent-tool": "dos2unix"
+          "distribution2":
+            "id": "Debian"
+            "match-pattern": "*Debian*"
+            "default-absent-tool": "dos2unix"
+        "include":
+        - "distribution":
+            "id": "Debian"
+            "match-pattern": "*Debian*"
+            "default-absent-tool": "dos2unix"
+          "distribution2":
+            "id": "Ubuntu-20.04"
+            "match-pattern": "*Ubuntu*20.04*"
+            "default-absent-tool": "dos2unix"
+      fail-fast: false
+  "test_distribution_specific_wsl_bash_scripts":
+    name: "Test distribution specific wsl-bash scripts ${{ matrix.nothing }}"
+    needs: "build"
+    runs-on: "windows-latest"
+    steps:
+    - name: "Restore built artifacts from cache"
+      uses: "actions/cache@v2"
+      with:
+        "path": "action.yml\nbuild/distributions/\n"
+        "key": "${{ github.run_id }}"
+    - id: "execute_action1"
+      name: "Execute action for ${{ matrix.distributions.distribution1.id }}"
+      uses: "./"
+      with:
+        "distribution": "${{ matrix.distributions.distribution1.id }}"
+    - id: "execute_action2"
+      name: "Execute action for ${{ matrix.distributions.distribution2.id }}"
+      uses: "./"
+      with:
+        "distribution": "${{ matrix.distributions.distribution2.id }}"
+        "additional-packages": "bash"
+    - id: "execute_action3"
+      name: "Execute action for ${{ matrix.distributions.distribution3.id }}"
+      uses: "./"
+      with:
+        "distribution": "${{ matrix.distributions.distribution3.id }}"
+        "set-as-default": "false"
+    - id: "execute_action4"
+      name: "Execute action for ${{ matrix.distributions.distribution4.id }}"
+      uses: "./"
+      with:
+        "distribution": "${{ matrix.distributions.distribution4.id }}"
+        "set-as-default": "false"
+    - id: "execute_action5"
+      name: "Execute action for ${{ matrix.distributions.distribution5.id }}"
+      uses: "./"
+      with:
+        "distribution": "${{ matrix.distributions.distribution5.id }}"
+        "set-as-default": "false"
+    - id: "execute_action6"
+      name: "Execute action for ${{ matrix.distributions.distribution6.id }}"
+      uses: "./"
+      with:
+        "distribution": "${{ matrix.distributions.distribution6.id }}"
+        "set-as-default": "false"
+    - id: "execute_action7"
+      name: "Execute action for ${{ matrix.distributions.distribution7.id }}"
+      uses: "./"
+      with:
+        "distribution": "${{ matrix.distributions.distribution7.id }}"
+        "set-as-default": "false"
+    - if: "always() && (steps.execute_action1.outcome == 'success')"
+      name: "Test - wsl-bash_${{ matrix.distributions.distribution1.id }} should use\
+        \ the correct distribution"
+      run: "cat <(lsb_release -a || true) <(uname -a || true) <([ -d /etc ] && find\
+        \ /etc -maxdepth 1 -type f \\( -name '*release' -or -name 'issue*' \\) -exec\
+        \ cat {} + || true) <([ -d /etc/products.d ] && find /etc/products.d -maxdepth\
+        \ 1 -type f -name '*.prod' -exec cat {} + || true) <([ -f /proc/version ]\
+        \ && cat /proc/version || true)\n[[ \"$(cat <(lsb_release -a || true) <(uname\
+        \ -a || true) <([ -d /etc ] && find /etc -maxdepth 1 -type f \\( -name '*release'\
+        \ -or -name 'issue*' \\) -exec cat {} + || true) <([ -d /etc/products.d ]\
+        \ && find /etc/products.d -maxdepth 1 -type f -name '*.prod' -exec cat {}\
+        \ + || true) <([ -f /proc/version ] && cat /proc/version || true))\" == ${{\
+        \ matrix.distributions.distribution1.match-pattern }} ]]\n"
+      shell: "wsl-bash_Debian {0}"
+    - if: "always() && (steps.execute_action2.outcome == 'success')"
+      name: "Test - wsl-bash_${{ matrix.distributions.distribution2.id }} should use\
+        \ the correct distribution"
+      run: "cat <(lsb_release -a || true) <(uname -a || true) <([ -d /etc ] && find\
+        \ /etc -maxdepth 1 -type f \\( -name '*release' -or -name 'issue*' \\) -exec\
+        \ cat {} + || true) <([ -d /etc/products.d ] && find /etc/products.d -maxdepth\
+        \ 1 -type f -name '*.prod' -exec cat {} + || true) <([ -f /proc/version ]\
+        \ && cat /proc/version || true)\n[[ \"$(cat <(lsb_release -a || true) <(uname\
+        \ -a || true) <([ -d /etc ] && find /etc -maxdepth 1 -type f \\( -name '*release'\
+        \ -or -name 'issue*' \\) -exec cat {} + || true) <([ -d /etc/products.d ]\
+        \ && find /etc/products.d -maxdepth 1 -type f -name '*.prod' -exec cat {}\
+        \ + || true) <([ -f /proc/version ] && cat /proc/version || true))\" == ${{\
+        \ matrix.distributions.distribution2.match-pattern }} ]]\n"
+      shell: "wsl-bash_Alpine {0}"
+    - if: "always() && (steps.execute_action3.outcome == 'success')"
+      name: "Test - wsl-bash_${{ matrix.distributions.distribution3.id }} should use\
+        \ the correct distribution"
+      run: "cat <(lsb_release -a || true) <(uname -a || true) <([ -d /etc ] && find\
+        \ /etc -maxdepth 1 -type f \\( -name '*release' -or -name 'issue*' \\) -exec\
+        \ cat {} + || true) <([ -d /etc/products.d ] && find /etc/products.d -maxdepth\
+        \ 1 -type f -name '*.prod' -exec cat {} + || true) <([ -f /proc/version ]\
+        \ && cat /proc/version || true)\n[[ \"$(cat <(lsb_release -a || true) <(uname\
+        \ -a || true) <([ -d /etc ] && find /etc -maxdepth 1 -type f \\( -name '*release'\
+        \ -or -name 'issue*' \\) -exec cat {} + || true) <([ -d /etc/products.d ]\
+        \ && find /etc/products.d -maxdepth 1 -type f -name '*.prod' -exec cat {}\
+        \ + || true) <([ -f /proc/version ] && cat /proc/version || true))\" == ${{\
+        \ matrix.distributions.distribution3.match-pattern }} ]]\n"
+      shell: "wsl-bash_kali-linux {0}"
+    - if: "always() && (steps.execute_action4.outcome == 'success')"
+      name: "Test - wsl-bash_${{ matrix.distributions.distribution4.id }} should use\
+        \ the correct distribution"
+      run: "cat <(lsb_release -a || true) <(uname -a || true) <([ -d /etc ] && find\
+        \ /etc -maxdepth 1 -type f \\( -name '*release' -or -name 'issue*' \\) -exec\
+        \ cat {} + || true) <([ -d /etc/products.d ] && find /etc/products.d -maxdepth\
+        \ 1 -type f -name '*.prod' -exec cat {} + || true) <([ -f /proc/version ]\
+        \ && cat /proc/version || true)\n[[ \"$(cat <(lsb_release -a || true) <(uname\
+        \ -a || true) <([ -d /etc ] && find /etc -maxdepth 1 -type f \\( -name '*release'\
+        \ -or -name 'issue*' \\) -exec cat {} + || true) <([ -d /etc/products.d ]\
+        \ && find /etc/products.d -maxdepth 1 -type f -name '*.prod' -exec cat {}\
+        \ + || true) <([ -f /proc/version ] && cat /proc/version || true))\" == ${{\
+        \ matrix.distributions.distribution4.match-pattern }} ]]\n"
+      shell: "wsl-bash_openSUSE-Leap-15.2 {0}"
+    - if: "always() && (steps.execute_action5.outcome == 'success')"
+      name: "Test - wsl-bash_${{ matrix.distributions.distribution5.id }} should use\
+        \ the correct distribution"
+      run: "cat <(lsb_release -a || true) <(uname -a || true) <([ -d /etc ] && find\
+        \ /etc -maxdepth 1 -type f \\( -name '*release' -or -name 'issue*' \\) -exec\
+        \ cat {} + || true) <([ -d /etc/products.d ] && find /etc/products.d -maxdepth\
+        \ 1 -type f -name '*.prod' -exec cat {} + || true) <([ -f /proc/version ]\
+        \ && cat /proc/version || true)\n[[ \"$(cat <(lsb_release -a || true) <(uname\
+        \ -a || true) <([ -d /etc ] && find /etc -maxdepth 1 -type f \\( -name '*release'\
+        \ -or -name 'issue*' \\) -exec cat {} + || true) <([ -d /etc/products.d ]\
+        \ && find /etc/products.d -maxdepth 1 -type f -name '*.prod' -exec cat {}\
+        \ + || true) <([ -f /proc/version ] && cat /proc/version || true))\" == ${{\
+        \ matrix.distributions.distribution5.match-pattern }} ]]\n"
+      shell: "wsl-bash_Ubuntu-20.04 {0}"
+    - if: "always() && (steps.execute_action6.outcome == 'success')"
+      name: "Test - wsl-bash_${{ matrix.distributions.distribution6.id }} should use\
+        \ the correct distribution"
+      run: "cat <(lsb_release -a || true) <(uname -a || true) <([ -d /etc ] && find\
+        \ /etc -maxdepth 1 -type f \\( -name '*release' -or -name 'issue*' \\) -exec\
+        \ cat {} + || true) <([ -d /etc/products.d ] && find /etc/products.d -maxdepth\
+        \ 1 -type f -name '*.prod' -exec cat {} + || true) <([ -f /proc/version ]\
+        \ && cat /proc/version || true)\n[[ \"$(cat <(lsb_release -a || true) <(uname\
+        \ -a || true) <([ -d /etc ] && find /etc -maxdepth 1 -type f \\( -name '*release'\
+        \ -or -name 'issue*' \\) -exec cat {} + || true) <([ -d /etc/products.d ]\
+        \ && find /etc/products.d -maxdepth 1 -type f -name '*.prod' -exec cat {}\
+        \ + || true) <([ -f /proc/version ] && cat /proc/version || true))\" == ${{\
+        \ matrix.distributions.distribution6.match-pattern }} ]]\n"
+      shell: "wsl-bash_Ubuntu-18.04 {0}"
+    - if: "always() && (steps.execute_action7.outcome == 'success')"
+      name: "Test - wsl-bash_${{ matrix.distributions.distribution7.id }} should use\
+        \ the correct distribution"
+      run: "cat <(lsb_release -a || true) <(uname -a || true) <([ -d /etc ] && find\
+        \ /etc -maxdepth 1 -type f \\( -name '*release' -or -name 'issue*' \\) -exec\
+        \ cat {} + || true) <([ -d /etc/products.d ] && find /etc/products.d -maxdepth\
+        \ 1 -type f -name '*.prod' -exec cat {} + || true) <([ -f /proc/version ]\
+        \ && cat /proc/version || true)\n[[ \"$(cat <(lsb_release -a || true) <(uname\
+        \ -a || true) <([ -d /etc ] && find /etc -maxdepth 1 -type f \\( -name '*release'\
+        \ -or -name 'issue*' \\) -exec cat {} + || true) <([ -d /etc/products.d ]\
+        \ && find /etc/products.d -maxdepth 1 -type f -name '*.prod' -exec cat {}\
+        \ + || true) <([ -f /proc/version ] && cat /proc/version || true))\" == ${{\
+        \ matrix.distributions.distribution7.match-pattern }} ]]\n"
+      shell: "wsl-bash_Ubuntu-16.04 {0}"
+    strategy:
+      matrix:
+        "distributions":
+        - "distribution1":
+            "id": "Debian"
+            "match-pattern": "*Debian*"
+            "default-absent-tool": "dos2unix"
+          "distribution2":
+            "id": "Alpine"
+            "match-pattern": "*Alpine*"
+            "default-absent-tool": "dos2unix"
+          "distribution3":
+            "id": "kali-linux"
+            "match-pattern": "*Kali*"
+            "default-absent-tool": "dos2unix"
+          "distribution4":
+            "id": "openSUSE-Leap-15.2"
+            "match-pattern": "*openSUSE*Leap*15.2*"
+            "default-absent-tool": "which"
+          "distribution5":
+            "id": "Ubuntu-20.04"
+            "match-pattern": "*Ubuntu*20.04*"
+            "default-absent-tool": "dos2unix"
+          "distribution6":
+            "id": "Ubuntu-18.04"
+            "match-pattern": "*Ubuntu*18.04*"
+            "default-absent-tool": "dos2unix"
+          "distribution7":
+            "id": "Ubuntu-16.04"
+            "match-pattern": "*Ubuntu*16.04*"
+            "default-absent-tool": "dos2unix"
+      fail-fast: false

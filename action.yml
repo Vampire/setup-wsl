@@ -1,0 +1,76 @@
+# Copyright 2020 Björn Kautler
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+name: Setup WSL
+description: WSL Setup GitHub Action
+author: Björn Kautler
+
+branding:
+    icon: terminal
+    color: purple
+
+inputs:
+    distribution:
+        description: |
+            The WSL distribution to install, update, or configure.
+            Valid values: 'Alpine', 'Debian', 'kali-linux', 'openSUSE-Leap-15.2', 'Ubuntu-20.04', 'Ubuntu-18.04', 'Ubuntu-16.04'
+        required: false
+        default: Debian
+
+    use-cache:
+        description: |
+            Whether to use the cache for the downloaded distribution installer.
+            This saves time in subsequent runs, jobs, or workflows but consumes space from
+            the available cache space of the repository.
+            Refer to https://github.com/marketplace/actions/cache for current usage limits.
+        required: false
+        default: 'true'
+
+    set-as-default:
+        description: |
+            Whether to set the distribution as default WSL distribution.
+            This can also be used if the distribution is installed already.
+            Default is 'true' if the distribution is going to be installed.
+            Default is 'false' if the distribution is only getting configured, updated, or additional packages installed.
+            The first installed WSL distribution is automatically the default one, independently of this input.
+        required: false
+        default: true | false
+
+    update:
+        description: |
+            Whether to update the distribution after installation.
+            This can also be used if the distribution is installed already.
+        required: false
+        default: 'false'
+
+    additional-packages:
+        description: |
+            Space separated list of additional packages to install after distribution installation.
+            This can also be used if the distribution is installed already.
+        required: false
+
+    wsl-shell-command:
+        description: |
+            The command that is used in the wsl-shell wrapper scripts to execute the run-step script.
+            The name of the wrapper scripts will be derived from the first word in this input prefixed with 'wsl-'.
+            This means that for the default value, the wrapper scripts will start with 'wsl-bash'.
+            The run-step script will be given as additional parameter after the given string.
+            This can also be used if the distribution is installed already to change the wrapper scripts or generate
+            additional ones for other shells.
+        required: false
+        default: bash --noprofile --norc -euo pipefail
+
+runs:
+    using: node12
+    main: build/distributions/index.js
