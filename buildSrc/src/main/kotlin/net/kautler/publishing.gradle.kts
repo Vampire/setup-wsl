@@ -253,3 +253,18 @@ undraftGithubRelease {
 tasks.updateVersion {
     dependsOn(undraftGithubRelease)
 }
+
+tasks.commitNewVersion {
+    doFirst {
+        release {
+            git {
+                pushToBranchPrefix = "test/"
+            }
+        }
+    }
+    doLast {
+        grgit.push {
+            refsOrSpecs = listOf(":refs/heads/test/master")
+        }
+    }
+}
