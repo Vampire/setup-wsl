@@ -22,7 +22,7 @@ import org.jetbrains.kotlin.gradle.targets.js.npm.NpmDependencyExtension
 val versions = mapOf(
         // project dependencies
         "@actions/cache" to "1.0.1",
-        "@actions/core" to "1.2.4",
+        "@actions/core" to "1.2.6",
         "@actions/exec" to "1.0.4",
         "@actions/http-client" to "1.0.8",
         "@actions/io" to "1.0.2",

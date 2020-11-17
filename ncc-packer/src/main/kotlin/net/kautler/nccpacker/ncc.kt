@@ -25,38 +25,16 @@ external fun ncc(input: String, options: NccOptions = definedExternally): Promis
 
 external interface NccOptions {
     var cache: dynamic
-        get() = definedExternally
-        set(value) = definedExternally
-    var externals: List<String>?
-        get() = definedExternally
-        set(value) = definedExternally
-    var filterAssetBase: String?
-        get() = definedExternally
-        set(value) = definedExternally
-    var minify: Boolean?
-        get() = definedExternally
-        set(value) = definedExternally
-    var sourceMap: Boolean?
-        get() = definedExternally
-        set(value) = definedExternally
-    var sourceMapBasePrefix: String?
-        get() = definedExternally
-        set(value) = definedExternally
-    var sourceMapRegister: Boolean?
-        get() = definedExternally
-        set(value) = definedExternally
-    var license: String?
-        get() = definedExternally
-        set(value) = definedExternally
-    var v8cache: Boolean?
-        get() = definedExternally
-        set(value) = definedExternally
-    var quiet: Boolean?
-        get() = definedExternally
-        set(value) = definedExternally
-    var debugLog: Boolean?
-        get() = definedExternally
-        set(value) = definedExternally
+    var externals: List<String>
+    var filterAssetBase: String
+    var minify: Boolean
+    var sourceMap: Boolean
+    var sourceMapBasePrefix: String
+    var sourceMapRegister: Boolean
+    var license: String
+    var v8cache: Boolean
+    var quiet: Boolean
+    var debugLog: Boolean
 }
 
 external interface NccResult {

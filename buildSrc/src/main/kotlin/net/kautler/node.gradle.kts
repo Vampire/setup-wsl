@@ -129,6 +129,7 @@ dependencies {
 
 tasks.withType(IntegratedDukatTask::class) {
     doLast {
+        // work-around for https://github.com/Kotlin/dukat/issues/240
         addJsModuleAnnotations(
                 this,
                 "core.module_@actions_core.kt" to "@actions/core",
@@ -138,28 +139,34 @@ tasks.withType(IntegratedDukatTask::class) {
                 "tool-cache.module_@actions_tool-cache.kt" to "@actions/tool-cache",
                 "cache.module_@actions_cache.kt" to "@actions/cache"
         )
+        // work-around for https://github.com/Kotlin/dukat/issues/397
         deleteExternalsFiles(
                 this,
                 "*.module_node.kt"
         )
         fixExternalsFiles(
                 this,
+                // work-around for https://github.com/Kotlin/dukat/issues/402
                 "lib.es2018.asynciterable.module_dukat.kt" to listOf(
                         """\Qval `return`: ((value: TReturn) -> Promise<dynamic /* IteratorYieldResult<T> | IteratorReturnResult<TReturn> */>)?\E$""" to "val `return`: ((value: dynamic) -> Promise<dynamic /* IteratorYieldResult<T> | IteratorReturnResult<TReturn> */>)?",
                         """^*\Qval `return`: ((value: PromiseLike<TReturn>) -> Promise<dynamic /* IteratorYieldResult<T> | IteratorReturnResult<TReturn> */>)?\E\r?\n\Q        get() = definedExternally\E\r?\n""" to ""
                 ),
+                // work-around for https://github.com/Kotlin/dukat/issues/401
                 "null-writable.module_null-writable.kt" to listOf(
                         """\Q`T$16`\E""" to """`T\$10`"""
                 ),
+                // work-around for https://github.com/Kotlin/dukat/issues/399
                 "tool-cache.module_@actions_tool-cache.kt" to listOf(
                         """\Qtypealias HTTPError = Error\E$""" to "",
                         """\Qtypealias IToolRelease = IToolRelease\E$""" to "",
                         """\Qtypealias IToolReleaseFile = IToolReleaseFile\E$""" to ""
                 ),
+                // work-around for https://github.com/Kotlin/dukat/issues/398
                 "cache.module_@actions_cache.kt" to listOf(
                         """\Qtypealias ValidationError = Error\E$""" to "external class ValidationError : Throwable",
                         """\Qtypealias ReserveCacheError = Error\E$""" to "external class ReserveCacheError : Throwable"
                 ),
+                // work-around for https://github.com/Kotlin/dukat/issues/400
                 "semver.module_semver.kt" to listOf(
                         """\Q@JsModule("semver")\E$""" to """@JsModule("semver/classes/semver")"""
                 )

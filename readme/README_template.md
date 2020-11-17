@@ -6,13 +6,21 @@ Setup WSL
 
 A GitHub action to install and setup a Linux distribution for the Windows Subsystem for Linux (WSL).
 
-Beginning with `windows-2019` virtual environment for GitHub actions, WSL is enabled.
+Beginning with `windows-2019` virtual environment for GitHub actions, WSLv1 is enabled.
 However, there is no Linux distribution installed by default and there is also no easy shell for
 `run` steps that executes commands within a WSL distribution.
 
 This action provides an easy way to install Linux distributions for WSL, update those to the latest packages and
 install additional packages in them. It also provides a comfortable shell for `run` steps that uses the default
 WSL distribution and distribution-specific shells if you set up multiple distributions.
+
+WSLv2 is not explicitly supported, because as of this writing neither the Windows version running on GitHub hosted
+runners supports WSLv2, nor is Hyper-V enabled which is also necessary to enable WSLv2. If you use a self-hosted
+runner on a Windows OS that is new enough with enabled Hyper-V and default WSL version set to 2, this action will
+probably run just fine, but this setup is untested and not explicitly supported. If you want to provide a self-hosted
+runner with a sufficient setup for this action to use or need changes for supporting WSLv2 I will happily accept this.
+With a proper test environment (self-hosted runner) that will stay available, I would also add proper official support
+where you can select the WSL version in your workflow files.
 
 Table of Contents
 -----------------
