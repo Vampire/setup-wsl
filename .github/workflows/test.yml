@@ -361,6 +361,25 @@ jobs:
         [ \"$(ps -o pid='' -o comm='' 2>/dev/null | grep \"^\\s\\+$$\\s\\+\" | grep\
         \ -o '\\S\\+$')\" == 'bash' ]\n"
       shell: "wsl-bash {0}"
+    - if: "always() && (steps.execute_action4.outcome == 'success')"
+      name: "Test - wsl-bash should use root as default user"
+      run: "whoami\n[ \"$(whoami)\" == 'root' ]\n"
+      shell: "wsl-bash {0}"
+    - name: "Add user test"
+      run: "useradd -m -p 4qBD5NWD3IkbU test\n"
+      shell: "wsl-bash {0}"
+    - id: "execute_action5"
+      name: "Set wsl-bash wrapper to use user test by default"
+      uses: "./"
+      with:
+        "distribution": "${{ matrix.distribution.id }}"
+        "additional-packages": "sudo"
+        "wsl-shell-command": "bash -c \"sudo -u test bash --noprofile --norc -euo\
+          \ pipefail \"\\"
+    - if: "always() && (steps.execute_action5.outcome == 'success')"
+      name: "Test - wsl-bash should use test as default user"
+      run: "whoami\n[ \"$(whoami)\" == 'test' ]\n"
+      shell: "wsl-bash {0}"
     strategy:
       matrix:
         "distribution":

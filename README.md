@@ -212,19 +212,31 @@ _**Example:**_
 The command that is used in the wsl-shell wrapper scripts to execute the `run`-step script.
 The name of the wrapper scripts will be derived from the first word in this input prefixed with `wsl-`.
 This means that for the default value, the wrapper scripts will start with `wsl-bash`.
-The `run`-step script will be given as additional parameter after the given string.
+The `run`-step script will be given as additional parameter after the given string,
+separated with one space character. The latter point is important,
+if you need to escape this space character as shown in the examples.
 This can also be used if the distribution is installed already to change the wrapper scripts or generate
 additional ones for other shells.
 
 **Default value:** `bash --noprofile --norc -euo pipefail`
 
-_**Example:**_
+_**Examples:**_
 ```yaml
 - uses: Vampire/setup-wsl@v1
   with:
       wsl-shell-command: ash -eu
 
 - shell: wsl-ash {0}
+  run: id
+
+- shell: wsl-bash {0}
+  run: |
+      useradd -m -p 4qBD5NWD3IkbU test
+
+- uses: Vampire/setup-wsl@v1
+  with:
+      wsl-shell-command: bash -c "sudo -u test bash --noprofile --norc -euo pipefail "
+- shell: wsl-bash {0}
   run: id
 ```
 

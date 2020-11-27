@@ -444,6 +444,35 @@ jobs:
                   ps -o pid='' -o comm='' | grep "^\s\+$$\s\+" | grep -o '\S\+$'
                   [ "$(ps -o pid='' -o comm='' 2>/dev/null | grep "^\s\+$$\s\+" | grep -o '\S\+$')" == 'bash' ]
 
+            - name: Test - wsl-bash should use root as default user
+              if: always()
+                  && (steps.execute_action4.outcome == 'success')
+              shell: wsl-bash {0}
+              run: |
+                  whoami
+                  [ "$(whoami)" == 'root' ]
+
+            - name: Add user test
+              shell: wsl-bash {0}
+              run: |
+                  useradd -m -p 4qBD5NWD3IkbU test
+
+            - <<: *execute_action
+              name: Set wsl-bash wrapper to use user test by default
+              id: execute_action5
+              with:
+                  distribution: ${{ matrix.distribution.id }}
+                  additional-packages: sudo
+                  wsl-shell-command: bash -c "sudo -u test bash --noprofile --norc -euo pipefail "\
+
+            - name: Test - wsl-bash should use test as default user
+              if: always()
+                  && (steps.execute_action5.outcome == 'success')
+              shell: wsl-bash {0}
+              run: |
+                  whoami
+                  [ "$(whoami)" == 'test' ]
+
         strategy: &distributions_matrix
             fail-fast: false
             matrix:
