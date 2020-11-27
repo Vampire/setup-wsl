@@ -131,7 +131,7 @@ jobs:
       shell: "wsl-bash {0}"
       continue-on-error: true
     - if: "always() && (steps.execute_action.outcome == 'success')"
-      name: "Test - wsl-bash should fail if one of the commands fails (verfication)"
+      name: "Test - wsl-bash should fail if one of the commands fails (verification)"
       run: "[ '${{ steps.set_e_provocation.outcome }}' == 'failure' ] || exit 1\n"
       shell: "wsl-bash {0}"
     - id: "set_u_provocation"
@@ -141,7 +141,7 @@ jobs:
       shell: "wsl-bash {0}"
       continue-on-error: true
     - if: "always() && (steps.execute_action.outcome == 'success')"
-      name: "Test - wsl-bash should fail if an undefined variable is used (verfication)"
+      name: "Test - wsl-bash should fail if an undefined variable is used (verification)"
       run: "[ '${{ steps.set_u_provocation.outcome }}' == 'failure' ]\n"
       shell: "wsl-bash {0}"
     - id: "set_pipefail_provocation"
@@ -151,7 +151,7 @@ jobs:
       shell: "wsl-bash {0}"
       continue-on-error: true
     - if: "always() && (steps.execute_action.outcome == 'success')"
-      name: "Test - wsl-bash should fail if any command in a pipe fails (verfication)"
+      name: "Test - wsl-bash should fail if any command in a pipe fails (verification)"
       run: "[ '${{ steps.set_pipefail_provocation.outcome }}' == 'failure' ]\n"
       shell: "wsl-bash {0}"
     - if: "always() && (steps.execute_action.outcome == 'success')"
@@ -208,7 +208,7 @@ jobs:
       continue-on-error: true
     - if: "always() && (matrix.distribution.id == 'Alpine') && (steps.execute_action1.outcome\
         \ == 'success')"
-      name: "Test - wsl-bash should fail if bash is not present by default (verfication)"
+      name: "Test - wsl-bash should fail if bash is not present by default (verification)"
       run: "wsl sh -euc \"[ '${{ steps.no_default_bash_provocation.outcome }}' = 'failure'\
         \ ]\"\n"
     - id: "execute_action2"
@@ -230,7 +230,7 @@ jobs:
       shell: "wsl-bash {0}"
       continue-on-error: true
     - if: "always() && (steps.execute_action1.outcome == 'success')"
-      name: "Test - wsl-bash should fail if one of the commands fails (verfication)"
+      name: "Test - wsl-bash should fail if one of the commands fails (verification)"
       run: "[ '${{ steps.set_e_provocation.outcome }}' == 'failure' ] || exit 1\n"
       shell: "wsl-bash {0}"
     - id: "set_u_provocation"
@@ -240,7 +240,7 @@ jobs:
       shell: "wsl-bash {0}"
       continue-on-error: true
     - if: "always() && (steps.execute_action1.outcome == 'success')"
-      name: "Test - wsl-bash should fail if an undefined variable is used (verfication)"
+      name: "Test - wsl-bash should fail if an undefined variable is used (verification)"
       run: "[ '${{ steps.set_u_provocation.outcome }}' == 'failure' ]\n"
       shell: "wsl-bash {0}"
     - id: "set_pipefail_provocation"
@@ -250,7 +250,7 @@ jobs:
       shell: "wsl-bash {0}"
       continue-on-error: true
     - if: "always() && (steps.execute_action1.outcome == 'success')"
-      name: "Test - wsl-bash should fail if any command in a pipe fails (verfication)"
+      name: "Test - wsl-bash should fail if any command in a pipe fails (verification)"
       run: "[ '${{ steps.set_pipefail_provocation.outcome }}' == 'failure' ]\n"
       shell: "wsl-bash {0}"
     - if: "always() && (steps.execute_action1.outcome == 'success')"
@@ -286,7 +286,7 @@ jobs:
       continue-on-error: true
     - if: "always() && (steps.execute_action1.outcome == 'success')"
       name: "Test - ${{ matrix.distribution.default-absent-tool }} should not be installed\
-        \ by default (verfication)"
+        \ by default (verification)"
       run: "[ '${{ steps.default_absent_tool_absent_provocation.outcome }}' == 'failure'\
         \ ]\n"
       shell: "wsl-bash {0}"
@@ -305,7 +305,7 @@ jobs:
       shell: "wsl-sh {0}"
       continue-on-error: true
     - if: "always() && (steps.execute_action1.outcome == 'success')"
-      name: "Test - wsl-sh should not be present (verfication)"
+      name: "Test - wsl-sh should not be present (verification)"
       run: "[ '${{ steps.wsl-sh_absent_provocation.outcome }}' == 'failure' ]\n"
       shell: "wsl-bash {0}"
     - id: "execute_action3"
@@ -342,7 +342,7 @@ jobs:
       shell: "wsl-bash {0}"
       continue-on-error: true
     - if: "always() && (steps.execute_action3.outcome == 'success')"
-      name: "Test - wsl-bash should not be present (verfication)"
+      name: "Test - wsl-bash should not be present (verification)"
       run: "[ '${{ steps.wsl-bash_absent_provocation.outcome }}' = 'failure' ]\n"
       shell: "wsl-sh {0}"
     - id: "execute_action4"

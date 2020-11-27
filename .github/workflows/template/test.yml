@@ -151,8 +151,8 @@ jobs:
                   :
               continue-on-error: true
 
-            - &test_wsl-bash_should_fail_if_one_of_the_commands_fails_verfication
-              name: Test - wsl-bash should fail if one of the commands fails (verfication)
+            - &test_wsl-bash_should_fail_if_one_of_the_commands_fails_verification
+              name: Test - wsl-bash should fail if one of the commands fails (verification)
               if: always()
                   && (steps.execute_action.outcome == 'success')
               shell: wsl-bash {0}
@@ -170,8 +170,8 @@ jobs:
               run: $foo
               continue-on-error: true
 
-            - &test_wsl-bash_should_fail_if_an_undefined_variable_is_used_verfication
-              name: Test - wsl-bash should fail if an undefined variable is used (verfication)
+            - &test_wsl-bash_should_fail_if_an_undefined_variable_is_used_verification
+              name: Test - wsl-bash should fail if an undefined variable is used (verification)
               if: always()
                   && (steps.execute_action.outcome == 'success')
               shell: wsl-bash {0}
@@ -187,8 +187,8 @@ jobs:
               run: false | true
               continue-on-error: true
 
-            - &test_wsl-bash_should_fail_if_any_command_in_a_pipe_fails_verfication
-              name: Test - wsl-bash should fail if any command in a pipe fails (verfication)
+            - &test_wsl-bash_should_fail_if_any_command_in_a_pipe_fails_verification
+              name: Test - wsl-bash should fail if any command in a pipe fails (verification)
               if: always()
                   && (steps.execute_action.outcome == 'success')
               shell: wsl-bash {0}
@@ -270,7 +270,7 @@ jobs:
               if: matrix.distribution.id == 'Alpine'
               continue-on-error: true
 
-            - name: Test - wsl-bash should fail if bash is not present by default (verfication)
+            - name: Test - wsl-bash should fail if bash is not present by default (verification)
               if: always()
                   && (matrix.distribution.id == 'Alpine')
                   && (steps.execute_action1.outcome == 'success')
@@ -295,7 +295,7 @@ jobs:
               if: always()
                   && (steps.execute_action1.outcome == 'success')
 
-            - <<: *test_wsl-bash_should_fail_if_one_of_the_commands_fails_verfication
+            - <<: *test_wsl-bash_should_fail_if_one_of_the_commands_fails_verification
               if: always()
                   && (steps.execute_action1.outcome == 'success')
 
@@ -303,7 +303,7 @@ jobs:
               if: always()
                   && (steps.execute_action1.outcome == 'success')
 
-            - <<: *test_wsl-bash_should_fail_if_an_undefined_variable_is_used_verfication
+            - <<: *test_wsl-bash_should_fail_if_an_undefined_variable_is_used_verification
               if: always()
                   && (steps.execute_action1.outcome == 'success')
 
@@ -311,7 +311,7 @@ jobs:
               if: always()
                   && (steps.execute_action1.outcome == 'success')
 
-            - <<: *test_wsl-bash_should_fail_if_any_command_in_a_pipe_fails_verfication
+            - <<: *test_wsl-bash_should_fail_if_any_command_in_a_pipe_fails_verification
               if: always()
                   && (steps.execute_action1.outcome == 'success')
 
@@ -335,7 +335,7 @@ jobs:
               run: ${{ matrix.distribution.default-absent-tool }} --version
               continue-on-error: true
 
-            - name: Test - ${{ matrix.distribution.default-absent-tool }} should not be installed by default (verfication)
+            - name: Test - ${{ matrix.distribution.default-absent-tool }} should not be installed by default (verification)
               if: always()
                   && (steps.execute_action1.outcome == 'success')
               shell: wsl-bash {0}
@@ -363,7 +363,7 @@ jobs:
                   :
               continue-on-error: true
 
-            - name: Test - wsl-sh should not be present (verfication)
+            - name: Test - wsl-sh should not be present (verification)
               if: always()
                   && (steps.execute_action1.outcome == 'success')
               shell: wsl-bash {0}
@@ -415,7 +415,7 @@ jobs:
                   :
               continue-on-error: true
 
-            - name: Test - wsl-bash should not be present (verfication)
+            - name: Test - wsl-bash should not be present (verification)
               if: always()
                   && (steps.execute_action3.outcome == 'success')
               shell: wsl-sh {0}
