@@ -209,13 +209,19 @@ _**Example:**_
 
 #### wsl-shell-command
 
-The command that is used in the wsl-shell wrapper scripts to execute the `run`-step script.
+The command that is used in the wsl-shell wrapper scripts to execute the `run`-step script file.
 The name of the wrapper scripts will be derived from the first word in this input prefixed with `wsl-`.
 This means that for the default value, the wrapper scripts will start with `wsl-bash`.
-The `run`-step script will be given as additional parameter after the given string,
-separated with one space character. The latter point is important,
-if you need to escape this space character as shown in the examples.
-This can also be used if the distribution is installed already to change the wrapper scripts or generate
+
+The `run`-step script file will be given as additional parameter in single quotes after the given string,
+separated with one space character. The latter point is important, if you need to escape this space character
+as shown in the examples.
+
+If the given string contains at least once the sequence `{0}`, all occurrences of it will be replaced by the
+`run`-step script file without any quotes or anything and it will not be given as additional parameter.
+This can be used if the script file is needed within the shell command opposed to as additional parameter.
+
+This input can also be used if the distribution is installed already to change the wrapper scripts or generate
 additional ones for other shells.
 
 **Default value:** `bash --noprofile --norc -euo pipefail`
@@ -236,6 +242,13 @@ _**Examples:**_
 - uses: Vampire/setup-wsl@v$majorVersion
   with:
       wsl-shell-command: bash -c "sudo -u test bash --noprofile --norc -euo pipefail "\
+
+- shell: wsl-bash {0}
+  run: id
+
+- uses: Vampire/setup-wsl@v$majorVersion
+  with:
+      wsl-shell-command: bash -c "sudo -u test bash --noprofile --norc -euo pipefail '{0}'"
 
 - shell: wsl-bash {0}
   run: id

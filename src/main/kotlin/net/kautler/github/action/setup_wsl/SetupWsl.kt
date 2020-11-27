@@ -296,7 +296,13 @@ suspend fun writeWslShellWrapper() {
         )
         FOR /F "tokens=* usebackq" %%F IN (`wsl <wsl distribution parameter> wslpath '%~1'`) DO SET wsl_script=%%F
         wsl <wsl distribution parameter> sed -i 's/\r$//' '%wsl_script%'
-        wsl <wsl distribution parameter> $wslShellCommand '%wsl_script%'
+        wsl <wsl distribution parameter> ${
+            if (wslShellCommand.contains("{0}")) {
+                wslShellCommand.replace("{0}", "%wsl_script%")
+            } else {
+                "$wslShellCommand '%wsl_script%'"
+            }
+        }
     """).trimIndent().lines().joinToString("\r\n")
 
     writeFileSync(

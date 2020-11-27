@@ -473,6 +473,21 @@ jobs:
                   whoami
                   [ "$(whoami)" == 'test' ]
 
+            - <<: *execute_action
+              name: Set wsl-bash wrapper to use user test by default with inline script usage
+              id: execute_action6
+              with:
+                  distribution: ${{ matrix.distribution.id }}
+                  wsl-shell-command: bash -c "sudo -u test bash --noprofile --norc -euo pipefail '{0}'"
+
+            - name: Test - wsl-bash should use test as default user with inline script usage
+              if: always()
+                  && (steps.execute_action6.outcome == 'success')
+              shell: wsl-bash {0}
+              run: |
+                  whoami
+                  [ "$(whoami)" == 'test' ]
+
         strategy: &distributions_matrix
             fail-fast: false
             matrix:

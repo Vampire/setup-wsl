@@ -380,6 +380,17 @@ jobs:
       name: "Test - wsl-bash should use test as default user"
       run: "whoami\n[ \"$(whoami)\" == 'test' ]\n"
       shell: "wsl-bash {0}"
+    - id: "execute_action6"
+      name: "Set wsl-bash wrapper to use user test by default with inline script usage"
+      uses: "./"
+      with:
+        "distribution": "${{ matrix.distribution.id }}"
+        "wsl-shell-command": "bash -c \"sudo -u test bash --noprofile --norc -euo\
+          \ pipefail '{0}'\""
+    - if: "always() && (steps.execute_action6.outcome == 'success')"
+      name: "Test - wsl-bash should use test as default user with inline script usage"
+      run: "whoami\n[ \"$(whoami)\" == 'test' ]\n"
+      shell: "wsl-bash {0}"
     strategy:
       matrix:
         "distribution":
