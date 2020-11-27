@@ -219,47 +219,47 @@ jobs:
       with:
         "distribution": "${{ matrix.distribution.id }}"
         "additional-packages": "bash"
-    - if: "always() && (steps.execute_action.outcome == 'success')"
+    - if: "always() && (steps.execute_action1.outcome == 'success')"
       name: "Test - wsl-bash should be available as custom shell"
       run: ":\n"
       shell: "wsl-bash {0}"
     - id: "set_e_provocation"
-      if: "always() && (steps.execute_action.outcome == 'success')"
+      if: "always() && (steps.execute_action1.outcome == 'success')"
       name: "Test - wsl-bash should fail if one of the commands fails (provocation)"
       run: "false\n:\n"
       shell: "wsl-bash {0}"
       continue-on-error: true
-    - if: "always() && (steps.execute_action.outcome == 'success')"
+    - if: "always() && (steps.execute_action1.outcome == 'success')"
       name: "Test - wsl-bash should fail if one of the commands fails (verfication)"
       run: "[ '${{ steps.set_e_provocation.outcome }}' == 'failure' ] || exit 1\n"
       shell: "wsl-bash {0}"
     - id: "set_u_provocation"
-      if: "always() && (steps.execute_action.outcome == 'success')"
+      if: "always() && (steps.execute_action1.outcome == 'success')"
       name: "Test - wsl-bash should fail if an undefined variable is used (provocation)"
       run: "$foo"
       shell: "wsl-bash {0}"
       continue-on-error: true
-    - if: "always() && (steps.execute_action.outcome == 'success')"
+    - if: "always() && (steps.execute_action1.outcome == 'success')"
       name: "Test - wsl-bash should fail if an undefined variable is used (verfication)"
       run: "[ '${{ steps.set_u_provocation.outcome }}' == 'failure' ]\n"
       shell: "wsl-bash {0}"
     - id: "set_pipefail_provocation"
-      if: "always() && (steps.execute_action.outcome == 'success')"
+      if: "always() && (steps.execute_action1.outcome == 'success')"
       name: "Test - wsl-bash should fail if any command in a pipe fails (provocation)"
       run: "false | true"
       shell: "wsl-bash {0}"
       continue-on-error: true
-    - if: "always() && (steps.execute_action.outcome == 'success')"
+    - if: "always() && (steps.execute_action1.outcome == 'success')"
       name: "Test - wsl-bash should fail if any command in a pipe fails (verfication)"
       run: "[ '${{ steps.set_pipefail_provocation.outcome }}' == 'failure' ]\n"
       shell: "wsl-bash {0}"
-    - if: "always() && (steps.execute_action.outcome == 'success')"
+    - if: "always() && (steps.execute_action1.outcome == 'success')"
       name: "Test - the default distribution should be correct"
       run: "wslconfig.exe /list | iconv -f UTF-16LE -t UTF-8\n[[ \"$(wslconfig.exe\
         \ /list | iconv -f UTF-16LE -t UTF-8)\" == *${{ matrix.distribution.id }}\\\
         \ \\(Default\\)* ]]\n"
       shell: "wsl-bash {0}"
-    - if: "always() && (steps.execute_action.outcome == 'success')"
+    - if: "always() && (steps.execute_action1.outcome == 'success')"
       name: "Test - wsl-bash should use the correct distribution"
       run: "cat <(lsb_release -a || true) <(uname -a || true) <([ -d /etc ] && find\
         \ /etc -maxdepth 1 -type f \\( -name '*release' -or -name 'issue*' \\) -exec\
@@ -272,7 +272,7 @@ jobs:
         \ + || true) <([ -f /proc/version ] && cat /proc/version || true))\" == ${{\
         \ matrix.distribution.match-pattern }} ]]\n"
       shell: "wsl-bash {0}"
-    - if: "always() && (steps.execute_action.outcome == 'success')"
+    - if: "always() && (steps.execute_action1.outcome == 'success')"
       name: "Test - multi-line commands should not be disturbed by CRLF line endings"
       run: ": # this comment catches the CR if present\n! grep -q $'\\r' \"$0\" #\
         \ this comment catches the CR if present\n"
@@ -314,40 +314,34 @@ jobs:
       with:
         "distribution": "${{ matrix.distribution.id }}"
         "wsl-shell-command": "sh -eu"
-    - if: "always() && (steps.execute_action1.outcome == 'success') && (steps.execute_action3.outcome\
-        \ == 'success')"
+    - if: "always() && (steps.execute_action3.outcome == 'success')"
       name: "Test - wsl-sh should be present"
       run: ":\n"
       shell: "wsl-sh {0}"
-    - if: "always() && (steps.execute_action1.outcome == 'success') && (steps.execute_action3.outcome\
-        \ == 'success')"
+    - if: "always() && (steps.execute_action3.outcome == 'success')"
       name: "Test - wsl-bash should use bash"
       run: "ps -o pid='' -o comm='' | grep \"^\\s\\+$$\\s\\+\" | grep -o '\\S\\+$'\n\
         [ \"$(ps -o pid='' -o comm='' 2>/dev/null | grep \"^\\s\\+$$\\s\\+\" | grep\
         \ -o '\\S\\+$')\" == 'bash' ]\n"
       shell: "wsl-bash {0}"
-    - if: "always() && (steps.execute_action1.outcome == 'success') && (steps.execute_action3.outcome\
-        \ == 'success')"
+    - if: "always() && (steps.execute_action3.outcome == 'success')"
       name: "Test - wsl-sh should use sh"
       run: "ps -o pid='' -o comm='' | grep \"^\\s\\+$$\\s\\+\" | grep -o '\\S\\+$'\n\
         [ \"$(ps -o pid='' -o comm='' 2>/dev/null | grep \"^\\s\\+$$\\s\\+\" | grep\
         \ -o '\\S\\+$')\" = 'sh' ]\n"
       shell: "wsl-sh {0}"
-    - if: "always() && (steps.execute_action1.outcome == 'success') && (steps.execute_action3.outcome\
-        \ == 'success')"
+    - if: "always() && (steps.execute_action3.outcome == 'success')"
       name: "Test - delete wsl-bash"
       run: "find \"`wslpath '${{ runner.temp }}'`\" -name wsl-bash.bat -print -delete\
         \ 2>/dev/null"
       shell: "wsl-sh {0}"
     - id: "wsl-bash_absent_provocation"
-      if: "always() && (steps.execute_action1.outcome == 'success') && (steps.execute_action3.outcome\
-        \ == 'success')"
+      if: "always() && (steps.execute_action3.outcome == 'success')"
       name: "Test - wsl-bash should not be present (provocation)"
       run: ":\n"
       shell: "wsl-bash {0}"
       continue-on-error: true
-    - if: "always() && (steps.execute_action1.outcome == 'success') && (steps.execute_action3.outcome\
-        \ == 'success')"
+    - if: "always() && (steps.execute_action3.outcome == 'success')"
       name: "Test - wsl-bash should not be present (verfication)"
       run: "[ '${{ steps.wsl-bash_absent_provocation.outcome }}' = 'failure' ]\n"
       shell: "wsl-sh {0}"
@@ -357,13 +351,11 @@ jobs:
       with:
         "distribution": "${{ matrix.distribution.id }}"
         "wsl-shell-command": "bash"
-    - if: "always() && (steps.execute_action1.outcome == 'success') && (steps.execute_action3.outcome\
-        \ == 'success') && (steps.execute_action4.outcome == 'success')"
+    - if: "always() && (steps.execute_action4.outcome == 'success')"
       name: "Test - wsl-bash should be present"
       run: ":\n"
       shell: "wsl-bash {0}"
-    - if: "always() && (steps.execute_action1.outcome == 'success') && (steps.execute_action3.outcome\
-        \ == 'success') && (steps.execute_action4.outcome == 'success')"
+    - if: "always() && (steps.execute_action4.outcome == 'success')"
       name: "Test - wsl-bash should use bash"
       run: "ps -o pid='' -o comm='' | grep \"^\\s\\+$$\\s\\+\" | grep -o '\\S\\+$'\n\
         [ \"$(ps -o pid='' -o comm='' 2>/dev/null | grep \"^\\s\\+$$\\s\\+\" | grep\
@@ -476,18 +468,14 @@ jobs:
       uses: "./"
       with:
         "distribution": "${{ matrix.distributions.distribution1.id }}"
-    - if: "always() && (steps.execute_action1.outcome == 'success') && (steps.execute_action2.outcome\
-        \ == 'success') && (steps.execute_action3.outcome == 'success') && (steps.execute_action4.outcome\
-        \ == 'success')"
+    - if: "always() && (steps.execute_action4.outcome == 'success')"
       name: "Test - the default distribution should be the last installed distribution\
         \ with set-as-default true"
       run: "wslconfig.exe /list\nwslconfig.exe /list | iconv -f UTF-16LE -t UTF-8\n\
         [[ \"$(wslconfig.exe /list | iconv -f UTF-16LE -t UTF-8)\" == *${{ matrix.distributions.distribution2.id\
         \ }}\\ \\(Default\\)* ]]\n"
       shell: "wsl-bash {0}"
-    - if: "always() && (steps.execute_action1.outcome == 'success') && (steps.execute_action2.outcome\
-        \ == 'success') && (steps.execute_action3.outcome == 'success') && (steps.execute_action4.outcome\
-        \ == 'success')"
+    - if: "always() && (steps.execute_action4.outcome == 'success')"
       name: "Test - wsl-bash should use the last installed distribution with set-as-default\
         \ true"
       run: "cat <(lsb_release -a || true) <(uname -a || true) <([ -d /etc ] && find\
@@ -606,9 +594,7 @@ jobs:
       with:
         "distribution": "${{ matrix.distribution.id }}"
         "additional-packages": "${{ matrix.distribution.default-absent-tool }}"
-    - if: "always() && (steps.execute_action1.outcome == 'success') && ((steps.execute_action2.outcome\
-        \ == 'success') || (matrix.distribution.id == 'kali-linux')) && (steps.execute_action3.outcome\
-        \ == 'success')"
+    - if: "always() && (steps.execute_action3.outcome == 'success')"
       name: "Test - ${{ matrix.distribution.default-absent-tool }} should be installed"
       run: "${{ matrix.distribution.default-absent-tool }} --version"
       shell: "wsl-bash {0}"
@@ -617,9 +603,7 @@ jobs:
       uses: "./"
       with:
         "distribution": "${{ matrix.distribution2.id }}"
-    - if: "always() && (steps.execute_action1.outcome == 'success') && ((steps.execute_action2.outcome\
-        \ == 'success') || (matrix.distribution.id == 'kali-linux')) && (steps.execute_action3.outcome\
-        \ == 'success') && (steps.execute_action4.outcome == 'success')"
+    - if: "always() && (steps.execute_action4.outcome == 'success')"
       name: "Test - '${{ matrix.distribution2.id }}' should be the default distribution\
         \ after installation"
       run: "cat <(lsb_release -a || true) <(uname -a || true) <([ -d /etc ] && find\
@@ -638,10 +622,7 @@ jobs:
       uses: "./"
       with:
         "distribution": "${{ matrix.distribution.id }}"
-    - if: "always() && (steps.execute_action1.outcome == 'success') && ((steps.execute_action2.outcome\
-        \ == 'success') || (matrix.distribution.id == 'kali-linux')) && (steps.execute_action3.outcome\
-        \ == 'success') && (steps.execute_action4.outcome == 'success') && (steps.execute_action5.outcome\
-        \ == 'success')"
+    - if: "always() && (steps.execute_action5.outcome == 'success')"
       name: "Test - '${{ matrix.distribution2.id }}' should still be the default distribution\
         \ after re-running for '${{ matrix.distribution.id }}'"
       run: "cat <(lsb_release -a || true) <(uname -a || true) <([ -d /etc ] && find\
@@ -661,10 +642,7 @@ jobs:
       with:
         "distribution": "${{ matrix.distribution.id }}"
         "set-as-default": "true"
-    - if: "always() && (steps.execute_action1.outcome == 'success') && ((steps.execute_action2.outcome\
-        \ == 'success') || (matrix.distribution.id == 'kali-linux')) && (steps.execute_action3.outcome\
-        \ == 'success') && (steps.execute_action4.outcome == 'success') && (steps.execute_action5.outcome\
-        \ == 'success') && (steps.execute_action6.outcome == 'success')"
+    - if: "always() && (steps.execute_action6.outcome == 'success')"
       name: "Test - '${{ matrix.distribution.id }}' should be the default distribution\
         \ after re-running with set-as-default true"
       run: "cat <(lsb_release -a || true) <(uname -a || true) <([ -d /etc ] && find\
