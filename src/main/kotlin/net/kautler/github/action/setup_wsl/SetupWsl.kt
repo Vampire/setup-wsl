@@ -53,6 +53,7 @@ import process
 import restoreCache
 import saveCache
 import setFailed
+import setOutput
 import startGroup
 import warning
 import which
@@ -244,6 +245,9 @@ suspend fun main() {
                 || !existsSync(wslShellDistributionWrapperPath)) {
             group("Write WSL Shell Wrapper", ::writeWslShellWrapper)
         }
+
+        setOutput("wsl-shell-wrapper-path", wslShellWrapperPath)
+        setOutput("wsl-shell-distribution-wrapper-path", wslShellDistributionWrapperPath)
     }.onFailure {
         debug(it.stackTraceToString())
         setFailed(it.message ?: "$it")

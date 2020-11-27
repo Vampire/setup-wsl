@@ -276,6 +276,11 @@ jobs:
       name: "Test - wsl-bash should fail if bash is not present by default (verification)"
       run: "wsl sh -euc \"[ '${{ steps.no_default_bash_provocation.outcome }}' = 'failure'\
         \ ]\"\n"
+    - if: "always() && (matrix.distribution.id == 'Alpine') && (steps.execute_action1.outcome\
+        \ == 'success')"
+      name: "Delete wsl-bash"
+      run: "DEL /F \"${{ steps.execute_action1.outputs.wsl-shell-wrapper-path }}\""
+      shell: "cmd"
     - id: "execute_action2"
       if: "always() && (matrix.distribution.id == 'Alpine') && (steps.execute_action1.outcome\
         \ == 'success')"
@@ -284,7 +289,6 @@ jobs:
       with:
         "distribution": "${{ matrix.distribution.id }}"
         "additional-packages": "bash"
-        "wsl-shell-command": "bash --noprofile --norc -euo pipefail"
     - if: "always() && (steps.execute_action1.outcome == 'success')"
       name: "Test - wsl-bash should be available as custom shell"
       run: ":\n"
@@ -408,10 +412,9 @@ jobs:
         \ -o '\\S\\+$')\" = 'sh' ]\n"
       shell: "wsl-sh {0}"
     - if: "always() && (steps.execute_action3.outcome == 'success')"
-      name: "Test - delete wsl-bash"
-      run: "find \"`wslpath '${{ runner.temp }}'`\" -name wsl-bash.bat -print -delete\
-        \ 2>/dev/null"
-      shell: "wsl-sh {0}"
+      name: "Delete wsl-bash"
+      run: "DEL /F \"${{ steps.execute_action1.outputs.wsl-shell-wrapper-path }}\""
+      shell: "cmd"
     - id: "wsl-bash_absent_provocation"
       if: "always() && (steps.execute_action3.outcome == 'success')"
       name: "Test - wsl-bash should not be present (provocation)"
@@ -427,7 +430,6 @@ jobs:
       uses: "./"
       with:
         "distribution": "${{ matrix.distribution.id }}"
-        "wsl-shell-command": "bash --noprofile --norc -euo pipefail"
     - if: "always() && (steps.execute_action4.outcome == 'success')"
       name: "Test - wsl-bash should be present"
       run: ":\n"
@@ -468,12 +470,14 @@ jobs:
       name: "Test - wsl-bash should use test as default user with inline script usage"
       run: "whoami\n[ \"$(whoami)\" == 'test' ]\n"
       shell: "wsl-bash {0}"
+    - name: "Delete wsl-bash"
+      run: "DEL /F \"${{ steps.execute_action6.outputs.wsl-shell-wrapper-path }}\""
+      shell: "cmd"
     - id: "execute_action7"
       name: "Set wsl-bash wrapper to use default user by default"
       uses: "./"
       with:
         "distribution": "${{ matrix.distribution.id }}"
-        "wsl-shell-command": "bash --noprofile --norc -euo pipefail"
     - if: "always() && (steps.execute_action7.outcome == 'success')"
       name: "Test - wsl-bash should use root as default user"
       run: "whoami\n[ \"$(whoami)\" == 'root' ]\n"
@@ -482,6 +486,9 @@ jobs:
       name: "Test - test user does already exist"
       run: "id -u test\n"
       shell: "wsl-bash {0}"
+    - name: "Delete wsl-bash"
+      run: "DEL /F \"${{ steps.execute_action7.outputs.wsl-shell-wrapper-path }}\""
+      shell: "cmd"
     - id: "execute_action8"
       name: "Set wsl-bash wrapper to use existing user test by default with extra\
         \ parameter"
@@ -489,7 +496,6 @@ jobs:
       with:
         "distribution": "${{ matrix.distribution.id }}"
         "wsl-shell-user": "test"
-        "wsl-shell-command": "bash --noprofile --norc -euo pipefail"
     - if: "always() && (steps.execute_action8.outcome == 'success')"
       name: "Test - wsl-bash should use existing user test as default user with extra\
         \ parameter"
@@ -499,6 +505,9 @@ jobs:
       name: "Test - test2 user does not exist"
       run: "! id -u test2\n"
       shell: "wsl-bash {0}"
+    - name: "Delete wsl-bash"
+      run: "DEL /F \"${{ steps.execute_action8.outputs.wsl-shell-wrapper-path }}\""
+      shell: "cmd"
     - id: "execute_action9"
       name: "Set wsl-bash wrapper to use non-existing user test2 by default with extra\
         \ parameter"
@@ -506,7 +515,6 @@ jobs:
       with:
         "distribution": "${{ matrix.distribution.id }}"
         "wsl-shell-user": "test2"
-        "wsl-shell-command": "bash --noprofile --norc -euo pipefail"
     - if: "always() && (steps.execute_action9.outcome == 'success')"
       name: "Test - wsl-bash should use auto-generated user test2 as default user"
       run: "whoami\n[ \"$(whoami)\" == 'test2' ]\n"

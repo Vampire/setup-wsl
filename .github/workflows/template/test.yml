@@ -378,6 +378,13 @@ jobs:
               run: |
                   wsl sh -euc "[ '${{ steps.no_default_bash_provocation.outcome }}' = 'failure' ]"
 
+            - name: Delete wsl-bash
+              if: always()
+                  && (matrix.distribution.id == 'Alpine')
+                  && (steps.execute_action1.outcome == 'success')
+              shell: cmd
+              run: DEL /F "${{ steps.execute_action1.outputs.wsl-shell-wrapper-path }}"
+
             - <<: *execute_action
               name: Install Bash on Alpine
               if: always()
@@ -387,7 +394,6 @@ jobs:
               with:
                   distribution: ${{ matrix.distribution.id }}
                   additional-packages: bash
-                  wsl-shell-command: bash --noprofile --norc -euo pipefail
 
             - <<: *test_wsl-bash_should_be_available_as_custom_shell
               if: always()
@@ -510,11 +516,11 @@ jobs:
                   ps -o pid='' -o comm='' | grep "^\s\+$$\s\+" | grep -o '\S\+$'
                   [ "$(ps -o pid='' -o comm='' 2>/dev/null | grep "^\s\+$$\s\+" | grep -o '\S\+$')" = 'sh' ]
 
-            - name: Test - delete wsl-bash
+            - name: Delete wsl-bash
               if: always()
                   && (steps.execute_action3.outcome == 'success')
-              shell: wsl-sh {0}
-              run: find "`wslpath '${{ runner.temp }}'`" -name wsl-bash.bat -print -delete 2>/dev/null
+              shell: cmd
+              run: DEL /F "${{ steps.execute_action1.outputs.wsl-shell-wrapper-path }}"
 
             - name: Test - wsl-bash should not be present (provocation)
               id: wsl-bash_absent_provocation
@@ -537,7 +543,6 @@ jobs:
               id: execute_action4
               with:
                   distribution: ${{ matrix.distribution.id }}
-                  wsl-shell-command: bash --noprofile --norc -euo pipefail
 
             - name: Test - wsl-bash should be present
               if: always()
@@ -598,12 +603,15 @@ jobs:
                   whoami
                   [ "$(whoami)" == 'test' ]
 
+            - name: Delete wsl-bash
+              shell: cmd
+              run: DEL /F "${{ steps.execute_action6.outputs.wsl-shell-wrapper-path }}"
+
             - <<: *execute_action
               name: Set wsl-bash wrapper to use default user by default
               id: execute_action7
               with:
                   distribution: ${{ matrix.distribution.id }}
-                  wsl-shell-command: bash --noprofile --norc -euo pipefail
 
             - name: Test - wsl-bash should use root as default user
               if: always()
@@ -620,13 +628,16 @@ jobs:
               run: |
                   id -u test
 
+            - name: Delete wsl-bash
+              shell: cmd
+              run: DEL /F "${{ steps.execute_action7.outputs.wsl-shell-wrapper-path }}"
+
             - <<: *execute_action
               name: Set wsl-bash wrapper to use existing user test by default with extra parameter
               id: execute_action8
               with:
                   distribution: ${{ matrix.distribution.id }}
                   wsl-shell-user: test
-                  wsl-shell-command: bash --noprofile --norc -euo pipefail
 
             - name: Test - wsl-bash should use existing user test as default user with extra parameter
               if: always()
@@ -643,13 +654,16 @@ jobs:
               run: |
                   ! id -u test2
 
+            - name: Delete wsl-bash
+              shell: cmd
+              run: DEL /F "${{ steps.execute_action8.outputs.wsl-shell-wrapper-path }}"
+
             - <<: *execute_action
               name: Set wsl-bash wrapper to use non-existing user test2 by default with extra parameter
               id: execute_action9
               with:
                   distribution: ${{ matrix.distribution.id }}
                   wsl-shell-user: test2
-                  wsl-shell-command: bash --noprofile --norc -euo pipefail
 
             - name: Test - wsl-bash should use auto-generated user test2 as default user
               if: always()
