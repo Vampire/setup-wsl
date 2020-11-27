@@ -34,6 +34,7 @@ Table of Contents
     * [set-as-default](#set-as-default)
     * [update](#update)
     * [additional-packages](#additional-packages)
+    * [wsl-shell-user](#wsl-shell-user)
     * [wsl-shell-command](#wsl-shell-command)
 * [Version Numbers](#version-numbers)
 * [License](#license)
@@ -205,6 +206,22 @@ _**Example:**_
       additional-packages:
           dos2unix
           ash
+```
+
+#### wsl-shell-user
+
+The distribution user that should be used to execute `run`-step scripts with wsl-shell wrapper scripts
+that are created or updated by the current action invocation. If no value is given, the default user of
+the distribution at script execution time is used. If the user does not yet exists in the distribution,
+it is automatically added.
+
+**Default value:** none
+
+_**Example:**_
+```yaml
+- uses: Vampire/setup-wsl@v$majorVersion
+  with:
+      wsl-shell-user: test
 ```
 
 #### wsl-shell-command

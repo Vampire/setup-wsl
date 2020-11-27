@@ -193,6 +193,10 @@ val additionalPackages by lazy {
             .toTypedArray()
 }
 
+val wslShellUser by lazy {
+    getInput("wsl-shell-user").trim()
+}
+
 val wslShellCommand by lazy {
     getInput("wsl-shell-command", jsObject {
         required = true
@@ -284,6 +288,36 @@ suspend fun writeWslShellWrapper() {
             }
     ).await() != 0)
 
+    if (wslShellUser.isNotEmpty()) {
+        val wslShellUserExists = exec(
+                "wsl",
+                arrayOf(
+                        "--distribution",
+                        distribution.id,
+                        "id",
+                        "-u",
+                        wslShellUser
+                ),
+                jsObject {
+                    ignoreReturnCode = true
+                }
+        ).await() == 0
+        if (!wslShellUserExists) {
+            exec(
+                    "wsl",
+                    arrayOf(
+                            "--distribution",
+                            distribution.id,
+                            "useradd",
+                            "-m",
+                            "-p",
+                            "4qBD5NWD3IkbU",
+                            wslShellUser
+                    )
+            ).await()
+        }
+    }
+
     val scriptContent = (if (bashMissing) """
         @ECHO OFF
         ECHO Bash is not available by default in '${distribution.id}', please either add it to 'additional-packages' input or configure a different 'wsl-shell-command' >&2
@@ -294,9 +328,11 @@ suspend fun writeWslShellWrapper() {
             ECHO wrong arguments, only a script file is expected >&2
             EXIT /B 1
         )
-        FOR /F "tokens=* usebackq" %%F IN (`wsl <wsl distribution parameter> wslpath '%~1'`) DO SET wsl_script=%%F
-        wsl <wsl distribution parameter> sed -i 's/\r$//' '%wsl_script%'
+        FOR /F "tokens=* usebackq" %%F IN (`wsl <wsl distribution parameter> -u root wslpath '%~1'`) DO SET wsl_script=%%F
+        wsl <wsl distribution parameter> -u root sed -i 's/\r$//' '%wsl_script%'
         wsl <wsl distribution parameter> ${
+            if (wslShellUser.isEmpty()) wslShellUser else "-u $wslShellUser"
+        } ${
             if (wslShellCommand.contains("{0}")) {
                 wslShellCommand.replace("{0}", "%wsl_script%")
             } else {

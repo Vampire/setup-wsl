@@ -488,6 +488,64 @@ jobs:
                   whoami
                   [ "$(whoami)" == 'test' ]
 
+            - <<: *execute_action
+              name: Set wsl-bash wrapper to use default user by default
+              id: execute_action7
+              with:
+                  distribution: ${{ matrix.distribution.id }}
+
+            - name: Test - wsl-bash should use root as default user
+              if: always()
+                  && (steps.execute_action7.outcome == 'success')
+              shell: wsl-bash {0}
+              run: |
+                  whoami
+                  [ "$(whoami)" == 'root' ]
+
+            - name: Test - test user does already exist
+              if: always()
+                  && (steps.execute_action7.outcome == 'success')
+              shell: wsl-bash {0}
+              run: |
+                  id -u test
+
+            - <<: *execute_action
+              name: Set wsl-bash wrapper to use existing user test by default with extra parameter
+              id: execute_action8
+              with:
+                  distribution: ${{ matrix.distribution.id }}
+                  wsl-shell-user: test
+
+            - name: Test - wsl-bash should use existing user test as default user with extra parameter
+              if: always()
+                  && (steps.execute_action8.outcome == 'success')
+              shell: wsl-bash {0}
+              run: |
+                  whoami
+                  [ "$(whoami)" == 'test' ]
+
+            - name: Test - test2 user does not exist
+              if: always()
+                  && (steps.execute_action8.outcome == 'success')
+              shell: wsl-bash {0}
+              run: |
+                  ! id -u test2
+
+            - <<: *execute_action
+              name: Set wsl-bash wrapper to use non-existing user test2 by default with extra parameter
+              id: execute_action9
+              with:
+                  distribution: ${{ matrix.distribution.id }}
+                  wsl-shell-user: test2
+
+            - name: Test - wsl-bash should use auto-generated user test2 as default user
+              if: always()
+                  && (steps.execute_action9.outcome == 'success')
+              shell: wsl-bash {0}
+              run: |
+                  whoami
+                  [ "$(whoami)" == 'test2' ]
+
         strategy: &distributions_matrix
             fail-fast: false
             matrix:

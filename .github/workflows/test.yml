@@ -391,6 +391,46 @@ jobs:
       name: "Test - wsl-bash should use test as default user with inline script usage"
       run: "whoami\n[ \"$(whoami)\" == 'test' ]\n"
       shell: "wsl-bash {0}"
+    - id: "execute_action7"
+      name: "Set wsl-bash wrapper to use default user by default"
+      uses: "./"
+      with:
+        "distribution": "${{ matrix.distribution.id }}"
+    - if: "always() && (steps.execute_action7.outcome == 'success')"
+      name: "Test - wsl-bash should use root as default user"
+      run: "whoami\n[ \"$(whoami)\" == 'root' ]\n"
+      shell: "wsl-bash {0}"
+    - if: "always() && (steps.execute_action7.outcome == 'success')"
+      name: "Test - test user does already exist"
+      run: "id -u test\n"
+      shell: "wsl-bash {0}"
+    - id: "execute_action8"
+      name: "Set wsl-bash wrapper to use existing user test by default with extra\
+        \ parameter"
+      uses: "./"
+      with:
+        "distribution": "${{ matrix.distribution.id }}"
+        "wsl-shell-user": "test"
+    - if: "always() && (steps.execute_action8.outcome == 'success')"
+      name: "Test - wsl-bash should use existing user test as default user with extra\
+        \ parameter"
+      run: "whoami\n[ \"$(whoami)\" == 'test' ]\n"
+      shell: "wsl-bash {0}"
+    - if: "always() && (steps.execute_action8.outcome == 'success')"
+      name: "Test - test2 user does not exist"
+      run: "! id -u test2\n"
+      shell: "wsl-bash {0}"
+    - id: "execute_action9"
+      name: "Set wsl-bash wrapper to use non-existing user test2 by default with extra\
+        \ parameter"
+      uses: "./"
+      with:
+        "distribution": "${{ matrix.distribution.id }}"
+        "wsl-shell-user": "test2"
+    - if: "always() && (steps.execute_action9.outcome == 'success')"
+      name: "Test - wsl-bash should use auto-generated user test2 as default user"
+      run: "whoami\n[ \"$(whoami)\" == 'test2' ]\n"
+      shell: "wsl-bash {0}"
     strategy:
       matrix:
         "distribution":
