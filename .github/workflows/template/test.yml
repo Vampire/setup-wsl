@@ -140,6 +140,27 @@ jobs:
               run: |
                   :
 
+            - &test_wsl-bash_should_fail_if_the_script_fails_provocation
+              name: Test - wsl-bash should fail if the script fails (provocation)
+              id: wrapper_should_fail_provocation
+              if: always()
+                  && (steps.execute_action.outcome == 'success')
+              shell: wsl-bash {0}
+              run: |
+                  false
+              continue-on-error: true
+
+            - &test_wsl-bash_should_fail_if_the_script_fails_verification
+              name: Test - wsl-bash should fail if the script fails (verification)
+              if: always()
+                  && (steps.execute_action.outcome == 'success')
+              shell: cmd
+              # do not just rely on false here, but explicitly use exit
+              # in case failing commands do not make the script fail
+              # and use "shell: cmd" to capture that the wrapper script is hiding errors
+              run: |
+                  IF '${{ steps.wrapper_should_fail_provocation.outcome }}' NEQ 'failure' EXIT /B 1
+
             - &test_wsl-bash_should_fail_if_one_of_the_commands_fails_provocation
               name: Test - wsl-bash should fail if one of the commands fails (provocation)
               id: set_e_provocation
@@ -242,6 +263,86 @@ jobs:
                   : # this comment catches the CR if present
                   ! grep -q $'\r' "$0" # this comment catches the CR if present
 
+            - name: Test - wsl-bash should fail if no script file is given (provocation)
+              id: no_script_file_provocation
+              if: always()
+                  && (steps.execute_action.outcome == 'success')
+              shell: wsl-bash
+              run: |
+                  :
+              continue-on-error: true
+
+            - name: Test - wsl-bash should fail if no script file is given (verification)
+              if: always()
+                  && (steps.execute_action.outcome == 'success')
+              shell: wsl-bash {0}
+              run: |
+                  [ '${{ steps.no_script_file_provocation.outcome }}' == 'failure' ]
+
+            - name: Test - wsl-bash should fail if more than one parameter is given and first is not -u (provocation)
+              id: wrong_first_parameter_provocation
+              if: always()
+                  && (steps.execute_action.outcome == 'success')
+              shell: wsl-bash user {0}
+              run: |
+                  :
+              continue-on-error: true
+
+            - name: Test - wsl-bash should fail if more than one parameter is given and first is not -u (verification)
+              if: always()
+                  && (steps.execute_action.outcome == 'success')
+              shell: wsl-bash {0}
+              run: |
+                  [ '${{ steps.wrong_first_parameter_provocation.outcome }}' == 'failure' ]
+
+            - name: Test - wsl-bash should fail if only user is given (provocation)
+              id: only_user_provocation
+              if: always()
+                  && (steps.execute_action.outcome == 'success')
+              shell: wsl-bash -u {0}
+              run: |
+                  :
+              continue-on-error: true
+
+            - name: Test - wsl-bash should fail if only user is given (verification)
+              if: always()
+                  && (steps.execute_action.outcome == 'success')
+              shell: wsl-bash {0}
+              run: |
+                  [ '${{ steps.only_user_provocation.outcome }}' == 'failure' ]
+
+            - name: Test - wsl-bash should fail if excess argument is given (provocation)
+              id: excess_argument_provocation
+              if: always()
+                  && (steps.execute_action.outcome == 'success')
+              shell: wsl-bash -u user {0} foo
+              run: |
+                  :
+              continue-on-error: true
+
+            - name: Test - wsl-bash should fail if excess argument is given (verification)
+              if: always()
+                  && (steps.execute_action.outcome == 'success')
+              shell: wsl-bash {0}
+              run: |
+                  [ '${{ steps.excess_argument_provocation.outcome }}' == 'failure' ]
+
+            - name: Test - wsl-bash should fail if given script file does not exist (provocation)
+              id: script_file_does_not_exist_provocation
+              if: always()
+                  && (steps.execute_action.outcome == 'success')
+              shell: wsl-bash -u user {0}foo
+              run: |
+                  :
+              continue-on-error: true
+
+            - name: Test - wsl-bash should fail if given script file does not exist (verification)
+              if: always()
+                  && (steps.execute_action.outcome == 'success')
+              shell: wsl-bash {0}
+              run: |
+                  [ '${{ steps.script_file_does_not_exist_provocation.outcome }}' == 'failure' ]
+
         strategy:
             fail-fast: false
             matrix:
@@ -288,6 +389,14 @@ jobs:
                   additional-packages: bash
 
             - <<: *test_wsl-bash_should_be_available_as_custom_shell
+              if: always()
+                  && (steps.execute_action1.outcome == 'success')
+
+            - <<: *test_wsl-bash_should_fail_if_the_script_fails_provocation
+              if: always()
+                  && (steps.execute_action1.outcome == 'success')
+
+            - <<: *test_wsl-bash_should_fail_if_the_script_fails_verification
               if: always()
                   && (steps.execute_action1.outcome == 'success')
 
@@ -427,7 +536,6 @@ jobs:
               id: execute_action4
               with:
                   distribution: ${{ matrix.distribution.id }}
-                  wsl-shell-command: bash
 
             - name: Test - wsl-bash should be present
               if: always()
@@ -545,6 +653,22 @@ jobs:
               run: |
                   whoami
                   [ "$(whoami)" == 'test2' ]
+
+            - name: Test - wsl-bash should use ad-hoc user test
+              if: always()
+                  && (steps.execute_action9.outcome == 'success')
+              shell: wsl-bash -u test {0}
+              run: |
+                  whoami
+                  [ "$(whoami)" == 'test' ]
+
+            - name: Test - wsl-bash should use ad-hoc user root
+              if: always()
+                  && (steps.execute_action9.outcome == 'success')
+              shell: wsl-bash -u root {0}
+              run: |
+                  whoami
+                  [ "$(whoami)" == 'root' ]
 
         strategy: &distributions_matrix
             fail-fast: false

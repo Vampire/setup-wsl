@@ -124,6 +124,17 @@ jobs:
       name: "Test - wsl-bash should be available as custom shell"
       run: ":\n"
       shell: "wsl-bash {0}"
+    - id: "wrapper_should_fail_provocation"
+      if: "always() && (steps.execute_action.outcome == 'success')"
+      name: "Test - wsl-bash should fail if the script fails (provocation)"
+      run: "false\n"
+      shell: "wsl-bash {0}"
+      continue-on-error: true
+    - if: "always() && (steps.execute_action.outcome == 'success')"
+      name: "Test - wsl-bash should fail if the script fails (verification)"
+      run: "IF '${{ steps.wrapper_should_fail_provocation.outcome }}' NEQ 'failure'\
+        \ EXIT /B 1\n"
+      shell: "cmd"
     - id: "set_e_provocation"
       if: "always() && (steps.execute_action.outcome == 'success')"
       name: "Test - wsl-bash should fail if one of the commands fails (provocation)"
@@ -178,6 +189,60 @@ jobs:
       run: ": # this comment catches the CR if present\n! grep -q $'\\r' \"$0\" #\
         \ this comment catches the CR if present\n"
       shell: "wsl-bash {0}"
+    - id: "no_script_file_provocation"
+      if: "always() && (steps.execute_action.outcome == 'success')"
+      name: "Test - wsl-bash should fail if no script file is given (provocation)"
+      run: ":\n"
+      shell: "wsl-bash"
+      continue-on-error: true
+    - if: "always() && (steps.execute_action.outcome == 'success')"
+      name: "Test - wsl-bash should fail if no script file is given (verification)"
+      run: "[ '${{ steps.no_script_file_provocation.outcome }}' == 'failure' ]\n"
+      shell: "wsl-bash {0}"
+    - id: "wrong_first_parameter_provocation"
+      if: "always() && (steps.execute_action.outcome == 'success')"
+      name: "Test - wsl-bash should fail if more than one parameter is given and first\
+        \ is not -u (provocation)"
+      run: ":\n"
+      shell: "wsl-bash user {0}"
+      continue-on-error: true
+    - if: "always() && (steps.execute_action.outcome == 'success')"
+      name: "Test - wsl-bash should fail if more than one parameter is given and first\
+        \ is not -u (verification)"
+      run: "[ '${{ steps.wrong_first_parameter_provocation.outcome }}' == 'failure'\
+        \ ]\n"
+      shell: "wsl-bash {0}"
+    - id: "only_user_provocation"
+      if: "always() && (steps.execute_action.outcome == 'success')"
+      name: "Test - wsl-bash should fail if only user is given (provocation)"
+      run: ":\n"
+      shell: "wsl-bash -u {0}"
+      continue-on-error: true
+    - if: "always() && (steps.execute_action.outcome == 'success')"
+      name: "Test - wsl-bash should fail if only user is given (verification)"
+      run: "[ '${{ steps.only_user_provocation.outcome }}' == 'failure' ]\n"
+      shell: "wsl-bash {0}"
+    - id: "excess_argument_provocation"
+      if: "always() && (steps.execute_action.outcome == 'success')"
+      name: "Test - wsl-bash should fail if excess argument is given (provocation)"
+      run: ":\n"
+      shell: "wsl-bash -u user {0} foo"
+      continue-on-error: true
+    - if: "always() && (steps.execute_action.outcome == 'success')"
+      name: "Test - wsl-bash should fail if excess argument is given (verification)"
+      run: "[ '${{ steps.excess_argument_provocation.outcome }}' == 'failure' ]\n"
+      shell: "wsl-bash {0}"
+    - id: "script_file_does_not_exist_provocation"
+      if: "always() && (steps.execute_action.outcome == 'success')"
+      name: "Test - wsl-bash should fail if given script file does not exist (provocation)"
+      run: ":\n"
+      shell: "wsl-bash -u user {0}foo"
+      continue-on-error: true
+    - if: "always() && (steps.execute_action.outcome == 'success')"
+      name: "Test - wsl-bash should fail if given script file does not exist (verification)"
+      run: "[ '${{ steps.script_file_does_not_exist_provocation.outcome }}' == 'failure'\
+        \ ]\n"
+      shell: "wsl-bash {0}"
     strategy:
       matrix:
         "distribution":
@@ -223,6 +288,17 @@ jobs:
       name: "Test - wsl-bash should be available as custom shell"
       run: ":\n"
       shell: "wsl-bash {0}"
+    - id: "wrapper_should_fail_provocation"
+      if: "always() && (steps.execute_action1.outcome == 'success')"
+      name: "Test - wsl-bash should fail if the script fails (provocation)"
+      run: "false\n"
+      shell: "wsl-bash {0}"
+      continue-on-error: true
+    - if: "always() && (steps.execute_action1.outcome == 'success')"
+      name: "Test - wsl-bash should fail if the script fails (verification)"
+      run: "IF '${{ steps.wrapper_should_fail_provocation.outcome }}' NEQ 'failure'\
+        \ EXIT /B 1\n"
+      shell: "cmd"
     - id: "set_e_provocation"
       if: "always() && (steps.execute_action1.outcome == 'success')"
       name: "Test - wsl-bash should fail if one of the commands fails (provocation)"
@@ -350,7 +426,6 @@ jobs:
       uses: "./"
       with:
         "distribution": "${{ matrix.distribution.id }}"
-        "wsl-shell-command": "bash"
     - if: "always() && (steps.execute_action4.outcome == 'success')"
       name: "Test - wsl-bash should be present"
       run: ":\n"
@@ -431,6 +506,14 @@ jobs:
       name: "Test - wsl-bash should use auto-generated user test2 as default user"
       run: "whoami\n[ \"$(whoami)\" == 'test2' ]\n"
       shell: "wsl-bash {0}"
+    - if: "always() && (steps.execute_action9.outcome == 'success')"
+      name: "Test - wsl-bash should use ad-hoc user test"
+      run: "whoami\n[ \"$(whoami)\" == 'test' ]\n"
+      shell: "wsl-bash -u test {0}"
+    - if: "always() && (steps.execute_action9.outcome == 'success')"
+      name: "Test - wsl-bash should use ad-hoc user root"
+      run: "whoami\n[ \"$(whoami)\" == 'root' ]\n"
+      shell: "wsl-bash -u root {0}"
     strategy:
       matrix:
         "distribution":

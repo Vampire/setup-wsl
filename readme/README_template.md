@@ -74,6 +74,12 @@ in the `wsl-shell-command` input, so if you configure `ash -eu` as command, the 
 (and `wsl-ash_<distribution id>`). Differently named wsl-shell wrappers from former action executions are not
 deleted.
 
+The wsl-shell wrappers by default execute the `run`-step scripts as the default user of the distribution which
+usually will be the user `root`. If you want a different user being used by default, you can configure the user
+using the [`wsl-shell-user` input](#wsl-shell-user) for the wsl-shell wrapper scripts created or updated by
+the current action invocation. Additionally, the generated wsl-shell wrappers optionally accept as first two
+parameters `-u` and a user that should be used for this invocation.
+
 The wsl-shell wrapper without distribution id suffix always uses the default WSL distribution at the time
 it is actually invoked. If you want to target a specific distribution, either make sure it is the default,
 for example using this action, or use the distribution specific wsl-shell wrapper that always uses the
@@ -89,6 +95,9 @@ _**Examples:**_
       npm ci
       npm run build
       npm run package
+
+- shell: wsl-bash -u root {0}
+  run: id
 ```
 
 ### Default Shell

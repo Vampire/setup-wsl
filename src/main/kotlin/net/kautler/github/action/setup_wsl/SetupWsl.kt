@@ -320,23 +320,62 @@ suspend fun writeWslShellWrapper() {
 
     val scriptContent = (if (bashMissing) """
         @ECHO OFF
+
         ECHO Bash is not available by default in '${distribution.id}', please either add it to 'additional-packages' input or configure a different 'wsl-shell-command' >&2
         EXIT /B 1
     """ else """
         @ECHO OFF
-        IF '%2' NEQ '' (
-            ECHO wrong arguments, only a script file is expected >&2
-            EXIT /B 1
+
+        SETLOCAL
+
+        IF '%1' EQU '' (
+            REM wsl-shell
+            GOTO INVALID_ARGUMENTS
+        ) ELSE IF '%2' EQU '' (
+            REM wsl-shell scriptFile
+            ${if (wslShellUser.isEmpty()) "" else "SET wslShellUser=-u $wslShellUser"}
+            SET scriptFile=%~1
+        ) ELSE IF '%1' NEQ '-u' (
+            REM wsl-shell user scriptFile
+            GOTO INVALID_ARGUMENTS
+        ) ELSE IF '%3' EQU '' (
+            REM wsl-shell -u user
+            GOTO INVALID_ARGUMENTS
+        ) ELSE IF '%4' NEQ '' (
+            REM wsl-shell -u user scriptFile foo
+            GOTO INVALID_ARGUMENTS
+        ) ELSE (
+            REM wsl-shell -u user scriptFile
+            SET wslShellUser=-u %~2
+            SET scriptFile=%~3
         )
-        FOR /F "tokens=* usebackq" %%F IN (`wsl <wsl distribution parameter> -u root wslpath '%~1'`) DO SET wsl_script=%%F
-        wsl <wsl distribution parameter> -u root sed -i 's/\r$//' '%wsl_script%'
-        wsl <wsl distribution parameter> ${
-            if (wslShellUser.isEmpty()) wslShellUser else "-u $wslShellUser"
-        } ${
+
+        IF NOT EXIST %scriptFile% GOTO INVALID_SCRIPT_FILE
+        GOTO START
+
+        :INVALID_ARGUMENTS
+        ECHO Invalid arguments >&2
+        GOTO USAGE
+
+        :INVALID_SCRIPT_FILE
+        ECHO Invalid script file "%scriptFile%" >&2
+        GOTO USAGE
+
+        :USAGE
+        ECHO Usage: %~n0 [-u ^<user^>] ^<script file a.k.a. {0}^> >&2
+        EXIT /B 1
+
+        :START
+        FOR /F "usebackq tokens=*" %%F IN (
+            `wsl <wsl distribution parameter> -u root wslpath '%scriptFile%'`
+        ) DO SET wslScriptFile=%%F
+        wsl <wsl distribution parameter> -u root sed -i 's/\r$//' '%wslScriptFile%'
+
+        wsl <wsl distribution parameter> %wslShellUser% ${
             if (wslShellCommand.contains("{0}")) {
-                wslShellCommand.replace("{0}", "%wsl_script%")
+                wslShellCommand.replace("{0}", "%wslScriptFile%")
             } else {
-                "$wslShellCommand '%wsl_script%'"
+                "$wslShellCommand '%wslScriptFile%'"
             }
         }
     """).trimIndent().lines().joinToString("\r\n")
