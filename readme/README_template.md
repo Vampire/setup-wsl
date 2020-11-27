@@ -248,7 +248,10 @@ If the given string contains at least once the sequence `{0}`, all occurrences o
 This can be used if the script file is needed within the shell command opposed to as additional parameter.
 
 This input can also be used if the distribution is installed already to change the wrapper scripts or generate
-additional ones for other shells.
+additional ones for other shells. Already existing wsl-shell wrapper scripts are only overwritten, if this input
+is set to a value explicitly. Non-existing wrapper scripts are always generated. So if you want to change the
+default user using the [`wsl-shell-user` input](#wsl-shell-user), you either have to first delete the wrapper script
+or scripts that should be regenerated or specify a value for this input explicitly.
 
 **Default value:** `bash --noprofile --norc -euo pipefail`
 

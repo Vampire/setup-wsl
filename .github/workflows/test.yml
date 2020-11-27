@@ -284,6 +284,7 @@ jobs:
       with:
         "distribution": "${{ matrix.distribution.id }}"
         "additional-packages": "bash"
+        "wsl-shell-command": "bash --noprofile --norc -euo pipefail"
     - if: "always() && (steps.execute_action1.outcome == 'success')"
       name: "Test - wsl-bash should be available as custom shell"
       run: ":\n"
@@ -426,6 +427,7 @@ jobs:
       uses: "./"
       with:
         "distribution": "${{ matrix.distribution.id }}"
+        "wsl-shell-command": "bash --noprofile --norc -euo pipefail"
     - if: "always() && (steps.execute_action4.outcome == 'success')"
       name: "Test - wsl-bash should be present"
       run: ":\n"
@@ -471,6 +473,7 @@ jobs:
       uses: "./"
       with:
         "distribution": "${{ matrix.distribution.id }}"
+        "wsl-shell-command": "bash --noprofile --norc -euo pipefail"
     - if: "always() && (steps.execute_action7.outcome == 'success')"
       name: "Test - wsl-bash should use root as default user"
       run: "whoami\n[ \"$(whoami)\" == 'root' ]\n"
@@ -486,6 +489,7 @@ jobs:
       with:
         "distribution": "${{ matrix.distribution.id }}"
         "wsl-shell-user": "test"
+        "wsl-shell-command": "bash --noprofile --norc -euo pipefail"
     - if: "always() && (steps.execute_action8.outcome == 'success')"
       name: "Test - wsl-bash should use existing user test as default user with extra\
         \ parameter"
@@ -502,6 +506,7 @@ jobs:
       with:
         "distribution": "${{ matrix.distribution.id }}"
         "wsl-shell-user": "test2"
+        "wsl-shell-command": "bash --noprofile --norc -euo pipefail"
     - if: "always() && (steps.execute_action9.outcome == 'success')"
       name: "Test - wsl-bash should use auto-generated user test2 as default user"
       run: "whoami\n[ \"$(whoami)\" == 'test2' ]\n"
@@ -514,6 +519,15 @@ jobs:
       name: "Test - wsl-bash should use ad-hoc user root"
       run: "whoami\n[ \"$(whoami)\" == 'root' ]\n"
       shell: "wsl-bash -u root {0}"
+    - id: "execute_action10"
+      name: "Make a no-op execution of the action"
+      uses: "./"
+      with:
+        "distribution": "${{ matrix.distribution.id }}"
+    - if: "always() && (steps.execute_action10.outcome == 'success')"
+      name: "Test - wsl-bash should still use test2 as default user"
+      run: "whoami\n[ \"$(whoami)\" == 'test2' ]\n"
+      shell: "wsl-bash {0}"
     strategy:
       matrix:
         "distribution":

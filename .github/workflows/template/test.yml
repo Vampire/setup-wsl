@@ -387,6 +387,7 @@ jobs:
               with:
                   distribution: ${{ matrix.distribution.id }}
                   additional-packages: bash
+                  wsl-shell-command: bash --noprofile --norc -euo pipefail
 
             - <<: *test_wsl-bash_should_be_available_as_custom_shell
               if: always()
@@ -536,6 +537,7 @@ jobs:
               id: execute_action4
               with:
                   distribution: ${{ matrix.distribution.id }}
+                  wsl-shell-command: bash --noprofile --norc -euo pipefail
 
             - name: Test - wsl-bash should be present
               if: always()
@@ -601,6 +603,7 @@ jobs:
               id: execute_action7
               with:
                   distribution: ${{ matrix.distribution.id }}
+                  wsl-shell-command: bash --noprofile --norc -euo pipefail
 
             - name: Test - wsl-bash should use root as default user
               if: always()
@@ -623,6 +626,7 @@ jobs:
               with:
                   distribution: ${{ matrix.distribution.id }}
                   wsl-shell-user: test
+                  wsl-shell-command: bash --noprofile --norc -euo pipefail
 
             - name: Test - wsl-bash should use existing user test as default user with extra parameter
               if: always()
@@ -645,6 +649,7 @@ jobs:
               with:
                   distribution: ${{ matrix.distribution.id }}
                   wsl-shell-user: test2
+                  wsl-shell-command: bash --noprofile --norc -euo pipefail
 
             - name: Test - wsl-bash should use auto-generated user test2 as default user
               if: always()
@@ -669,6 +674,20 @@ jobs:
               run: |
                   whoami
                   [ "$(whoami)" == 'root' ]
+
+            - <<: *execute_action
+              name: Make a no-op execution of the action
+              id: execute_action10
+              with:
+                  distribution: ${{ matrix.distribution.id }}
+
+            - name: Test - wsl-bash should still use test2 as default user
+              if: always()
+                  && (steps.execute_action10.outcome == 'success')
+              shell: wsl-bash {0}
+              run: |
+                  whoami
+                  [ "$(whoami)" == 'test2' ]
 
         strategy: &distributions_matrix
             fail-fast: false

@@ -80,7 +80,6 @@ inputs:
             This input can also be used if the distribution is installed already to change the wrapper scripts or generate
             additional ones for other shells.
         required: false
-        default: bash --noprofile --norc -euo pipefail
 
 runs:
     using: node12
