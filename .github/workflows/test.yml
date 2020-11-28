@@ -17,7 +17,7 @@ on:
   "push": null
   "pull_request": null
   "schedule":
-  - cron: "0 0 * * FRI"
+  - cron: "0 0 * * *"
 jobs:
   "build":
     name: "Build"

@@ -18,7 +18,7 @@ on:
     push:
     pull_request:
     schedule:
-        - cron: 0 0 * * FRI
+        - cron: 0 0 * * *
 
 jobs:
     includes:
