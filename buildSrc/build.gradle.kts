@@ -35,7 +35,7 @@ import kotlin.script.experimental.jvmhost.JvmScriptCompiler
 plugins {
     `kotlin-dsl`
     kotlin("plugin.serialization") version "1.3.72"
-    id("com.github.ben-manes.versions") version "0.29.0"
+    id("com.github.ben-manes.versions") version "0.36.0"
 }
 
 buildscript {
@@ -44,7 +44,7 @@ buildscript {
     }
     dependencies {
         classpath("org.jetbrains.kotlinx:kotlinx-serialization-runtime:0.20.0")
-        classpath("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.3.9")
+        classpath("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.4.2")
         classpath(kotlin("scripting-jvm-host", "1.3.72"))
     }
 }

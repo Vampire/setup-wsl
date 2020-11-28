@@ -39,8 +39,6 @@ kotlin {
                         .withPropertyName("packaged JavaScript files")
 
                 args(
-                        // work-around for https://youtrack.jetbrains.com/issue/KT-41286
-                        tasks.compileKotlinJs.get().outputFile.absolutePath,
                         rootProject.tasks.compileKotlinJs.get().outputFile.absolutePath,
                         output.get().asFile.absolutePath
                 )
@@ -58,7 +56,7 @@ dependencies {
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core".withVersion)
     implementation("org.jetbrains:kotlin-extensions".withVersion)
     implementation("org.jetbrains.kotlinx:kotlinx-nodejs".withVersion)
-    implementation(npm("@vercel/ncc"))
+    implementation(npm("@vercel/ncc", generateExternals = false))
 }
 
 val TaskContainer.compileKotlinJs

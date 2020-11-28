@@ -17,6 +17,7 @@
 package net.kautler.github.action.setup_wsl
 
 import Buffer
+import NodeJS.get
 import NullWritable
 import ReserveCacheError
 import ValidationError

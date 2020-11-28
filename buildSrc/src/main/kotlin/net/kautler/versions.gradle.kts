@@ -75,27 +75,23 @@ tasks.dependencyUpdates {
         }
 
         val ignored = outdated.dependencies.filter {
-            // Not until Gradle is on Kotlin 1.4
-            it.matches("com.charleskorn.kaml", "kaml") ||
-                    it.matches("org.jetbrains.kotlin", "kotlin-reflect") ||
-                    it.matches("org.jetbrains.kotlin", "kotlin-sam-with-receiver") ||
-                    it.matches("org.jetbrains.kotlin", "kotlin-scripting-compiler-embeddable") ||
-                    it.matches("org.jetbrains.kotlin", "kotlin-scripting-jvm-host") ||
-                    it.matches("org.jetbrains.kotlin", "kotlin-serialization") ||
-                    it.matches("org.jetbrains.kotlin", "kotlin-serialization-unshaded") ||
-                    it.matches("org.jetbrains.kotlin", "kotlin-stdlib-jdk8") ||
-                    it.matches("org.jetbrains.kotlin.plugin.serialization", "org.jetbrains.kotlin.plugin.serialization.gradle.plugin") ||
-                    it.matches("org.jetbrains.kotlinx", "kotlinx-serialization-runtime")
-        }
-
-        val ignoredUnresolved = unresolved.dependencies.filter {
-            // work-around for https://github.com/ben-manes/gradle-versions-plugin/issues/334
-            it.matches("org.jetbrains", "kotlin-extensions") ||
-                    it.matches("org.jetbrains.kotlinx", "kotlinx-nodejs")
+            // This plugin should always be used without version as it is tightly
+            // tied to the Gradle version that is building the precompiled script plugins
+            it.matches("org.gradle.kotlin.kotlin-dsl", "org.gradle.kotlin.kotlin-dsl.gradle.plugin")
+                    // Not until Gradle is on Kotlin 1.4
+                    || it.matches("com.charleskorn.kaml", "kaml")
+                    || it.matches("org.jetbrains.kotlin", "kotlin-reflect")
+                    || it.matches("org.jetbrains.kotlin", "kotlin-sam-with-receiver")
+                    || it.matches("org.jetbrains.kotlin", "kotlin-scripting-compiler-embeddable")
+                    || it.matches("org.jetbrains.kotlin", "kotlin-scripting-jvm-host")
+                    || it.matches("org.jetbrains.kotlin", "kotlin-serialization")
+                    || it.matches("org.jetbrains.kotlin", "kotlin-serialization-unshaded")
+                    || it.matches("org.jetbrains.kotlin", "kotlin-stdlib-jdk8")
+                    || it.matches("org.jetbrains.kotlin.plugin.serialization", "org.jetbrains.kotlin.plugin.serialization.gradle.plugin")
+                    || it.matches("org.jetbrains.kotlinx", "kotlinx-serialization-runtime")
         }
 
         outdated.dependencies.removeAll(ignored)
-        unresolved.dependencies.removeAll(ignoredUnresolved)
         updateCounts()
 
         PlainTextReporter(project, revisionLevel(), gradleReleaseChannelLevel())
@@ -105,14 +101,6 @@ tasks.dependencyUpdates {
             println("\nThe following dependencies have later ${revisionLevel()} versions but were ignored:")
             ignored.forEach {
                 println(" - ${it.group}:${it.name} [${it.version} -> ${it.available.getProperty(revisionLevel())}]")
-                it.projectUrl?.let { println("     $it") }
-            }
-        }
-
-        if (ignoredUnresolved.isNotEmpty()) {
-            println("\nThe following dependencies could not be resolved but were ignored:")
-            ignoredUnresolved.forEach {
-                println(" - ${it.group}:${it.name}:${it.version}")
                 it.projectUrl?.let { println("     $it") }
             }
         }
