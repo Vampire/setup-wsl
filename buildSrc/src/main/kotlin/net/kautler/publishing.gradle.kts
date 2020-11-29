@@ -173,30 +173,22 @@ tasks.githubPublish {
     draft(true)
 }
 
-val configureUndraftGithubRelease by tasks.registering
-
 val undraftGithubRelease by tasks.registering(GithubPublish::class) {
-    dependsOn(configureUndraftGithubRelease)
+    onlyIf {
+        !"$version".endsWith("-SNAPSHOT")
+    }
 
     publishMethod = update
-}
-
-configureUndraftGithubRelease {
-    doLast {
-        undraftGithubRelease {
-            enabled = !"$version".endsWith("-SNAPSHOT")
-        }
-    }
 }
 
 val finishMilestone by tasks.registering {
     enabled = releaseVersion
 
     doLast("finish milestone") {
-        github.getRepository(githubRepositoryName)!!.run {
+        github.getRepository(githubRepositoryName)!!.apply {
             listMilestones(OPEN)
                     .find { it.title == "Next Version" }!!
-                    .run {
+                    .apply {
                         title = releaseTagName
                         close()
                     }
