@@ -123,7 +123,7 @@ dependencies {
     implementation(npm("@actions/io"))
     implementation(npm("@actions/tool-cache"))
     implementation(npm("@types/semver"))
-    implementation(npm("semver"))
+    implementation(npm("semver", generateExternals = false))
     implementation(npm("null-writable"))
 }
 
@@ -157,7 +157,7 @@ tasks.withType(IntegratedDukatTask::class) {
                 ),
                 // work-around for https://github.com/Kotlin/dukat/issues/399
                 "tool-cache.module_@actions_tool-cache.kt" to listOf(
-                        """\Qtypealias HTTPError = Error\E$""" to "",
+                        """\Qtypealias HTTPError = Error\E$""" to "external class HTTPError : Throwable",
                         """\Qtypealias IToolRelease = IToolRelease\E$""" to "",
                         """\Qtypealias IToolReleaseFile = IToolReleaseFile\E$""" to ""
                 ),
@@ -165,6 +165,9 @@ tasks.withType(IntegratedDukatTask::class) {
                 "cache.module_@actions_cache.kt" to listOf(
                         """\Qtypealias ValidationError = Error\E$""" to "external class ValidationError : Throwable",
                         """\Qtypealias ReserveCacheError = Error\E$""" to "external class ReserveCacheError : Throwable"
+                ),
+                "index.module_@actions_http-client.kt" to listOf(
+                        """\Qtypealias HttpClientError = Error\E$""" to "external class HttpClientError : Throwable"
                 ),
                 // work-around for https://github.com/Kotlin/dukat/issues/400
                 "semver.module_semver.kt" to listOf(

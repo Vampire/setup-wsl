@@ -17,7 +17,7 @@ on:
   "push": null
   "pull_request": null
   "schedule":
-  - cron: "0 0 * * FRI"
+  - cron: "0 0 * * *"
 jobs:
   "build":
     name: "Build"
@@ -124,6 +124,17 @@ jobs:
       name: "Test - wsl-bash should be available as custom shell"
       run: ":\n"
       shell: "wsl-bash {0}"
+    - id: "wrapper_should_fail_provocation"
+      if: "always() && (steps.execute_action.outcome == 'success')"
+      name: "Test - wsl-bash should fail if the script fails (provocation)"
+      run: "false\n"
+      shell: "wsl-bash {0}"
+      continue-on-error: true
+    - if: "always() && (steps.execute_action.outcome == 'success')"
+      name: "Test - wsl-bash should fail if the script fails (verification)"
+      run: "IF '${{ steps.wrapper_should_fail_provocation.outcome }}' NEQ 'failure'\
+        \ EXIT /B 1\n"
+      shell: "cmd"
     - id: "set_e_provocation"
       if: "always() && (steps.execute_action.outcome == 'success')"
       name: "Test - wsl-bash should fail if one of the commands fails (provocation)"
@@ -131,7 +142,7 @@ jobs:
       shell: "wsl-bash {0}"
       continue-on-error: true
     - if: "always() && (steps.execute_action.outcome == 'success')"
-      name: "Test - wsl-bash should fail if one of the commands fails (verfication)"
+      name: "Test - wsl-bash should fail if one of the commands fails (verification)"
       run: "[ '${{ steps.set_e_provocation.outcome }}' == 'failure' ] || exit 1\n"
       shell: "wsl-bash {0}"
     - id: "set_u_provocation"
@@ -141,7 +152,7 @@ jobs:
       shell: "wsl-bash {0}"
       continue-on-error: true
     - if: "always() && (steps.execute_action.outcome == 'success')"
-      name: "Test - wsl-bash should fail if an undefined variable is used (verfication)"
+      name: "Test - wsl-bash should fail if an undefined variable is used (verification)"
       run: "[ '${{ steps.set_u_provocation.outcome }}' == 'failure' ]\n"
       shell: "wsl-bash {0}"
     - id: "set_pipefail_provocation"
@@ -151,7 +162,7 @@ jobs:
       shell: "wsl-bash {0}"
       continue-on-error: true
     - if: "always() && (steps.execute_action.outcome == 'success')"
-      name: "Test - wsl-bash should fail if any command in a pipe fails (verfication)"
+      name: "Test - wsl-bash should fail if any command in a pipe fails (verification)"
       run: "[ '${{ steps.set_pipefail_provocation.outcome }}' == 'failure' ]\n"
       shell: "wsl-bash {0}"
     - if: "always() && (steps.execute_action.outcome == 'success')"
@@ -177,6 +188,60 @@ jobs:
       name: "Test - multi-line commands should not be disturbed by CRLF line endings"
       run: ": # this comment catches the CR if present\n! grep -q $'\\r' \"$0\" #\
         \ this comment catches the CR if present\n"
+      shell: "wsl-bash {0}"
+    - id: "no_script_file_provocation"
+      if: "always() && (steps.execute_action.outcome == 'success')"
+      name: "Test - wsl-bash should fail if no script file is given (provocation)"
+      run: ":\n"
+      shell: "wsl-bash"
+      continue-on-error: true
+    - if: "always() && (steps.execute_action.outcome == 'success')"
+      name: "Test - wsl-bash should fail if no script file is given (verification)"
+      run: "[ '${{ steps.no_script_file_provocation.outcome }}' == 'failure' ]\n"
+      shell: "wsl-bash {0}"
+    - id: "wrong_first_parameter_provocation"
+      if: "always() && (steps.execute_action.outcome == 'success')"
+      name: "Test - wsl-bash should fail if more than one parameter is given and first\
+        \ is not -u (provocation)"
+      run: ":\n"
+      shell: "wsl-bash user {0}"
+      continue-on-error: true
+    - if: "always() && (steps.execute_action.outcome == 'success')"
+      name: "Test - wsl-bash should fail if more than one parameter is given and first\
+        \ is not -u (verification)"
+      run: "[ '${{ steps.wrong_first_parameter_provocation.outcome }}' == 'failure'\
+        \ ]\n"
+      shell: "wsl-bash {0}"
+    - id: "only_user_provocation"
+      if: "always() && (steps.execute_action.outcome == 'success')"
+      name: "Test - wsl-bash should fail if only user is given (provocation)"
+      run: ":\n"
+      shell: "wsl-bash -u {0}"
+      continue-on-error: true
+    - if: "always() && (steps.execute_action.outcome == 'success')"
+      name: "Test - wsl-bash should fail if only user is given (verification)"
+      run: "[ '${{ steps.only_user_provocation.outcome }}' == 'failure' ]\n"
+      shell: "wsl-bash {0}"
+    - id: "excess_argument_provocation"
+      if: "always() && (steps.execute_action.outcome == 'success')"
+      name: "Test - wsl-bash should fail if excess argument is given (provocation)"
+      run: ":\n"
+      shell: "wsl-bash -u user {0} foo"
+      continue-on-error: true
+    - if: "always() && (steps.execute_action.outcome == 'success')"
+      name: "Test - wsl-bash should fail if excess argument is given (verification)"
+      run: "[ '${{ steps.excess_argument_provocation.outcome }}' == 'failure' ]\n"
+      shell: "wsl-bash {0}"
+    - id: "script_file_does_not_exist_provocation"
+      if: "always() && (steps.execute_action.outcome == 'success')"
+      name: "Test - wsl-bash should fail if given script file does not exist (provocation)"
+      run: ":\n"
+      shell: "wsl-bash -u user {0}foo"
+      continue-on-error: true
+    - if: "always() && (steps.execute_action.outcome == 'success')"
+      name: "Test - wsl-bash should fail if given script file does not exist (verification)"
+      run: "[ '${{ steps.script_file_does_not_exist_provocation.outcome }}' == 'failure'\
+        \ ]\n"
       shell: "wsl-bash {0}"
     strategy:
       matrix:
@@ -208,9 +273,14 @@ jobs:
       continue-on-error: true
     - if: "always() && (matrix.distribution.id == 'Alpine') && (steps.execute_action1.outcome\
         \ == 'success')"
-      name: "Test - wsl-bash should fail if bash is not present by default (verfication)"
+      name: "Test - wsl-bash should fail if bash is not present by default (verification)"
       run: "wsl sh -euc \"[ '${{ steps.no_default_bash_provocation.outcome }}' = 'failure'\
         \ ]\"\n"
+    - if: "always() && (matrix.distribution.id == 'Alpine') && (steps.execute_action1.outcome\
+        \ == 'success')"
+      name: "Delete wsl-bash"
+      run: "DEL /F \"${{ steps.execute_action1.outputs.wsl-shell-wrapper-path }}\""
+      shell: "cmd"
     - id: "execute_action2"
       if: "always() && (matrix.distribution.id == 'Alpine') && (steps.execute_action1.outcome\
         \ == 'success')"
@@ -219,47 +289,58 @@ jobs:
       with:
         "distribution": "${{ matrix.distribution.id }}"
         "additional-packages": "bash"
-    - if: "always() && (steps.execute_action.outcome == 'success')"
+    - if: "always() && (steps.execute_action1.outcome == 'success')"
       name: "Test - wsl-bash should be available as custom shell"
       run: ":\n"
       shell: "wsl-bash {0}"
+    - id: "wrapper_should_fail_provocation"
+      if: "always() && (steps.execute_action1.outcome == 'success')"
+      name: "Test - wsl-bash should fail if the script fails (provocation)"
+      run: "false\n"
+      shell: "wsl-bash {0}"
+      continue-on-error: true
+    - if: "always() && (steps.execute_action1.outcome == 'success')"
+      name: "Test - wsl-bash should fail if the script fails (verification)"
+      run: "IF '${{ steps.wrapper_should_fail_provocation.outcome }}' NEQ 'failure'\
+        \ EXIT /B 1\n"
+      shell: "cmd"
     - id: "set_e_provocation"
-      if: "always() && (steps.execute_action.outcome == 'success')"
+      if: "always() && (steps.execute_action1.outcome == 'success')"
       name: "Test - wsl-bash should fail if one of the commands fails (provocation)"
       run: "false\n:\n"
       shell: "wsl-bash {0}"
       continue-on-error: true
-    - if: "always() && (steps.execute_action.outcome == 'success')"
-      name: "Test - wsl-bash should fail if one of the commands fails (verfication)"
+    - if: "always() && (steps.execute_action1.outcome == 'success')"
+      name: "Test - wsl-bash should fail if one of the commands fails (verification)"
       run: "[ '${{ steps.set_e_provocation.outcome }}' == 'failure' ] || exit 1\n"
       shell: "wsl-bash {0}"
     - id: "set_u_provocation"
-      if: "always() && (steps.execute_action.outcome == 'success')"
+      if: "always() && (steps.execute_action1.outcome == 'success')"
       name: "Test - wsl-bash should fail if an undefined variable is used (provocation)"
       run: "$foo"
       shell: "wsl-bash {0}"
       continue-on-error: true
-    - if: "always() && (steps.execute_action.outcome == 'success')"
-      name: "Test - wsl-bash should fail if an undefined variable is used (verfication)"
+    - if: "always() && (steps.execute_action1.outcome == 'success')"
+      name: "Test - wsl-bash should fail if an undefined variable is used (verification)"
       run: "[ '${{ steps.set_u_provocation.outcome }}' == 'failure' ]\n"
       shell: "wsl-bash {0}"
     - id: "set_pipefail_provocation"
-      if: "always() && (steps.execute_action.outcome == 'success')"
+      if: "always() && (steps.execute_action1.outcome == 'success')"
       name: "Test - wsl-bash should fail if any command in a pipe fails (provocation)"
       run: "false | true"
       shell: "wsl-bash {0}"
       continue-on-error: true
-    - if: "always() && (steps.execute_action.outcome == 'success')"
-      name: "Test - wsl-bash should fail if any command in a pipe fails (verfication)"
+    - if: "always() && (steps.execute_action1.outcome == 'success')"
+      name: "Test - wsl-bash should fail if any command in a pipe fails (verification)"
       run: "[ '${{ steps.set_pipefail_provocation.outcome }}' == 'failure' ]\n"
       shell: "wsl-bash {0}"
-    - if: "always() && (steps.execute_action.outcome == 'success')"
+    - if: "always() && (steps.execute_action1.outcome == 'success')"
       name: "Test - the default distribution should be correct"
       run: "wslconfig.exe /list | iconv -f UTF-16LE -t UTF-8\n[[ \"$(wslconfig.exe\
         \ /list | iconv -f UTF-16LE -t UTF-8)\" == *${{ matrix.distribution.id }}\\\
         \ \\(Default\\)* ]]\n"
       shell: "wsl-bash {0}"
-    - if: "always() && (steps.execute_action.outcome == 'success')"
+    - if: "always() && (steps.execute_action1.outcome == 'success')"
       name: "Test - wsl-bash should use the correct distribution"
       run: "cat <(lsb_release -a || true) <(uname -a || true) <([ -d /etc ] && find\
         \ /etc -maxdepth 1 -type f \\( -name '*release' -or -name 'issue*' \\) -exec\
@@ -272,7 +353,7 @@ jobs:
         \ + || true) <([ -f /proc/version ] && cat /proc/version || true))\" == ${{\
         \ matrix.distribution.match-pattern }} ]]\n"
       shell: "wsl-bash {0}"
-    - if: "always() && (steps.execute_action.outcome == 'success')"
+    - if: "always() && (steps.execute_action1.outcome == 'success')"
       name: "Test - multi-line commands should not be disturbed by CRLF line endings"
       run: ": # this comment catches the CR if present\n! grep -q $'\\r' \"$0\" #\
         \ this comment catches the CR if present\n"
@@ -286,7 +367,7 @@ jobs:
       continue-on-error: true
     - if: "always() && (steps.execute_action1.outcome == 'success')"
       name: "Test - ${{ matrix.distribution.default-absent-tool }} should not be installed\
-        \ by default (verfication)"
+        \ by default (verification)"
       run: "[ '${{ steps.default_absent_tool_absent_provocation.outcome }}' == 'failure'\
         \ ]\n"
       shell: "wsl-bash {0}"
@@ -305,7 +386,7 @@ jobs:
       shell: "wsl-sh {0}"
       continue-on-error: true
     - if: "always() && (steps.execute_action1.outcome == 'success')"
-      name: "Test - wsl-sh should not be present (verfication)"
+      name: "Test - wsl-sh should not be present (verification)"
       run: "[ '${{ steps.wsl-sh_absent_provocation.outcome }}' == 'failure' ]\n"
       shell: "wsl-bash {0}"
     - id: "execute_action3"
@@ -314,41 +395,34 @@ jobs:
       with:
         "distribution": "${{ matrix.distribution.id }}"
         "wsl-shell-command": "sh -eu"
-    - if: "always() && (steps.execute_action1.outcome == 'success') && (steps.execute_action3.outcome\
-        \ == 'success')"
+    - if: "always() && (steps.execute_action3.outcome == 'success')"
       name: "Test - wsl-sh should be present"
       run: ":\n"
       shell: "wsl-sh {0}"
-    - if: "always() && (steps.execute_action1.outcome == 'success') && (steps.execute_action3.outcome\
-        \ == 'success')"
+    - if: "always() && (steps.execute_action3.outcome == 'success')"
       name: "Test - wsl-bash should use bash"
       run: "ps -o pid='' -o comm='' | grep \"^\\s\\+$$\\s\\+\" | grep -o '\\S\\+$'\n\
         [ \"$(ps -o pid='' -o comm='' 2>/dev/null | grep \"^\\s\\+$$\\s\\+\" | grep\
         \ -o '\\S\\+$')\" == 'bash' ]\n"
       shell: "wsl-bash {0}"
-    - if: "always() && (steps.execute_action1.outcome == 'success') && (steps.execute_action3.outcome\
-        \ == 'success')"
+    - if: "always() && (steps.execute_action3.outcome == 'success')"
       name: "Test - wsl-sh should use sh"
       run: "ps -o pid='' -o comm='' | grep \"^\\s\\+$$\\s\\+\" | grep -o '\\S\\+$'\n\
         [ \"$(ps -o pid='' -o comm='' 2>/dev/null | grep \"^\\s\\+$$\\s\\+\" | grep\
         \ -o '\\S\\+$')\" = 'sh' ]\n"
       shell: "wsl-sh {0}"
-    - if: "always() && (steps.execute_action1.outcome == 'success') && (steps.execute_action3.outcome\
-        \ == 'success')"
-      name: "Test - delete wsl-bash"
-      run: "find \"`wslpath '${{ runner.temp }}'`\" -name wsl-bash.bat -print -delete\
-        \ 2>/dev/null"
-      shell: "wsl-sh {0}"
+    - if: "always() && (steps.execute_action3.outcome == 'success')"
+      name: "Delete wsl-bash"
+      run: "DEL /F \"${{ steps.execute_action1.outputs.wsl-shell-wrapper-path }}\""
+      shell: "cmd"
     - id: "wsl-bash_absent_provocation"
-      if: "always() && (steps.execute_action1.outcome == 'success') && (steps.execute_action3.outcome\
-        \ == 'success')"
+      if: "always() && (steps.execute_action3.outcome == 'success')"
       name: "Test - wsl-bash should not be present (provocation)"
       run: ":\n"
       shell: "wsl-bash {0}"
       continue-on-error: true
-    - if: "always() && (steps.execute_action1.outcome == 'success') && (steps.execute_action3.outcome\
-        \ == 'success')"
-      name: "Test - wsl-bash should not be present (verfication)"
+    - if: "always() && (steps.execute_action3.outcome == 'success')"
+      name: "Test - wsl-bash should not be present (verification)"
       run: "[ '${{ steps.wsl-bash_absent_provocation.outcome }}' = 'failure' ]\n"
       shell: "wsl-sh {0}"
     - id: "execute_action4"
@@ -356,18 +430,111 @@ jobs:
       uses: "./"
       with:
         "distribution": "${{ matrix.distribution.id }}"
-        "wsl-shell-command": "bash"
-    - if: "always() && (steps.execute_action1.outcome == 'success') && (steps.execute_action3.outcome\
-        \ == 'success') && (steps.execute_action4.outcome == 'success')"
+    - if: "always() && (steps.execute_action4.outcome == 'success')"
       name: "Test - wsl-bash should be present"
       run: ":\n"
       shell: "wsl-bash {0}"
-    - if: "always() && (steps.execute_action1.outcome == 'success') && (steps.execute_action3.outcome\
-        \ == 'success') && (steps.execute_action4.outcome == 'success')"
+    - if: "always() && (steps.execute_action4.outcome == 'success')"
       name: "Test - wsl-bash should use bash"
       run: "ps -o pid='' -o comm='' | grep \"^\\s\\+$$\\s\\+\" | grep -o '\\S\\+$'\n\
         [ \"$(ps -o pid='' -o comm='' 2>/dev/null | grep \"^\\s\\+$$\\s\\+\" | grep\
         \ -o '\\S\\+$')\" == 'bash' ]\n"
+      shell: "wsl-bash {0}"
+    - if: "always() && (steps.execute_action4.outcome == 'success')"
+      name: "Test - wsl-bash should use root as default user"
+      run: "whoami\n[ \"$(whoami)\" == 'root' ]\n"
+      shell: "wsl-bash {0}"
+    - name: "Add user test"
+      run: "useradd -m -p 4qBD5NWD3IkbU test\n"
+      shell: "wsl-bash {0}"
+    - id: "execute_action5"
+      name: "Set wsl-bash wrapper to use user test by default"
+      uses: "./"
+      with:
+        "distribution": "${{ matrix.distribution.id }}"
+        "additional-packages": "sudo"
+        "wsl-shell-command": "bash -c \"sudo -u test bash --noprofile --norc -euo\
+          \ pipefail \"\\"
+    - if: "always() && (steps.execute_action5.outcome == 'success')"
+      name: "Test - wsl-bash should use test as default user"
+      run: "whoami\n[ \"$(whoami)\" == 'test' ]\n"
+      shell: "wsl-bash {0}"
+    - id: "execute_action6"
+      name: "Set wsl-bash wrapper to use user test by default with inline script usage"
+      uses: "./"
+      with:
+        "distribution": "${{ matrix.distribution.id }}"
+        "wsl-shell-command": "bash -c \"sudo -u test bash --noprofile --norc -euo\
+          \ pipefail '{0}'\""
+    - if: "always() && (steps.execute_action6.outcome == 'success')"
+      name: "Test - wsl-bash should use test as default user with inline script usage"
+      run: "whoami\n[ \"$(whoami)\" == 'test' ]\n"
+      shell: "wsl-bash {0}"
+    - name: "Delete wsl-bash"
+      run: "DEL /F \"${{ steps.execute_action6.outputs.wsl-shell-wrapper-path }}\""
+      shell: "cmd"
+    - id: "execute_action7"
+      name: "Set wsl-bash wrapper to use default user by default"
+      uses: "./"
+      with:
+        "distribution": "${{ matrix.distribution.id }}"
+    - if: "always() && (steps.execute_action7.outcome == 'success')"
+      name: "Test - wsl-bash should use root as default user"
+      run: "whoami\n[ \"$(whoami)\" == 'root' ]\n"
+      shell: "wsl-bash {0}"
+    - if: "always() && (steps.execute_action7.outcome == 'success')"
+      name: "Test - test user does already exist"
+      run: "id -u test\n"
+      shell: "wsl-bash {0}"
+    - name: "Delete wsl-bash"
+      run: "DEL /F \"${{ steps.execute_action7.outputs.wsl-shell-wrapper-path }}\""
+      shell: "cmd"
+    - id: "execute_action8"
+      name: "Set wsl-bash wrapper to use existing user test by default with extra\
+        \ parameter"
+      uses: "./"
+      with:
+        "distribution": "${{ matrix.distribution.id }}"
+        "wsl-shell-user": "test"
+    - if: "always() && (steps.execute_action8.outcome == 'success')"
+      name: "Test - wsl-bash should use existing user test as default user with extra\
+        \ parameter"
+      run: "whoami\n[ \"$(whoami)\" == 'test' ]\n"
+      shell: "wsl-bash {0}"
+    - if: "always() && (steps.execute_action8.outcome == 'success')"
+      name: "Test - test2 user does not exist"
+      run: "! id -u test2\n"
+      shell: "wsl-bash {0}"
+    - name: "Delete wsl-bash"
+      run: "DEL /F \"${{ steps.execute_action8.outputs.wsl-shell-wrapper-path }}\""
+      shell: "cmd"
+    - id: "execute_action9"
+      name: "Set wsl-bash wrapper to use non-existing user test2 by default with extra\
+        \ parameter"
+      uses: "./"
+      with:
+        "distribution": "${{ matrix.distribution.id }}"
+        "wsl-shell-user": "test2"
+    - if: "always() && (steps.execute_action9.outcome == 'success')"
+      name: "Test - wsl-bash should use auto-generated user test2 as default user"
+      run: "whoami\n[ \"$(whoami)\" == 'test2' ]\n"
+      shell: "wsl-bash {0}"
+    - if: "always() && (steps.execute_action9.outcome == 'success')"
+      name: "Test - wsl-bash should use ad-hoc user test"
+      run: "whoami\n[ \"$(whoami)\" == 'test' ]\n"
+      shell: "wsl-bash -u test {0}"
+    - if: "always() && (steps.execute_action9.outcome == 'success')"
+      name: "Test - wsl-bash should use ad-hoc user root"
+      run: "whoami\n[ \"$(whoami)\" == 'root' ]\n"
+      shell: "wsl-bash -u root {0}"
+    - id: "execute_action10"
+      name: "Make a no-op execution of the action"
+      uses: "./"
+      with:
+        "distribution": "${{ matrix.distribution.id }}"
+    - if: "always() && (steps.execute_action10.outcome == 'success')"
+      name: "Test - wsl-bash should still use test2 as default user"
+      run: "whoami\n[ \"$(whoami)\" == 'test2' ]\n"
       shell: "wsl-bash {0}"
     strategy:
       matrix:
@@ -476,18 +643,14 @@ jobs:
       uses: "./"
       with:
         "distribution": "${{ matrix.distributions.distribution1.id }}"
-    - if: "always() && (steps.execute_action1.outcome == 'success') && (steps.execute_action2.outcome\
-        \ == 'success') && (steps.execute_action3.outcome == 'success') && (steps.execute_action4.outcome\
-        \ == 'success')"
+    - if: "always() && (steps.execute_action4.outcome == 'success')"
       name: "Test - the default distribution should be the last installed distribution\
         \ with set-as-default true"
       run: "wslconfig.exe /list\nwslconfig.exe /list | iconv -f UTF-16LE -t UTF-8\n\
         [[ \"$(wslconfig.exe /list | iconv -f UTF-16LE -t UTF-8)\" == *${{ matrix.distributions.distribution2.id\
         \ }}\\ \\(Default\\)* ]]\n"
       shell: "wsl-bash {0}"
-    - if: "always() && (steps.execute_action1.outcome == 'success') && (steps.execute_action2.outcome\
-        \ == 'success') && (steps.execute_action3.outcome == 'success') && (steps.execute_action4.outcome\
-        \ == 'success')"
+    - if: "always() && (steps.execute_action4.outcome == 'success')"
       name: "Test - wsl-bash should use the last installed distribution with set-as-default\
         \ true"
       run: "cat <(lsb_release -a || true) <(uname -a || true) <([ -d /etc ] && find\
@@ -606,9 +769,7 @@ jobs:
       with:
         "distribution": "${{ matrix.distribution.id }}"
         "additional-packages": "${{ matrix.distribution.default-absent-tool }}"
-    - if: "always() && (steps.execute_action1.outcome == 'success') && ((steps.execute_action2.outcome\
-        \ == 'success') || (matrix.distribution.id == 'kali-linux')) && (steps.execute_action3.outcome\
-        \ == 'success')"
+    - if: "always() && (steps.execute_action3.outcome == 'success')"
       name: "Test - ${{ matrix.distribution.default-absent-tool }} should be installed"
       run: "${{ matrix.distribution.default-absent-tool }} --version"
       shell: "wsl-bash {0}"
@@ -617,9 +778,7 @@ jobs:
       uses: "./"
       with:
         "distribution": "${{ matrix.distribution2.id }}"
-    - if: "always() && (steps.execute_action1.outcome == 'success') && ((steps.execute_action2.outcome\
-        \ == 'success') || (matrix.distribution.id == 'kali-linux')) && (steps.execute_action3.outcome\
-        \ == 'success') && (steps.execute_action4.outcome == 'success')"
+    - if: "always() && (steps.execute_action4.outcome == 'success')"
       name: "Test - '${{ matrix.distribution2.id }}' should be the default distribution\
         \ after installation"
       run: "cat <(lsb_release -a || true) <(uname -a || true) <([ -d /etc ] && find\
@@ -638,10 +797,7 @@ jobs:
       uses: "./"
       with:
         "distribution": "${{ matrix.distribution.id }}"
-    - if: "always() && (steps.execute_action1.outcome == 'success') && ((steps.execute_action2.outcome\
-        \ == 'success') || (matrix.distribution.id == 'kali-linux')) && (steps.execute_action3.outcome\
-        \ == 'success') && (steps.execute_action4.outcome == 'success') && (steps.execute_action5.outcome\
-        \ == 'success')"
+    - if: "always() && (steps.execute_action5.outcome == 'success')"
       name: "Test - '${{ matrix.distribution2.id }}' should still be the default distribution\
         \ after re-running for '${{ matrix.distribution.id }}'"
       run: "cat <(lsb_release -a || true) <(uname -a || true) <([ -d /etc ] && find\
@@ -661,10 +817,7 @@ jobs:
       with:
         "distribution": "${{ matrix.distribution.id }}"
         "set-as-default": "true"
-    - if: "always() && (steps.execute_action1.outcome == 'success') && ((steps.execute_action2.outcome\
-        \ == 'success') || (matrix.distribution.id == 'kali-linux')) && (steps.execute_action3.outcome\
-        \ == 'success') && (steps.execute_action4.outcome == 'success') && (steps.execute_action5.outcome\
-        \ == 'success') && (steps.execute_action6.outcome == 'success')"
+    - if: "always() && (steps.execute_action6.outcome == 'success')"
       name: "Test - '${{ matrix.distribution.id }}' should be the default distribution\
         \ after re-running with set-as-default true"
       run: "cat <(lsb_release -a || true) <(uname -a || true) <([ -d /etc ] && find\

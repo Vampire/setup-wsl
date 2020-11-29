@@ -35,6 +35,8 @@ external interface NccOptions {
     var v8cache: Boolean
     var quiet: Boolean
     var debugLog: Boolean
+    var transpileOnly: Boolean
+    var target: String
 }
 
 external interface NccResult {

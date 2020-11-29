@@ -20,32 +20,36 @@ import org.gradle.api.artifacts.dsl.DependencyHandler
 import org.jetbrains.kotlin.gradle.targets.js.npm.NpmDependencyExtension
 
 val versions = mapOf(
-        // project dependencies
-        "@actions/cache" to "1.0.1",
+        // project NPM dependencies
+        "@actions/cache" to "1.0.4",
         "@actions/core" to "1.2.6",
         "@actions/exec" to "1.0.4",
-        "@actions/http-client" to "1.0.8",
+        "@actions/http-client" to "1.0.9",
         "@actions/io" to "1.0.2",
-        "@actions/tool-cache" to "1.6.0",
-        "@types/semver" to "7.3.1",
-        "kotlin-extensions" to "1.0.1-pre.110-kotlin-1.4.0",
-        "kotlinx-coroutines-core" to "1.3.9",
-        "kotlinx-nodejs" to "0.0.6",
-        "node" to "12.18.3",
+        "@actions/tool-cache" to "1.6.1",
+        "@types/semver" to "7.3.4",
         "null-writable" to "1.0.5",
         "semver" to "7.3.2",
 
-        // build dependencies
-        "@vercel/ncc" to "0.23.0",
-        "com.github.ben-manes.versions" to "0.29.0",
+        // project Java dependencies
+        "kotlin-extensions" to "1.0.1-pre.129-kotlin-1.4.20",
+        "kotlinx-coroutines-core" to "1.4.2",
+        "kotlinx-nodejs" to "0.0.7",
+        "node" to "12.18.3",
+
+        // build NPM dependencies
+        "@vercel/ncc" to "0.25.1",
+
+        // build Java dependencies
+        "com.github.ben-manes.versions" to "0.36.0",
         "dukat" to "0.5.7",
-        "github-api" to "1.116",
+        "github-api" to "1.117",
         "kaml" to "0.18.1",
         "kotlinx-serialization-runtime" to "0.20.0",
         "net.researchgate.release" to "2.8.1",
         "net.wooga.github" to "1.4.0",
-        "org.ajoberstar.grgit" to "4.0.2",
-        "org.jetbrains.kotlin.js" to "1.4.0"
+        "org.ajoberstar.grgit" to "4.1.0",
+        "org.jetbrains.kotlin.js" to "1.4.20"
 )
 
 val String.version get() = "${versions[this]}"

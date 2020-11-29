@@ -34,7 +34,11 @@ Table of Contents
     * [set-as-default](#set-as-default)
     * [update](#update)
     * [additional-packages](#additional-packages)
+    * [wsl-shell-user](#wsl-shell-user)
     * [wsl-shell-command](#wsl-shell-command)
+  * [Outputs](#outputs)
+    * [wsl-shell-wrapper-path](#wsl-shell-wrapper-path)
+    * [wsl-shell-distribution-wrapper-path](#wsl-shell-distribution-wrapper-path)
 * [Version Numbers](#version-numbers)
 * [License](#license)
 
@@ -73,6 +77,12 @@ in the `wsl-shell-command` input, so if you configure `ash -eu` as command, the 
 (and `wsl-ash_<distribution id>`). Differently named wsl-shell wrappers from former action executions are not
 deleted.
 
+The wsl-shell wrappers by default execute the `run`-step scripts as the default user of the distribution which
+usually will be the user `root`. If you want a different user being used by default, you can configure the user
+using the [`wsl-shell-user` input](#wsl-shell-user) for the wsl-shell wrapper scripts created or updated by
+the current action invocation. Additionally, the generated wsl-shell wrappers optionally accept as first two
+parameters `-u` and a user that should be used for this invocation.
+
 The wsl-shell wrapper without distribution id suffix always uses the default WSL distribution at the time
 it is actually invoked. If you want to target a specific distribution, either make sure it is the default,
 for example using this action, or use the distribution specific wsl-shell wrapper that always uses the
@@ -88,6 +98,9 @@ _**Examples:**_
       npm ci
       npm run build
       npm run package
+
+- shell: wsl-bash -u root {0}
+  run: id
 ```
 
 ### Default Shell
@@ -207,18 +220,47 @@ _**Example:**_
           ash
 ```
 
+#### wsl-shell-user
+
+The distribution user that should be used to execute `run`-step scripts with wsl-shell wrapper scripts
+that are created or updated by the current action invocation. If no value is given, the default user of
+the distribution at script execution time is used. If the user does not yet exists in the distribution,
+it is automatically added.
+
+**Default value:** none
+
+_**Example:**_
+```yaml
+- uses: Vampire/setup-wsl@v$majorVersion
+  with:
+      wsl-shell-user: test
+```
+
 #### wsl-shell-command
 
-The command that is used in the wsl-shell wrapper scripts to execute the `run`-step script.
+The command that is used in the wsl-shell wrapper scripts to execute the `run`-step script file.
 The name of the wrapper scripts will be derived from the first word in this input prefixed with `wsl-`.
 This means that for the default value, the wrapper scripts will start with `wsl-bash`.
-The `run`-step script will be given as additional parameter after the given string.
-This can also be used if the distribution is installed already to change the wrapper scripts or generate
-additional ones for other shells.
+
+The `run`-step script file will be given as additional parameter in single quotes after the given string,
+separated with one space character. The latter point is important, if you need to escape this space character
+as shown in the examples.
+
+If the given string contains at least once the sequence `{0}`, all occurrences of it will be replaced by the
+`run`-step script file without any quotes or anything and it will not be given as additional parameter.
+This can be used if the script file is needed within the shell command opposed to as additional parameter.
+
+This input can also be used if the distribution is installed already to change the wrapper scripts or generate
+additional ones for other shells. Already existing wsl-shell wrapper scripts are only overwritten, if this input
+is set to a value explicitly. Non-existing wrapper scripts are always generated. So if you want to change the
+default user using the [`wsl-shell-user` input](#wsl-shell-user), you either have to first delete the wrapper script
+or scripts that should be regenerated or specify a value for this input explicitly. To delete the wsl-shell wrapper
+scripts, the [`wsl-shell-wrapper-path` output](#wsl-shell-wrapper-path) and
+[`wsl-shell-distribution-wrapper-path` output](#wsl-shell-distribution-wrapper-path) can be used.
 
 **Default value:** `bash --noprofile --norc -euo pipefail`
 
-_**Example:**_
+_**Examples:**_
 ```yaml
 - uses: Vampire/setup-wsl@v$majorVersion
   with:
@@ -226,7 +268,44 @@ _**Example:**_
 
 - shell: wsl-ash {0}
   run: id
+
+- shell: wsl-bash {0}
+  run: |
+      useradd -m -p 4qBD5NWD3IkbU test
+
+- uses: Vampire/setup-wsl@v$majorVersion
+  with:
+      wsl-shell-command: bash -c "sudo -u test bash --noprofile --norc -euo pipefail "\
+
+- shell: wsl-bash {0}
+  run: id
+
+- uses: Vampire/setup-wsl@v$majorVersion
+  with:
+      wsl-shell-command: bash -c "sudo -u test bash --noprofile --norc -euo pipefail '{0}'"
+
+- shell: wsl-bash {0}
+  run: id
+
+- shell: cmd
+  run: DEL /F "\${{ steps.execute_action.outputs.wsl-shell-wrapper-path }}"
 ```
+
+
+
+### Outputs
+
+#### wsl-shell-wrapper-path
+
+The path to the wsl-shell wrapper that is generated by the current action invocation.
+Even if the current action invocation does not actually generate the script, because
+wsl-shell-command is not set explicitly and the script already exists, this output will be set.
+
+#### wsl-shell-distribution-wrapper-path
+
+The path to the distribution-specific wsl-shell wrapper that is generated by the current action invocation.
+Even if the current action invocation does not actually generate the script, because
+wsl-shell-command is not set explicitly and the script already exists, this output will be set.
 
 
 

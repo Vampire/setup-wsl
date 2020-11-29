@@ -17,6 +17,7 @@
 package net.kautler.github.action.setup_wsl
 
 import Buffer
+import NodeJS.get
 import NullWritable
 import ReserveCacheError
 import ValidationError
@@ -53,6 +54,7 @@ import process
 import restoreCache
 import saveCache
 import setFailed
+import setOutput
 import startGroup
 import warning
 import which
@@ -193,14 +195,30 @@ val additionalPackages by lazy {
             .toTypedArray()
 }
 
+val wslShellUser by lazy {
+    getInput("wsl-shell-user").trim()
+}
+
 val wslShellCommand by lazy {
-    getInput("wsl-shell-command", jsObject {
-        required = true
-    }).trim()
+    getInput("wsl-shell-command").trim()
 }
 
 val wslShellName by lazy {
-    wslShellCommand.split(' ', limit = 2).first()
+    wslShellCommand
+            .takeIf { it.isNotEmpty() }
+            ?.split(' ', limit = 2)
+            ?.first()
+            ?: "bash"
+}
+
+val wslShellWrapperDirectory = path.join(process.env["RUNNER_TEMP"]!!, "wsl-shell-wrapper")
+
+val wslShellWrapperPath by lazy {
+    path.join(wslShellWrapperDirectory, "wsl-$wslShellName.bat")
+}
+
+val wslShellDistributionWrapperPath by lazy {
+    path.join(wslShellWrapperDirectory, "wsl-${wslShellName}_${distribution.id.replace("[^a-zA-Z0-9.-]+".toRegex(), "_")}.bat")
 }
 
 suspend fun main() {
@@ -223,7 +241,14 @@ suspend fun main() {
             group("Install Additional Packages", suspend { distribution.install(*additionalPackages) })
         }
 
-        group("Write WSL Shell Wrapper", ::writeWslShellWrapper)
+        if (wslShellCommand.isNotEmpty()
+                || !existsSync(wslShellWrapperPath)
+                || !existsSync(wslShellDistributionWrapperPath)) {
+            group("Write WSL Shell Wrapper", ::writeWslShellWrapper)
+        }
+
+        setOutput("wsl-shell-wrapper-path", wslShellWrapperPath)
+        setOutput("wsl-shell-distribution-wrapper-path", wslShellDistributionWrapperPath)
     }.onFailure {
         debug(it.stackTraceToString())
         setFailed(it.message ?: "$it")
@@ -266,10 +291,9 @@ suspend fun setDistributionAsDefault() {
 }
 
 suspend fun writeWslShellWrapper() {
-    val wslShellWrapperDirectory = path.join(process.env["RUNNER_TEMP"]!!, "wsl-shell-wrapper")
     mkdirP(wslShellWrapperDirectory).await()
 
-    val bashMissing = (wslShellCommand == "bash --noprofile --norc -euo pipefail")
+    val bashMissing = wslShellCommand.isEmpty()
             && (exec(
             "wsl",
             arrayOf(
@@ -284,32 +308,119 @@ suspend fun writeWslShellWrapper() {
             }
     ).await() != 0)
 
+    if (wslShellUser.isNotEmpty()) {
+        val wslShellUserExists = exec(
+                "wsl",
+                arrayOf(
+                        "--distribution",
+                        distribution.id,
+                        "id",
+                        "-u",
+                        wslShellUser
+                ),
+                jsObject {
+                    ignoreReturnCode = true
+                }
+        ).await() == 0
+        if (!wslShellUserExists) {
+            exec(
+                    "wsl",
+                    arrayOf(
+                            "--distribution",
+                            distribution.id,
+                            "useradd",
+                            "-m",
+                            "-p",
+                            "4qBD5NWD3IkbU",
+                            wslShellUser
+                    )
+            ).await()
+        }
+    }
+
     val scriptContent = (if (bashMissing) """
         @ECHO OFF
+
         ECHO Bash is not available by default in '${distribution.id}', please either add it to 'additional-packages' input or configure a different 'wsl-shell-command' >&2
         EXIT /B 1
     """ else """
         @ECHO OFF
-        IF '%2' NEQ '' (
-            ECHO wrong arguments, only a script file is expected >&2
-            EXIT /B 1
+
+        SETLOCAL
+
+        IF '%1' EQU '' (
+            REM wsl-shell
+            GOTO INVALID_ARGUMENTS
+        ) ELSE IF '%2' EQU '' (
+            REM wsl-shell scriptFile
+            ${if (wslShellUser.isEmpty()) "" else "SET wslShellUser=-u $wslShellUser"}
+            SET scriptFile=%~1
+        ) ELSE IF '%1' NEQ '-u' (
+            REM wsl-shell user scriptFile
+            GOTO INVALID_ARGUMENTS
+        ) ELSE IF '%3' EQU '' (
+            REM wsl-shell -u user
+            GOTO INVALID_ARGUMENTS
+        ) ELSE IF '%4' NEQ '' (
+            REM wsl-shell -u user scriptFile foo
+            GOTO INVALID_ARGUMENTS
+        ) ELSE (
+            REM wsl-shell -u user scriptFile
+            SET wslShellUser=-u %~2
+            SET scriptFile=%~3
         )
-        FOR /F "tokens=* usebackq" %%F IN (`wsl <wsl distribution parameter> wslpath '%~1'`) DO SET wsl_script=%%F
-        wsl <wsl distribution parameter> sed -i 's/\r$//' '%wsl_script%'
-        wsl <wsl distribution parameter> $wslShellCommand '%wsl_script%'
+
+        IF NOT EXIST %scriptFile% GOTO INVALID_SCRIPT_FILE
+        GOTO START
+
+        :INVALID_ARGUMENTS
+        ECHO Invalid arguments >&2
+        GOTO USAGE
+
+        :INVALID_SCRIPT_FILE
+        ECHO Invalid script file "%scriptFile%" >&2
+        GOTO USAGE
+
+        :USAGE
+        ECHO Usage: %~n0 [-u ^<user^>] ^<script file a.k.a. {0}^> >&2
+        EXIT /B 1
+
+        :START
+        FOR /F "usebackq tokens=*" %%F IN (
+            `wsl <wsl distribution parameter> -u root wslpath '%scriptFile%'`
+        ) DO SET wslScriptFile=%%F
+        wsl <wsl distribution parameter> -u root sed -i 's/\r$//' '%wslScriptFile%'
+
+        wsl <wsl distribution parameter> %wslShellUser% ${
+            when {
+                wslShellCommand.isEmpty() ->
+                    "bash --noprofile --norc -euo pipefail '%wslScriptFile%'"
+
+                wslShellCommand.contains("{0}") ->
+                    wslShellCommand.replace("{0}", "%wslScriptFile%")
+
+                else ->
+                    "$wslShellCommand '%wslScriptFile%'"
+            }
+        }
     """).trimIndent().lines().joinToString("\r\n")
 
-    writeFileSync(
-            path.join(wslShellWrapperDirectory, "wsl-$wslShellName.bat"),
-            scriptContent.replace("<wsl distribution parameter> ", ""),
-            jsObject<`T$45`>()
-    )
+    if (wslShellCommand.isNotEmpty() || !existsSync(wslShellWrapperPath)) {
+        writeFileSync(
+                wslShellWrapperPath,
+                scriptContent.replace("<wsl distribution parameter> ", ""),
+                jsObject<`T$45`>()
+        )
+    }
 
-    writeFileSync(
-            path.join(wslShellWrapperDirectory, "wsl-${wslShellName}_${distribution.id.replace("[^a-zA-Z0-9.-]+".toRegex(), "_")}.bat"),
-            scriptContent.replace("<wsl distribution parameter>", "--distribution ${distribution.id}"),
-            jsObject<`T$45`>()
-    )
+
+    if (wslShellCommand.isNotEmpty() || !existsSync(wslShellDistributionWrapperPath)) {
+        writeFileSync(
+                wslShellDistributionWrapperPath,
+                scriptContent.replace("<wsl distribution parameter>", "--distribution ${distribution.id}"),
+                jsObject<`T$45`>()
+        )
+    }
 
     addPath(wslShellWrapperDirectory)
 }

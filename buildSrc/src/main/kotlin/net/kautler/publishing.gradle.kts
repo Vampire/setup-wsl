@@ -91,6 +91,7 @@ val github by lazy(NONE) {
 
 val releaseBody by lazy(NONE) {
     val releaseBody = grgit.log {
+        includes.add(release.git.requireBranch)
         github.getRepository(githubRepositoryName).latestRelease?.apply { excludes.add(tagName) }
     }.filter { commit ->
         !commit.shortMessage.startsWith("[Gradle Release Plugin] ")
@@ -252,4 +253,19 @@ undraftGithubRelease {
 // https://github.com/researchgate/gradle-release/issues/309
 tasks.updateVersion {
     dependsOn(undraftGithubRelease)
+}
+
+tasks.commitNewVersion {
+    doFirst {
+        release {
+            git {
+                pushToBranchPrefix = "test/"
+            }
+        }
+    }
+    doLast {
+        grgit.push {
+            refsOrSpecs = listOf(":refs/heads/test/master")
+        }
+    }
 }
