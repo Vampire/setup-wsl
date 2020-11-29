@@ -95,7 +95,7 @@ val releaseBody by lazy(NONE) {
         github.getRepository(githubRepositoryName).latestRelease?.apply { excludes.add(tagName) }
     }.filter { commit ->
         !commit.shortMessage.startsWith("[Gradle Release Plugin] ")
-    }.joinToString("\n") { commit ->
+    }.asReversed().joinToString("\n") { commit ->
         "- ${commit.shortMessage} [${commit.id}]"
     }
 
