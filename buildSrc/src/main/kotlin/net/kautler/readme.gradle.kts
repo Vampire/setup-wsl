@@ -22,22 +22,37 @@ plugins {
     `lifecycle-base`
 }
 
+val majorVersion: String by project
 val readmeTemplateFilePath = "readme/README_template.md"
 val readmeFilePath = "README.md"
 val readmeChecksumFilePath = "readme/README.md.sha256"
 
+val readmeCopySpec = copySpec {
+    from(readmeTemplateFilePath)
+    rename { readmeFilePath }
+    filteringCharset = "UTF-8"
+    expand("majorVersion" to majorVersion)
+}
+
 val verifyReadme by tasks.registering {
+    inputs.property("majorVersion", majorVersion)
+    inputs.file(readmeTemplateFilePath).withPropertyName("readmeTemplate")
     inputs.files(readmeFilePath).withPropertyName("readme")
     inputs.file(readmeChecksumFilePath).withPropertyName("readmeChecksum")
 
     doLast("verify readme") {
         if (!file(readmeFilePath).exists() || file(readmeChecksumFilePath).readText() != calculateReadmeChecksum()) {
-            // do not use hasTask() as this require realization of the task that maybe is not necessary
+            // do not use hasTask() as this requires realization of the task that maybe is not necessary
             if (gradle.taskGraph.allTasks.any { it.name == "updateReadme" }) {
                 error("The README.md file was tampered with manually, "
                         + "if you want to overwrite it, add \"-x $name\" to your Gradle call")
             }
             error("The README.md file was tampered with manually")
+        }
+
+        copy {
+            with(readmeCopySpec)
+            into(temporaryDir)
         }
     }
 }
@@ -49,8 +64,6 @@ tasks.check {
 tasks.register("updateReadme") {
     dependsOn(verifyReadme)
 
-    val majorVersion: String by project
-
     inputs.property("majorVersion", majorVersion)
     inputs.file(readmeTemplateFilePath).withPropertyName("readmeTemplate")
     outputs.file(readmeFilePath).withPropertyName("readme")
@@ -58,11 +71,8 @@ tasks.register("updateReadme") {
 
     doLast("update readme") {
         copy {
-            from(readmeTemplateFilePath)
+            with(readmeCopySpec)
             into(".")
-            rename { readmeFilePath }
-            filteringCharset = "UTF-8"
-            expand("majorVersion" to majorVersion)
         }
         file(readmeChecksumFilePath).writeText(calculateReadmeChecksum())
     }
