@@ -247,17 +247,19 @@ tasks.updateVersion {
     dependsOn(undraftGithubRelease)
 }
 
-tasks.commitNewVersion {
-    doFirst {
-        release {
-            git {
-                pushToBranchPrefix = "test/"
-            }
-        }
-    }
+val checkBranchProtectionCompatibility by tasks.registering {
     doLast {
-        grgit.push {
-            refsOrSpecs = listOf(":refs/heads/test/master")
+        check(!github
+                .getRepository(githubRepositoryName)!!
+                .getBranch(release.git.requireBranch)
+                .protection
+                .enforceAdmins
+                .isEnabled) {
+            "Please disable branch protection for administrators before triggering a release"
         }
     }
+}
+
+tasks.beforeReleaseBuild {
+    dependsOn(checkBranchProtectionCompatibility)
 }
