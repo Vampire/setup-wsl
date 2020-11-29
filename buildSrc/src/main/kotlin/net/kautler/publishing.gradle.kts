@@ -91,6 +91,7 @@ val github by lazy(NONE) {
 
 val releaseBody by lazy(NONE) {
     val releaseBody = grgit.log {
+        includes.add(release.git.requireBranch)
         github.getRepository(githubRepositoryName).latestRelease?.apply { excludes.add(tagName) }
     }.filter { commit ->
         !commit.shortMessage.startsWith("[Gradle Release Plugin] ")

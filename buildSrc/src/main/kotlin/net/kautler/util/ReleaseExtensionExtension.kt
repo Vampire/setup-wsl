@@ -19,5 +19,8 @@ package net.kautler.util
 import net.researchgate.release.GitAdapter.GitConfig
 import net.researchgate.release.ReleaseExtension
 
+val ReleaseExtension.git
+    get() = getProperty("git") as GitConfig
+
 fun ReleaseExtension.git(configure: GitConfig.() -> Unit) =
-        (getProperty("git") as GitConfig).configure()
+        git.configure()
