@@ -774,7 +774,7 @@ jobs:
       run: "${{ matrix.distribution.default-absent-tool }} --version"
       shell: "wsl-bash {0}"
     - id: "execute_action4"
-      name: "Execute action for ${{ matrix.distributions.distribution2.id }}"
+      name: "Execute action for ${{ matrix.distribution2.id }}"
       uses: "./"
       with:
         "distribution": "${{ matrix.distribution2.id }}"

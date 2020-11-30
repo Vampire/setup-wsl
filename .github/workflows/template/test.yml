@@ -901,7 +901,7 @@ jobs:
               run: ${{ matrix.distribution.default-absent-tool }} --version
 
             - <<: *execute_action
-              name: Execute action for ${{ matrix.distributions.distribution2.id }}
+              name: Execute action for ${{ matrix.distribution2.id }}
               id: execute_action4
               with:
                   distribution: ${{ matrix.distribution2.id }}
