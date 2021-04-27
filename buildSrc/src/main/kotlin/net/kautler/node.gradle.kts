@@ -146,6 +146,10 @@ tasks.withType(IntegratedDukatTask::class) {
         )
         fixExternalsFiles(
                 this,
+                "lib.dom.kt" to listOf(
+                    """\Qoverride fun addEventListener(type: String, listener: EventListenerObject\E""" to """fun addEventListener(type: String, listener: EventListenerObject""",
+                    """\Qoverride fun removeEventListener(type: String, callback: EventListenerObject\E""" to """fun removeEventListener(type: String, callback: EventListenerObject"""
+                ),
                 // work-around for https://github.com/Kotlin/dukat/issues/402
                 "lib.es2018.asynciterable.module_dukat.kt" to listOf(
                         """\Qval `return`: ((value: TReturn) -> Promise<dynamic /* IteratorYieldResult<T> | IteratorReturnResult<TReturn> */>)?\E$""" to "val `return`: ((value: dynamic) -> Promise<dynamic /* IteratorYieldResult<T> | IteratorReturnResult<TReturn> */>)?",
