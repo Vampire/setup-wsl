@@ -47,7 +47,7 @@ jobs:
               name: Build
               uses: burrunan/gradle-cache-action@v1
               with:
-                  arguments: build
+                  arguments: build --info
                   debug: false
                   concurrent: true
                   gradle-dependencies-cache-key: buildSrc/**/Versions.kt
