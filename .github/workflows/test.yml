@@ -30,7 +30,7 @@ jobs:
     - name: "Build"
       uses: "burrunan/gradle-cache-action@v1"
       with:
-        "arguments": "build --info"
+        "arguments": "build --info --stacktrace"
         "debug": "false"
         "concurrent": "true"
         "gradle-dependencies-cache-key": "buildSrc/**/Versions.kt"
@@ -50,7 +50,7 @@ jobs:
     - name: "Build"
       uses: "burrunan/gradle-cache-action@v1"
       with:
-        "arguments": "build --info"
+        "arguments": "build --info --stacktrace"
         "debug": "false"
         "concurrent": "true"
         "gradle-dependencies-cache-key": "buildSrc/**/Versions.kt"
