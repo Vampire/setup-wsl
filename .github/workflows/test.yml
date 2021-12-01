@@ -39,43 +39,6 @@ jobs:
       with:
         "path": "action.yml\nbuild/distributions/\n"
         "key": "${{ github.run_id }}"
-  "build_windows_2016":
-    name: "Build on windows-2016"
-    runs-on: "windows-2016"
-    steps:
-    - name: "Configure Git"
-      run: "git config --global core.autocrlf input"
-    - name: "Checkout"
-      uses: "actions/checkout@v2"
-    - name: "Build"
-      uses: "burrunan/gradle-cache-action@v1"
-      with:
-        "arguments": "build --info --stacktrace --scan"
-        "debug": "false"
-        "concurrent": "true"
-        "gradle-dependencies-cache-key": "buildSrc/**/Versions.kt"
-    - name: "Save built artifacts to cache"
-      uses: "actions/cache@v2"
-      with:
-        "key": "${{ github.run_id }}-windows_2016"
-        "path": "action.yml\nbuild/distributions/\n"
-  "test_invalid_windows_environment":
-    name: "Test 'windows-2016' environment"
-    needs: "build_windows_2016"
-    runs-on: "windows-2016"
-    steps:
-    - name: "Restore built artifacts from cache"
-      uses: "actions/cache@v2"
-      with:
-        "key": "${{ github.run_id }}-windows_2016"
-        "path": "action.yml\nbuild/distributions/\n"
-    - id: "execute_action"
-      name: "Execute action"
-      uses: "./"
-      continue-on-error: true
-    - name: "Test - action should fail if an invalid windows environment is given"
-      run: "if '${{ steps.execute_action.outcome }}' NEQ 'failure' exit 1\n"
-      shell: "cmd"
   "test_invalid_distribution":
     name: "Test '${{ matrix.distribution.label }}' distribution"
     needs: "build"

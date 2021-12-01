@@ -35,16 +35,13 @@ jobs:
         name: Build
         runs-on: windows-latest
         steps:
-            - &configure_git
-              name: Configure Git
+            - name: Configure Git
               run: git config --global core.autocrlf input
 
-            - &checkout
-              name: Checkout
+            - name: Checkout
               uses: actions/checkout@v2
 
-            - &build
-              name: Build
+            - name: Build
               uses: burrunan/gradle-cache-action@v1
               with:
                   arguments: build --info --stacktrace --scan
@@ -55,41 +52,11 @@ jobs:
             - &built_artifacts_cache
               name: Save built artifacts to cache
               uses: actions/cache@v2
-              with: &built_artifacts_cache_input
+              with:
                   path: |
                       action.yml
                       build/distributions/
                   key: ${{ github.run_id }}
-
-    # work-around for https://github.com/actions/cache/issues/301
-    build_windows_2016:
-        name: Build on windows-2016
-        runs-on: windows-2016
-        steps:
-            - *configure_git
-            - *checkout
-            - *build
-            - &built_artifacts_cache_windows_2016
-              <<: *built_artifacts_cache
-              with:
-                  <<: *built_artifacts_cache_input
-                  key: ${{ github.run_id }}-windows_2016
-
-    test_invalid_windows_environment:
-        name: Test 'windows-2016' environment
-        needs: build_windows_2016
-        runs-on: windows-2016
-        steps:
-            - name: Restore built artifacts from cache
-              <<: *built_artifacts_cache_windows_2016
-
-            - <<: *execute_action
-              continue-on-error: true
-
-            - name: Test - action should fail if an invalid windows environment is given
-              shell: cmd
-              run: |
-                  if '${{ steps.execute_action.outcome }}' NEQ 'failure' exit 1
 
     test_invalid_distribution:
         name: Test '${{ matrix.distribution.label }}' distribution
