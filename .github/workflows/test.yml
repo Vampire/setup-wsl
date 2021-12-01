@@ -40,7 +40,7 @@ jobs:
         "path": "action.yml\nbuild/distributions/\n"
         "key": "${{ github.run_id }}"
   "test_invalid_distribution":
-    name: "Test '${{ matrix.distribution.label }}' distribution"
+    name: "Test \"${{ matrix.distribution.label }}\" distribution"
     needs: "build"
     runs-on: "windows-latest"
     steps:
@@ -214,7 +214,7 @@ jobs:
           "default-absent-tool": "dos2unix"
       fail-fast: false
   "test":
-    name: "Test '${{ matrix.distribution.id }}' distribution"
+    name: "Test \"${{ matrix.distribution.id }}\" distribution"
     needs: "build"
     runs-on: "windows-latest"
     steps:
@@ -525,7 +525,7 @@ jobs:
           "default-absent-tool": "dos2unix"
       fail-fast: false
   "test_additional_packages":
-    name: "Test additional packages for '${{ matrix.distribution.id }}' distribution"
+    name: "Test additional packages for \"${{ matrix.distribution.id }}\" distribution"
     needs: "build"
     runs-on: "windows-latest"
     steps:
@@ -574,9 +574,9 @@ jobs:
           "default-absent-tool": "dos2unix"
       fail-fast: false
   "test_multiple_usage_with_different_distributions":
-    name: "Test multiple usage with different distributions ('${{ matrix.distributions.distribution1.id\
-      \ }}' / '${{ matrix.distributions.distribution2.id }}' / '${{ matrix.distributions.distribution3.id\
-      \ }}')"
+    name: "Test multiple usage with different distributions (\"${{ matrix.distributions.distribution1.id\
+      \ }}\" / \"${{ matrix.distributions.distribution2.id }}\" / \"${{ matrix.distributions.distribution3.id\
+      \ }}\")"
     needs: "build"
     runs-on: "windows-latest"
     steps:
@@ -704,7 +704,7 @@ jobs:
             "default-absent-tool": "dos2unix"
       fail-fast: false
   "test_multiple_usage_with_same_distribution":
-    name: "Test multiple usage with '${{ matrix.distribution.id }}' distribution"
+    name: "Test multiple usage with \"${{ matrix.distribution.id }}\" distribution"
     needs: "build"
     runs-on: "windows-latest"
     steps:
@@ -742,7 +742,7 @@ jobs:
       with:
         "distribution": "${{ matrix.distribution2.id }}"
     - if: "always() && (steps.execute_action4.outcome == 'success')"
-      name: "Test - '${{ matrix.distribution2.id }}' should be the default distribution\
+      name: "Test - \"${{ matrix.distribution2.id }}\" should be the default distribution\
         \ after installation"
       run: "cat <(lsb_release -a || true) <(uname -a || true) <([ -d /etc ] && find\
         \ /etc -maxdepth 1 -type f \\( -name '*release' -or -name 'issue*' \\) -exec\
@@ -761,8 +761,8 @@ jobs:
       with:
         "distribution": "${{ matrix.distribution.id }}"
     - if: "always() && (steps.execute_action5.outcome == 'success')"
-      name: "Test - '${{ matrix.distribution2.id }}' should still be the default distribution\
-        \ after re-running for '${{ matrix.distribution.id }}'"
+      name: "Test - \"${{ matrix.distribution2.id }}\" should still be the default\
+        \ distribution after re-running for \"${{ matrix.distribution.id }}\""
       run: "cat <(lsb_release -a || true) <(uname -a || true) <([ -d /etc ] && find\
         \ /etc -maxdepth 1 -type f \\( -name '*release' -or -name 'issue*' \\) -exec\
         \ cat {} + || true) <([ -d /etc/products.d ] && find /etc/products.d -maxdepth\
@@ -781,7 +781,7 @@ jobs:
         "distribution": "${{ matrix.distribution.id }}"
         "set-as-default": "true"
     - if: "always() && (steps.execute_action6.outcome == 'success')"
-      name: "Test - '${{ matrix.distribution.id }}' should be the default distribution\
+      name: "Test - \"${{ matrix.distribution.id }}\" should be the default distribution\
         \ after re-running with set-as-default true"
       run: "cat <(lsb_release -a || true) <(uname -a || true) <([ -d /etc ] && find\
         \ /etc -maxdepth 1 -type f \\( -name '*release' -or -name 'issue*' \\) -exec\
