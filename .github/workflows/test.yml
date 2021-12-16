@@ -40,9 +40,10 @@ jobs:
         "path": "action.yml\nbuild/distributions/\n"
         "key": "${{ github.run_id }}"
   "test_invalid_distribution":
-    name: "Test \"${{ matrix.distribution.label }}\" distribution"
+    name: "Test \"${{ matrix.distribution.label }}\" distribution on ${{ matrix.environment\
+      \ }}"
     needs: "build"
-    runs-on: "windows-latest"
+    runs-on: "${{ matrix.environment }}"
     steps:
     - name: "Restore built artifacts from cache"
       uses: "actions/cache@v2"
@@ -60,6 +61,10 @@ jobs:
       shell: "cmd"
     strategy:
       matrix:
+        "environment":
+        - "windows-2019"
+        - "windows-2022"
+        - "windows-latest"
         "distribution":
         - "id": "invalid"
           "label": "invalid"
@@ -69,9 +74,9 @@ jobs:
           "label": "null"
       fail-fast: false
   "test_default_distribution":
-    name: "Test default distribution ${{ matrix.nothing }}"
+    name: "Test default distribution on ${{ matrix.environment }}"
     needs: "build"
-    runs-on: "windows-latest"
+    runs-on: "${{ matrix.environment }}"
     steps:
     - name: "Restore built artifacts from cache"
       uses: "actions/cache@v2"
@@ -208,15 +213,20 @@ jobs:
       shell: "wsl-bash {0}"
     strategy:
       matrix:
+        "environment":
+        - "windows-2019"
+        - "windows-2022"
+        - "windows-latest"
         "distribution":
         - "id": "Debian"
           "match-pattern": "*Debian*"
           "default-absent-tool": "dos2unix"
       fail-fast: false
   "test":
-    name: "Test \"${{ matrix.distribution.id }}\" distribution"
+    name: "Test \"${{ matrix.distribution.id }}\" distribution on ${{ matrix.environment\
+      \ }}"
     needs: "build"
-    runs-on: "windows-latest"
+    runs-on: "${{ matrix.environment }}"
     steps:
     - name: "Restore built artifacts from cache"
       uses: "actions/cache@v2"
@@ -501,6 +511,10 @@ jobs:
       shell: "wsl-bash {0}"
     strategy:
       matrix:
+        "environment":
+        - "windows-2019"
+        - "windows-2022"
+        - "windows-latest"
         "distribution":
         - "id": "Debian"
           "match-pattern": "*Debian*"
@@ -525,9 +539,10 @@ jobs:
           "default-absent-tool": "dos2unix"
       fail-fast: false
   "test_additional_packages":
-    name: "Test additional packages for \"${{ matrix.distribution.id }}\" distribution"
+    name: "Test additional packages for \"${{ matrix.distribution.id }}\" distribution\
+      \ on ${{ matrix.environment }}"
     needs: "build"
-    runs-on: "windows-latest"
+    runs-on: "${{ matrix.environment }}"
     steps:
     - name: "Restore built artifacts from cache"
       uses: "actions/cache@v2"
@@ -550,6 +565,10 @@ jobs:
       shell: "wsl-bash {0}"
     strategy:
       matrix:
+        "environment":
+        - "windows-2019"
+        - "windows-2022"
+        - "windows-latest"
         "distribution":
         - "id": "Debian"
           "match-pattern": "*Debian*"
@@ -576,9 +595,9 @@ jobs:
   "test_multiple_usage_with_different_distributions":
     name: "Test multiple usage with different distributions (\"${{ matrix.distributions.distribution1.id\
       \ }}\" / \"${{ matrix.distributions.distribution2.id }}\" / \"${{ matrix.distributions.distribution3.id\
-      \ }}\")"
+      \ }}\") on ${{ matrix.environment }}"
     needs: "build"
-    runs-on: "windows-latest"
+    runs-on: "${{ matrix.environment }}"
     steps:
     - name: "Restore built artifacts from cache"
       uses: "actions/cache@v2"
@@ -629,6 +648,10 @@ jobs:
       shell: "wsl-bash {0}"
     strategy:
       matrix:
+        "environment":
+        - "windows-2019"
+        - "windows-2022"
+        - "windows-latest"
         "distributions":
         - "distribution1":
             "id": "Debian"
@@ -704,9 +727,10 @@ jobs:
             "default-absent-tool": "dos2unix"
       fail-fast: false
   "test_multiple_usage_with_same_distribution":
-    name: "Test multiple usage with \"${{ matrix.distribution.id }}\" distribution"
+    name: "Test multiple usage with \"${{ matrix.distribution.id }}\" distribution\
+      \ on ${{ matrix.environment }}"
     needs: "build"
-    runs-on: "windows-latest"
+    runs-on: "${{ matrix.environment }}"
     steps:
     - name: "Restore built artifacts from cache"
       uses: "actions/cache@v2"
@@ -796,6 +820,10 @@ jobs:
       shell: "wsl-bash {0}"
     strategy:
       matrix:
+        "environment":
+        - "windows-2019"
+        - "windows-2022"
+        - "windows-latest"
         "distribution":
         - "id": "Debian"
           "match-pattern": "*Debian*"
@@ -823,7 +851,26 @@ jobs:
           "match-pattern": "*Debian*"
           "default-absent-tool": "dos2unix"
         "exclude":
-        - "distribution":
+        - "environment": "windows-2019"
+          "distribution":
+            "id": "Debian"
+            "match-pattern": "*Debian*"
+            "default-absent-tool": "dos2unix"
+          "distribution2":
+            "id": "Debian"
+            "match-pattern": "*Debian*"
+            "default-absent-tool": "dos2unix"
+        - "environment": "windows-2022"
+          "distribution":
+            "id": "Debian"
+            "match-pattern": "*Debian*"
+            "default-absent-tool": "dos2unix"
+          "distribution2":
+            "id": "Debian"
+            "match-pattern": "*Debian*"
+            "default-absent-tool": "dos2unix"
+        - "environment": "windows-latest"
+          "distribution":
             "id": "Debian"
             "match-pattern": "*Debian*"
             "default-absent-tool": "dos2unix"
@@ -832,7 +879,26 @@ jobs:
             "match-pattern": "*Debian*"
             "default-absent-tool": "dos2unix"
         "include":
-        - "distribution":
+        - "environment": "windows-2019"
+          "distribution":
+            "id": "Debian"
+            "match-pattern": "*Debian*"
+            "default-absent-tool": "dos2unix"
+          "distribution2":
+            "id": "Ubuntu-20.04"
+            "match-pattern": "*Ubuntu*20.04*"
+            "default-absent-tool": "dos2unix"
+        - "environment": "windows-2022"
+          "distribution":
+            "id": "Debian"
+            "match-pattern": "*Debian*"
+            "default-absent-tool": "dos2unix"
+          "distribution2":
+            "id": "Ubuntu-20.04"
+            "match-pattern": "*Ubuntu*20.04*"
+            "default-absent-tool": "dos2unix"
+        - "environment": "windows-latest"
+          "distribution":
             "id": "Debian"
             "match-pattern": "*Debian*"
             "default-absent-tool": "dos2unix"
@@ -842,9 +908,9 @@ jobs:
             "default-absent-tool": "dos2unix"
       fail-fast: false
   "test_distribution_specific_wsl_bash_scripts":
-    name: "Test distribution specific wsl-bash scripts ${{ matrix.nothing }}"
+    name: "Test distribution specific wsl-bash scripts on ${{ matrix.environment }}"
     needs: "build"
-    runs-on: "windows-latest"
+    runs-on: "${{ matrix.environment }}"
     steps:
     - name: "Restore built artifacts from cache"
       uses: "actions/cache@v2"
@@ -992,6 +1058,10 @@ jobs:
       shell: "wsl-bash_Ubuntu-16.04 {0}"
     strategy:
       matrix:
+        "environment":
+        - "windows-2019"
+        - "windows-2022"
+        - "windows-latest"
         "distributions":
         - "distribution1":
             "id": "Debian"

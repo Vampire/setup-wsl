@@ -59,9 +59,9 @@ jobs:
                   key: ${{ github.run_id }}
 
     test_invalid_distribution:
-        name: Test "${{ matrix.distribution.label }}" distribution
+        name: Test "${{ matrix.distribution.label }}" distribution on ${{ matrix.environment }}
         needs: build
-        runs-on: windows-latest
+        runs-on: ${{ matrix.environment }}
         steps:
             - name: Restore built artifacts from cache
               <<: *built_artifacts_cache
@@ -79,6 +79,10 @@ jobs:
         strategy:
             fail-fast: false
             matrix:
+                environment: &environments
+                    - windows-2019
+                    - windows-2022
+                    - windows-latest
                 distribution:
                     - id: invalid
                       label: invalid
@@ -88,9 +92,9 @@ jobs:
                       label: 'null'
 
     test_default_distribution:
-        name: Test default distribution ${{ matrix.nothing }}
+        name: Test default distribution on ${{ matrix.environment }}
         needs: build
-        runs-on: windows-latest
+        runs-on: ${{ matrix.environment }}
         steps:
             - name: Restore built artifacts from cache
               <<: *built_artifacts_cache
@@ -313,6 +317,7 @@ jobs:
         strategy:
             fail-fast: false
             matrix:
+                environment: *environments
                 distribution:
                     - &debian
                       id: Debian
@@ -320,9 +325,9 @@ jobs:
                       default-absent-tool: dos2unix
 
     test:
-        name: Test "${{ matrix.distribution.id }}" distribution
+        name: Test "${{ matrix.distribution.id }}" distribution on ${{ matrix.environment }}
         needs: build
-        runs-on: windows-latest
+        runs-on: ${{ matrix.environment }}
         steps:
             - name: Restore built artifacts from cache
               <<: *built_artifacts_cache
@@ -673,6 +678,7 @@ jobs:
         strategy: &distributions_matrix
             fail-fast: false
             matrix:
+                environment: *environments
                 distribution: &distributions
                     - *debian
                     - &alpine
@@ -701,9 +707,9 @@ jobs:
                       default-absent-tool: dos2unix
 
     test_additional_packages:
-        name: Test additional packages for "${{ matrix.distribution.id }}" distribution
+        name: Test additional packages for "${{ matrix.distribution.id }}" distribution on ${{ matrix.environment }}
         needs: build
-        runs-on: windows-latest
+        runs-on: ${{ matrix.environment }}
         steps:
             - name: Restore built artifacts from cache
               <<: *built_artifacts_cache
@@ -726,16 +732,20 @@ jobs:
                   && (steps.execute_action.outcome == 'success')
               shell: wsl-bash {0}
               run: bash -c true
-
-        strategy: *distributions_matrix
+        strategy:
+            <<: *distributions_matrix
+            matrix:
+                environment: *environments
+                distribution: *distributions
 
     test_multiple_usage_with_different_distributions:
         name: Test multiple usage with different distributions
             ("${{ matrix.distributions.distribution1.id }}"
             / "${{ matrix.distributions.distribution2.id }}"
             / "${{ matrix.distributions.distribution3.id }}")
+            on ${{ matrix.environment }}
         needs: build
-        runs-on: windows-latest
+        runs-on: ${{ matrix.environment }}
         steps:
             - name: Restore built artifacts from cache
               <<: *built_artifacts_cache
@@ -806,6 +816,7 @@ jobs:
         strategy:
             fail-fast: false
             matrix:
+                environment: *environments
                 distributions:
                     - distribution1: *debian
                       distribution2: *ubuntu_20_04
@@ -832,9 +843,9 @@ jobs:
                       distribution3: *debian
 
     test_multiple_usage_with_same_distribution:
-        name: Test multiple usage with "${{ matrix.distribution.id }}" distribution
+        name: Test multiple usage with "${{ matrix.distribution.id }}" distribution on ${{ matrix.environment }}
         needs: build
-        runs-on: windows-latest
+        runs-on: ${{ matrix.environment }}
         steps:
             - name: Restore built artifacts from cache
               <<: *built_artifacts_cache
@@ -958,20 +969,35 @@ jobs:
         strategy:
             <<: *distributions_matrix
             matrix:
+                environment: *environments
                 distribution: *distributions
                 distribution2:
                     - *debian
                 exclude:
-                    - distribution: *debian
+                    - environment: windows-2019
+                      distribution: *debian
+                      distribution2: *debian
+                    - environment: windows-2022
+                      distribution: *debian
+                      distribution2: *debian
+                    - environment: windows-latest
+                      distribution: *debian
                       distribution2: *debian
                 include:
-                    - distribution: *debian
+                    - environment: windows-2019
+                      distribution: *debian
+                      distribution2: *ubuntu_20_04
+                    - environment: windows-2022
+                      distribution: *debian
+                      distribution2: *ubuntu_20_04
+                    - environment: windows-latest
+                      distribution: *debian
                       distribution2: *ubuntu_20_04
 
     test_distribution_specific_wsl_bash_scripts:
-        name: Test distribution specific wsl-bash scripts ${{ matrix.nothing }}
+        name: Test distribution specific wsl-bash scripts on ${{ matrix.environment }}
         needs: build
-        runs-on: windows-latest
+        runs-on: ${{ matrix.environment }}
         steps:
             - name: Restore built artifacts from cache
               <<: *built_artifacts_cache
@@ -1188,6 +1214,7 @@ jobs:
         strategy:
             fail-fast: false
             matrix:
+                environment: *environments
                 distributions:
                     - distribution1: *debian
                       distribution2: *alpine
