@@ -38,6 +38,7 @@ import fs.readdirSync
 import fs.writeFileSync
 import getInput
 import info
+import isDebug
 import kotlinext.js.jsObject
 import kotlinx.coroutines.CoroutineStart.LAZY
 import kotlinx.coroutines.GlobalScope
@@ -339,12 +340,12 @@ suspend fun writeWslShellWrapper() {
     }
 
     val scriptContent = (if (bashMissing) """
-        @ECHO OFF
+        @ECHO ${if (isDebug()) "ON" else "OFF"}
 
         ECHO Bash is not available by default in '${distribution.id}', please either add it to 'additional-packages' input or configure a different 'wsl-shell-command' >&2
         EXIT /B 1
     """ else """
-        @ECHO OFF
+        @ECHO ${if (isDebug()) "ON" else "OFF"}
 
         SETLOCAL
 
