@@ -63,6 +63,60 @@ configure<NodeJsRootExtension> {
     nodeVersion = "node".version
     versions.dukat.version = "dukat".version
 
+    // work-around for https://youtrack.jetbrains.com/issue/KT-34014
+    val copyYarnLock by tasks.registering {
+        val yarnLock = layout.projectDirectory.file("yarn.lock")
+
+        inputs
+            .file(yarnLock)
+            .withPropertyName("versioned Yarn lock file")
+        outputs
+            .file(rootPackageDir.resolve("yarn.lock"))
+            .withPropertyName("Yarn lock file")
+
+        onlyIf {
+            !gradle.taskGraph.hasTask(":updateYarnLock")
+        }
+
+        doLast {
+            copy {
+                from(yarnLock)
+                into(rootPackageDir)
+            }
+        }
+    }
+    npmInstallTaskProvider {
+        dependsOn(copyYarnLock)
+    }
+    val cleanKotlinNpmInstall by tasks
+    val cleanGenerateExternalsIntegrated by tasks
+    npmInstallTaskProvider {
+        shouldRunAfter(cleanKotlinNpmInstall)
+        shouldRunAfter(cleanGenerateExternalsIntegrated)
+    }
+    val updateYarnLock by tasks.registering {
+        dependsOn(cleanKotlinNpmInstall)
+        dependsOn(cleanGenerateExternalsIntegrated)
+        dependsOn(tasks.build)
+        dependsOn(project(":ncc-packer").tasks.build)
+
+        val yarnLock = rootPackageDir.resolve("yarn.lock")
+
+        inputs
+            .file(yarnLock)
+            .withPropertyName("Yarn lock file")
+        outputs
+            .file(layout.projectDirectory.file("yarn.lock"))
+            .withPropertyName("versioned Yarn lock file")
+
+        doLast {
+            copy {
+                from(yarnLock)
+                into(layout.projectDirectory)
+            }
+        }
+    }
+
     // work-around for https://github.com/Kotlin/dukat/issues/103
     npmInstallTaskProvider {
         val patchedDukat0012CliJs = layout
@@ -142,10 +196,15 @@ tasks.withType(IntegratedDukatTask::class) {
         // work-around for https://github.com/Kotlin/dukat/issues/397
         deleteExternalsFiles(
                 this,
-                "*.module_node.kt"
+                "*.module_node.kt",
+                "*.nonDeclarations.kt"
         )
         fixExternalsFiles(
                 this,
+                "lib.dom.kt" to listOf(
+                    """\Qoverride fun addEventListener(type: String, listener: EventListenerObject\E""" to """fun addEventListener(type: String, listener: EventListenerObject""",
+                    """\Qoverride fun removeEventListener(type: String, callback: EventListenerObject\E""" to """fun removeEventListener(type: String, callback: EventListenerObject"""
+                ),
                 // work-around for https://github.com/Kotlin/dukat/issues/402
                 "lib.es2018.asynciterable.module_dukat.kt" to listOf(
                         """\Qval `return`: ((value: TReturn) -> Promise<dynamic /* IteratorYieldResult<T> | IteratorReturnResult<TReturn> */>)?\E$""" to "val `return`: ((value: dynamic) -> Promise<dynamic /* IteratorYieldResult<T> | IteratorReturnResult<TReturn> */>)?",

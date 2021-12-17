@@ -35,19 +35,16 @@ jobs:
         name: Build
         runs-on: windows-latest
         steps:
-            - &configure_git
-              name: Configure Git
+            - name: Configure Git
               run: git config --global core.autocrlf input
 
-            - &checkout
-              name: Checkout
+            - name: Checkout
               uses: actions/checkout@v2
 
-            - &build
-              name: Build
+            - name: Build
               uses: burrunan/gradle-cache-action@v1
               with:
-                  arguments: build
+                  arguments: build --info --stacktrace --scan
                   debug: false
                   concurrent: true
                   gradle-dependencies-cache-key: buildSrc/**/Versions.kt
@@ -55,46 +52,16 @@ jobs:
             - &built_artifacts_cache
               name: Save built artifacts to cache
               uses: actions/cache@v2
-              with: &built_artifacts_cache_input
+              with:
                   path: |
                       action.yml
                       build/distributions/
                   key: ${{ github.run_id }}
 
-    # work-around for https://github.com/actions/cache/issues/301
-    build_windows_2016:
-        name: Build on windows-2016
-        runs-on: windows-2016
-        steps:
-            - *configure_git
-            - *checkout
-            - *build
-            - &built_artifacts_cache_windows_2016
-              <<: *built_artifacts_cache
-              with:
-                  <<: *built_artifacts_cache_input
-                  key: ${{ github.run_id }}-windows_2016
-
-    test_invalid_windows_environment:
-        name: Test 'windows-2016' environment
-        needs: build_windows_2016
-        runs-on: windows-2016
-        steps:
-            - name: Restore built artifacts from cache
-              <<: *built_artifacts_cache_windows_2016
-
-            - <<: *execute_action
-              continue-on-error: true
-
-            - name: Test - action should fail if an invalid windows environment is given
-              shell: cmd
-              run: |
-                  if '${{ steps.execute_action.outcome }}' NEQ 'failure' exit 1
-
     test_invalid_distribution:
-        name: Test '${{ matrix.distribution.label }}' distribution
+        name: Test "${{ matrix.distribution.label }}" distribution on ${{ matrix.environment }}
         needs: build
-        runs-on: windows-latest
+        runs-on: ${{ matrix.environment }}
         steps:
             - name: Restore built artifacts from cache
               <<: *built_artifacts_cache
@@ -112,6 +79,10 @@ jobs:
         strategy:
             fail-fast: false
             matrix:
+                environment: &environments
+                    - windows-2019
+                    - windows-2022
+                    - windows-latest
                 distribution:
                     - id: invalid
                       label: invalid
@@ -121,9 +92,9 @@ jobs:
                       label: 'null'
 
     test_default_distribution:
-        name: Test default distribution ${{ matrix.nothing }}
+        name: Test default distribution on ${{ matrix.environment }}
         needs: build
-        runs-on: windows-latest
+        runs-on: ${{ matrix.environment }}
         steps:
             - name: Restore built artifacts from cache
               <<: *built_artifacts_cache
@@ -346,6 +317,7 @@ jobs:
         strategy:
             fail-fast: false
             matrix:
+                environment: *environments
                 distribution:
                     - &debian
                       id: Debian
@@ -353,9 +325,9 @@ jobs:
                       default-absent-tool: dos2unix
 
     test:
-        name: Test '${{ matrix.distribution.id }}' distribution
+        name: Test "${{ matrix.distribution.id }}" distribution on ${{ matrix.environment }}
         needs: build
-        runs-on: windows-latest
+        runs-on: ${{ matrix.environment }}
         steps:
             - name: Restore built artifacts from cache
               <<: *built_artifacts_cache
@@ -706,6 +678,7 @@ jobs:
         strategy: &distributions_matrix
             fail-fast: false
             matrix:
+                environment: *environments
                 distribution: &distributions
                     - *debian
                     - &alpine
@@ -734,9 +707,9 @@ jobs:
                       default-absent-tool: dos2unix
 
     test_additional_packages:
-        name: Test additional packages for '${{ matrix.distribution.id }}' distribution
+        name: Test additional packages for "${{ matrix.distribution.id }}" distribution on ${{ matrix.environment }}
         needs: build
-        runs-on: windows-latest
+        runs-on: ${{ matrix.environment }}
         steps:
             - name: Restore built artifacts from cache
               <<: *built_artifacts_cache
@@ -759,16 +732,20 @@ jobs:
                   && (steps.execute_action.outcome == 'success')
               shell: wsl-bash {0}
               run: bash -c true
-
-        strategy: *distributions_matrix
+        strategy:
+            <<: *distributions_matrix
+            matrix:
+                environment: *environments
+                distribution: *distributions
 
     test_multiple_usage_with_different_distributions:
         name: Test multiple usage with different distributions
-            ('${{ matrix.distributions.distribution1.id }}'
-            / '${{ matrix.distributions.distribution2.id }}'
-            / '${{ matrix.distributions.distribution3.id }}')
+            ("${{ matrix.distributions.distribution1.id }}"
+            / "${{ matrix.distributions.distribution2.id }}"
+            / "${{ matrix.distributions.distribution3.id }}")
+            on ${{ matrix.environment }}
         needs: build
-        runs-on: windows-latest
+        runs-on: ${{ matrix.environment }}
         steps:
             - name: Restore built artifacts from cache
               <<: *built_artifacts_cache
@@ -839,6 +816,7 @@ jobs:
         strategy:
             fail-fast: false
             matrix:
+                environment: *environments
                 distributions:
                     - distribution1: *debian
                       distribution2: *ubuntu_20_04
@@ -865,9 +843,9 @@ jobs:
                       distribution3: *debian
 
     test_multiple_usage_with_same_distribution:
-        name: Test multiple usage with '${{ matrix.distribution.id }}' distribution
+        name: Test multiple usage with "${{ matrix.distribution.id }}" distribution on ${{ matrix.environment }}
         needs: build
-        runs-on: windows-latest
+        runs-on: ${{ matrix.environment }}
         steps:
             - name: Restore built artifacts from cache
               <<: *built_artifacts_cache
@@ -901,12 +879,12 @@ jobs:
               run: ${{ matrix.distribution.default-absent-tool }} --version
 
             - <<: *execute_action
-              name: Execute action for ${{ matrix.distributions.distribution2.id }}
+              name: Execute action for ${{ matrix.distribution2.id }}
               id: execute_action4
               with:
                   distribution: ${{ matrix.distribution2.id }}
 
-            - name: Test - '${{ matrix.distribution2.id }}' should be the default distribution after installation
+            - name: Test - "${{ matrix.distribution2.id }}" should be the default distribution after installation
               if: always()
                   && (steps.execute_action4.outcome == 'success')
               shell: wsl-bash {0}
@@ -935,7 +913,7 @@ jobs:
               with:
                   distribution: ${{ matrix.distribution.id }}
 
-            - name: Test - '${{ matrix.distribution2.id }}' should still be the default distribution after re-running for '${{ matrix.distribution.id }}'
+            - name: Test - "${{ matrix.distribution2.id }}" should still be the default distribution after re-running for "${{ matrix.distribution.id }}"
               if: always()
                   && (steps.execute_action5.outcome == 'success')
               shell: wsl-bash {0}
@@ -965,7 +943,7 @@ jobs:
                   distribution: ${{ matrix.distribution.id }}
                   set-as-default: 'true'
 
-            - name: Test - '${{ matrix.distribution.id }}' should be the default distribution after re-running with set-as-default true
+            - name: Test - "${{ matrix.distribution.id }}" should be the default distribution after re-running with set-as-default true
               if: always()
                   && (steps.execute_action6.outcome == 'success')
               shell: wsl-bash {0}
@@ -991,20 +969,35 @@ jobs:
         strategy:
             <<: *distributions_matrix
             matrix:
+                environment: *environments
                 distribution: *distributions
                 distribution2:
                     - *debian
                 exclude:
-                    - distribution: *debian
+                    - environment: windows-2019
+                      distribution: *debian
+                      distribution2: *debian
+                    - environment: windows-2022
+                      distribution: *debian
+                      distribution2: *debian
+                    - environment: windows-latest
+                      distribution: *debian
                       distribution2: *debian
                 include:
-                    - distribution: *debian
+                    - environment: windows-2019
+                      distribution: *debian
+                      distribution2: *ubuntu_20_04
+                    - environment: windows-2022
+                      distribution: *debian
+                      distribution2: *ubuntu_20_04
+                    - environment: windows-latest
+                      distribution: *debian
                       distribution2: *ubuntu_20_04
 
     test_distribution_specific_wsl_bash_scripts:
-        name: Test distribution specific wsl-bash scripts ${{ matrix.nothing }}
+        name: Test distribution specific wsl-bash scripts on ${{ matrix.environment }}
         needs: build
-        runs-on: windows-latest
+        runs-on: ${{ matrix.environment }}
         steps:
             - name: Restore built artifacts from cache
               <<: *built_artifacts_cache
@@ -1221,6 +1214,7 @@ jobs:
         strategy:
             fail-fast: false
             matrix:
+                environment: *environments
                 distributions:
                     - distribution1: *debian
                       distribution2: *alpine

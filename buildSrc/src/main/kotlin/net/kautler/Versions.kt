@@ -48,7 +48,7 @@ val versions = mapOf(
         "kotlinx-serialization-runtime" to "0.20.0",
         "net.researchgate.release" to "2.8.1",
         "net.wooga.github" to "1.4.0",
-        "org.ajoberstar.grgit" to "4.1.0",
+        "org.ajoberstar.grgit" to "4.1.1",
         "org.jetbrains.kotlin.js" to "1.4.20"
 )
 

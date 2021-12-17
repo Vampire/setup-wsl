@@ -275,7 +275,7 @@ _**Examples:**_
 
 - uses: Vampire/setup-wsl@v$majorVersion
   with:
-      wsl-shell-command: bash -c "sudo -u test bash --noprofile --norc -euo pipefail "\
+      wsl-shell-command: bash -c "sudo -u test bash --noprofile --norc -euo pipefail "\\
 
 - shell: wsl-bash {0}
   run: id
@@ -286,6 +286,13 @@ _**Examples:**_
 
 - shell: wsl-bash {0}
   run: id
+
+- uses: Vampire/setup-wsl@v$majorVersion
+  with:
+    wsl-shell-command: bash -c "cd && bash --noprofile --norc -euo pipefail '{0}'"
+
+- shell: wsl-bash {0}
+  run: pwd
 
 - shell: cmd
   run: DEL /F "\${{ steps.execute_action.outputs.wsl-shell-wrapper-path }}"

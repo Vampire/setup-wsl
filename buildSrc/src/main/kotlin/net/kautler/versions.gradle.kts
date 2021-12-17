@@ -22,14 +22,46 @@ import com.github.benmanes.gradle.versions.updates.gradle.GradleReleaseChannel.C
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.JsonConfiguration.Companion.Stable
 import net.kautler.dao.ResultSerializer
+import net.kautler.util.NullOutputStream
 import net.kautler.util.matches
 import net.kautler.util.updateCounts
+import java.net.URL
+import java.security.DigestInputStream
+import java.security.MessageDigest
 
 plugins {
     id("com.github.ben-manes.versions")
 }
 
 val majorVersion by extra("$version".substringBefore('.'))
+
+val validateGradleWrapperJar by tasks.registering {
+    onlyIf {
+        !gradle.startParameter.isOffline
+    }
+
+    doLast {
+        val expectedDigest = URL("https://services.gradle.org/distributions/gradle-${gradle.gradleVersion}-wrapper.jar.sha256").readText()
+
+        val sha256 = MessageDigest.getInstance("SHA-256")
+        layout
+                .projectDirectory
+                .dir("gradle")
+                .dir("wrapper")
+                .file("gradle-wrapper.jar")
+                .asFile
+                .inputStream()
+                .let { DigestInputStream(it, sha256) }
+                .use { it.copyTo(NullOutputStream()) }
+        val actualDigest = sha256.digest().let {
+            "%02x".repeat(it.size).format(*it.toTypedArray())
+        }
+
+        check(expectedDigest == actualDigest) {
+            "The wrapper JAR does not match the configured Gradle version, please update the wrapper"
+        }
+    }
+}
 
 val buildSrcDependencyUpdates by tasks.registering(GradleBuild::class) {
     dir = file("buildSrc")
@@ -38,6 +70,7 @@ val buildSrcDependencyUpdates by tasks.registering(GradleBuild::class) {
 }
 
 tasks.dependencyUpdates {
+    dependsOn(validateGradleWrapperJar)
     dependsOn(buildSrcDependencyUpdates)
 
     gradleReleaseChannel = CURRENT.id

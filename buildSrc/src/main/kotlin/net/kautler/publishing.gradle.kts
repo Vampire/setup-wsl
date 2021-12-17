@@ -95,7 +95,7 @@ val releaseBody by lazy(NONE) {
         github.getRepository(githubRepositoryName).latestRelease?.apply { excludes.add(tagName) }
     }.filter { commit ->
         !commit.shortMessage.startsWith("[Gradle Release Plugin] ")
-    }.joinToString("\n") { commit ->
+    }.asReversed().joinToString("\n") { commit ->
         "- ${commit.shortMessage} [${commit.id}]"
     }
 
@@ -173,30 +173,22 @@ tasks.githubPublish {
     draft(true)
 }
 
-val configureUndraftGithubRelease by tasks.registering
-
 val undraftGithubRelease by tasks.registering(GithubPublish::class) {
-    dependsOn(configureUndraftGithubRelease)
+    onlyIf {
+        !"$version".endsWith("-SNAPSHOT")
+    }
 
     publishMethod = update
-}
-
-configureUndraftGithubRelease {
-    doLast {
-        undraftGithubRelease {
-            enabled = !"$version".endsWith("-SNAPSHOT")
-        }
-    }
 }
 
 val finishMilestone by tasks.registering {
     enabled = releaseVersion
 
     doLast("finish milestone") {
-        github.getRepository(githubRepositoryName)!!.run {
+        github.getRepository(githubRepositoryName)!!.apply {
             listMilestones(OPEN)
                     .find { it.title == "Next Version" }!!
-                    .run {
+                    .apply {
                         title = releaseTagName
                         close()
                     }
@@ -255,17 +247,19 @@ tasks.updateVersion {
     dependsOn(undraftGithubRelease)
 }
 
-tasks.commitNewVersion {
-    doFirst {
-        release {
-            git {
-                pushToBranchPrefix = "test/"
-            }
-        }
-    }
+val checkBranchProtectionCompatibility by tasks.registering {
     doLast {
-        grgit.push {
-            refsOrSpecs = listOf(":refs/heads/test/master")
+        check(!github
+                .getRepository(githubRepositoryName)!!
+                .getBranch(release.git.requireBranch)
+                .protection
+                .enforceAdmins
+                .isEnabled) {
+            "Please disable branch protection for administrators before triggering a release"
         }
     }
+}
+
+tasks.beforeReleaseBuild {
+    dependsOn(checkBranchProtectionCompatibility)
 }
