@@ -34,7 +34,7 @@ val distributions = listOf(
         OpenSuseLeap15_2,
         Ubuntu1604,
         Ubuntu1804,
-        Ubuntu2004
+        Ubuntu
 ).map { it.id to it }.toMap()
 
 sealed class Distribution(
@@ -170,7 +170,7 @@ abstract class AptGetBasedDistribution : Distribution {
 }
 
 object Ubuntu2004 : AptGetBasedDistribution(
-        id = "Ubuntu-20.04",
+        id = "Ubuntu",
         distributionName = "Ubuntu",
         version = SemVer("20.4.0", jsObject<Options>()),
         downloadUrl = URL("https://aka.ms/wslubuntu2004"),
