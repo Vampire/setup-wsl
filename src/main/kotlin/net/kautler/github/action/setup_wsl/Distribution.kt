@@ -174,7 +174,7 @@ object Ubuntu2004 : AptGetBasedDistribution(
         distributionName = "Ubuntu",
         version = SemVer("20.4.0", jsObject<Options>()),
         downloadUrl = URL("https://aka.ms/wslubuntu2004"),
-        installerFile = "ubuntu2004.exe"
+        installerFile = "ubuntu.exe"
 )
 
 object Ubuntu1804 : AptGetBasedDistribution(
