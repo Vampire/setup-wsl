@@ -35,15 +35,16 @@ val distributions = listOf(
     Ubuntu1604,
     Ubuntu1804,
     Ubuntu2004
-).associateBy { it.id }
+).associateBy { it.userId }
 
 sealed class Distribution(
-    val id: String,
+    val wslId: String,
     val distributionName: String,
     val version: SemVer,
     private val _downloadUrl: URL?,
     private val productId: String?,
-    val installerFile: String
+    val installerFile: String,
+    val userId: String = wslId
 ) {
     val downloadUrl = GlobalScope.async(start = LAZY) {
         if (_downloadUrl != null) {
@@ -71,20 +72,38 @@ sealed class Distribution(
     }
 
     constructor(
-        id: String,
+        wslId: String,
         distributionName: String,
         version: SemVer,
         downloadUrl: URL,
         installerFile: String
-    ) : this(id, distributionName, version, downloadUrl, null, installerFile)
+    ) : this(wslId, distributionName, version, downloadUrl, null, installerFile)
 
     constructor(
-        id: String,
+        wslId: String,
+        userId: String,
+        distributionName: String,
+        version: SemVer,
+        downloadUrl: URL,
+        installerFile: String,
+    ) : this(wslId, distributionName, version, downloadUrl, null, installerFile, userId)
+
+    constructor(
+        wslId: String,
         distributionName: String,
         version: SemVer,
         productId: String,
         installerFile: String
-    ) : this(id, distributionName, version, null, productId, installerFile)
+    ) : this(wslId, distributionName, version, null, productId, installerFile)
+
+    constructor(
+        wslId: String,
+        userId: String,
+        distributionName: String,
+        version: SemVer,
+        productId: String,
+        installerFile: String
+    ) : this(wslId, distributionName, version, null, productId, installerFile, userId)
 
     abstract suspend fun update()
 
@@ -93,27 +112,45 @@ sealed class Distribution(
 
 abstract class AptGetBasedDistribution : Distribution {
     constructor(
-        id: String,
+        wslId: String,
         distributionName: String,
         version: SemVer,
         downloadUrl: URL,
         installerFile: String
-    ) : super(id, distributionName, version, downloadUrl, installerFile)
+    ) : super(wslId, distributionName, version, downloadUrl, installerFile)
 
     constructor(
-        id: String,
+        wslId: String,
+        userId: String,
+        distributionName: String,
+        version: SemVer,
+        downloadUrl: URL,
+        installerFile: String
+    ) : super(wslId, userId, distributionName, version, downloadUrl, installerFile)
+
+    constructor(
+        wslId: String,
         distributionName: String,
         version: SemVer,
         productId: String,
         installerFile: String
-    ) : super(id, distributionName, version, productId, installerFile)
+    ) : super(wslId, distributionName, version, productId, installerFile)
+
+    constructor(
+        wslId: String,
+        userId: String,
+        distributionName: String,
+        version: SemVer,
+        productId: String,
+        installerFile: String
+    ) : super(wslId, userId, distributionName, version, productId, installerFile)
 
     private suspend fun refresh() {
         exec(
             "wsl",
             arrayOf(
                 "--distribution",
-                id,
+                wslId,
                 "apt-get",
                 "update"
             ),
@@ -132,7 +169,7 @@ abstract class AptGetBasedDistribution : Distribution {
             "wsl",
             arrayOf(
                 "--distribution",
-                id,
+                wslId,
                 "apt-get",
                 "upgrade",
                 "--yes"
@@ -152,7 +189,7 @@ abstract class AptGetBasedDistribution : Distribution {
             "wsl",
             arrayOf(
                 "--distribution",
-                id,
+                wslId,
                 "apt-get",
                 "install",
                 "--yes",
@@ -170,7 +207,7 @@ abstract class AptGetBasedDistribution : Distribution {
 }
 
 object Ubuntu2004 : AptGetBasedDistribution(
-    id = "Ubuntu-20.04",
+    wslId = "Ubuntu-20.04",
     distributionName = "Ubuntu",
     version = SemVer("20.4.0", jsObject<Options>()),
     downloadUrl = URL("https://aka.ms/wslubuntu2004"),
@@ -178,7 +215,7 @@ object Ubuntu2004 : AptGetBasedDistribution(
 )
 
 object Ubuntu1804 : AptGetBasedDistribution(
-    id = "Ubuntu-18.04",
+    wslId = "Ubuntu-18.04",
     distributionName = "Ubuntu",
     version = SemVer("18.4.0", jsObject<Options>()),
     downloadUrl = URL("https://aka.ms/wsl-ubuntu-1804"),
@@ -186,7 +223,7 @@ object Ubuntu1804 : AptGetBasedDistribution(
 )
 
 object Ubuntu1604 : AptGetBasedDistribution(
-    id = "Ubuntu-16.04",
+    wslId = "Ubuntu-16.04",
     distributionName = "Ubuntu",
     version = SemVer("16.4.0", jsObject<Options>()),
     downloadUrl = URL("https://aka.ms/wsl-ubuntu-1604"),
@@ -194,7 +231,7 @@ object Ubuntu1604 : AptGetBasedDistribution(
 )
 
 object Debian : AptGetBasedDistribution(
-    id = "Debian",
+    wslId = "Debian",
     distributionName = "Debian",
     version = SemVer("1.0.0", jsObject<Options>()),
     downloadUrl = URL("https://aka.ms/wsl-debian-gnulinux"),
@@ -202,7 +239,7 @@ object Debian : AptGetBasedDistribution(
 )
 
 object Kali : AptGetBasedDistribution(
-    id = "kali-linux",
+    wslId = "kali-linux",
     distributionName = "Kali",
     version = SemVer("1.0.0", jsObject<Options>()),
     productId = "9pkr34tncv07",
@@ -211,27 +248,45 @@ object Kali : AptGetBasedDistribution(
 
 abstract class ZypperBasedDistribution : Distribution {
     constructor(
-        id: String,
+        wslId: String,
         distributionName: String,
         version: SemVer,
         downloadUrl: URL,
         installerFile: String
-    ) : super(id, distributionName, version, downloadUrl, installerFile)
+    ) : super(wslId, distributionName, version, downloadUrl, installerFile)
 
     constructor(
-        id: String,
+        wslId: String,
+        userId: String,
+        distributionName: String,
+        version: SemVer,
+        downloadUrl: URL,
+        installerFile: String
+    ) : super(wslId, userId, distributionName, version, downloadUrl, installerFile)
+
+    constructor(
+        wslId: String,
         distributionName: String,
         version: SemVer,
         productId: String,
         installerFile: String
-    ) : super(id, distributionName, version, productId, installerFile)
+    ) : super(wslId, distributionName, version, productId, installerFile)
+
+    constructor(
+        wslId: String,
+        userId: String,
+        distributionName: String,
+        version: SemVer,
+        productId: String,
+        installerFile: String
+    ) : super(wslId, userId, distributionName, version, productId, installerFile)
 
     private suspend fun refresh() {
         exec(
             "wsl",
             arrayOf(
                 "--distribution",
-                id,
+                wslId,
                 "zypper",
                 "--non-interactive",
                 "refresh"
@@ -245,7 +300,7 @@ abstract class ZypperBasedDistribution : Distribution {
             "wsl",
             arrayOf(
                 "--distribution",
-                id,
+                wslId,
                 "zypper",
                 "--non-interactive",
                 "update"
@@ -259,7 +314,7 @@ abstract class ZypperBasedDistribution : Distribution {
             "wsl",
             arrayOf(
                 "--distribution",
-                id,
+                wslId,
                 "zypper",
                 "--non-interactive",
                 "install",
@@ -270,7 +325,7 @@ abstract class ZypperBasedDistribution : Distribution {
 }
 
 object OpenSuseLeap15_2 : ZypperBasedDistribution(
-    id = "openSUSE-Leap-15.2",
+    wslId = "openSUSE-Leap-15.2",
     distributionName = "openSUSE Leap",
     version = SemVer("15.2.0", jsObject<Options>()),
     productId = "9mzd0n9z4m4h",
@@ -279,27 +334,45 @@ object OpenSuseLeap15_2 : ZypperBasedDistribution(
 
 abstract class ApkBasedDistribution : Distribution {
     constructor(
-        id: String,
+        wslId: String,
         distributionName: String,
         version: SemVer,
         downloadUrl: URL,
         installerFile: String
-    ) : super(id, distributionName, version, downloadUrl, installerFile)
+    ) : super(wslId, distributionName, version, downloadUrl, installerFile)
 
     constructor(
-        id: String,
+        wslId: String,
+        userId: String,
+        distributionName: String,
+        version: SemVer,
+        downloadUrl: URL,
+        installerFile: String
+    ) : super(wslId, userId, distributionName, version, downloadUrl, installerFile)
+
+    constructor(
+        wslId: String,
         distributionName: String,
         version: SemVer,
         productId: String,
         installerFile: String
-    ) : super(id, distributionName, version, productId, installerFile)
+    ) : super(wslId, distributionName, version, productId, installerFile)
+
+    constructor(
+        wslId: String,
+        userId: String,
+        distributionName: String,
+        version: SemVer,
+        productId: String,
+        installerFile: String
+    ) : super(wslId, userId, distributionName, version, productId, installerFile)
 
     private suspend fun refresh() {
         exec(
             "wsl",
             arrayOf(
                 "--distribution",
-                id,
+                wslId,
                 "apk",
                 "update"
             )
@@ -312,7 +385,7 @@ abstract class ApkBasedDistribution : Distribution {
             "wsl",
             arrayOf(
                 "--distribution",
-                id,
+                wslId,
                 "apk",
                 "upgrade"
             )
@@ -325,7 +398,7 @@ abstract class ApkBasedDistribution : Distribution {
             "wsl",
             arrayOf(
                 "--distribution",
-                id,
+                wslId,
                 "apk",
                 "add",
                 *packages
@@ -335,7 +408,7 @@ abstract class ApkBasedDistribution : Distribution {
 }
 
 object Alpine : ApkBasedDistribution(
-    id = "Alpine",
+    wslId = "Alpine",
     distributionName = "Alpine",
     version = SemVer("1.0.3", jsObject<Options>()),
     productId = "9p804crf0395",

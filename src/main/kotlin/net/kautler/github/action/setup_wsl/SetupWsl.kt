@@ -77,7 +77,7 @@ val installationNeeded = GlobalScope.async(start = LAZY) {
         "wsl",
         arrayOf(
             "--distribution",
-            distribution.id,
+            distribution.wslId,
             "true"
         ),
         jsObject {
@@ -130,7 +130,7 @@ val distributionDirectory = GlobalScope.async(start = LAZY) {
             .filter { it.contains("""(?<!_(?:scale-(?:100|125|150|400)|ARM64))\.appx$""".toRegex()) }
             .map { extractZip(path.join(extractedDistributionDirectory, it)).await() }
             .firstOrNull { existsSync(path.join(it, distribution.installerFile)) }
-            ?: error("'${distribution.installerFile}' not found for distribution '${distribution.id}'")
+            ?: error("'${distribution.installerFile}' not found for distribution '${distribution.userId}'")
     }
 
     cacheDirectory = cacheDir(
@@ -219,7 +219,7 @@ val wslShellWrapperPath by lazy {
 }
 
 val wslShellDistributionWrapperPath by lazy {
-    path.join(wslShellWrapperDirectory, "wsl-${wslShellName}_${distribution.id.replace("[^a-zA-Z0-9.-]+".toRegex(), "_")}.bat")
+    path.join(wslShellWrapperDirectory, "wsl-${wslShellName}_${distribution.userId.replace("[^a-zA-Z0-9.-]+".toRegex(), "_")}.bat")
 }
 
 suspend fun main() {
@@ -288,7 +288,7 @@ suspend fun installDistribution() {
 suspend fun setDistributionAsDefault() {
     exec(
         commandLine = "wslconfig",
-        args = arrayOf("/setdefault", distribution.id)
+        args = arrayOf("/setdefault", distribution.wslId)
     ).await()
 }
 
@@ -300,7 +300,7 @@ suspend fun writeWslShellWrapper() {
         "wsl",
         arrayOf(
             "--distribution",
-            distribution.id,
+            distribution.wslId,
             "bash",
             "-c",
             "true"
@@ -315,7 +315,7 @@ suspend fun writeWslShellWrapper() {
             "wsl",
             arrayOf(
                 "--distribution",
-                distribution.id,
+                distribution.wslId,
                 "id",
                 "-u",
                 wslShellUser
@@ -329,7 +329,7 @@ suspend fun writeWslShellWrapper() {
                 "wsl",
                 arrayOf(
                     "--distribution",
-                    distribution.id,
+                    distribution.wslId,
                     "useradd",
                     "-m",
                     "-p",
@@ -343,7 +343,7 @@ suspend fun writeWslShellWrapper() {
     val scriptContent = (if (bashMissing) """
         @ECHO ${if (isDebug()) "ON" else "OFF"}
 
-        ECHO Bash is not available by default in '${distribution.id}', please either add it to 'additional-packages' input or configure a different 'wsl-shell-command' >&2
+        ECHO Bash is not available by default in '${distribution.userId}', please either add it to 'additional-packages' input or configure a different 'wsl-shell-command' >&2
         EXIT /B 1
     """ else """
         @ECHO ${if (isDebug()) "ON" else "OFF"}
@@ -419,7 +419,7 @@ suspend fun writeWslShellWrapper() {
     if (wslShellCommand.isNotEmpty() || !existsSync(wslShellDistributionWrapperPath)) {
         writeFileSync(
             wslShellDistributionWrapperPath,
-            scriptContent.replace("<wsl distribution parameter>", "--distribution ${distribution.id}"),
+            scriptContent.replace("<wsl distribution parameter>", "--distribution ${distribution.wslId}"),
             jsObject<`T$45`>()
         )
     }
