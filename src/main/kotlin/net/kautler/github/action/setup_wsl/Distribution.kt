@@ -207,11 +207,12 @@ abstract class AptGetBasedDistribution : Distribution {
 }
 
 object Ubuntu2004 : AptGetBasedDistribution(
-    wslId = "Ubuntu-20.04",
+    wslId = "Ubuntu",
+    userId = "Ubuntu-20.04",
     distributionName = "Ubuntu",
     version = SemVer("20.4.0", jsObject<Options>()),
     downloadUrl = URL("https://aka.ms/wslubuntu2004"),
-    installerFile = "ubuntu2004.exe"
+    installerFile = "ubuntu.exe"
 )
 
 object Ubuntu1804 : AptGetBasedDistribution(
