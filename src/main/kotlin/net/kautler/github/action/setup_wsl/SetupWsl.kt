@@ -163,6 +163,10 @@ val distributionDirectory = GlobalScope.async(start = LAZY) {
     return@async cacheDirectory
 }
 
+val wslConf by lazy {
+    getInput("wsl-conf").trim()
+}
+
 val setAsDefault = GlobalScope.async(start = LAZY) {
     val input = getInput("set-as-default", jsObject {
         required = true
@@ -230,6 +234,10 @@ suspend fun main() {
             group("Install Distribution", ::installDistribution)
         }
 
+        if (wslConf.isNotEmpty()) {
+            group("Create /etc/wsl.conf", ::createWslConf)
+        }
+
         if (setAsDefault()) {
             group("Set Distribution as Default", ::setDistributionAsDefault)
         }
@@ -282,6 +290,20 @@ suspend fun installDistribution() {
         options = jsObject {
             input = Buffer.from("")
         }
+    ).await()
+}
+
+suspend fun createWslConf() {
+    exec(
+        commandLine = "wsl",
+        args = arrayOf(
+            "--distribution", distribution.wslId,
+            "sh", "-c", "echo '$wslConf' >/etc/wsl.conf"
+        )
+    ).await()
+    exec(
+        commandLine = "wslconfig",
+        args = arrayOf("/terminate", distribution.wslId)
     ).await()
 }
 

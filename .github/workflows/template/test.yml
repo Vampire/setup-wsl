@@ -714,6 +714,140 @@ jobs:
                       match-pattern: '*Ubuntu*16.04*'
                       default-absent-tool: dos2unix
 
+    test_wsl-conf_on_initial_execution:
+        name: Test /etc/wsl.conf handling on initial execution for "${{ matrix.distribution.user-id }}" distribution on ${{ matrix.environment }}
+        needs: build
+        runs-on: ${{ matrix.environment }}
+        steps:
+            - name: Restore built artifacts from cache
+              <<: *built_artifacts_cache
+
+            - <<: *execute_action
+              id: execute_action1
+              with:
+                  distribution: ${{ matrix.distribution.user-id }}
+                  wsl-conf: |
+                      [automount]
+                      options = uid=1000
+
+            - name: Delete wsl-bash
+              if: always()
+                  && (matrix.distribution.user-id == 'Alpine')
+                  && (steps.execute_action1.outcome == 'success')
+              shell: cmd
+              run: DEL /F "${{ steps.execute_action1.outputs.wsl-shell-wrapper-path }}"
+
+            - <<: *execute_action
+              name: Install Bash on Alpine
+              if: always()
+                  && (matrix.distribution.user-id == 'Alpine')
+                  && (steps.execute_action1.outcome == 'success')
+              id: execute_action2
+              with:
+                  distribution: ${{ matrix.distribution.user-id }}
+                  additional-packages: bash
+
+            - name: Test - /etc/wsl.conf should exist
+              if: always()
+                  && (steps.execute_action1.outcome == 'success')
+              shell: wsl-bash {0}
+              run: |
+                  [ -f /etc/wsl.conf ]
+                  cat /etc/wsl.conf
+
+            - name: Test - /mnt/c should be mounted with uid 1000
+              if: always()
+                  && (steps.execute_action1.outcome == 'success')
+              shell: wsl-bash {0}
+              run: |
+                  ls -alh /mnt
+                  [[ "$(stat -c %u /mnt/c)" == 1000 ]]
+
+        strategy: *distributions_matrix
+
+    test_wsl-conf_on_subsequent_execution:
+        name: Test /etc/wsl.conf handling on subsequent execution for "${{ matrix.distribution.user-id }}" distribution on ${{ matrix.environment }}
+        needs: build
+        runs-on: ${{ matrix.environment }}
+        steps:
+            - name: Restore built artifacts from cache
+              <<: *built_artifacts_cache
+
+            - <<: *execute_action
+              id: execute_action1
+              with:
+                  distribution: ${{ matrix.distribution.user-id }}
+
+            - name: Delete wsl-bash
+              if: always()
+                  && (matrix.distribution.user-id == 'Alpine')
+                  && (steps.execute_action1.outcome == 'success')
+              shell: cmd
+              run: DEL /F "${{ steps.execute_action1.outputs.wsl-shell-wrapper-path }}"
+
+            - <<: *execute_action
+              name: Install Bash on Alpine
+              if: always()
+                  && (matrix.distribution.user-id == 'Alpine')
+                  && (steps.execute_action1.outcome == 'success')
+              id: execute_action2
+              with:
+                  distribution: ${{ matrix.distribution.user-id }}
+                  additional-packages: bash
+
+            - name: Test - /etc/wsl.conf should not exist
+              if: always()
+                  && (steps.execute_action1.outcome == 'success')
+              shell: wsl-bash {0}
+              run: |
+                  [ ! -f /etc/wsl.conf ]
+
+            - name: |
+                Test - C: should be mounted at /mnt/c
+              if: always()
+                  && (steps.execute_action1.outcome == 'success')
+              shell: wsl-bash {0}
+              run: |
+                  mount
+                  mount | grep 'C:.* on /mnt/c'
+
+            - name: Test - /mnt/c should be mounted with uid 0
+              if: always()
+                  && (steps.execute_action1.outcome == 'success')
+              shell: wsl-bash {0}
+              run: |
+                  ls -alh /mnt
+                  [[ "$(stat -c %u /mnt/c)" == 0 ]]
+
+            - <<: *execute_action
+              id: execute_action3
+              if: always()
+                  && (steps.execute_action1.outcome == 'success')
+              with:
+                  distribution: ${{ matrix.distribution.user-id }}
+                  wsl-conf: |
+                      [automount]
+                      root = /
+
+            - name: Test - /etc/wsl.conf should exist
+              if: always()
+                  && (steps.execute_action3.outcome == 'success')
+              shell: wsl-bash {0}
+              run: |
+                  [ -f /etc/wsl.conf ]
+                  cat /etc/wsl.conf
+
+            - name: |
+                Test - C: should be mounted at /c
+              if: always()
+                  && (steps.execute_action3.outcome == 'success')
+              shell: wsl-bash {0}
+              run: |
+                  mount
+                  mount | grep 'C:.* on /c'
+
+        strategy: *distributions_matrix
+
     test_additional_packages:
         name: Test additional packages for "${{ matrix.distribution.user-id }}" distribution on ${{ matrix.environment }}
         needs: build
@@ -740,11 +874,7 @@ jobs:
                   && (steps.execute_action.outcome == 'success')
               shell: wsl-bash {0}
               run: bash -c true
-        strategy:
-            <<: *distributions_matrix
-            matrix:
-                environment: *environments
-                distribution: *distributions
+        strategy: *distributions_matrix
 
     test_multiple_usage_with_different_distributions:
         name: Test multiple usage with different distributions

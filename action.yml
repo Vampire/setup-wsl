@@ -37,6 +37,14 @@ inputs:
         required: false
         default: 'true'
 
+    wsl-conf:
+        description: |
+            The content that will be written to /etc/wsl.conf of the installed distribution.
+            This can be used to adjust various settings as documented at
+            https://docs.microsoft.com/en-us/windows/wsl/wsl-config#configuration-settings-for-wslconf.
+            This can also be used if the distribution is installed already.
+        required: false
+
     set-as-default:
         description: |
             Whether to set the distribution as default WSL distribution.
