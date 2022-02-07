@@ -60,21 +60,23 @@ release {
 
 val githubRepositoryName by lazy(NONE) {
     grgit
-            .remote
-            .list()
-            .find { it.name == "origin" }
-            ?.let { remote ->
-                Regex("""(?x)
+        .remote
+        .list()
+        .find { it.name == "origin" }
+        ?.let { remote ->
+            Regex(
+                """(?x)
                     (?:
                         ://([^@]++@)?+github\.com(?::\d++)?+/ |
                         ([^@]++@)?+github\.com:
                     )
                     (?<repositoryName>.*)
                     \.git
-                """)
-                        .find(remote.url)
-                        ?.let { it.groups["repositoryName"]!!.value }
-            } ?: "Vampire/setup-wsl"
+                """
+            )
+                .find(remote.url)
+                ?.let { it.groups["repositoryName"]!!.value }
+        } ?: "Vampire/setup-wsl"
 }
 
 val releasePlugin by lazy(NONE) {
@@ -128,18 +130,20 @@ val releaseBody by lazy(NONE) {
             }
         }
 
-        result.complete(try {
-            when (showOptionDialog(
+        result.complete(
+            try {
+                when (showOptionDialog(
                     parentFrame, JScrollPane(textArea), "Release Body",
                     DEFAULT_OPTION, QUESTION_MESSAGE, null,
                     arrayOf("OK", resetButton), null
-            )) {
-                OK_OPTION -> textArea.text!!
-                else -> releaseBody
+                )) {
+                    OK_OPTION -> textArea.text!!
+                    else -> releaseBody
+                }
+            } finally {
+                parentFrame.dispose()
             }
-        } finally {
-            parentFrame.dispose()
-        })
+        )
     }
 
     result.join()!!
@@ -187,11 +191,11 @@ val finishMilestone by tasks.registering {
     doLast("finish milestone") {
         github.getRepository(githubRepositoryName)!!.apply {
             listMilestones(OPEN)
-                    .find { it.title == "Next Version" }!!
-                    .apply {
-                        title = releaseTagName
-                        close()
-                    }
+                .find { it.title == "Next Version" }!!
+                .apply {
+                    title = releaseTagName
+                    close()
+                }
 
             createMilestone("Next Version", null)
         }
@@ -249,12 +253,14 @@ tasks.updateVersion {
 
 val checkBranchProtectionCompatibility by tasks.registering {
     doLast {
-        check(!github
+        check(
+            !github
                 .getRepository(githubRepositoryName)!!
                 .getBranch(release.git.requireBranch)
                 .protection
                 .enforceAdmins
-                .isEnabled) {
+                .isEnabled
+        ) {
             "Please disable branch protection for administrators before triggering a release"
         }
     }

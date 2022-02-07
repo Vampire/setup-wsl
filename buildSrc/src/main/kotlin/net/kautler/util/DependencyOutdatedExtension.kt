@@ -19,10 +19,10 @@ package net.kautler.util
 import com.github.benmanes.gradle.versions.reporter.result.DependencyOutdated
 
 fun DependencyOutdated.matches(
-        group: String,
-        name: String,
-        oldVersion: String? = null,
-        newVersion: String? = null
+    group: String,
+    name: String,
+    oldVersion: String? = null,
+    newVersion: String? = null
 ) = (this.group == group)
         && (this.name == name)
         && oldVersion?.let { it == version } ?: true

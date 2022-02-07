@@ -39,17 +39,17 @@ kotlin {
                 environment("RUNNER_TOOL_CACHE", toolCacheDir)
 
                 Yaml
-                        .default
-                        .parse(GitHubAction.serializer(), file("action.yml").readText())
-                        .inputs
-                        ?.filterValues { it.default != null }
-                        ?.filterKeys { !System.getenv().containsKey("INPUT_${it.toUpperCase()}") }
-                        ?.forEach { name, input ->
-                            environment(
-                                    "INPUT_${name.toUpperCase()}",
-                                    if (name == "use-cache") "false" else input.default!!
-                            )
-                        }
+                    .default
+                    .parse(GitHubAction.serializer(), file("action.yml").readText())
+                    .inputs
+                    ?.filterValues { it.default != null }
+                    ?.filterKeys { !System.getenv().containsKey("INPUT_${it.toUpperCase()}") }
+                    ?.forEach { name, input ->
+                        environment(
+                            "INPUT_${name.toUpperCase()}",
+                            if (name == "use-cache") "false" else input.default!!
+                        )
+                    }
 
                 doFirst("Delete tool-cache") {
                     file(toolCacheDir).deleteRecursively()
@@ -120,25 +120,25 @@ configure<NodeJsRootExtension> {
     // work-around for https://github.com/Kotlin/dukat/issues/103
     npmInstallTaskProvider {
         val patchedDukat0012CliJs = layout
-                .projectDirectory
-                .file("resources/dukat-cli-0.0.12.js")
+            .projectDirectory
+            .file("resources/dukat-cli-0.0.12.js")
 
         val patchedDukat057CliJs = layout
-                .projectDirectory
-                .file("resources/dukat-cli-0.5.7.js")
+            .projectDirectory
+            .file("resources/dukat-cli-0.5.7.js")
 
         inputs
-                .files(patchedDukat0012CliJs, patchedDukat057CliJs)
-                .withPropertyName("patched dukat-cli.js files")
+            .files(patchedDukat0012CliJs, patchedDukat057CliJs)
+            .withPropertyName("patched dukat-cli.js files")
 
         doLast {
             val dukatCliJs = rootPackageDir.resolve("node_modules/dukat/bin/dukat-cli.js")
 
             if (dukatCliJs.exists()) {
                 val sha256 = MessageDigest
-                        .getInstance("SHA-256")
-                        .digest(dukatCliJs.readBytes())
-                        .joinToString("") { "%02x".format(it) }
+                    .getInstance("SHA-256")
+                    .digest(dukatCliJs.readBytes())
+                    .joinToString("") { "%02x".format(it) }
 
                 when (sha256) {
                     // already a patched version
@@ -185,53 +185,53 @@ tasks.withType(IntegratedDukatTask::class) {
     doLast {
         // work-around for https://github.com/Kotlin/dukat/issues/240
         addJsModuleAnnotations(
-                this,
-                "core.module_@actions_core.kt" to "@actions/core",
-                "io.module_@actions_io.kt" to "@actions/io",
-                "exec.module_@actions_exec.kt" to "@actions/exec",
-                "index.module_@actions_http-client.kt" to "@actions/http-client",
-                "tool-cache.module_@actions_tool-cache.kt" to "@actions/tool-cache",
-                "cache.module_@actions_cache.kt" to "@actions/cache"
+            this,
+            "core.module_@actions_core.kt" to "@actions/core",
+            "io.module_@actions_io.kt" to "@actions/io",
+            "exec.module_@actions_exec.kt" to "@actions/exec",
+            "index.module_@actions_http-client.kt" to "@actions/http-client",
+            "tool-cache.module_@actions_tool-cache.kt" to "@actions/tool-cache",
+            "cache.module_@actions_cache.kt" to "@actions/cache"
         )
         // work-around for https://github.com/Kotlin/dukat/issues/397
         deleteExternalsFiles(
-                this,
-                "*.module_node.kt",
-                "*.nonDeclarations.kt"
+            this,
+            "*.module_node.kt",
+            "*.nonDeclarations.kt"
         )
         fixExternalsFiles(
-                this,
-                "lib.dom.kt" to listOf(
-                    """\Qoverride fun addEventListener(type: String, listener: EventListenerObject\E""" to """fun addEventListener(type: String, listener: EventListenerObject""",
-                    """\Qoverride fun removeEventListener(type: String, callback: EventListenerObject\E""" to """fun removeEventListener(type: String, callback: EventListenerObject"""
-                ),
-                // work-around for https://github.com/Kotlin/dukat/issues/402
-                "lib.es2018.asynciterable.module_dukat.kt" to listOf(
-                        """\Qval `return`: ((value: TReturn) -> Promise<dynamic /* IteratorYieldResult<T> | IteratorReturnResult<TReturn> */>)?\E$""" to "val `return`: ((value: dynamic) -> Promise<dynamic /* IteratorYieldResult<T> | IteratorReturnResult<TReturn> */>)?",
-                        """^*\Qval `return`: ((value: PromiseLike<TReturn>) -> Promise<dynamic /* IteratorYieldResult<T> | IteratorReturnResult<TReturn> */>)?\E\r?\n\Q        get() = definedExternally\E\r?\n""" to ""
-                ),
-                // work-around for https://github.com/Kotlin/dukat/issues/401
-                "null-writable.module_null-writable.kt" to listOf(
-                        """\Q`T$16`\E""" to """`T\$10`"""
-                ),
-                // work-around for https://github.com/Kotlin/dukat/issues/399
-                "tool-cache.module_@actions_tool-cache.kt" to listOf(
-                        """\Qtypealias HTTPError = Error\E$""" to "external class HTTPError : Throwable",
-                        """\Qtypealias IToolRelease = IToolRelease\E$""" to "",
-                        """\Qtypealias IToolReleaseFile = IToolReleaseFile\E$""" to ""
-                ),
-                // work-around for https://github.com/Kotlin/dukat/issues/398
-                "cache.module_@actions_cache.kt" to listOf(
-                        """\Qtypealias ValidationError = Error\E$""" to "external class ValidationError : Throwable",
-                        """\Qtypealias ReserveCacheError = Error\E$""" to "external class ReserveCacheError : Throwable"
-                ),
-                "index.module_@actions_http-client.kt" to listOf(
-                        """\Qtypealias HttpClientError = Error\E$""" to "external class HttpClientError : Throwable"
-                ),
-                // work-around for https://github.com/Kotlin/dukat/issues/400
-                "semver.module_semver.kt" to listOf(
-                        """\Q@JsModule("semver")\E$""" to """@JsModule("semver/classes/semver")"""
-                )
+            this,
+            "lib.dom.kt" to listOf(
+                """\Qoverride fun addEventListener(type: String, listener: EventListenerObject\E""" to """fun addEventListener(type: String, listener: EventListenerObject""",
+                """\Qoverride fun removeEventListener(type: String, callback: EventListenerObject\E""" to """fun removeEventListener(type: String, callback: EventListenerObject"""
+            ),
+            // work-around for https://github.com/Kotlin/dukat/issues/402
+            "lib.es2018.asynciterable.module_dukat.kt" to listOf(
+                """\Qval `return`: ((value: TReturn) -> Promise<dynamic /* IteratorYieldResult<T> | IteratorReturnResult<TReturn> */>)?\E$""" to "val `return`: ((value: dynamic) -> Promise<dynamic /* IteratorYieldResult<T> | IteratorReturnResult<TReturn> */>)?",
+                """^*\Qval `return`: ((value: PromiseLike<TReturn>) -> Promise<dynamic /* IteratorYieldResult<T> | IteratorReturnResult<TReturn> */>)?\E\r?\n\Q        get() = definedExternally\E\r?\n""" to ""
+            ),
+            // work-around for https://github.com/Kotlin/dukat/issues/401
+            "null-writable.module_null-writable.kt" to listOf(
+                """\Q`T$16`\E""" to """`T\$10`"""
+            ),
+            // work-around for https://github.com/Kotlin/dukat/issues/399
+            "tool-cache.module_@actions_tool-cache.kt" to listOf(
+                """\Qtypealias HTTPError = Error\E$""" to "external class HTTPError : Throwable",
+                """\Qtypealias IToolRelease = IToolRelease\E$""" to "",
+                """\Qtypealias IToolReleaseFile = IToolReleaseFile\E$""" to ""
+            ),
+            // work-around for https://github.com/Kotlin/dukat/issues/398
+            "cache.module_@actions_cache.kt" to listOf(
+                """\Qtypealias ValidationError = Error\E$""" to "external class ValidationError : Throwable",
+                """\Qtypealias ReserveCacheError = Error\E$""" to "external class ReserveCacheError : Throwable"
+            ),
+            "index.module_@actions_http-client.kt" to listOf(
+                """\Qtypealias HttpClientError = Error\E$""" to "external class HttpClientError : Throwable"
+            ),
+            // work-around for https://github.com/Kotlin/dukat/issues/400
+            "semver.module_semver.kt" to listOf(
+                """\Q@JsModule("semver")\E$""" to """@JsModule("semver/classes/semver")"""
+            )
         )
     }
 }
@@ -243,45 +243,45 @@ tasks.assemble {
 fun addJsModuleAnnotations(task: Task, vararg pairs: Pair<String, String>) {
     for ((file, module) in pairs) {
         task
-                .outputs
-                .files
-                .asFileTree
-                .matching { include("**/$file") }
-                .singleFile
-                .apply {
-                    writeText("@file:JsModule(\"$module\")\n${readText()}")
-                }
+            .outputs
+            .files
+            .asFileTree
+            .matching { include("**/$file") }
+            .singleFile
+            .apply {
+                writeText("@file:JsModule(\"$module\")\n${readText()}")
+            }
     }
 }
 
 fun deleteExternalsFiles(task: Task, vararg files: String) {
     task
-            .outputs
-            .files
-            .asFileTree
-            .matching {
-                for (file in files) {
-                    include("**/$file")
-                }
+        .outputs
+        .files
+        .asFileTree
+        .matching {
+            for (file in files) {
+                include("**/$file")
             }
-            .forEach { it.delete() }
+        }
+        .forEach { it.delete() }
 }
 
 fun fixExternalsFiles(task: Task, vararg pairs: Pair<String, List<Pair<String, String>>>) {
     for ((file, fixups) in pairs) {
         task
-                .outputs
-                .files
-                .asFileTree
-                .matching { include("**/$file") }
-                .singleFile
-                .apply {
-                    writeText(fixups
-                            .map { (pattern, replacement) -> pattern.toRegex(MULTILINE) to replacement }
-                            .fold(readText()) { current, (regex, replacement) ->
-                                regex.replace(current, replacement)
-                            }
-                    )
-                }
+            .outputs
+            .files
+            .asFileTree
+            .matching { include("**/$file") }
+            .singleFile
+            .apply {
+                writeText(fixups
+                    .map { (pattern, replacement) -> pattern.toRegex(MULTILINE) to replacement }
+                    .fold(readText()) { current, (regex, replacement) ->
+                        regex.replace(current, replacement)
+                    }
+                )
+            }
     }
 }

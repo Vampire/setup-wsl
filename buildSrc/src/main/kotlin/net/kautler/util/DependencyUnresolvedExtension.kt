@@ -19,9 +19,9 @@ package net.kautler.util
 import com.github.benmanes.gradle.versions.reporter.result.DependencyUnresolved
 
 fun DependencyUnresolved.matches(
-        group: String,
-        name: String,
-        version: String? = null
+    group: String,
+    name: String,
+    version: String? = null
 ) = (this.group == group)
         && (this.name == name)
         && version?.let { it == version } ?: true

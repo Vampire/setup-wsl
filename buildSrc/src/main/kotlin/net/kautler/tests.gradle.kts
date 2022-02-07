@@ -35,8 +35,9 @@ tasks.register("preProcessTestWorkflow") {
                 val workflow = parse(serializer, input.readText())
                 workflow.jobs.remove("includes")
                 stringify(serializer, workflow)
-                        .also {
-                            output.writeText("""
+                    .also {
+                        output.writeText(
+                            """
                                 |# Copyright 2020 Björn Kautler
                                 |#
                                 |# Licensed under the Apache License, Version 2.0 (the "License");
@@ -52,8 +53,9 @@ tasks.register("preProcessTestWorkflow") {
                                 |# limitations under the License.
                                 |
                                 ${it.prependIndent("|")}
-                            """.trimMargin())
-                        }
+                            """.trimMargin()
+                        )
+                    }
             }
         }.onFailure {
             // work-around for https://github.com/charleskorn/kaml/issues/36

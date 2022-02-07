@@ -79,8 +79,9 @@ tasks.dependencyUpdates {
     checkConstraints = true
 
     rejectVersionIf {
-        val preliminaryReleaseRegex = Regex("""(?i)[.-](?:${
-            listOf(
+        val preliminaryReleaseRegex = Regex(
+            """(?i)[.-](?:${
+                listOf(
                     "alpha",
                     "beta",
                     "dev",
@@ -93,8 +94,9 @@ tasks.dependencyUpdates {
                     "pre",
                     "b",
                     "ea"
-            ).joinToString("|")
-        })[.\d-]*""")
+                ).joinToString("|")
+            })[.\d-]*"""
+        )
         preliminaryReleaseRegex.containsMatchIn(candidate.version)
                 && !preliminaryReleaseRegex.containsMatchIn(currentVersion)
     }
@@ -102,59 +104,59 @@ tasks.dependencyUpdates {
     outputFormatter = closureOf<Result> {
         gradle = null
         file("build/dependencyUpdates/report.json")
-                .apply { parentFile.mkdirs() }
-                .also { reportFile ->
-                    Json(Stable.copy(prettyPrint = true))
-                            .stringify(resultSerializer, this)
-                            .also { reportFile.writeText(it) }
-                }
+            .apply { parentFile.mkdirs() }
+            .also { reportFile ->
+                Json(Stable.copy(prettyPrint = true))
+                    .stringify(resultSerializer, this)
+                    .also { reportFile.writeText(it) }
+            }
     }
 }
 
 @Suppress("UNCHECKED_CAST")
 val resultSerializerByClassLoader
     get() = layout
-            .buildDirectory
-            .dir("classes/kotlin/main")
-            .get()
-            .let { classesDir ->
-                if (!classesDir.file("net/kautler/dao/ResultSerializer.class").asFile.isFile) {
-                    return@let null
-                }
-
-                URLClassLoader(
-                        arrayOf(classesDir.asFile.toURI().toURL()),
-                        buildscript.classLoader
-                )
-                        .loadClass("net.kautler.dao.ResultSerializer")
-                        .kotlin
-                        .objectInstance
-                        as KSerializer<Result>?
+        .buildDirectory
+        .dir("classes/kotlin/main")
+        .get()
+        .let { classesDir ->
+            if (!classesDir.file("net/kautler/dao/ResultSerializer.class").asFile.isFile) {
+                return@let null
             }
+
+            URLClassLoader(
+                arrayOf(classesDir.asFile.toURI().toURL()),
+                buildscript.classLoader
+            )
+                .loadClass("net.kautler.dao.ResultSerializer")
+                .kotlin
+                .objectInstance
+                    as KSerializer<Result>?
+        }
 
 @Suppress("UNCHECKED_CAST")
 val resultSerializerByScripting
     get() = runBlocking {
         JvmScriptCompiler(defaultJvmScriptingHostConfiguration)(
-                """
+            """
                     ${file("src/main/kotlin/net/kautler/dao/ResultSerializer.kt").readText()}
                     ResultSerializer
                 """.toScriptSource(),
-                ScriptCompilationConfiguration {
-                    jvm {
-                        dependenciesFromCurrentContext(
-                                "gradle-versions-plugin",
-                                "kotlinx-serialization-runtime",
-                                "groovy-all"
-                        )
-                    }
+            ScriptCompilationConfiguration {
+                jvm {
+                    dependenciesFromCurrentContext(
+                        "gradle-versions-plugin",
+                        "kotlinx-serialization-runtime",
+                        "groovy-all"
+                    )
                 }
+            }
         ).onSuccess { BasicJvmScriptEvaluator()(it) }
     }
-            .valueOrThrow()
-            .returnValue
-            .let { it as Value }
-            .value
+        .valueOrThrow()
+        .returnValue
+        .let { it as Value }
+        .value
             as KSerializer<Result>
 
 val resultSerializer by lazy(NONE) {
@@ -164,41 +166,41 @@ val resultSerializer by lazy(NONE) {
 @Suppress("UNCHECKED_CAST")
 val versionsByClassLoader
     get() = layout
-            .buildDirectory
-            .dir("classes/kotlin/main")
-            .get()
-            .let { classesDir ->
-                if (!classesDir.file("net/kautler/VersionsKt.class").asFile.isFile) {
-                    return@let null
-                }
-
-                URLClassLoader(
-                        arrayOf(classesDir.asFile.toURI().toURL()),
-                        buildscript.classLoader
-                )
-                        .loadClass("net.kautler.VersionsKt")
-                        .methods
-                        .find { it.name == "getVersions" }
-                        ?.invoke(null)
-                        as Map<String, String>?
+        .buildDirectory
+        .dir("classes/kotlin/main")
+        .get()
+        .let { classesDir ->
+            if (!classesDir.file("net/kautler/VersionsKt.class").asFile.isFile) {
+                return@let null
             }
+
+            URLClassLoader(
+                arrayOf(classesDir.asFile.toURI().toURL()),
+                buildscript.classLoader
+            )
+                .loadClass("net.kautler.VersionsKt")
+                .methods
+                .find { it.name == "getVersions" }
+                ?.invoke(null)
+                    as Map<String, String>?
+        }
 
 @Suppress("UNCHECKED_CAST")
 val versionsByScripting
     get() = runBlocking {
         JvmScriptCompiler(defaultJvmScriptingHostConfiguration)(
-                """val versions = (mapOf\([^)]++\))"""
-                        .toRegex()
-                        .find(file("src/main/kotlin/net/kautler/Versions.kt").readText())!!
-                        .groupValues[1]
-                        .toScriptSource(),
-                ScriptCompilationConfiguration()
+            """val versions = (mapOf\([^)]++\))"""
+                .toRegex()
+                .find(file("src/main/kotlin/net/kautler/Versions.kt").readText())!!
+                .groupValues[1]
+                .toScriptSource(),
+            ScriptCompilationConfiguration()
         ).onSuccess { BasicJvmScriptEvaluator()(it) }
     }
-            .valueOrThrow()
-            .returnValue
-            .let { it as Value }
-            .value
+        .valueOrThrow()
+        .returnValue
+        .let { it as Value }
+        .value
             as Map<String, String>
 
 val String.version get() = "${versions[this]}"
