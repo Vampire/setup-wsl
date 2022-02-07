@@ -114,7 +114,7 @@ val distributionDirectory = GlobalScope.async(start = LAZY) {
 
     cacheDirectory = toolCacheDir()
 
-    val cacheKey = "distributionDirectory_${distribution.distributionName}_${distribution.version}"
+    val cacheKey = "2:distributionDirectory_${distribution.distributionName}_${distribution.version}"
 
     val restoredKey = if (useCache) restoreCache(arrayOf(cacheDirectory), cacheKey).await() else null
     if (restoredKey != null) {
@@ -130,7 +130,7 @@ val distributionDirectory = GlobalScope.async(start = LAZY) {
                 .filter { it.contains("""(?<!_(?:scale-(?:100|125|150|400)|ARM64))\.appx$""".toRegex()) }
                 .map { extractZip(path.join(extractedDistributionDirectory, it)).await() }
                 .firstOrNull { existsSync(path.join(it, distribution.installerFile)) }
-                ?: extractedDistributionDirectory
+                ?: error("'${distribution.installerFile}' not found for distribution '${distribution.id}'")
     }
 
     cacheDirectory = cacheDir(
