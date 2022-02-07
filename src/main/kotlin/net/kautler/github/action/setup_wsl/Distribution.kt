@@ -286,7 +286,7 @@ abstract class ZypperBasedDistribution : Distribution {
         installerFile: String
     ) : super(wslId, userId, distributionName, version, productId, installerFile)
 
-    private suspend fun refresh() {
+    protected open suspend fun refresh() {
         exec(
             "wsl",
             arrayOf(
@@ -335,7 +335,13 @@ object OpenSuseLeap15_2 : ZypperBasedDistribution(
     version = SemVer("15.2.0", jsObject<Options>()),
     productId = "9mzd0n9z4m4h",
     installerFile = "openSUSE-Leap-15.2.exe"
-)
+) {
+    override suspend fun refresh() {
+        retry(5) {
+            super.refresh()
+        }
+    }
+}
 
 abstract class ApkBasedDistribution : Distribution {
     constructor(
