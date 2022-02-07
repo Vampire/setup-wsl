@@ -336,6 +336,7 @@ jobs:
               id: execute_action1
               with:
                   distribution: ${{ matrix.distribution.id }}
+                  use-cache: false
 
             - <<: *test_wsl-bash_should_be_available_as_custom_shell
               name: Test - wsl-bash should fail if bash is not present by default (provocation)

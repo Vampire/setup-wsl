@@ -238,6 +238,7 @@ jobs:
       uses: "./"
       with:
         "distribution": "${{ matrix.distribution.id }}"
+        "use-cache": "false"
     - id: "no_default_bash_provocation"
       if: "matrix.distribution.id == 'Alpine'"
       name: "Test - wsl-bash should fail if bash is not present by default (provocation)"
