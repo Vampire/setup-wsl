@@ -19,7 +19,9 @@ package net.kautler.github.action.setup_wsl
 import HttpClient
 import Options
 import SemVer
+import debug
 import exec
+import info
 import kotlinext.js.jsObject
 import kotlinx.coroutines.CoroutineStart.LAZY
 import kotlinx.coroutines.GlobalScope
@@ -51,24 +53,26 @@ sealed class Distribution(
             return@async _downloadUrl
         }
 
-        val response = HttpClient().post(
-            requestUrl = "https://store.rg-adguard.net/api/GetFiles",
-            data = "type=ProductId&url=$productId",
-            additionalHeaders = mapOf(
-                "Content-Type" to "application/x-www-form-urlencoded"
-            ).asIHeaders()
-        ).await()
+        return@async retry(5) {
+            val response = HttpClient().post(
+                requestUrl = "https://store.rg-adguard.net/api/GetFiles",
+                data = "type=ProductId&url=$productId",
+                additionalHeaders = mapOf(
+                    "Content-Type" to "application/x-www-form-urlencoded"
+                ).asIHeaders()
+            ).await()
 
-        if (response.message.statusCode != 200) {
-            error("Could not determine download URL (statusCode: ${response.message.statusCode} / statusMessage: ${response.message.statusMessage})")
+            if (response.message.statusCode != 200) {
+                error("Could not determine download URL (statusCode: ${response.message.statusCode} / statusMessage: ${response.message.statusMessage})")
+            }
+
+            val body = response.readBody().await()
+            val downloadLinkAnchorMatch =
+                """<a [^>]*href="(?<url>[^"]+)"[^>]*>[^<]*\.appx(?:bundle)?</a>""".toRegex().find(body)
+                    ?: error("Could not determine download URL from:\n$body")
+
+            return@retry URL(downloadLinkAnchorMatch.groups[1]!!.value)
         }
-
-        val body = response.readBody().await()
-        val downloadLinkAnchorMatch =
-            """<a [^>]*href="(?<url>[^"]+)"[^>]*>[^<]*\.appx(?:bundle)?</a>""".toRegex().find(body)
-                ?: error("Could not determine download URL from:\n$body")
-
-        return@async URL(downloadLinkAnchorMatch.groups[1]!!.value)
     }
 
     constructor(
@@ -415,3 +419,16 @@ object Alpine : ApkBasedDistribution(
     productId = "9p804crf0395",
     installerFile = "Alpine.exe"
 )
+
+private suspend inline fun <T> retry(amount: Int, crossinline block: suspend () -> T): T {
+    (1..amount).map { i ->
+        runCatching {
+            return block()
+        }.onFailure {
+            if (i != 5) {
+                debug(it.stackTraceToString())
+                info("Failure happened, retrying (${it.message ?: it})")
+            }
+        }
+    }.last().getOrThrow<Nothing>()
+}
