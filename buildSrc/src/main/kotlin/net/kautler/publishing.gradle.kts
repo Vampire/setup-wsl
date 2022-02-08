@@ -149,7 +149,7 @@ val releaseBody by lazy(NONE) {
     result.join()!!
 }
 
-val releaseVersion = !"$version".endsWith("-SNAPSHOT")
+val releaseVersion get() = !"$version".endsWith("-SNAPSHOT")
 
 val removeDistributionsFromGit by tasks.registering {
     mustRunAfter(tasks.checkoutMergeFromReleaseBranch)
@@ -166,7 +166,7 @@ tasks.updateVersion {
 }
 
 tasks.withType<GithubPublish>().configureEach {
-    enabled = releaseVersion
+    onlyIf { releaseVersion }
     repositoryName(githubRepositoryName)
     tagName(Callable { releaseTagName })
     releaseName(Callable { releaseTagName })
@@ -178,10 +178,6 @@ tasks.githubPublish {
 }
 
 val undraftGithubRelease by tasks.registering(GithubPublish::class) {
-    onlyIf {
-        !"$version".endsWith("-SNAPSHOT")
-    }
-
     publishMethod = update
 }
 
