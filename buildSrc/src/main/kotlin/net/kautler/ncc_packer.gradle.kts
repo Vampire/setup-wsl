@@ -29,18 +29,18 @@ kotlin {
         nodejs {
             runTask {
                 inputs
-                        .files(rootProject.tasks.compileKotlinJs)
-                        .skipWhenEmpty()
-                        .withPropertyName("compiled JavaScript files")
+                    .files(rootProject.tasks.compileKotlinJs)
+                    .skipWhenEmpty()
+                    .withPropertyName("compiled JavaScript files")
 
                 val output = rootProject.layout.buildDirectory.dir("distributions")
                 outputs
-                        .dir(output)
-                        .withPropertyName("packaged JavaScript files")
+                    .dir(output)
+                    .withPropertyName("packaged JavaScript files")
 
                 args(
-                        rootProject.tasks.compileKotlinJs.get().outputFile.absolutePath,
-                        output.get().asFile.absolutePath
+                    rootProject.tasks.compileKotlinJs.get().outputFile.absolutePath,
+                    output.get().asFile.absolutePath
                 )
             }
         }

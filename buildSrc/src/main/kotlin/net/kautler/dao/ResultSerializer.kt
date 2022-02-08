@@ -82,7 +82,7 @@ object ResultSerializer : KSerializer<Result> {
 
     @Serializer(forClass = DependenciesGroup::class)
     class DependenciesGroupSerializer<E : Dependency>(
-            private val elementSerializer: KSerializer<E>
+        private val elementSerializer: KSerializer<E>
     ) : KSerializer<DependenciesGroup<E>> {
         override val descriptor = SerialDescriptor("com.github.benmanes.gradle.versions.reporter.result.DependenciesGroup") {
             element("count", Int.serializer().descriptor)

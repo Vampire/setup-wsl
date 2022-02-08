@@ -23,4 +23,4 @@ val ReleaseExtension.git
     get() = getProperty("git") as GitConfig
 
 fun ReleaseExtension.git(configure: GitConfig.() -> Unit) =
-        git.configure()
+    git.configure()

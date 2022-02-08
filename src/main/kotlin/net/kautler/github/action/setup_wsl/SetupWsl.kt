@@ -74,17 +74,17 @@ val distribution by lazy {
 
 val installationNeeded = GlobalScope.async(start = LAZY) {
     exec(
-            "wsl",
-            arrayOf(
-                    "--distribution",
-                    distribution.id,
-                    "true"
-            ),
-            jsObject {
-                ignoreReturnCode = true
-                outStream = NullWritable()
-                errStream = NullWritable()
-            }
+        "wsl",
+        arrayOf(
+            "--distribution",
+            distribution.wslId,
+            "true"
+        ),
+        jsObject {
+            ignoreReturnCode = true
+            outStream = NullWritable()
+            errStream = NullWritable()
+        }
     ).await() != 0
 }
 
@@ -114,7 +114,7 @@ val distributionDirectory = GlobalScope.async(start = LAZY) {
 
     cacheDirectory = toolCacheDir()
 
-    val cacheKey = "distributionDirectory_${distribution.distributionName}_${distribution.version}"
+    val cacheKey = "2:distributionDirectory_${distribution.distributionName}_${distribution.version}"
 
     val restoredKey = if (useCache) restoreCache(arrayOf(cacheDirectory), cacheKey).await() else null
     if (restoredKey != null) {
@@ -126,17 +126,17 @@ val distributionDirectory = GlobalScope.async(start = LAZY) {
 
     if (!existsSync(path.join(extractedDistributionDirectory, distribution.installerFile))) {
         extractedDistributionDirectory = readdirSync(extractedDistributionDirectory, jsObject<`T$35`>())
-                .asFlow()
-                .filter { it.contains("""(?<!_(?:scale-(?:100|125|150|400)|ARM64))\.appx$""".toRegex()) }
-                .map { extractZip(path.join(extractedDistributionDirectory, it)).await() }
-                .firstOrNull { existsSync(path.join(it, distribution.installerFile)) }
-                ?: extractedDistributionDirectory
+            .asFlow()
+            .filter { it.contains("""(?<!_(?:scale-(?:100|125|150|400)|ARM64))\.appx$""".toRegex()) }
+            .map { extractZip(path.join(extractedDistributionDirectory, it)).await() }
+            .firstOrNull { existsSync(path.join(it, distribution.installerFile)) }
+            ?: error("'${distribution.installerFile}' not found for distribution '${distribution.userId}'")
     }
 
     cacheDirectory = cacheDir(
-            extractedDistributionDirectory,
-            distribution.distributionName,
-            "${distribution.version}"
+        extractedDistributionDirectory,
+        distribution.distributionName,
+        "${distribution.version}"
     ).await()
 
     if (useCache) {
@@ -161,6 +161,10 @@ val distributionDirectory = GlobalScope.async(start = LAZY) {
     }
 
     return@async cacheDirectory
+}
+
+val wslConf by lazy {
+    getInput("wsl-conf").trim()
 }
 
 val setAsDefault = GlobalScope.async(start = LAZY) {
@@ -190,10 +194,10 @@ val update by lazy {
 
 val additionalPackages by lazy {
     getInput("additional-packages")
-            .trim()
-            .split("""\s+""".toRegex())
-            .filterNot { it.isBlank() }
-            .toTypedArray()
+        .trim()
+        .split("""\s+""".toRegex())
+        .filterNot { it.isBlank() }
+        .toTypedArray()
 }
 
 val wslShellUser by lazy {
@@ -206,10 +210,10 @@ val wslShellCommand by lazy {
 
 val wslShellName by lazy {
     wslShellCommand
-            .takeIf { it.isNotEmpty() }
-            ?.split(' ', limit = 2)
-            ?.first()
-            ?: "bash"
+        .takeIf { it.isNotEmpty() }
+        ?.split(' ', limit = 2)
+        ?.first()
+        ?: "bash"
 }
 
 val wslShellWrapperDirectory = path.join(process.env["RUNNER_TEMP"]!!, "wsl-shell-wrapper")
@@ -219,7 +223,7 @@ val wslShellWrapperPath by lazy {
 }
 
 val wslShellDistributionWrapperPath by lazy {
-    path.join(wslShellWrapperDirectory, "wsl-${wslShellName}_${distribution.id.replace("[^a-zA-Z0-9.-]+".toRegex(), "_")}.bat")
+    path.join(wslShellWrapperDirectory, "wsl-${wslShellName}_${distribution.userId.replace("[^a-zA-Z0-9.-]+".toRegex(), "_")}.bat")
 }
 
 suspend fun main() {
@@ -228,6 +232,10 @@ suspend fun main() {
 
         if (installationNeeded()) {
             group("Install Distribution", ::installDistribution)
+        }
+
+        if (wslConf.isNotEmpty()) {
+            group("Create /etc/wsl.conf", ::createWslConf)
         }
 
         if (setAsDefault()) {
@@ -243,8 +251,9 @@ suspend fun main() {
         }
 
         if (wslShellCommand.isNotEmpty()
-                || !existsSync(wslShellWrapperPath)
-                || !existsSync(wslShellDistributionWrapperPath)) {
+            || !existsSync(wslShellWrapperPath)
+            || !existsSync(wslShellDistributionWrapperPath)
+        ) {
             group("Write WSL Shell Wrapper", ::writeWslShellWrapper)
         }
 
@@ -276,18 +285,32 @@ suspend fun verifyWindowsEnvironment() {
 
 suspend fun installDistribution() {
     exec(
-            commandLine = """"${path.join(distributionDirectory(), distribution.installerFile)}"""",
-            args = arrayOf("install", "--root"),
-            options = jsObject {
-                input = Buffer.from("")
-            }
+        commandLine = """"${path.join(distributionDirectory(), distribution.installerFile)}"""",
+        args = arrayOf("install", "--root"),
+        options = jsObject {
+            input = Buffer.from("")
+        }
+    ).await()
+}
+
+suspend fun createWslConf() {
+    exec(
+        commandLine = "wsl",
+        args = arrayOf(
+            "--distribution", distribution.wslId,
+            "sh", "-c", "echo '$wslConf' >/etc/wsl.conf"
+        )
+    ).await()
+    exec(
+        commandLine = "wslconfig",
+        args = arrayOf("/terminate", distribution.wslId)
     ).await()
 }
 
 suspend fun setDistributionAsDefault() {
     exec(
-            commandLine = "wslconfig",
-            args = arrayOf("/setdefault", distribution.id)
+        commandLine = "wslconfig",
+        args = arrayOf("/setdefault", distribution.wslId)
     ).await()
 }
 
@@ -296,45 +319,45 @@ suspend fun writeWslShellWrapper() {
 
     val bashMissing = wslShellCommand.isEmpty()
             && (exec(
-            "wsl",
-            arrayOf(
-                    "--distribution",
-                    distribution.id,
-                    "bash",
-                    "-c",
-                    "true"
-            ),
-            jsObject {
-                ignoreReturnCode = true
-            }
+        "wsl",
+        arrayOf(
+            "--distribution",
+            distribution.wslId,
+            "bash",
+            "-c",
+            "true"
+        ),
+        jsObject {
+            ignoreReturnCode = true
+        }
     ).await() != 0)
 
     if (wslShellUser.isNotEmpty()) {
         val wslShellUserExists = exec(
-                "wsl",
-                arrayOf(
-                        "--distribution",
-                        distribution.id,
-                        "id",
-                        "-u",
-                        wslShellUser
-                ),
-                jsObject {
-                    ignoreReturnCode = true
-                }
+            "wsl",
+            arrayOf(
+                "--distribution",
+                distribution.wslId,
+                "id",
+                "-u",
+                wslShellUser
+            ),
+            jsObject {
+                ignoreReturnCode = true
+            }
         ).await() == 0
         if (!wslShellUserExists) {
             exec(
-                    "wsl",
-                    arrayOf(
-                            "--distribution",
-                            distribution.id,
-                            "useradd",
-                            "-m",
-                            "-p",
-                            "4qBD5NWD3IkbU",
-                            wslShellUser
-                    )
+                "wsl",
+                arrayOf(
+                    "--distribution",
+                    distribution.wslId,
+                    "useradd",
+                    "-m",
+                    "-p",
+                    "4qBD5NWD3IkbU",
+                    wslShellUser
+                )
             ).await()
         }
     }
@@ -342,7 +365,7 @@ suspend fun writeWslShellWrapper() {
     val scriptContent = (if (bashMissing) """
         @ECHO ${if (isDebug()) "ON" else "OFF"}
 
-        ECHO Bash is not available by default in '${distribution.id}', please either add it to 'additional-packages' input or configure a different 'wsl-shell-command' >&2
+        ECHO Bash is not available by default in '${distribution.userId}', please either add it to 'additional-packages' input or configure a different 'wsl-shell-command' >&2
         EXIT /B 1
     """ else """
         @ECHO ${if (isDebug()) "ON" else "OFF"}
@@ -393,33 +416,33 @@ suspend fun writeWslShellWrapper() {
         wsl <wsl distribution parameter> -u root sed -i 's/\r$//' '%wslScriptFile%'
 
         wsl <wsl distribution parameter> %wslShellUser% ${
-            when {
-                wslShellCommand.isEmpty() ->
-                    "bash --noprofile --norc -euo pipefail '%wslScriptFile%'"
+        when {
+            wslShellCommand.isEmpty() ->
+                "bash --noprofile --norc -euo pipefail '%wslScriptFile%'"
 
-                wslShellCommand.contains("{0}") ->
-                    wslShellCommand.replace("{0}", "%wslScriptFile%")
+            wslShellCommand.contains("{0}") ->
+                wslShellCommand.replace("{0}", "%wslScriptFile%")
 
-                else ->
-                    "$wslShellCommand '%wslScriptFile%'"
-            }
+            else ->
+                "$wslShellCommand '%wslScriptFile%'"
         }
+    }
     """).trimIndent().lines().joinToString("\r\n")
 
     if (wslShellCommand.isNotEmpty() || !existsSync(wslShellWrapperPath)) {
         writeFileSync(
-                wslShellWrapperPath,
-                scriptContent.replace("<wsl distribution parameter> ", ""),
-                jsObject<`T$45`>()
+            wslShellWrapperPath,
+            scriptContent.replace("<wsl distribution parameter> ", ""),
+            jsObject<`T$45`>()
         )
     }
 
 
     if (wslShellCommand.isNotEmpty() || !existsSync(wslShellDistributionWrapperPath)) {
         writeFileSync(
-                wslShellDistributionWrapperPath,
-                scriptContent.replace("<wsl distribution parameter>", "--distribution ${distribution.id}"),
-                jsObject<`T$45`>()
+            wslShellDistributionWrapperPath,
+            scriptContent.replace("<wsl distribution parameter>", "--distribution ${distribution.wslId}"),
+            jsObject<`T$45`>()
         )
     }
 

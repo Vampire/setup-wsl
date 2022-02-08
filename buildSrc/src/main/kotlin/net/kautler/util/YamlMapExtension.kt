@@ -22,15 +22,15 @@ import com.charleskorn.kaml.YamlScalar
 
 @Suppress("UNCHECKED_CAST")
 operator fun <T : YamlNode> YamlMap.get(key: String) =
-        entries
-                .asSequence()
-                .find { (it.key as? YamlScalar)?.content == key }
-                ?.value as T?
+    entries
+        .asSequence()
+        .find { (it.key as? YamlScalar)?.content == key }
+        ?.value as T?
 
 fun YamlMap.getKey(value: YamlNode) =
-        entries
-                .asSequence()
-                .find { it.value == value }
-                ?.key
-                ?.let { it as? YamlScalar }
-                ?.content
+    entries
+        .asSequence()
+        .find { it.value == value }
+        ?.key
+        ?.let { it as? YamlScalar }
+        ?.content

@@ -54,7 +54,7 @@ jobs:
       name: "Execute action"
       uses: "./"
       with:
-        "distribution": "${{ matrix.distribution.id }}"
+        "distribution": "${{ matrix.distribution.user-id }}"
       continue-on-error: true
     - name: "Test - action should fail if an invalid distribution is given"
       run: "if '${{ steps.execute_action.outcome }}' NEQ 'failure' exit 1\n"
@@ -136,8 +136,8 @@ jobs:
     - if: "always() && (steps.execute_action.outcome == 'success')"
       name: "Test - the default distribution should be correct"
       run: "wslconfig.exe /list | iconv -f UTF-16LE -t UTF-8\n[[ \"$(wslconfig.exe\
-        \ /list | iconv -f UTF-16LE -t UTF-8)\" == *${{ matrix.distribution.id }}\\\
-        \ \\(Default\\)* ]]\n"
+        \ /list | iconv -f UTF-16LE -t UTF-8)\" == *${{ matrix.distribution.wsl-id\
+        \ }}\\ \\(Default\\)* ]]\n"
       shell: "wsl-bash {0}"
     - if: "always() && (steps.execute_action.outcome == 'success')"
       name: "Test - wsl-bash should use the correct distribution"
@@ -218,12 +218,13 @@ jobs:
         - "windows-2022"
         - "windows-latest"
         "distribution":
-        - "id": "Debian"
+        - "wsl-id": "Debian"
+          "user-id": "Debian"
           "match-pattern": "*Debian*"
           "default-absent-tool": "dos2unix"
       fail-fast: false
   "test":
-    name: "Test \"${{ matrix.distribution.id }}\" distribution on ${{ matrix.environment\
+    name: "Test \"${{ matrix.distribution.user-id }}\" distribution on ${{ matrix.environment\
       \ }}"
     needs: "build"
     runs-on: "${{ matrix.environment }}"
@@ -237,30 +238,31 @@ jobs:
       name: "Execute action"
       uses: "./"
       with:
-        "distribution": "${{ matrix.distribution.id }}"
+        "distribution": "${{ matrix.distribution.user-id }}"
+        "use-cache": "false"
     - id: "no_default_bash_provocation"
-      if: "matrix.distribution.id == 'Alpine'"
+      if: "matrix.distribution.user-id == 'Alpine'"
       name: "Test - wsl-bash should fail if bash is not present by default (provocation)"
       run: ":\n"
       shell: "wsl-bash {0}"
       continue-on-error: true
-    - if: "always() && (matrix.distribution.id == 'Alpine') && (steps.execute_action1.outcome\
+    - if: "always() && (matrix.distribution.user-id == 'Alpine') && (steps.execute_action1.outcome\
         \ == 'success')"
       name: "Test - wsl-bash should fail if bash is not present by default (verification)"
       run: "wsl sh -euc \"[ '${{ steps.no_default_bash_provocation.outcome }}' = 'failure'\
         \ ]\"\n"
-    - if: "always() && (matrix.distribution.id == 'Alpine') && (steps.execute_action1.outcome\
+    - if: "always() && (matrix.distribution.user-id == 'Alpine') && (steps.execute_action1.outcome\
         \ == 'success')"
       name: "Delete wsl-bash"
       run: "DEL /F \"${{ steps.execute_action1.outputs.wsl-shell-wrapper-path }}\""
       shell: "cmd"
     - id: "execute_action2"
-      if: "always() && (matrix.distribution.id == 'Alpine') && (steps.execute_action1.outcome\
+      if: "always() && (matrix.distribution.user-id == 'Alpine') && (steps.execute_action1.outcome\
         \ == 'success')"
       name: "Install Bash on Alpine"
       uses: "./"
       with:
-        "distribution": "${{ matrix.distribution.id }}"
+        "distribution": "${{ matrix.distribution.user-id }}"
         "additional-packages": "bash"
     - if: "always() && (steps.execute_action1.outcome == 'success')"
       name: "Test - wsl-bash should be available as custom shell"
@@ -310,8 +312,8 @@ jobs:
     - if: "always() && (steps.execute_action1.outcome == 'success')"
       name: "Test - the default distribution should be correct"
       run: "wslconfig.exe /list | iconv -f UTF-16LE -t UTF-8\n[[ \"$(wslconfig.exe\
-        \ /list | iconv -f UTF-16LE -t UTF-8)\" == *${{ matrix.distribution.id }}\\\
-        \ \\(Default\\)* ]]\n"
+        \ /list | iconv -f UTF-16LE -t UTF-8)\" == *${{ matrix.distribution.wsl-id\
+        \ }}\\ \\(Default\\)* ]]\n"
       shell: "wsl-bash {0}"
     - if: "always() && (steps.execute_action1.outcome == 'success')"
       name: "Test - wsl-bash should use the correct distribution"
@@ -366,7 +368,7 @@ jobs:
       name: "Add wsl-sh wrapper"
       uses: "./"
       with:
-        "distribution": "${{ matrix.distribution.id }}"
+        "distribution": "${{ matrix.distribution.user-id }}"
         "wsl-shell-command": "sh -eu"
     - if: "always() && (steps.execute_action3.outcome == 'success')"
       name: "Test - wsl-sh should be present"
@@ -402,7 +404,7 @@ jobs:
       name: "Re-add wsl-bash wrapper"
       uses: "./"
       with:
-        "distribution": "${{ matrix.distribution.id }}"
+        "distribution": "${{ matrix.distribution.user-id }}"
     - if: "always() && (steps.execute_action4.outcome == 'success')"
       name: "Test - wsl-bash should be present"
       run: ":\n"
@@ -424,7 +426,7 @@ jobs:
       name: "Set wsl-bash wrapper to use user test by default"
       uses: "./"
       with:
-        "distribution": "${{ matrix.distribution.id }}"
+        "distribution": "${{ matrix.distribution.user-id }}"
         "additional-packages": "sudo"
         "wsl-shell-command": "bash -c \"sudo -u test bash --noprofile --norc -euo\
           \ pipefail \"\\"
@@ -436,7 +438,7 @@ jobs:
       name: "Set wsl-bash wrapper to use user test by default with inline script usage"
       uses: "./"
       with:
-        "distribution": "${{ matrix.distribution.id }}"
+        "distribution": "${{ matrix.distribution.user-id }}"
         "wsl-shell-command": "bash -c \"sudo -u test bash --noprofile --norc -euo\
           \ pipefail '{0}'\""
     - if: "always() && (steps.execute_action6.outcome == 'success')"
@@ -450,7 +452,7 @@ jobs:
       name: "Set wsl-bash wrapper to use default user by default"
       uses: "./"
       with:
-        "distribution": "${{ matrix.distribution.id }}"
+        "distribution": "${{ matrix.distribution.user-id }}"
     - if: "always() && (steps.execute_action7.outcome == 'success')"
       name: "Test - wsl-bash should use root as default user"
       run: "whoami\n[ \"$(whoami)\" == 'root' ]\n"
@@ -467,7 +469,7 @@ jobs:
         \ parameter"
       uses: "./"
       with:
-        "distribution": "${{ matrix.distribution.id }}"
+        "distribution": "${{ matrix.distribution.user-id }}"
         "wsl-shell-user": "test"
     - if: "always() && (steps.execute_action8.outcome == 'success')"
       name: "Test - wsl-bash should use existing user test as default user with extra\
@@ -486,7 +488,7 @@ jobs:
         \ parameter"
       uses: "./"
       with:
-        "distribution": "${{ matrix.distribution.id }}"
+        "distribution": "${{ matrix.distribution.user-id }}"
         "wsl-shell-user": "test2"
     - if: "always() && (steps.execute_action9.outcome == 'success')"
       name: "Test - wsl-bash should use auto-generated user test2 as default user"
@@ -504,7 +506,7 @@ jobs:
       name: "Make a no-op execution of the action"
       uses: "./"
       with:
-        "distribution": "${{ matrix.distribution.id }}"
+        "distribution": "${{ matrix.distribution.user-id }}"
     - if: "always() && (steps.execute_action10.outcome == 'success')"
       name: "Test - wsl-bash should still use test2 as default user"
       run: "whoami\n[ \"$(whoami)\" == 'test2' ]\n"
@@ -516,30 +518,203 @@ jobs:
         - "windows-2022"
         - "windows-latest"
         "distribution":
-        - "id": "Debian"
+        - "wsl-id": "Debian"
+          "user-id": "Debian"
           "match-pattern": "*Debian*"
           "default-absent-tool": "dos2unix"
-        - "id": "Alpine"
+        - "wsl-id": "Alpine"
+          "user-id": "Alpine"
           "match-pattern": "*Alpine*"
           "default-absent-tool": "dos2unix"
-        - "id": "kali-linux"
+        - "wsl-id": "kali-linux"
+          "user-id": "kali-linux"
           "match-pattern": "*Kali*"
           "default-absent-tool": "dos2unix"
-        - "id": "openSUSE-Leap-15.2"
+        - "wsl-id": "openSUSE-Leap-15.2"
+          "user-id": "openSUSE-Leap-15.2"
           "match-pattern": "*openSUSE*Leap*15.2*"
           "default-absent-tool": "which"
-        - "id": "Ubuntu-20.04"
+        - "wsl-id": "Ubuntu"
+          "user-id": "Ubuntu-20.04"
           "match-pattern": "*Ubuntu*20.04*"
           "default-absent-tool": "dos2unix"
-        - "id": "Ubuntu-18.04"
+        - "wsl-id": "Ubuntu-18.04"
+          "user-id": "Ubuntu-18.04"
           "match-pattern": "*Ubuntu*18.04*"
           "default-absent-tool": "dos2unix"
-        - "id": "Ubuntu-16.04"
+        - "wsl-id": "Ubuntu-16.04"
+          "user-id": "Ubuntu-16.04"
+          "match-pattern": "*Ubuntu*16.04*"
+          "default-absent-tool": "dos2unix"
+      fail-fast: false
+  "test_wsl-conf_on_initial_execution":
+    name: "Test /etc/wsl.conf handling on initial execution for \"${{ matrix.distribution.user-id\
+      \ }}\" distribution on ${{ matrix.environment }}"
+    needs: "build"
+    runs-on: "${{ matrix.environment }}"
+    steps:
+    - name: "Restore built artifacts from cache"
+      uses: "actions/cache@v2"
+      with:
+        "path": "action.yml\nbuild/distributions/\n"
+        "key": "${{ github.run_id }}"
+    - id: "execute_action1"
+      name: "Execute action"
+      uses: "./"
+      with:
+        "distribution": "${{ matrix.distribution.user-id }}"
+        "wsl-conf": "[automount]\noptions = uid=1000\n"
+    - if: "always() && (matrix.distribution.user-id == 'Alpine') && (steps.execute_action1.outcome\
+        \ == 'success')"
+      name: "Delete wsl-bash"
+      run: "DEL /F \"${{ steps.execute_action1.outputs.wsl-shell-wrapper-path }}\""
+      shell: "cmd"
+    - id: "execute_action2"
+      if: "always() && (matrix.distribution.user-id == 'Alpine') && (steps.execute_action1.outcome\
+        \ == 'success')"
+      name: "Install Bash on Alpine"
+      uses: "./"
+      with:
+        "distribution": "${{ matrix.distribution.user-id }}"
+        "additional-packages": "bash"
+    - if: "always() && (steps.execute_action1.outcome == 'success')"
+      name: "Test - /etc/wsl.conf should exist"
+      run: "[ -f /etc/wsl.conf ]\ncat /etc/wsl.conf\n"
+      shell: "wsl-bash {0}"
+    - if: "always() && (steps.execute_action1.outcome == 'success')"
+      name: "Test - /mnt/c should be mounted with uid 1000"
+      run: "ls -alh /mnt\n[[ \"$(stat -c %u /mnt/c)\" == 1000 ]]\n"
+      shell: "wsl-bash {0}"
+    strategy:
+      matrix:
+        "environment":
+        - "windows-2019"
+        - "windows-2022"
+        - "windows-latest"
+        "distribution":
+        - "wsl-id": "Debian"
+          "user-id": "Debian"
+          "match-pattern": "*Debian*"
+          "default-absent-tool": "dos2unix"
+        - "wsl-id": "Alpine"
+          "user-id": "Alpine"
+          "match-pattern": "*Alpine*"
+          "default-absent-tool": "dos2unix"
+        - "wsl-id": "kali-linux"
+          "user-id": "kali-linux"
+          "match-pattern": "*Kali*"
+          "default-absent-tool": "dos2unix"
+        - "wsl-id": "openSUSE-Leap-15.2"
+          "user-id": "openSUSE-Leap-15.2"
+          "match-pattern": "*openSUSE*Leap*15.2*"
+          "default-absent-tool": "which"
+        - "wsl-id": "Ubuntu"
+          "user-id": "Ubuntu-20.04"
+          "match-pattern": "*Ubuntu*20.04*"
+          "default-absent-tool": "dos2unix"
+        - "wsl-id": "Ubuntu-18.04"
+          "user-id": "Ubuntu-18.04"
+          "match-pattern": "*Ubuntu*18.04*"
+          "default-absent-tool": "dos2unix"
+        - "wsl-id": "Ubuntu-16.04"
+          "user-id": "Ubuntu-16.04"
+          "match-pattern": "*Ubuntu*16.04*"
+          "default-absent-tool": "dos2unix"
+      fail-fast: false
+  "test_wsl-conf_on_subsequent_execution":
+    name: "Test /etc/wsl.conf handling on subsequent execution for \"${{ matrix.distribution.user-id\
+      \ }}\" distribution on ${{ matrix.environment }}"
+    needs: "build"
+    runs-on: "${{ matrix.environment }}"
+    steps:
+    - name: "Restore built artifacts from cache"
+      uses: "actions/cache@v2"
+      with:
+        "path": "action.yml\nbuild/distributions/\n"
+        "key": "${{ github.run_id }}"
+    - id: "execute_action1"
+      name: "Execute action"
+      uses: "./"
+      with:
+        "distribution": "${{ matrix.distribution.user-id }}"
+    - if: "always() && (matrix.distribution.user-id == 'Alpine') && (steps.execute_action1.outcome\
+        \ == 'success')"
+      name: "Delete wsl-bash"
+      run: "DEL /F \"${{ steps.execute_action1.outputs.wsl-shell-wrapper-path }}\""
+      shell: "cmd"
+    - id: "execute_action2"
+      if: "always() && (matrix.distribution.user-id == 'Alpine') && (steps.execute_action1.outcome\
+        \ == 'success')"
+      name: "Install Bash on Alpine"
+      uses: "./"
+      with:
+        "distribution": "${{ matrix.distribution.user-id }}"
+        "additional-packages": "bash"
+    - if: "always() && (steps.execute_action1.outcome == 'success')"
+      name: "Test - /etc/wsl.conf should not exist"
+      run: "[ ! -f /etc/wsl.conf ]\n"
+      shell: "wsl-bash {0}"
+    - if: "always() && (steps.execute_action1.outcome == 'success')"
+      name: "Test - C: should be mounted at /mnt/c\n"
+      run: "mount\nmount | grep 'C:.* on /mnt/c'\n"
+      shell: "wsl-bash {0}"
+    - if: "always() && (steps.execute_action1.outcome == 'success')"
+      name: "Test - /mnt/c should be mounted with uid 0"
+      run: "ls -alh /mnt\n[[ \"$(stat -c %u /mnt/c)\" == 0 ]]\n"
+      shell: "wsl-bash {0}"
+    - id: "execute_action3"
+      if: "always() && (steps.execute_action1.outcome == 'success')"
+      name: "Execute action"
+      uses: "./"
+      with:
+        "distribution": "${{ matrix.distribution.user-id }}"
+        "wsl-conf": "[automount]\nroot = /\n"
+    - if: "always() && (steps.execute_action3.outcome == 'success')"
+      name: "Test - /etc/wsl.conf should exist"
+      run: "[ -f /etc/wsl.conf ]\ncat /etc/wsl.conf\n"
+      shell: "wsl-bash {0}"
+    - if: "always() && (steps.execute_action3.outcome == 'success')"
+      name: "Test - C: should be mounted at /c\n"
+      run: "mount\nmount | grep 'C:.* on /c'\n"
+      shell: "wsl-bash {0}"
+    strategy:
+      matrix:
+        "environment":
+        - "windows-2019"
+        - "windows-2022"
+        - "windows-latest"
+        "distribution":
+        - "wsl-id": "Debian"
+          "user-id": "Debian"
+          "match-pattern": "*Debian*"
+          "default-absent-tool": "dos2unix"
+        - "wsl-id": "Alpine"
+          "user-id": "Alpine"
+          "match-pattern": "*Alpine*"
+          "default-absent-tool": "dos2unix"
+        - "wsl-id": "kali-linux"
+          "user-id": "kali-linux"
+          "match-pattern": "*Kali*"
+          "default-absent-tool": "dos2unix"
+        - "wsl-id": "openSUSE-Leap-15.2"
+          "user-id": "openSUSE-Leap-15.2"
+          "match-pattern": "*openSUSE*Leap*15.2*"
+          "default-absent-tool": "which"
+        - "wsl-id": "Ubuntu"
+          "user-id": "Ubuntu-20.04"
+          "match-pattern": "*Ubuntu*20.04*"
+          "default-absent-tool": "dos2unix"
+        - "wsl-id": "Ubuntu-18.04"
+          "user-id": "Ubuntu-18.04"
+          "match-pattern": "*Ubuntu*18.04*"
+          "default-absent-tool": "dos2unix"
+        - "wsl-id": "Ubuntu-16.04"
+          "user-id": "Ubuntu-16.04"
           "match-pattern": "*Ubuntu*16.04*"
           "default-absent-tool": "dos2unix"
       fail-fast: false
   "test_additional_packages":
-    name: "Test additional packages for \"${{ matrix.distribution.id }}\" distribution\
+    name: "Test additional packages for \"${{ matrix.distribution.user-id }}\" distribution\
       \ on ${{ matrix.environment }}"
     needs: "build"
     runs-on: "${{ matrix.environment }}"
@@ -553,7 +728,7 @@ jobs:
       name: "Execute action"
       uses: "./"
       with:
-        "distribution": "${{ matrix.distribution.id }}"
+        "distribution": "${{ matrix.distribution.user-id }}"
         "additional-packages": "${{ matrix.distribution.default-absent-tool }} bash\n"
     - if: "always() && (steps.execute_action.outcome == 'success')"
       name: "Test - ${{ matrix.distribution.default-absent-tool }} should be installed"
@@ -570,31 +745,38 @@ jobs:
         - "windows-2022"
         - "windows-latest"
         "distribution":
-        - "id": "Debian"
+        - "wsl-id": "Debian"
+          "user-id": "Debian"
           "match-pattern": "*Debian*"
           "default-absent-tool": "dos2unix"
-        - "id": "Alpine"
+        - "wsl-id": "Alpine"
+          "user-id": "Alpine"
           "match-pattern": "*Alpine*"
           "default-absent-tool": "dos2unix"
-        - "id": "kali-linux"
+        - "wsl-id": "kali-linux"
+          "user-id": "kali-linux"
           "match-pattern": "*Kali*"
           "default-absent-tool": "dos2unix"
-        - "id": "openSUSE-Leap-15.2"
+        - "wsl-id": "openSUSE-Leap-15.2"
+          "user-id": "openSUSE-Leap-15.2"
           "match-pattern": "*openSUSE*Leap*15.2*"
           "default-absent-tool": "which"
-        - "id": "Ubuntu-20.04"
+        - "wsl-id": "Ubuntu"
+          "user-id": "Ubuntu-20.04"
           "match-pattern": "*Ubuntu*20.04*"
           "default-absent-tool": "dos2unix"
-        - "id": "Ubuntu-18.04"
+        - "wsl-id": "Ubuntu-18.04"
+          "user-id": "Ubuntu-18.04"
           "match-pattern": "*Ubuntu*18.04*"
           "default-absent-tool": "dos2unix"
-        - "id": "Ubuntu-16.04"
+        - "wsl-id": "Ubuntu-16.04"
+          "user-id": "Ubuntu-16.04"
           "match-pattern": "*Ubuntu*16.04*"
           "default-absent-tool": "dos2unix"
       fail-fast: false
   "test_multiple_usage_with_different_distributions":
-    name: "Test multiple usage with different distributions (\"${{ matrix.distributions.distribution1.id\
-      \ }}\" / \"${{ matrix.distributions.distribution2.id }}\" / \"${{ matrix.distributions.distribution3.id\
+    name: "Test multiple usage with different distributions (\"${{ matrix.distributions.distribution1.user-id\
+      \ }}\" / \"${{ matrix.distributions.distribution2.user-id }}\" / \"${{ matrix.distributions.distribution3.user-id\
       \ }}\") on ${{ matrix.environment }}"
     needs: "build"
     runs-on: "${{ matrix.environment }}"
@@ -605,31 +787,32 @@ jobs:
         "path": "action.yml\nbuild/distributions/\n"
         "key": "${{ github.run_id }}"
     - id: "execute_action1"
-      name: "Execute action for ${{ matrix.distributions.distribution1.id }}"
+      name: "Execute action for ${{ matrix.distributions.distribution1.user-id }}"
       uses: "./"
       with:
-        "distribution": "${{ matrix.distributions.distribution1.id }}"
+        "distribution": "${{ matrix.distributions.distribution1.user-id }}"
     - id: "execute_action2"
-      name: "Execute action for ${{ matrix.distributions.distribution2.id }}"
+      name: "Execute action for ${{ matrix.distributions.distribution2.user-id }}"
       uses: "./"
       with:
-        "distribution": "${{ matrix.distributions.distribution2.id }}"
+        "distribution": "${{ matrix.distributions.distribution2.user-id }}"
     - id: "execute_action3"
-      name: "Execute action for ${{ matrix.distributions.distribution3.id }}"
+      name: "Execute action for ${{ matrix.distributions.distribution3.user-id }}"
       uses: "./"
       with:
-        "distribution": "${{ matrix.distributions.distribution3.id }}"
+        "distribution": "${{ matrix.distributions.distribution3.user-id }}"
         "set-as-default": "false"
     - id: "execute_action4"
-      name: "Execute action for ${{ matrix.distributions.distribution1.id }} again"
+      name: "Execute action for ${{ matrix.distributions.distribution1.user-id }}\
+        \ again"
       uses: "./"
       with:
-        "distribution": "${{ matrix.distributions.distribution1.id }}"
+        "distribution": "${{ matrix.distributions.distribution1.user-id }}"
     - if: "always() && (steps.execute_action4.outcome == 'success')"
       name: "Test - the default distribution should be the last installed distribution\
         \ with set-as-default true"
       run: "wslconfig.exe /list\nwslconfig.exe /list | iconv -f UTF-16LE -t UTF-8\n\
-        [[ \"$(wslconfig.exe /list | iconv -f UTF-16LE -t UTF-8)\" == *${{ matrix.distributions.distribution2.id\
+        [[ \"$(wslconfig.exe /list | iconv -f UTF-16LE -t UTF-8)\" == *${{ matrix.distributions.distribution2.wsl-id\
         \ }}\\ \\(Default\\)* ]]\n"
       shell: "wsl-bash {0}"
     - if: "always() && (steps.execute_action4.outcome == 'success')"
@@ -654,80 +837,98 @@ jobs:
         - "windows-latest"
         "distributions":
         - "distribution1":
-            "id": "Debian"
+            "wsl-id": "Debian"
+            "user-id": "Debian"
             "match-pattern": "*Debian*"
             "default-absent-tool": "dos2unix"
           "distribution2":
-            "id": "Ubuntu-20.04"
+            "wsl-id": "Ubuntu"
+            "user-id": "Ubuntu-20.04"
             "match-pattern": "*Ubuntu*20.04*"
             "default-absent-tool": "dos2unix"
           "distribution3":
-            "id": "Ubuntu-18.04"
+            "wsl-id": "Ubuntu-18.04"
+            "user-id": "Ubuntu-18.04"
             "match-pattern": "*Ubuntu*18.04*"
             "default-absent-tool": "dos2unix"
         - "distribution1":
-            "id": "Debian"
+            "wsl-id": "Debian"
+            "user-id": "Debian"
             "match-pattern": "*Debian*"
             "default-absent-tool": "dos2unix"
           "distribution2":
-            "id": "Ubuntu-18.04"
+            "wsl-id": "Ubuntu-18.04"
+            "user-id": "Ubuntu-18.04"
             "match-pattern": "*Ubuntu*18.04*"
             "default-absent-tool": "dos2unix"
           "distribution3":
-            "id": "Ubuntu-20.04"
+            "wsl-id": "Ubuntu"
+            "user-id": "Ubuntu-20.04"
             "match-pattern": "*Ubuntu*20.04*"
             "default-absent-tool": "dos2unix"
         - "distribution1":
-            "id": "Ubuntu-20.04"
+            "wsl-id": "Ubuntu"
+            "user-id": "Ubuntu-20.04"
             "match-pattern": "*Ubuntu*20.04*"
             "default-absent-tool": "dos2unix"
           "distribution2":
-            "id": "Debian"
+            "wsl-id": "Debian"
+            "user-id": "Debian"
             "match-pattern": "*Debian*"
             "default-absent-tool": "dos2unix"
           "distribution3":
-            "id": "Ubuntu-18.04"
+            "wsl-id": "Ubuntu-18.04"
+            "user-id": "Ubuntu-18.04"
             "match-pattern": "*Ubuntu*18.04*"
             "default-absent-tool": "dos2unix"
         - "distribution1":
-            "id": "Ubuntu-20.04"
+            "wsl-id": "Ubuntu"
+            "user-id": "Ubuntu-20.04"
             "match-pattern": "*Ubuntu*20.04*"
             "default-absent-tool": "dos2unix"
           "distribution2":
-            "id": "Ubuntu-18.04"
+            "wsl-id": "Ubuntu-18.04"
+            "user-id": "Ubuntu-18.04"
             "match-pattern": "*Ubuntu*18.04*"
             "default-absent-tool": "dos2unix"
           "distribution3":
-            "id": "Debian"
+            "wsl-id": "Debian"
+            "user-id": "Debian"
             "match-pattern": "*Debian*"
             "default-absent-tool": "dos2unix"
         - "distribution1":
-            "id": "Ubuntu-18.04"
+            "wsl-id": "Ubuntu-18.04"
+            "user-id": "Ubuntu-18.04"
             "match-pattern": "*Ubuntu*18.04*"
             "default-absent-tool": "dos2unix"
           "distribution2":
-            "id": "Debian"
+            "wsl-id": "Debian"
+            "user-id": "Debian"
             "match-pattern": "*Debian*"
             "default-absent-tool": "dos2unix"
           "distribution3":
-            "id": "Ubuntu-20.04"
+            "wsl-id": "Ubuntu"
+            "user-id": "Ubuntu-20.04"
             "match-pattern": "*Ubuntu*20.04*"
             "default-absent-tool": "dos2unix"
         - "distribution1":
-            "id": "Ubuntu-18.04"
+            "wsl-id": "Ubuntu-18.04"
+            "user-id": "Ubuntu-18.04"
             "match-pattern": "*Ubuntu*18.04*"
             "default-absent-tool": "dos2unix"
           "distribution2":
-            "id": "Ubuntu-20.04"
+            "wsl-id": "Ubuntu"
+            "user-id": "Ubuntu-20.04"
             "match-pattern": "*Ubuntu*20.04*"
             "default-absent-tool": "dos2unix"
           "distribution3":
-            "id": "Debian"
+            "wsl-id": "Debian"
+            "user-id": "Debian"
             "match-pattern": "*Debian*"
             "default-absent-tool": "dos2unix"
       fail-fast: false
   "test_multiple_usage_with_same_distribution":
-    name: "Test multiple usage with \"${{ matrix.distribution.id }}\" distribution\
+    name: "Test multiple usage with \"${{ matrix.distribution.user-id }}\" distribution\
       \ on ${{ matrix.environment }}"
     needs: "build"
     runs-on: "${{ matrix.environment }}"
@@ -741,33 +942,33 @@ jobs:
       name: "Execute action"
       uses: "./"
       with:
-        "distribution": "${{ matrix.distribution.id }}"
+        "distribution": "${{ matrix.distribution.user-id }}"
         "additional-packages": "bash"
     - id: "execute_action2"
-      if: "matrix.distribution.id != 'kali-linux'"
+      if: "matrix.distribution.user-id != 'kali-linux'"
       name: "Update distribution"
       uses: "./"
       with:
-        "distribution": "${{ matrix.distribution.id }}"
+        "distribution": "${{ matrix.distribution.user-id }}"
         "update": "true"
     - id: "execute_action3"
       name: "Install default absent tool"
       uses: "./"
       with:
-        "distribution": "${{ matrix.distribution.id }}"
+        "distribution": "${{ matrix.distribution.user-id }}"
         "additional-packages": "${{ matrix.distribution.default-absent-tool }}"
     - if: "always() && (steps.execute_action3.outcome == 'success')"
       name: "Test - ${{ matrix.distribution.default-absent-tool }} should be installed"
       run: "${{ matrix.distribution.default-absent-tool }} --version"
       shell: "wsl-bash {0}"
     - id: "execute_action4"
-      name: "Execute action for ${{ matrix.distribution2.id }}"
+      name: "Execute action for ${{ matrix.distribution2.user-id }}"
       uses: "./"
       with:
-        "distribution": "${{ matrix.distribution2.id }}"
+        "distribution": "${{ matrix.distribution2.user-id }}"
     - if: "always() && (steps.execute_action4.outcome == 'success')"
-      name: "Test - \"${{ matrix.distribution2.id }}\" should be the default distribution\
-        \ after installation"
+      name: "Test - \"${{ matrix.distribution2.user-id }}\" should be the default\
+        \ distribution after installation"
       run: "cat <(lsb_release -a || true) <(uname -a || true) <([ -d /etc ] && find\
         \ /etc -maxdepth 1 -type f \\( -name '*release' -or -name 'issue*' \\) -exec\
         \ cat {} + || true) <([ -d /etc/products.d ] && find /etc/products.d -maxdepth\
@@ -783,10 +984,10 @@ jobs:
       name: "Re-execute action"
       uses: "./"
       with:
-        "distribution": "${{ matrix.distribution.id }}"
+        "distribution": "${{ matrix.distribution.user-id }}"
     - if: "always() && (steps.execute_action5.outcome == 'success')"
-      name: "Test - \"${{ matrix.distribution2.id }}\" should still be the default\
-        \ distribution after re-running for \"${{ matrix.distribution.id }}\""
+      name: "Test - \"${{ matrix.distribution2.user-id }}\" should still be the default\
+        \ distribution after re-running for \"${{ matrix.distribution.user-id }}\""
       run: "cat <(lsb_release -a || true) <(uname -a || true) <([ -d /etc ] && find\
         \ /etc -maxdepth 1 -type f \\( -name '*release' -or -name 'issue*' \\) -exec\
         \ cat {} + || true) <([ -d /etc/products.d ] && find /etc/products.d -maxdepth\
@@ -802,10 +1003,10 @@ jobs:
       name: "Set as default"
       uses: "./"
       with:
-        "distribution": "${{ matrix.distribution.id }}"
+        "distribution": "${{ matrix.distribution.user-id }}"
         "set-as-default": "true"
     - if: "always() && (steps.execute_action6.outcome == 'success')"
-      name: "Test - \"${{ matrix.distribution.id }}\" should be the default distribution\
+      name: "Test - \"${{ matrix.distribution.user-id }}\" should be the default distribution\
         \ after re-running with set-as-default true"
       run: "cat <(lsb_release -a || true) <(uname -a || true) <([ -d /etc ] && find\
         \ /etc -maxdepth 1 -type f \\( -name '*release' -or -name 'issue*' \\) -exec\
@@ -825,85 +1026,105 @@ jobs:
         - "windows-2022"
         - "windows-latest"
         "distribution":
-        - "id": "Debian"
+        - "wsl-id": "Debian"
+          "user-id": "Debian"
           "match-pattern": "*Debian*"
           "default-absent-tool": "dos2unix"
-        - "id": "Alpine"
+        - "wsl-id": "Alpine"
+          "user-id": "Alpine"
           "match-pattern": "*Alpine*"
           "default-absent-tool": "dos2unix"
-        - "id": "kali-linux"
+        - "wsl-id": "kali-linux"
+          "user-id": "kali-linux"
           "match-pattern": "*Kali*"
           "default-absent-tool": "dos2unix"
-        - "id": "openSUSE-Leap-15.2"
+        - "wsl-id": "openSUSE-Leap-15.2"
+          "user-id": "openSUSE-Leap-15.2"
           "match-pattern": "*openSUSE*Leap*15.2*"
           "default-absent-tool": "which"
-        - "id": "Ubuntu-20.04"
+        - "wsl-id": "Ubuntu"
+          "user-id": "Ubuntu-20.04"
           "match-pattern": "*Ubuntu*20.04*"
           "default-absent-tool": "dos2unix"
-        - "id": "Ubuntu-18.04"
+        - "wsl-id": "Ubuntu-18.04"
+          "user-id": "Ubuntu-18.04"
           "match-pattern": "*Ubuntu*18.04*"
           "default-absent-tool": "dos2unix"
-        - "id": "Ubuntu-16.04"
+        - "wsl-id": "Ubuntu-16.04"
+          "user-id": "Ubuntu-16.04"
           "match-pattern": "*Ubuntu*16.04*"
           "default-absent-tool": "dos2unix"
         "distribution2":
-        - "id": "Debian"
+        - "wsl-id": "Debian"
+          "user-id": "Debian"
           "match-pattern": "*Debian*"
           "default-absent-tool": "dos2unix"
         "exclude":
         - "environment": "windows-2019"
           "distribution":
-            "id": "Debian"
+            "wsl-id": "Debian"
+            "user-id": "Debian"
             "match-pattern": "*Debian*"
             "default-absent-tool": "dos2unix"
           "distribution2":
-            "id": "Debian"
+            "wsl-id": "Debian"
+            "user-id": "Debian"
             "match-pattern": "*Debian*"
             "default-absent-tool": "dos2unix"
         - "environment": "windows-2022"
           "distribution":
-            "id": "Debian"
+            "wsl-id": "Debian"
+            "user-id": "Debian"
             "match-pattern": "*Debian*"
             "default-absent-tool": "dos2unix"
           "distribution2":
-            "id": "Debian"
+            "wsl-id": "Debian"
+            "user-id": "Debian"
             "match-pattern": "*Debian*"
             "default-absent-tool": "dos2unix"
         - "environment": "windows-latest"
           "distribution":
-            "id": "Debian"
+            "wsl-id": "Debian"
+            "user-id": "Debian"
             "match-pattern": "*Debian*"
             "default-absent-tool": "dos2unix"
           "distribution2":
-            "id": "Debian"
+            "wsl-id": "Debian"
+            "user-id": "Debian"
             "match-pattern": "*Debian*"
             "default-absent-tool": "dos2unix"
         "include":
         - "environment": "windows-2019"
           "distribution":
-            "id": "Debian"
+            "wsl-id": "Debian"
+            "user-id": "Debian"
             "match-pattern": "*Debian*"
             "default-absent-tool": "dos2unix"
           "distribution2":
-            "id": "Ubuntu-20.04"
+            "wsl-id": "Ubuntu"
+            "user-id": "Ubuntu-20.04"
             "match-pattern": "*Ubuntu*20.04*"
             "default-absent-tool": "dos2unix"
         - "environment": "windows-2022"
           "distribution":
-            "id": "Debian"
+            "wsl-id": "Debian"
+            "user-id": "Debian"
             "match-pattern": "*Debian*"
             "default-absent-tool": "dos2unix"
           "distribution2":
-            "id": "Ubuntu-20.04"
+            "wsl-id": "Ubuntu"
+            "user-id": "Ubuntu-20.04"
             "match-pattern": "*Ubuntu*20.04*"
             "default-absent-tool": "dos2unix"
         - "environment": "windows-latest"
           "distribution":
-            "id": "Debian"
+            "wsl-id": "Debian"
+            "user-id": "Debian"
             "match-pattern": "*Debian*"
             "default-absent-tool": "dos2unix"
           "distribution2":
-            "id": "Ubuntu-20.04"
+            "wsl-id": "Ubuntu"
+            "user-id": "Ubuntu-20.04"
             "match-pattern": "*Ubuntu*20.04*"
             "default-absent-tool": "dos2unix"
       fail-fast: false
@@ -918,49 +1139,49 @@ jobs:
         "path": "action.yml\nbuild/distributions/\n"
         "key": "${{ github.run_id }}"
     - id: "execute_action1"
-      name: "Execute action for ${{ matrix.distributions.distribution1.id }}"
+      name: "Execute action for ${{ matrix.distributions.distribution1.user-id }}"
       uses: "./"
       with:
-        "distribution": "${{ matrix.distributions.distribution1.id }}"
+        "distribution": "${{ matrix.distributions.distribution1.user-id }}"
     - id: "execute_action2"
-      name: "Execute action for ${{ matrix.distributions.distribution2.id }}"
+      name: "Execute action for ${{ matrix.distributions.distribution2.user-id }}"
       uses: "./"
       with:
-        "distribution": "${{ matrix.distributions.distribution2.id }}"
+        "distribution": "${{ matrix.distributions.distribution2.user-id }}"
         "additional-packages": "bash"
     - id: "execute_action3"
-      name: "Execute action for ${{ matrix.distributions.distribution3.id }}"
+      name: "Execute action for ${{ matrix.distributions.distribution3.user-id }}"
       uses: "./"
       with:
-        "distribution": "${{ matrix.distributions.distribution3.id }}"
+        "distribution": "${{ matrix.distributions.distribution3.user-id }}"
         "set-as-default": "false"
     - id: "execute_action4"
-      name: "Execute action for ${{ matrix.distributions.distribution4.id }}"
+      name: "Execute action for ${{ matrix.distributions.distribution4.user-id }}"
       uses: "./"
       with:
-        "distribution": "${{ matrix.distributions.distribution4.id }}"
+        "distribution": "${{ matrix.distributions.distribution4.user-id }}"
         "set-as-default": "false"
     - id: "execute_action5"
-      name: "Execute action for ${{ matrix.distributions.distribution5.id }}"
+      name: "Execute action for ${{ matrix.distributions.distribution5.user-id }}"
       uses: "./"
       with:
-        "distribution": "${{ matrix.distributions.distribution5.id }}"
+        "distribution": "${{ matrix.distributions.distribution5.user-id }}"
         "set-as-default": "false"
     - id: "execute_action6"
-      name: "Execute action for ${{ matrix.distributions.distribution6.id }}"
+      name: "Execute action for ${{ matrix.distributions.distribution6.user-id }}"
       uses: "./"
       with:
-        "distribution": "${{ matrix.distributions.distribution6.id }}"
+        "distribution": "${{ matrix.distributions.distribution6.user-id }}"
         "set-as-default": "false"
     - id: "execute_action7"
-      name: "Execute action for ${{ matrix.distributions.distribution7.id }}"
+      name: "Execute action for ${{ matrix.distributions.distribution7.user-id }}"
       uses: "./"
       with:
-        "distribution": "${{ matrix.distributions.distribution7.id }}"
+        "distribution": "${{ matrix.distributions.distribution7.user-id }}"
         "set-as-default": "false"
     - if: "always() && (steps.execute_action1.outcome == 'success')"
-      name: "Test - wsl-bash_${{ matrix.distributions.distribution1.id }} should use\
-        \ the correct distribution"
+      name: "Test - wsl-bash_${{ matrix.distributions.distribution1.user-id }} should\
+        \ use the correct distribution"
       run: "cat <(lsb_release -a || true) <(uname -a || true) <([ -d /etc ] && find\
         \ /etc -maxdepth 1 -type f \\( -name '*release' -or -name 'issue*' \\) -exec\
         \ cat {} + || true) <([ -d /etc/products.d ] && find /etc/products.d -maxdepth\
@@ -973,8 +1194,8 @@ jobs:
         \ matrix.distributions.distribution1.match-pattern }} ]]\n"
       shell: "wsl-bash_Debian {0}"
     - if: "always() && (steps.execute_action2.outcome == 'success')"
-      name: "Test - wsl-bash_${{ matrix.distributions.distribution2.id }} should use\
-        \ the correct distribution"
+      name: "Test - wsl-bash_${{ matrix.distributions.distribution2.user-id }} should\
+        \ use the correct distribution"
       run: "cat <(lsb_release -a || true) <(uname -a || true) <([ -d /etc ] && find\
         \ /etc -maxdepth 1 -type f \\( -name '*release' -or -name 'issue*' \\) -exec\
         \ cat {} + || true) <([ -d /etc/products.d ] && find /etc/products.d -maxdepth\
@@ -987,8 +1208,8 @@ jobs:
         \ matrix.distributions.distribution2.match-pattern }} ]]\n"
       shell: "wsl-bash_Alpine {0}"
     - if: "always() && (steps.execute_action3.outcome == 'success')"
-      name: "Test - wsl-bash_${{ matrix.distributions.distribution3.id }} should use\
-        \ the correct distribution"
+      name: "Test - wsl-bash_${{ matrix.distributions.distribution3.user-id }} should\
+        \ use the correct distribution"
       run: "cat <(lsb_release -a || true) <(uname -a || true) <([ -d /etc ] && find\
         \ /etc -maxdepth 1 -type f \\( -name '*release' -or -name 'issue*' \\) -exec\
         \ cat {} + || true) <([ -d /etc/products.d ] && find /etc/products.d -maxdepth\
@@ -1001,8 +1222,8 @@ jobs:
         \ matrix.distributions.distribution3.match-pattern }} ]]\n"
       shell: "wsl-bash_kali-linux {0}"
     - if: "always() && (steps.execute_action4.outcome == 'success')"
-      name: "Test - wsl-bash_${{ matrix.distributions.distribution4.id }} should use\
-        \ the correct distribution"
+      name: "Test - wsl-bash_${{ matrix.distributions.distribution4.user-id }} should\
+        \ use the correct distribution"
       run: "cat <(lsb_release -a || true) <(uname -a || true) <([ -d /etc ] && find\
         \ /etc -maxdepth 1 -type f \\( -name '*release' -or -name 'issue*' \\) -exec\
         \ cat {} + || true) <([ -d /etc/products.d ] && find /etc/products.d -maxdepth\
@@ -1015,8 +1236,8 @@ jobs:
         \ matrix.distributions.distribution4.match-pattern }} ]]\n"
       shell: "wsl-bash_openSUSE-Leap-15.2 {0}"
     - if: "always() && (steps.execute_action5.outcome == 'success')"
-      name: "Test - wsl-bash_${{ matrix.distributions.distribution5.id }} should use\
-        \ the correct distribution"
+      name: "Test - wsl-bash_${{ matrix.distributions.distribution5.user-id }} should\
+        \ use the correct distribution"
       run: "cat <(lsb_release -a || true) <(uname -a || true) <([ -d /etc ] && find\
         \ /etc -maxdepth 1 -type f \\( -name '*release' -or -name 'issue*' \\) -exec\
         \ cat {} + || true) <([ -d /etc/products.d ] && find /etc/products.d -maxdepth\
@@ -1029,8 +1250,8 @@ jobs:
         \ matrix.distributions.distribution5.match-pattern }} ]]\n"
       shell: "wsl-bash_Ubuntu-20.04 {0}"
     - if: "always() && (steps.execute_action6.outcome == 'success')"
-      name: "Test - wsl-bash_${{ matrix.distributions.distribution6.id }} should use\
-        \ the correct distribution"
+      name: "Test - wsl-bash_${{ matrix.distributions.distribution6.user-id }} should\
+        \ use the correct distribution"
       run: "cat <(lsb_release -a || true) <(uname -a || true) <([ -d /etc ] && find\
         \ /etc -maxdepth 1 -type f \\( -name '*release' -or -name 'issue*' \\) -exec\
         \ cat {} + || true) <([ -d /etc/products.d ] && find /etc/products.d -maxdepth\
@@ -1043,8 +1264,8 @@ jobs:
         \ matrix.distributions.distribution6.match-pattern }} ]]\n"
       shell: "wsl-bash_Ubuntu-18.04 {0}"
     - if: "always() && (steps.execute_action7.outcome == 'success')"
-      name: "Test - wsl-bash_${{ matrix.distributions.distribution7.id }} should use\
-        \ the correct distribution"
+      name: "Test - wsl-bash_${{ matrix.distributions.distribution7.user-id }} should\
+        \ use the correct distribution"
       run: "cat <(lsb_release -a || true) <(uname -a || true) <([ -d /etc ] && find\
         \ /etc -maxdepth 1 -type f \\( -name '*release' -or -name 'issue*' \\) -exec\
         \ cat {} + || true) <([ -d /etc/products.d ] && find /etc/products.d -maxdepth\
@@ -1064,31 +1285,38 @@ jobs:
         - "windows-latest"
         "distributions":
         - "distribution1":
-            "id": "Debian"
+            "wsl-id": "Debian"
+            "user-id": "Debian"
             "match-pattern": "*Debian*"
             "default-absent-tool": "dos2unix"
           "distribution2":
-            "id": "Alpine"
+            "wsl-id": "Alpine"
+            "user-id": "Alpine"
             "match-pattern": "*Alpine*"
             "default-absent-tool": "dos2unix"
           "distribution3":
-            "id": "kali-linux"
+            "wsl-id": "kali-linux"
+            "user-id": "kali-linux"
             "match-pattern": "*Kali*"
             "default-absent-tool": "dos2unix"
           "distribution4":
-            "id": "openSUSE-Leap-15.2"
+            "wsl-id": "openSUSE-Leap-15.2"
+            "user-id": "openSUSE-Leap-15.2"
             "match-pattern": "*openSUSE*Leap*15.2*"
             "default-absent-tool": "which"
           "distribution5":
-            "id": "Ubuntu-20.04"
+            "wsl-id": "Ubuntu"
+            "user-id": "Ubuntu-20.04"
             "match-pattern": "*Ubuntu*20.04*"
             "default-absent-tool": "dos2unix"
           "distribution6":
-            "id": "Ubuntu-18.04"
+            "wsl-id": "Ubuntu-18.04"
+            "user-id": "Ubuntu-18.04"
             "match-pattern": "*Ubuntu*18.04*"
             "default-absent-tool": "dos2unix"
           "distribution7":
-            "id": "Ubuntu-16.04"
+            "wsl-id": "Ubuntu-16.04"
+            "user-id": "Ubuntu-16.04"
             "match-pattern": "*Ubuntu*16.04*"
             "default-absent-tool": "dos2unix"
       fail-fast: false

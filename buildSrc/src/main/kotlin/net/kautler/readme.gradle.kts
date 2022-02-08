@@ -44,8 +44,10 @@ val verifyReadme by tasks.registering {
         if (!file(readmeFilePath).exists() || file(readmeChecksumFilePath).readText() != calculateReadmeChecksum()) {
             // do not use hasTask() as this requires realization of the task that maybe is not necessary
             if (gradle.taskGraph.allTasks.any { it.name == "updateReadme" }) {
-                error("The README.md file was tampered with manually, "
-                        + "if you want to overwrite it, add \"-x $name\" to your Gradle call")
+                error(
+                    "The README.md file was tampered with manually, "
+                            + "if you want to overwrite it, add \"-x $name\" to your Gradle call"
+                )
             }
             error("The README.md file was tampered with manually")
         }
@@ -80,13 +82,13 @@ tasks.register("updateReadme") {
 
 fun calculateReadmeChecksum() = MessageDigest.getInstance("SHA-256").let { sha256 ->
     sha256.digest(
-            file("README.md")
-                    .readLines()
-                    .joinToString("\n")
-                    .toByteArray()
+        file("README.md")
+            .readLines()
+            .joinToString("\n")
+            .toByteArray()
     ).let {
         BigInteger(1, it)
-                .toString(16)
-                .padStart(sha256.digestLength * 2, '0')
+            .toString(16)
+            .padStart(sha256.digestLength * 2, '0')
     }
 }

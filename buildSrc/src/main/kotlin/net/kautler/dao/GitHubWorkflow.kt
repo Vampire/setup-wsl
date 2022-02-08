@@ -42,12 +42,12 @@ import kotlin.reflect.full.memberProperties
 
 @Serializable
 data class GitHubWorkflow(
-        val name: String? = null,
-        @Serializable(with = OnMapSerializer::class)
-        val on: Map<String, OnDetails?>,
-        val env: Map<String, String>? = null,
-        val defaults: Defaults? = null,
-        val jobs: MutableMap<String, Job>
+    val name: String? = null,
+    @Serializable(with = OnMapSerializer::class)
+    val on: Map<String, OnDetails?>,
+    val env: Map<String, String>? = null,
+    val defaults: Defaults? = null,
+    val jobs: MutableMap<String, Job>
 ) {
     sealed class OnDetails {
         interface OnTypedEventDetails {
@@ -63,44 +63,44 @@ data class GitHubWorkflow(
 
         @Serializable
         data class OnEventDetails(
-                override val types: List<String>? = null
+            override val types: List<String>? = null
         ) : OnDetails(), OnTypedEventDetails
 
         @Serializable
         data class OnPushOrPullRequestEventDetails(
-                override val types: List<String>? = null,
-                override val branches: List<String>? = null,
-                override val branchesIgnore: List<String>? = null,
-                val tags: List<String>? = null,
-                @SerialName("tags-ignore")
-                val tagsIgnore: List<String>? = null,
-                val paths: List<String>? = null,
-                @SerialName("paths-ignore")
-                val pathsIgnore: List<String>? = null
+            override val types: List<String>? = null,
+            override val branches: List<String>? = null,
+            override val branchesIgnore: List<String>? = null,
+            val tags: List<String>? = null,
+            @SerialName("tags-ignore")
+            val tagsIgnore: List<String>? = null,
+            val paths: List<String>? = null,
+            @SerialName("paths-ignore")
+            val pathsIgnore: List<String>? = null
         ) : OnDetails(), OnTypedEventDetails, OnBranchEventDetails
 
         @Serializable
         data class OnWorkflowRunEventDetails(
-                override val types: List<String>? = null,
-                val workflows: List<String>? = null,
-                override val branches: List<String>? = null,
-                override val branchesIgnore: List<String>? = null
+            override val types: List<String>? = null,
+            val workflows: List<String>? = null,
+            override val branches: List<String>? = null,
+            override val branchesIgnore: List<String>? = null
         ) : OnDetails(), OnTypedEventDetails, OnBranchEventDetails
 
         @Serializable
         data class OnScheduleDetails(
-                val schedules: List<Schedule>
+            val schedules: List<Schedule>
         ) : OnDetails()
 
         @Serializable
         data class Schedule(
-                val cron: String
+            val cron: String
         )
 
         @Serializer(forClass = OnDetails::class)
         companion object : KSerializer<OnDetails?> {
             override val descriptor =
-                    SerialDescriptor("net.kautler.dao.GitHubWorkflow.OnDetails", CONTEXTUAL)
+                SerialDescriptor("net.kautler.dao.GitHubWorkflow.OnDetails", CONTEXTUAL)
 
             override fun deserialize(decoder: Decoder): OnDetails? {
                 check(decoder is YamlInput) { "This class can only be loaded using kaml" }
@@ -138,11 +138,11 @@ data class GitHubWorkflow(
 
         @Serializer(forClass = Map::class)
         class OnMapSerializer(
-                private val keySerializer: KSerializer<String>,
-                private val valueSerializer: KSerializer<OnDetails?>
+            private val keySerializer: KSerializer<String>,
+            private val valueSerializer: KSerializer<OnDetails?>
         ) : KSerializer<Map<String, OnDetails?>> {
             override val descriptor =
-                    SerialDescriptor("net.kautler.dao.GitHubWorkflow.on", CONTEXTUAL)
+                SerialDescriptor("net.kautler.dao.GitHubWorkflow.on", CONTEXTUAL)
 
             override fun deserialize(decoder: Decoder): Map<String, OnDetails?> {
                 check(decoder is YamlInput) { "This class can only be loaded using kaml" }
@@ -160,8 +160,8 @@ data class GitHubWorkflow(
                         check(onValueNode.items.all { it is YamlScalar }) { "Invalid on value list content" }
                         this as YamlInput
                         decodeSerializableValue(String.serializer().list)
-                                .map { it to null }
-                                .toMap()
+                            .map { it to null }
+                            .toMap()
                     }
 
                     is YamlMap -> decoder.decodeSerializableValue(MapSerializer(keySerializer, valueSerializer))
@@ -186,43 +186,43 @@ data class GitHubWorkflow(
 
     @Serializable
     data class Defaults(
-            val run: RunDefaults? = null
+        val run: RunDefaults? = null
     )
 
     @Serializable
     data class RunDefaults(
-            val shell: String? = null,
-            @SerialName("working-directory")
-            val workingDirectory: String? = null
+        val shell: String? = null,
+        @SerialName("working-directory")
+        val workingDirectory: String? = null
     )
 
     @Serializable
     data class Job(
-            val name: String? = null,
-            @Serializable(with = NeedsSerializer::class)
-            val needs: List<String>? = null,
-            @Serializable(with = RunsOnSerializer::class)
-            @SerialName("runs-on")
-            val runsOn: List<String>,
-            val outputs: Map<String, String>? = null,
-            val env: Map<String, String>? = null,
-            val defaults: Defaults? = null,
-            @SerialName("if")
-            val ifCondition: String? = null,
-            val steps: List<Step>,
-            @SerialName("timeout-minutes")
-            val timeoutMinutes: Long? = null,
-            val strategy: Strategy? = null,
-            @SerialName("continue-on-error")
-            val continueOnError: Boolean? = null,
-            @Serializable(with = ContainerSerializer::class)
-            val container: Container? = null,
-            val services: Map<String, Container>? = null
+        val name: String? = null,
+        @Serializable(with = NeedsSerializer::class)
+        val needs: List<String>? = null,
+        @Serializable(with = RunsOnSerializer::class)
+        @SerialName("runs-on")
+        val runsOn: List<String>,
+        val outputs: Map<String, String>? = null,
+        val env: Map<String, String>? = null,
+        val defaults: Defaults? = null,
+        @SerialName("if")
+        val ifCondition: String? = null,
+        val steps: List<Step>,
+        @SerialName("timeout-minutes")
+        val timeoutMinutes: Long? = null,
+        val strategy: Strategy? = null,
+        @SerialName("continue-on-error")
+        val continueOnError: Boolean? = null,
+        @Serializable(with = ContainerSerializer::class)
+        val container: Container? = null,
+        val services: Map<String, Container>? = null
     ) {
         @Serializer(forClass = List::class)
         class NeedsSerializer(private val elementSerializer: KSerializer<String>) : KSerializer<List<String>> {
             override val descriptor =
-                    SerialDescriptor("net.kautler.dao.GitHubWorkflow.Job.needs", CONTEXTUAL)
+                SerialDescriptor("net.kautler.dao.GitHubWorkflow.Job.needs", CONTEXTUAL)
 
             override fun deserialize(decoder: Decoder): List<String> {
                 check(decoder is YamlInput) { "This class can only be loaded using kaml" }
@@ -258,7 +258,7 @@ data class GitHubWorkflow(
         @Serializer(forClass = List::class)
         class RunsOnSerializer(private val elementSerializer: KSerializer<String>) : KSerializer<List<String>> {
             override val descriptor =
-                    SerialDescriptor("net.kautler.dao.GitHubWorkflow.Job.runsOn", CONTEXTUAL)
+                SerialDescriptor("net.kautler.dao.GitHubWorkflow.Job.runsOn", CONTEXTUAL)
 
             override fun deserialize(decoder: Decoder): List<String> {
                 check(decoder is YamlInput) { "This class can only be loaded using kaml" }
@@ -294,7 +294,7 @@ data class GitHubWorkflow(
         @Serializer(forClass = Container::class)
         object ContainerSerializer : KSerializer<Container> {
             override val descriptor =
-                    SerialDescriptor("net.kautler.dao.GitHubWorkflow.Job.container", CONTEXTUAL)
+                SerialDescriptor("net.kautler.dao.GitHubWorkflow.Job.container", CONTEXTUAL)
 
             override fun deserialize(decoder: Decoder): Container {
                 check(decoder is YamlInput) { "This class can only be loaded using kaml" }
@@ -326,44 +326,44 @@ data class GitHubWorkflow(
 
     @Serializable
     data class Step(
-            val id: String? = null,
-            @SerialName("if")
-            val ifCondition: String? = null,
-            val name: String? = null,
-            val uses: String? = null,
-            val run: String? = null,
-            val shell: String? = null,
-            @SerialName("working-directory")
-            val workingDirectory: String? = null,
-            val with: Map<String, String>? = null,
-            val env: Map<String, String>? = null,
-            @SerialName("continue-on-error")
-            val continueOnError: Boolean? = null,
-            @SerialName("timeout-minutes")
-            val timeoutMinutes: Long? = null
+        val id: String? = null,
+        @SerialName("if")
+        val ifCondition: String? = null,
+        val name: String? = null,
+        val uses: String? = null,
+        val run: String? = null,
+        val shell: String? = null,
+        @SerialName("working-directory")
+        val workingDirectory: String? = null,
+        val with: Map<String, String>? = null,
+        val env: Map<String, String>? = null,
+        @SerialName("continue-on-error")
+        val continueOnError: Boolean? = null,
+        @SerialName("timeout-minutes")
+        val timeoutMinutes: Long? = null
     )
 
     @Serializable
     data class Strategy(
-            val matrix: Map<String, MatrixValue>? = null,
-            @SerialName("fail-fast")
-            val failFast: Boolean? = null,
-            @SerialName("max-parallel")
-            val maxParallel: Long? = null
+        val matrix: Map<String, MatrixValue>? = null,
+        @SerialName("fail-fast")
+        val failFast: Boolean? = null,
+        @SerialName("max-parallel")
+        val maxParallel: Long? = null
     ) {
         sealed class MatrixValue {
             class MatrixVariable(
-                    val value: List<MatrixLeaf>
+                val value: List<MatrixLeaf>
             ) : MatrixValue()
 
             class MatrixIncludeOrExclude(
-                    val value: List<Map<String, MatrixLeaf>>
+                val value: List<Map<String, MatrixLeaf>>
             ) : MatrixValue()
 
             @Serializer(forClass = MatrixValue::class)
             companion object : KSerializer<MatrixValue> {
                 override val descriptor =
-                        SerialDescriptor("net.kautler.dao.GitHubWorkflow.MatrixValue", CONTEXTUAL)
+                    SerialDescriptor("net.kautler.dao.GitHubWorkflow.MatrixValue", CONTEXTUAL)
 
                 override fun deserialize(decoder: Decoder): MatrixValue {
                     check(decoder is YamlInput) { "This class can only be loaded using kaml" }
@@ -374,8 +374,10 @@ data class GitHubWorkflow(
                     return decoder.decodeStructure(descriptor) {
                         this as YamlInput
                         when (context.getKey(node)) {
-                            "include", "exclude" -> MatrixIncludeOrExclude(decodeSerializableValue(
-                                    MapSerializer(String.serializer(), MatrixLeaf).list)
+                            "include", "exclude" -> MatrixIncludeOrExclude(
+                                decodeSerializableValue(
+                                    MapSerializer(String.serializer(), MatrixLeaf).list
+                                )
                             )
                             else -> MatrixVariable(decodeSerializableValue(MatrixLeaf.list))
                         }
@@ -385,13 +387,13 @@ data class GitHubWorkflow(
                 override fun serialize(encoder: Encoder, value: MatrixValue) {
                     when (value) {
                         is MatrixVariable -> encoder.encodeSerializableValue(
-                                MatrixLeaf.list,
-                                value.value
+                            MatrixLeaf.list,
+                            value.value
                         )
 
                         is MatrixIncludeOrExclude -> encoder.encodeSerializableValue(
-                                MapSerializer(String.serializer(), MatrixLeaf).list,
-                                value.value
+                            MapSerializer(String.serializer(), MatrixLeaf).list,
+                            value.value
                         )
                     }
                 }
@@ -400,17 +402,17 @@ data class GitHubWorkflow(
 
         sealed class MatrixLeaf {
             class MatrixMapLeaf(
-                    val value: Map<String, MatrixLeaf?>
+                val value: Map<String, MatrixLeaf?>
             ) : MatrixLeaf()
 
             class MatrixStringLeaf(
-                    val value: String
+                val value: String
             ) : MatrixLeaf()
 
             @Serializer(forClass = MatrixLeaf::class)
             companion object : KSerializer<MatrixLeaf> {
                 override val descriptor =
-                        SerialDescriptor("net.kautler.dao.GitHubWorkflow.MatrixValue", CONTEXTUAL)
+                    SerialDescriptor("net.kautler.dao.GitHubWorkflow.MatrixValue", CONTEXTUAL)
 
                 override fun deserialize(decoder: Decoder): MatrixLeaf {
                     check(decoder is YamlInput) { "This class can only be loaded using kaml" }
@@ -423,9 +425,11 @@ data class GitHubWorkflow(
                                 MatrixStringLeaf(decodeString())
                             }
 
-                            is YamlMap -> MatrixMapLeaf(decodeSerializableValue(
+                            is YamlMap -> MatrixMapLeaf(
+                                decodeSerializableValue(
                                     MapSerializer(String.serializer(), MatrixLeaf.nullable)
-                            ))
+                                )
+                            )
 
                             else -> error("Unexpected type for context node: ${node::class}")
                         }
@@ -435,13 +439,13 @@ data class GitHubWorkflow(
                 override fun serialize(encoder: Encoder, value: MatrixLeaf) {
                     when (value) {
                         is MatrixMapLeaf -> encoder.encodeSerializableValue(
-                                MapSerializer(String.serializer(), MatrixLeaf.nullable),
-                                value.value
+                            MapSerializer(String.serializer(), MatrixLeaf.nullable),
+                            value.value
                         )
 
                         is MatrixStringLeaf -> encoder.encodeSerializableValue(
-                                String.serializer(),
-                                value.value
+                            String.serializer(),
+                            value.value
                         )
                     }
                 }
@@ -451,10 +455,10 @@ data class GitHubWorkflow(
 
     @Serializable
     data class Container(
-            val image: String,
-            val env: Map<String, String>? = null,
-            val ports: List<String>? = null,
-            val volumes: List<String>? = null,
-            val options: String? = null
+        val image: String,
+        val env: Map<String, String>? = null,
+        val ports: List<String>? = null,
+        val volumes: List<String>? = null,
+        val options: String? = null
     )
 }

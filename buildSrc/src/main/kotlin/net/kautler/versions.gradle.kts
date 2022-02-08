@@ -45,14 +45,14 @@ val validateGradleWrapperJar by tasks.registering {
 
         val sha256 = MessageDigest.getInstance("SHA-256")
         layout
-                .projectDirectory
-                .dir("gradle")
-                .dir("wrapper")
-                .file("gradle-wrapper.jar")
-                .asFile
-                .inputStream()
-                .let { DigestInputStream(it, sha256) }
-                .use { it.copyTo(NullOutputStream()) }
+            .projectDirectory
+            .dir("gradle")
+            .dir("wrapper")
+            .file("gradle-wrapper.jar")
+            .asFile
+            .inputStream()
+            .let { DigestInputStream(it, sha256) }
+            .use { it.copyTo(NullOutputStream()) }
         val actualDigest = sha256.digest().let {
             "%02x".repeat(it.size).format(*it.toTypedArray())
         }
@@ -77,8 +77,9 @@ tasks.dependencyUpdates {
     checkConstraints = true
 
     rejectVersionIf {
-        val preliminaryReleaseRegex = Regex("""(?i)[.-](?:${
-            listOf(
+        val preliminaryReleaseRegex = Regex(
+            """(?i)[.-](?:${
+                listOf(
                     "alpha",
                     "beta",
                     "dev",
@@ -91,8 +92,9 @@ tasks.dependencyUpdates {
                     "pre",
                     "b",
                     "ea"
-            ).joinToString("|")
-        })[.\d-]*""")
+                ).joinToString("|")
+            })[.\d-]*"""
+        )
         preliminaryReleaseRegex.containsMatchIn(candidate.version)
                 && !preliminaryReleaseRegex.containsMatchIn(currentVersion)
     }
@@ -128,7 +130,7 @@ tasks.dependencyUpdates {
         updateCounts()
 
         PlainTextReporter(project, revisionLevel(), gradleReleaseChannelLevel())
-                .write(System.out, this)
+            .write(System.out, this)
 
         if (ignored.isNotEmpty()) {
             println("\nThe following dependencies have later ${revisionLevel()} versions but were ignored:")
