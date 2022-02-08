@@ -31,6 +31,7 @@ Table of Contents
   * [Inputs](#inputs)
     * [distribution](#distribution)
     * [use-cache](#use-cache)
+    * [wsl-conf](#wsl-conf)
     * [set-as-default](#set-as-default)
     * [update](#update)
     * [additional-packages](#additional-packages)
@@ -171,6 +172,24 @@ _**Example:**_
 - uses: Vampire/setup-wsl@v1
   with:
       use-cache: 'false'
+```
+
+#### wsl-conf
+
+The content that will be written to /etc/wsl.conf of the installed distribution.
+This can be used to adjust various settings as documented at
+https://docs.microsoft.com/en-us/windows/wsl/wsl-config#configuration-settings-for-wslconf.
+This can also be used if the distribution is installed already.
+
+**Default value:** none
+
+_**Example:**_
+```yaml
+- uses: Vampire/setup-wsl@v1
+  with:
+      wsl-conf: |
+          [automount]
+          root = /
 ```
 
 #### set-as-default
