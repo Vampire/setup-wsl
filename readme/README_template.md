@@ -370,9 +370,9 @@ limitations under the License.
 
 
 [Version Badge]:
-    https://shields.javacord.org/github/v/release/Vampire/setup-wsl.svg?sort=semver&label=Version
+    https://shields.io/github/v/release/Vampire/setup-wsl.svg?sort=semver&label=Version
 [License Badge]:
-    https://shields.javacord.org/github/license/Vampire/setup-wsl.svg?label=License
+    https://shields.io/github/license/Vampire/setup-wsl.svg?label=License
 
 [Latest Release]:
     https://github.com/Vampire/setup-wsl/releases/latest
