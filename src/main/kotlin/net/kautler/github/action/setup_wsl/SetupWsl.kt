@@ -285,6 +285,16 @@ suspend fun verifyWindowsEnvironment() {
 
 suspend fun installDistribution() {
     exec(
+        commandLine = "wsl",
+        args = arrayOf("--set-default-version", "1"),
+        jsObject {
+            // ignore a failure in case WSLv2 is not available
+            // at all and thus `--set-default-version` is not
+            // a valid option for `wsl` at all
+            ignoreReturnCode = true
+        }
+    ).await()
+    exec(
         commandLine = """"${path.join(distributionDirectory(), distribution.installerFile)}"""",
         args = arrayOf("install", "--root"),
         options = jsObject {
