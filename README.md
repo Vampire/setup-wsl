@@ -352,7 +352,7 @@ License
 -------
 
 ```
-Copyright 2020 Björn Kautler
+Copyright 2020-2022 Björn Kautler
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -370,9 +370,9 @@ limitations under the License.
 
 
 [Version Badge]:
-    https://shields.javacord.org/github/v/release/Vampire/setup-wsl.svg?sort=semver&label=Version
+    https://shields.io/github/v/release/Vampire/setup-wsl.svg?sort=semver&label=Version
 [License Badge]:
-    https://shields.javacord.org/github/license/Vampire/setup-wsl.svg?label=License
+    https://shields.io/github/license/Vampire/setup-wsl.svg?label=License
 
 [Latest Release]:
     https://github.com/Vampire/setup-wsl/releases/latest

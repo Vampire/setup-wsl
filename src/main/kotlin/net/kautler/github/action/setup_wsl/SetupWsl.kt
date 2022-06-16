@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 Björn Kautler
+ * Copyright 2020-2022 Björn Kautler
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -284,6 +284,16 @@ suspend fun verifyWindowsEnvironment() {
 }
 
 suspend fun installDistribution() {
+    exec(
+        commandLine = "wsl",
+        args = arrayOf("--set-default-version", "1"),
+        jsObject {
+            // ignore a failure in case WSLv2 is not available
+            // at all and thus `--set-default-version` is not
+            // a valid option for `wsl` at all
+            ignoreReturnCode = true
+        }
+    ).await()
     exec(
         commandLine = """"${path.join(distributionDirectory(), distribution.installerFile)}"""",
         args = arrayOf("install", "--root"),
