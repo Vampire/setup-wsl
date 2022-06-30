@@ -257,7 +257,11 @@ val checkBranchProtectionCompatibility by tasks.registering {
                 .enforceAdmins
                 .isEnabled
         ) {
-            "Please disable branch protection for administrators before triggering a release"
+            """
+                Please disable branch protection for administrators before triggering a release, for example using
+
+                gh api 'repos/{owner}/{repo}/branches/${release.git.requireBranch}/protection/enforce_admins' -X DELETE
+            """.trimIndent()
         }
     }
 }
