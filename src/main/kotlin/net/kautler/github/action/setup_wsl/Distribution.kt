@@ -36,7 +36,8 @@ val distributions = listOf(
     OpenSuseLeap15_2,
     Ubuntu1604,
     Ubuntu1804,
-    Ubuntu2004
+    Ubuntu2004,
+    Ubuntu2204
 ).associateBy { it.userId }
 
 sealed class Distribution(
@@ -209,6 +210,14 @@ abstract class AptGetBasedDistribution : Distribution {
         ).await()
     }
 }
+
+object Ubuntu2204 : AptGetBasedDistribution(
+    wslId = "Ubuntu-22.04",
+    distributionName = "Ubuntu",
+    version = SemVer("22.4.0", jsObject<Options>()),
+    downloadUrl = URL("https://aka.ms/wslubuntu2204"),
+    installerFile = "ubuntu2204.exe"
+)
 
 object Ubuntu2004 : AptGetBasedDistribution(
     wslId = "Ubuntu",

@@ -534,6 +534,10 @@ jobs:
           "user-id": "openSUSE-Leap-15.2"
           "match-pattern": "*openSUSE*Leap*15.2*"
           "default-absent-tool": "which"
+        - "wsl-id": "Ubuntu-22.04"
+          "user-id": "Ubuntu-22.04"
+          "match-pattern": "*Ubuntu*22.04*"
+          "default-absent-tool": "dos2unix"
         - "wsl-id": "Ubuntu"
           "user-id": "Ubuntu-20.04"
           "match-pattern": "*Ubuntu*20.04*"
@@ -608,6 +612,10 @@ jobs:
           "user-id": "openSUSE-Leap-15.2"
           "match-pattern": "*openSUSE*Leap*15.2*"
           "default-absent-tool": "which"
+        - "wsl-id": "Ubuntu-22.04"
+          "user-id": "Ubuntu-22.04"
+          "match-pattern": "*Ubuntu*22.04*"
+          "default-absent-tool": "dos2unix"
         - "wsl-id": "Ubuntu"
           "user-id": "Ubuntu-20.04"
           "match-pattern": "*Ubuntu*20.04*"
@@ -700,6 +708,10 @@ jobs:
           "user-id": "openSUSE-Leap-15.2"
           "match-pattern": "*openSUSE*Leap*15.2*"
           "default-absent-tool": "which"
+        - "wsl-id": "Ubuntu-22.04"
+          "user-id": "Ubuntu-22.04"
+          "match-pattern": "*Ubuntu*22.04*"
+          "default-absent-tool": "dos2unix"
         - "wsl-id": "Ubuntu"
           "user-id": "Ubuntu-20.04"
           "match-pattern": "*Ubuntu*20.04*"
@@ -761,6 +773,10 @@ jobs:
           "user-id": "openSUSE-Leap-15.2"
           "match-pattern": "*openSUSE*Leap*15.2*"
           "default-absent-tool": "which"
+        - "wsl-id": "Ubuntu-22.04"
+          "user-id": "Ubuntu-22.04"
+          "match-pattern": "*Ubuntu*22.04*"
+          "default-absent-tool": "dos2unix"
         - "wsl-id": "Ubuntu"
           "user-id": "Ubuntu-20.04"
           "match-pattern": "*Ubuntu*20.04*"
@@ -1042,6 +1058,10 @@ jobs:
           "user-id": "openSUSE-Leap-15.2"
           "match-pattern": "*openSUSE*Leap*15.2*"
           "default-absent-tool": "which"
+        - "wsl-id": "Ubuntu-22.04"
+          "user-id": "Ubuntu-22.04"
+          "match-pattern": "*Ubuntu*22.04*"
+          "default-absent-tool": "dos2unix"
         - "wsl-id": "Ubuntu"
           "user-id": "Ubuntu-20.04"
           "match-pattern": "*Ubuntu*20.04*"
@@ -1179,6 +1199,12 @@ jobs:
       with:
         "distribution": "${{ matrix.distributions.distribution7.user-id }}"
         "set-as-default": "false"
+    - id: "execute_action8"
+      name: "Execute action for ${{ matrix.distributions.distribution8.user-id }}"
+      uses: "./"
+      with:
+        "distribution": "${{ matrix.distributions.distribution8.user-id }}"
+        "set-as-default": "false"
     - if: "always() && (steps.execute_action1.outcome == 'success')"
       name: "Test - wsl-bash_${{ matrix.distributions.distribution1.user-id }} should\
         \ use the correct distribution"
@@ -1248,7 +1274,7 @@ jobs:
         \ && find /etc/products.d -maxdepth 1 -type f -name '*.prod' -exec cat {}\
         \ + || true) <([ -f /proc/version ] && cat /proc/version || true))\" == ${{\
         \ matrix.distributions.distribution5.match-pattern }} ]]\n"
-      shell: "wsl-bash_Ubuntu-20.04 {0}"
+      shell: "wsl-bash_Ubuntu-22.04 {0}"
     - if: "always() && (steps.execute_action6.outcome == 'success')"
       name: "Test - wsl-bash_${{ matrix.distributions.distribution6.user-id }} should\
         \ use the correct distribution"
@@ -1262,7 +1288,7 @@ jobs:
         \ && find /etc/products.d -maxdepth 1 -type f -name '*.prod' -exec cat {}\
         \ + || true) <([ -f /proc/version ] && cat /proc/version || true))\" == ${{\
         \ matrix.distributions.distribution6.match-pattern }} ]]\n"
-      shell: "wsl-bash_Ubuntu-18.04 {0}"
+      shell: "wsl-bash_Ubuntu-20.04 {0}"
     - if: "always() && (steps.execute_action7.outcome == 'success')"
       name: "Test - wsl-bash_${{ matrix.distributions.distribution7.user-id }} should\
         \ use the correct distribution"
@@ -1276,6 +1302,20 @@ jobs:
         \ && find /etc/products.d -maxdepth 1 -type f -name '*.prod' -exec cat {}\
         \ + || true) <([ -f /proc/version ] && cat /proc/version || true))\" == ${{\
         \ matrix.distributions.distribution7.match-pattern }} ]]\n"
+      shell: "wsl-bash_Ubuntu-18.04 {0}"
+    - if: "always() && (steps.execute_action8.outcome == 'success')"
+      name: "Test - wsl-bash_${{ matrix.distributions.distribution8.user-id }} should\
+        \ use the correct distribution"
+      run: "cat <(lsb_release -a || true) <(uname -a || true) <([ -d /etc ] && find\
+        \ /etc -maxdepth 1 -type f \\( -name '*release' -or -name 'issue*' \\) -exec\
+        \ cat {} + || true) <([ -d /etc/products.d ] && find /etc/products.d -maxdepth\
+        \ 1 -type f -name '*.prod' -exec cat {} + || true) <([ -f /proc/version ]\
+        \ && cat /proc/version || true)\n[[ \"$(cat <(lsb_release -a || true) <(uname\
+        \ -a || true) <([ -d /etc ] && find /etc -maxdepth 1 -type f \\( -name '*release'\
+        \ -or -name 'issue*' \\) -exec cat {} + || true) <([ -d /etc/products.d ]\
+        \ && find /etc/products.d -maxdepth 1 -type f -name '*.prod' -exec cat {}\
+        \ + || true) <([ -f /proc/version ] && cat /proc/version || true))\" == ${{\
+        \ matrix.distributions.distribution8.match-pattern }} ]]\n"
       shell: "wsl-bash_Ubuntu-16.04 {0}"
     strategy:
       matrix:
@@ -1305,16 +1345,21 @@ jobs:
             "match-pattern": "*openSUSE*Leap*15.2*"
             "default-absent-tool": "which"
           "distribution5":
+            "wsl-id": "Ubuntu-22.04"
+            "user-id": "Ubuntu-22.04"
+            "match-pattern": "*Ubuntu*22.04*"
+            "default-absent-tool": "dos2unix"
+          "distribution6":
             "wsl-id": "Ubuntu"
             "user-id": "Ubuntu-20.04"
             "match-pattern": "*Ubuntu*20.04*"
             "default-absent-tool": "dos2unix"
-          "distribution6":
+          "distribution7":
             "wsl-id": "Ubuntu-18.04"
             "user-id": "Ubuntu-18.04"
             "match-pattern": "*Ubuntu*18.04*"
             "default-absent-tool": "dos2unix"
-          "distribution7":
+          "distribution8":
             "wsl-id": "Ubuntu-16.04"
             "user-id": "Ubuntu-16.04"
             "match-pattern": "*Ubuntu*16.04*"
