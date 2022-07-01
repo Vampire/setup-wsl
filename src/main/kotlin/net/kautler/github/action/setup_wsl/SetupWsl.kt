@@ -284,16 +284,39 @@ suspend fun verifyWindowsEnvironment() {
 }
 
 suspend fun installDistribution() {
+    val stdoutBuilder = StringBuilder()
+    val stdoutBuilderUtf16Le = StringBuilder()
+    val stderrBuilder = StringBuilder()
+    val stderrBuilderUtf16Le = StringBuilder()
     exec(
         commandLine = "wsl",
-        args = arrayOf("--set-default-version", "1"),
+        args = arrayOf("--help"),
         jsObject {
-            // ignore a failure in case WSLv2 is not available
-            // at all and thus `--set-default-version` is not
-            // a valid option for `wsl` at all
             ignoreReturnCode = true
+            outStream = NullWritable()
+            errStream = NullWritable()
+            listeners = jsObject {
+                stdout = {
+                    stdoutBuilder.append(it)
+                    stdoutBuilderUtf16Le.append(it.toString("UTF-16LE"))
+                }
+                stderr = {
+                    stderrBuilder.append(it)
+                    stderrBuilderUtf16Le.append(it.toString("UTF-16LE"))
+                }
+            }
         }
     ).await()
+    stdoutBuilder.append(stdoutBuilderUtf16Le)
+    stdoutBuilder.append(stderrBuilder)
+    stdoutBuilder.append(stderrBuilderUtf16Le)
+    if (stdoutBuilder.toString().contains("--set-default-version")) {
+        exec(
+            commandLine = "wsl",
+            args = arrayOf("--set-default-version", "1")
+        ).await()
+    }
+
     exec(
         commandLine = """"${path.join(distributionDirectory(), distribution.installerFile)}"""",
         args = arrayOf("install", "--root"),
