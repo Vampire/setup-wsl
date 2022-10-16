@@ -19,16 +19,7 @@ package net.kautler.github.action.setup_wsl
 import Buffer
 import NodeJS.get
 import NullWritable
-import ReserveCacheError
-import ValidationError
-import addPath
-import cacheDir
-import debug
-import downloadTool
-import endGroup
 import exec
-import extractZip
-import find
 import fs.`T$32`
 import fs.`T$35`
 import fs.`T$45`
@@ -36,9 +27,6 @@ import fs.existsSync
 import fs.mkdtempSync
 import fs.readdirSync
 import fs.writeFileSync
-import getInput
-import info
-import isDebug
 import kotlinext.js.jsObject
 import kotlinx.coroutines.CoroutineStart.LAZY
 import kotlinx.coroutines.GlobalScope
@@ -48,22 +36,34 @@ import kotlinx.coroutines.flow.asFlow
 import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.flow.map
-import mkdirP
 import os.tmpdir
 import path.path
 import process
-import restoreCache
-import saveCache
-import setFailed
-import setOutput
-import startGroup
-import warning
-import which
+import url.URL
+import addPath as coreAddPath
+import cacheDir as toolCacheCacheDir
+import debug as coreDebug
+import downloadTool as toolCacheDownloadTool
+import endGroup as coreEndGroup
+import extractZip as toolCacheExtractZip
+import find as toolCacheFind
+import getBooleanInput as coreGetBooleanInput
+import getInput as coreGetInput
+import isDebug as coreIsDebug
+import isFeatureAvailable as cacheIsFeatureAvailable
+import mkdirP as ioMkdirP
+import restoreCache as cacheRestoreCache
+import saveCache as cacheSaveCache
+import setFailed as coreSetFailed
+import setOutput as coreSetOutput
+import startGroup as coreStartGroup
+import warning as coreWarning
+import which as ioWhich
 
 val distribution by lazy {
-    val distributionId = getInput("distribution", jsObject {
+    val distributionId = coreGetInput("distribution", jsObject {
         required = true
-    }).trim()
+    })
 
     return@lazy requireNotNull(distributions[distributionId]) {
         "'${distributionId}' is not a valid distribution. Valid values: ${
@@ -90,23 +90,36 @@ val installationNeeded = GlobalScope.async(start = LAZY) {
 
 val toolCacheDir = GlobalScope.async(start = LAZY) {
     val fakeDir = mkdtempSync(path.join(tmpdir(), "setup_wsl_fake_dir_"), jsObject<`T$32`>())
-    cacheDir(fakeDir, distribution.distributionName, "${distribution.version}").await()
+    toolCacheCacheDir(fakeDir, distribution.distributionName, "${distribution.version}").await()
 }
 
 val useCache by lazy {
-    val input = getInput("use-cache", jsObject {
+    val input = coreGetInput("use-cache", jsObject {
         required = true
-    }).trim()
+    })
 
-    when (input) {
+    val result = when (input) {
         "true" -> true
         "false" -> false
+        "true | false" -> cacheIsFeatureAvailable()
         else -> error("'$input' is not a valid boolean for 'use-cache'. Valid values: true, false")
     }
+
+    if (result && !cacheIsFeatureAvailable()) {
+        val ghUrl = URL(process.env["GITHUB_SERVER_URL"] ?: "https://github.com", "")
+        if (ghUrl.hostname.toUpperCase() != "GITHUB.COM") {
+            coreWarning("Caching is only supported on GHES version >= 3.5. If you are on version >= 3.5 please check with GHES admin if Actions cache service is enabled or not.");
+        } else {
+            coreWarning("An internal error has occurred in cache backend. Please check https://www.githubstatus.com/ for any ongoing issue in actions.");
+        }
+        return@lazy false
+    }
+
+    return@lazy result
 }
 
 val distributionDirectory = GlobalScope.async(start = LAZY) {
-    var cacheDirectory = find(distribution.distributionName, "${distribution.version}")
+    var cacheDirectory = toolCacheFind(distribution.distributionName, "${distribution.version}")
 
     if (!cacheDirectory.isBlank()) {
         return@async cacheDirectory
@@ -116,61 +129,44 @@ val distributionDirectory = GlobalScope.async(start = LAZY) {
 
     val cacheKey = "2:distributionDirectory_${distribution.distributionName}_${distribution.version}"
 
-    val restoredKey = if (useCache) restoreCache(arrayOf(cacheDirectory), cacheKey).await() else null
+    val restoredKey = if (useCache) cacheRestoreCache(arrayOf(cacheDirectory), cacheKey).await() else null
     if (restoredKey != null) {
         return@async cacheDirectory
     }
 
-    val distributionDownload = downloadTool("${distribution.downloadUrl()}").await()
-    var extractedDistributionDirectory = extractZip(distributionDownload).await()
+    val distributionDownload = toolCacheDownloadTool("${distribution.downloadUrl()}").await()
+    var extractedDistributionDirectory = toolCacheExtractZip(distributionDownload).await()
 
     if (!existsSync(path.join(extractedDistributionDirectory, distribution.installerFile))) {
         extractedDistributionDirectory = readdirSync(extractedDistributionDirectory, jsObject<`T$35`>())
             .asFlow()
             .filter { it.contains("""(?<!_(?:scale-(?:100|125|150|400)|ARM64))\.appx$""".toRegex()) }
-            .map { extractZip(path.join(extractedDistributionDirectory, it)).await() }
+            .map { toolCacheExtractZip(path.join(extractedDistributionDirectory, it)).await() }
             .firstOrNull { existsSync(path.join(it, distribution.installerFile)) }
             ?: error("'${distribution.installerFile}' not found for distribution '${distribution.userId}'")
     }
 
-    cacheDirectory = cacheDir(
+    cacheDirectory = toolCacheCacheDir(
         extractedDistributionDirectory,
         distribution.distributionName,
         "${distribution.version}"
     ).await()
 
     if (useCache) {
-        try {
-            saveCache(arrayOf(cacheDirectory), cacheKey).await()
-        } catch (e: ValidationError) {
-            throw e
-        } catch (e: ReserveCacheError) {
-            info(e.message ?: "$e")
-        } catch (e: Throwable) {
-            val message = e.message
-            if (message == null) {
-                if (e is Error) {
-                    warning(e)
-                } else {
-                    warning(e.stackTraceToString())
-                }
-            } else {
-                warning(message)
-            }
-        }
+        cacheSaveCache(arrayOf(cacheDirectory), cacheKey).await()
     }
 
     return@async cacheDirectory
 }
 
 val wslConf by lazy {
-    getInput("wsl-conf").trim()
+    coreGetInput("wsl-conf")
 }
 
 val setAsDefault = GlobalScope.async(start = LAZY) {
-    val input = getInput("set-as-default", jsObject {
+    val input = coreGetInput("set-as-default", jsObject {
         required = true
-    }).trim()
+    })
 
     when (input) {
         "true" -> true
@@ -181,31 +177,24 @@ val setAsDefault = GlobalScope.async(start = LAZY) {
 }
 
 val update by lazy {
-    val input = getInput("update", jsObject {
+    coreGetBooleanInput("update", jsObject {
         required = true
-    }).trim()
-
-    when (input) {
-        "true" -> true
-        "false" -> false
-        else -> error("'$input' is not a valid boolean for 'update'. Valid values: true, false")
-    }
+    })
 }
 
 val additionalPackages by lazy {
-    getInput("additional-packages")
-        .trim()
+    coreGetInput("additional-packages")
         .split("""\s+""".toRegex())
         .filterNot { it.isBlank() }
         .toTypedArray()
 }
 
 val wslShellUser by lazy {
-    getInput("wsl-shell-user").trim()
+    coreGetInput("wsl-shell-user")
 }
 
 val wslShellCommand by lazy {
-    getInput("wsl-shell-command").trim()
+    coreGetInput("wsl-shell-command")
 }
 
 val wslShellName by lazy {
@@ -257,20 +246,20 @@ suspend fun main() {
             group("Write WSL Shell Wrapper", ::writeWslShellWrapper)
         }
 
-        setOutput("wsl-shell-wrapper-path", wslShellWrapperPath)
-        setOutput("wsl-shell-distribution-wrapper-path", wslShellDistributionWrapperPath)
+        coreSetOutput("wsl-shell-wrapper-path", wslShellWrapperPath)
+        coreSetOutput("wsl-shell-distribution-wrapper-path", wslShellDistributionWrapperPath)
     }.onFailure {
-        debug(it.stackTraceToString())
-        setFailed(it.message ?: "$it")
+        coreDebug(it.stackTraceToString())
+        coreSetFailed(it.message ?: "$it")
     }
 }
 
 suspend fun <T> group(name: String, fn: suspend () -> T): T {
-    startGroup(name)
+    coreStartGroup(name)
     try {
         return fn()
     } finally {
-        endGroup()
+        coreEndGroup()
     }
 }
 
@@ -278,7 +267,7 @@ suspend fun verifyWindowsEnvironment() {
     check(process.platform == "win32") {
         "platform '${process.platform}' is not supported by this action, please verify your 'runs-on' setting"
     }
-    check(which("wslconfig").await().isNotBlank()) {
+    check(ioWhich("wslconfig").await().isNotBlank()) {
         "This Windows environment does not have WSL enabled, please verify your 'runs-on' setting"
     }
 }
@@ -348,7 +337,7 @@ suspend fun setDistributionAsDefault() {
 }
 
 suspend fun writeWslShellWrapper() {
-    mkdirP(wslShellWrapperDirectory).await()
+    ioMkdirP(wslShellWrapperDirectory).await()
 
     val bashMissing = wslShellCommand.isEmpty()
             && (exec(
@@ -396,12 +385,12 @@ suspend fun writeWslShellWrapper() {
     }
 
     val scriptContent = (if (bashMissing) """
-        @ECHO ${if (isDebug()) "ON" else "OFF"}
+        @ECHO ${if (coreIsDebug()) "ON" else "OFF"}
 
         ECHO Bash is not available by default in '${distribution.userId}', please either add it to 'additional-packages' input or configure a different 'wsl-shell-command' >&2
         EXIT /B 1
     """ else """
-        @ECHO ${if (isDebug()) "ON" else "OFF"}
+        @ECHO ${if (coreIsDebug()) "ON" else "OFF"}
 
         SETLOCAL
 
@@ -479,5 +468,5 @@ suspend fun writeWslShellWrapper() {
         )
     }
 
-    addPath(wslShellWrapperDirectory)
+    coreAddPath(wslShellWrapperDirectory)
 }

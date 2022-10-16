@@ -17,11 +17,12 @@
 package net.kautler.github.action.setup_wsl
 
 import HttpClient
-import Options
+import RangeOptions as SemVerRangeOptions
 import SemVer
-import debug
+import debug as coreDebug
 import exec
-import info
+import http.OutgoingHttpHeaders
+import info as coreInfo
 import kotlinext.js.jsObject
 import kotlinx.coroutines.CoroutineStart.LAZY
 import kotlinx.coroutines.GlobalScope
@@ -60,7 +61,7 @@ sealed class Distribution(
                 data = "type=ProductId&url=$productId",
                 additionalHeaders = mapOf(
                     "Content-Type" to "application/x-www-form-urlencoded"
-                ).asIHeaders()
+                ).asOutgoingHttpHeaders()
             ).await()
 
             if (response.message.statusCode != 200) {
@@ -214,7 +215,7 @@ abstract class AptGetBasedDistribution : Distribution {
 object Ubuntu2204 : AptGetBasedDistribution(
     wslId = "Ubuntu-22.04",
     distributionName = "Ubuntu",
-    version = SemVer("22.4.0", jsObject<Options>()),
+    version = SemVer("22.4.0", jsObject<SemVerRangeOptions>()),
     downloadUrl = URL("https://aka.ms/wslubuntu2204"),
     installerFile = "ubuntu2204.exe"
 )
@@ -223,7 +224,7 @@ object Ubuntu2004 : AptGetBasedDistribution(
     wslId = "Ubuntu",
     userId = "Ubuntu-20.04",
     distributionName = "Ubuntu",
-    version = SemVer("20.4.0", jsObject<Options>()),
+    version = SemVer("20.4.0", jsObject<SemVerRangeOptions>()),
     downloadUrl = URL("https://aka.ms/wslubuntu2004"),
     installerFile = "ubuntu.exe"
 )
@@ -231,7 +232,7 @@ object Ubuntu2004 : AptGetBasedDistribution(
 object Ubuntu1804 : AptGetBasedDistribution(
     wslId = "Ubuntu-18.04",
     distributionName = "Ubuntu",
-    version = SemVer("18.4.0", jsObject<Options>()),
+    version = SemVer("18.4.0", jsObject<SemVerRangeOptions>()),
     downloadUrl = URL("https://aka.ms/wsl-ubuntu-1804"),
     installerFile = "ubuntu1804.exe"
 )
@@ -239,7 +240,7 @@ object Ubuntu1804 : AptGetBasedDistribution(
 object Ubuntu1604 : AptGetBasedDistribution(
     wslId = "Ubuntu-16.04",
     distributionName = "Ubuntu",
-    version = SemVer("16.4.0", jsObject<Options>()),
+    version = SemVer("16.4.0", jsObject<SemVerRangeOptions>()),
     downloadUrl = URL("https://aka.ms/wsl-ubuntu-1604"),
     installerFile = "ubuntu1604.exe"
 )
@@ -247,7 +248,7 @@ object Ubuntu1604 : AptGetBasedDistribution(
 object Debian : AptGetBasedDistribution(
     wslId = "Debian",
     distributionName = "Debian",
-    version = SemVer("1.0.0", jsObject<Options>()),
+    version = SemVer("1.0.0", jsObject<SemVerRangeOptions>()),
     downloadUrl = URL("https://aka.ms/wsl-debian-gnulinux"),
     installerFile = "debian.exe"
 )
@@ -255,7 +256,7 @@ object Debian : AptGetBasedDistribution(
 object Kali : AptGetBasedDistribution(
     wslId = "kali-linux",
     distributionName = "Kali",
-    version = SemVer("1.0.0", jsObject<Options>()),
+    version = SemVer("1.0.0", jsObject<SemVerRangeOptions>()),
     productId = "9pkr34tncv07",
     installerFile = "kali.exe"
 )
@@ -341,7 +342,7 @@ abstract class ZypperBasedDistribution : Distribution {
 object OpenSuseLeap15_2 : ZypperBasedDistribution(
     wslId = "openSUSE-Leap-15.2",
     distributionName = "openSUSE Leap",
-    version = SemVer("15.2.0", jsObject<Options>()),
+    version = SemVer("15.2.0", jsObject<SemVerRangeOptions>()),
     productId = "9mzd0n9z4m4h",
     installerFile = "openSUSE-Leap-15.2.exe"
 ) {
@@ -430,7 +431,7 @@ abstract class ApkBasedDistribution : Distribution {
 object Alpine : ApkBasedDistribution(
     wslId = "Alpine",
     distributionName = "Alpine",
-    version = SemVer("1.0.3", jsObject<Options>()),
+    version = SemVer("1.0.3", jsObject<SemVerRangeOptions>()),
     productId = "9p804crf0395",
     installerFile = "Alpine.exe"
 )
@@ -441,8 +442,8 @@ private suspend inline fun <T> retry(amount: Int, crossinline block: suspend () 
             return block()
         }.onFailure {
             if (i != 5) {
-                debug(it.stackTraceToString())
-                info("Failure happened, retrying (${it.message ?: it})")
+                coreDebug(it.stackTraceToString())
+                coreInfo("Failure happened, retrying (${it.message ?: it})")
             }
         }
     }.last().getOrThrow<Nothing>()

@@ -170,7 +170,9 @@ Whether to use the [cache][Caching dependencies to speed up workflows Website] f
 installer. This saves time in subsequent runs, jobs, or workflows but consumes space from the available cache
 space of the repository. Refer to [`actions/cache` documentation][actions/cache Website] for current usage limits.
 
-**Default value:** `'true'`
+**Default value:**
+* `'true'` if the cache feature is available
+* `'false'` if the cache feature is not available, for example because it was disabled on a GitHub Enterprise instance
 
 _**Example:**_
 ```yaml

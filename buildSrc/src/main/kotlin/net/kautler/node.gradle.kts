@@ -203,7 +203,8 @@ tasks.withType(IntegratedDukatTask::class) {
             this,
             "lib.dom.kt" to listOf(
                 """\Qoverride fun addEventListener(type: String, listener: EventListenerObject\E""" to """fun addEventListener(type: String, listener: EventListenerObject""",
-                """\Qoverride fun removeEventListener(type: String, callback: EventListenerObject\E""" to """fun removeEventListener(type: String, callback: EventListenerObject"""
+                """\Qoverride fun removeEventListener(type: String, callback: EventListenerObject\E""" to """fun removeEventListener(type: String, callback: EventListenerObject""",
+                """\Q`T${'$'}16`\E""" to """`T\${'$'}16`<R, T>"""
             ),
             // work-around for https://github.com/Kotlin/dukat/issues/402
             "lib.es2018.asynciterable.module_dukat.kt" to listOf(
@@ -212,7 +213,7 @@ tasks.withType(IntegratedDukatTask::class) {
             ),
             // work-around for https://github.com/Kotlin/dukat/issues/401
             "null-writable.module_null-writable.kt" to listOf(
-                """\Q`T$16`\E""" to """`T\$10`"""
+                """\Q`T$13`\E""" to """`T\$10`"""
             ),
             // work-around for https://github.com/Kotlin/dukat/issues/399
             "tool-cache.module_@actions_tool-cache.kt" to listOf(
@@ -228,9 +229,21 @@ tasks.withType(IntegratedDukatTask::class) {
             "index.module_@actions_http-client.kt" to listOf(
                 """\Qtypealias HttpClientError = Error\E$""" to "external class HttpClientError : Throwable"
             ),
+            "interfaces.module_@actions_http-client.kt" to listOf(
+                """\Qexternal interface HttpClient {\E$""" to "external interface HttpClient2 {"
+            ),
             // work-around for https://github.com/Kotlin/dukat/issues/400
             "semver.module_semver.kt" to listOf(
                 """\Q@JsModule("semver")\E$""" to """@JsModule("semver/classes/semver")"""
+            ),
+            "interfaces.module_@actions_exec.kt" to listOf(
+                """\Qimport buffer.global.Buffer\E$""" to """import Buffer"""
+            ),
+            "lib.es5.kt" to listOf(
+                """\Qval resolve: ((specified: String, parent: URL) -> Promise<String>)?\E$""" to """val resolve2: ((specified: String, parent: URL) -> Promise<String>)?"""
+            ),
+            "lib.es2020.bigint.module_dukat.kt" to listOf(
+                """\Q : RelativeIndexable<Any>\E""" to """"""
             )
         )
     }

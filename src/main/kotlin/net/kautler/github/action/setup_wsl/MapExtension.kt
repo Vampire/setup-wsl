@@ -16,11 +16,11 @@
 
 package net.kautler.github.action.setup_wsl
 
-import IHeaders
+import http.OutgoingHttpHeaders
 import kotlinext.js.jsObject
 import tsstdlib.`T$2`
 
-fun Map<String, Any>.asIHeaders() = asDynamic().unsafeCast<IHeaders>()
+fun Map<String, Any>.asOutgoingHttpHeaders() = asDynamic().unsafeCast<OutgoingHttpHeaders>()
 
 fun Map<String, Any>.`asT$2`() = asDynamic().unsafeCast<`T$2`>()
 
