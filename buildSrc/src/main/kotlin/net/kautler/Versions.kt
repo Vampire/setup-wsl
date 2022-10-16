@@ -21,15 +21,15 @@ import org.jetbrains.kotlin.gradle.targets.js.npm.NpmDependencyExtension
 
 val versions = mapOf(
     // project NPM dependencies
-    "@actions/cache" to "1.0.4",
-    "@actions/core" to "1.2.6",
-    "@actions/exec" to "1.0.4",
-    "@actions/http-client" to "1.0.9",
-    "@actions/io" to "1.0.2",
-    "@actions/tool-cache" to "1.6.1",
-    "@types/semver" to "7.3.4",
+    "@actions/cache" to "3.0.5",
+    "@actions/core" to "1.10.0",
+    "@actions/exec" to "1.1.1",
+    "@actions/http-client" to "2.0.1",
+    "@actions/io" to "1.1.2",
+    "@actions/tool-cache" to "2.0.1",
+    "@types/semver" to "7.3.12",
     "null-writable" to "1.0.5",
-    "semver" to "7.3.2",
+    "semver" to "7.3.8",
 
     // project Java dependencies
     "kotlin-extensions" to "1.0.1-pre.129-kotlin-1.4.20",
