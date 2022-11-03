@@ -108,9 +108,9 @@ val useCache by lazy {
     if (result && !cacheIsFeatureAvailable()) {
         val ghUrl = URL(process.env["GITHUB_SERVER_URL"] ?: "https://github.com", "")
         if (ghUrl.hostname.toUpperCase() != "GITHUB.COM") {
-            coreWarning("Caching is only supported on GHES version >= 3.5. If you are on version >= 3.5 please check with GHES admin if Actions cache service is enabled or not.");
+            coreWarning("Caching is only supported on GHES version >= 3.5. If you are on version >= 3.5 please check with GHES admin if Actions cache service is enabled or not.")
         } else {
-            coreWarning("An internal error has occurred in cache backend. Please check https://www.githubstatus.com/ for any ongoing issue in actions.");
+            coreWarning("An internal error has occurred in cache backend. Please check https://www.githubstatus.com/ for any ongoing issue in actions.")
         }
         return@lazy false
     }
