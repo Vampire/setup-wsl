@@ -74,13 +74,13 @@ val distribution by lazy {
 
 val installationNeeded = GlobalScope.async(start = LAZY) {
     exec(
-        "wsl",
-        arrayOf(
+        commandLine = "wsl",
+        args = arrayOf(
             "--distribution",
             distribution.wslId,
             "true"
         ),
-        jsObject {
+        options = jsObject {
             ignoreReturnCode = true
             outStream = NullWritable()
             errStream = NullWritable()
@@ -280,7 +280,7 @@ suspend fun installDistribution() {
     exec(
         commandLine = "wsl",
         args = arrayOf("--help"),
-        jsObject {
+        options = jsObject {
             ignoreReturnCode = true
             outStream = NullWritable()
             errStream = NullWritable()
@@ -341,37 +341,37 @@ suspend fun writeWslShellWrapper() {
 
     val bashMissing = wslShellCommand.isEmpty()
             && (exec(
-        "wsl",
-        arrayOf(
+        commandLine = "wsl",
+        args = arrayOf(
             "--distribution",
             distribution.wslId,
             "bash",
             "-c",
             "true"
         ),
-        jsObject {
+        options = jsObject {
             ignoreReturnCode = true
         }
     ).await() != 0)
 
     if (wslShellUser.isNotEmpty()) {
         val wslShellUserExists = exec(
-            "wsl",
-            arrayOf(
+            commandLine = "wsl",
+            args = arrayOf(
                 "--distribution",
                 distribution.wslId,
                 "id",
                 "-u",
                 wslShellUser
             ),
-            jsObject {
+            options = jsObject {
                 ignoreReturnCode = true
             }
         ).await() == 0
         if (!wslShellUserExists) {
             exec(
-                "wsl",
-                arrayOf(
+                commandLine = "wsl",
+                args = arrayOf(
                     "--distribution",
                     distribution.wslId,
                     "useradd",
