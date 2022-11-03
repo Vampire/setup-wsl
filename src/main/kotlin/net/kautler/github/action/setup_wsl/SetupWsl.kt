@@ -141,7 +141,9 @@ val distributionDirectory = GlobalScope.async(start = LAZY) {
 
     val restoredKey = if (useCache) cacheRestoreCache(arrayOf(cacheDirectory), cacheKey).await() else null
     if (restoredKey != null) {
-        return@async cacheDirectory
+        if (existsSync(path.join(cacheDirectory, distribution.installerFile))) {
+            return@async cacheDirectory
+        }
     }
 
     val distributionDownload = toolCacheDownloadTool("${distribution.downloadUrl()}").await()
