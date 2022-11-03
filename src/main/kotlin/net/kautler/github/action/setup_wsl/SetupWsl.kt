@@ -72,6 +72,16 @@ val distribution by lazy {
     }
 }
 
+val wslId = GlobalScope.async(start = LAZY) {
+    if (coreIsDebug()) {
+        exec(
+            commandLine = "wslconfig",
+            args = arrayOf("/list")
+        ).await()
+    }
+    distribution.wslId
+}
+
 val installationNeeded = GlobalScope.async(start = LAZY) {
     exec(
         commandLine = "wsl",
@@ -319,20 +329,20 @@ suspend fun createWslConf() {
     exec(
         commandLine = "wsl",
         args = arrayOf(
-            "--distribution", distribution.wslId,
+            "--distribution", wslId(),
             "sh", "-c", "echo '$wslConf' >/etc/wsl.conf"
         )
     ).await()
     exec(
         commandLine = "wslconfig",
-        args = arrayOf("/terminate", distribution.wslId)
+        args = arrayOf("/terminate", wslId())
     ).await()
 }
 
 suspend fun setDistributionAsDefault() {
     exec(
         commandLine = "wslconfig",
-        args = arrayOf("/setdefault", distribution.wslId)
+        args = arrayOf("/setdefault", wslId())
     ).await()
 }
 
@@ -344,7 +354,7 @@ suspend fun writeWslShellWrapper() {
         commandLine = "wsl",
         args = arrayOf(
             "--distribution",
-            distribution.wslId,
+            wslId(),
             "bash",
             "-c",
             "true"
@@ -359,7 +369,7 @@ suspend fun writeWslShellWrapper() {
             commandLine = "wsl",
             args = arrayOf(
                 "--distribution",
-                distribution.wslId,
+                wslId(),
                 "id",
                 "-u",
                 wslShellUser
@@ -373,7 +383,7 @@ suspend fun writeWslShellWrapper() {
                 commandLine = "wsl",
                 args = arrayOf(
                     "--distribution",
-                    distribution.wslId,
+                    wslId(),
                     "useradd",
                     "-m",
                     "-p",
@@ -463,7 +473,7 @@ suspend fun writeWslShellWrapper() {
     if (wslShellCommand.isNotEmpty() || !existsSync(wslShellDistributionWrapperPath)) {
         writeFileSync(
             wslShellDistributionWrapperPath,
-            scriptContent.replace("<wsl distribution parameter>", "--distribution ${distribution.wslId}"),
+            scriptContent.replace("<wsl distribution parameter>", "--distribution ${wslId()}"),
             jsObject<`T$45`>()
         )
     }
