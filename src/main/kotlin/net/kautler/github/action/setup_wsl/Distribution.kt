@@ -213,11 +213,12 @@ abstract class AptGetBasedDistribution : Distribution {
 }
 
 object Ubuntu2204 : AptGetBasedDistribution(
-    wslId = "Ubuntu-22.04",
+    wslId = "Ubuntu",
+    userId = "Ubuntu-22.04",
     distributionName = "Ubuntu",
     version = SemVer("22.4.0", jsObject<SemVerRangeOptions>()),
     downloadUrl = URL("https://aka.ms/wslubuntu2204"),
-    installerFile = "ubuntu2204.exe"
+    installerFile = "ubuntu.exe"
 )
 
 object Ubuntu2004 : AptGetBasedDistribution(
