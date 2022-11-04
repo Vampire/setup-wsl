@@ -699,7 +699,7 @@ jobs:
                       match-pattern: '*openSUSE*Leap*15.2*'
                       default-absent-tool: which
                     - &ubuntu_22_04
-                      wsl-id: Ubuntu-22.04
+                      wsl-id: Ubuntu
                       user-id: Ubuntu-22.04
                       match-pattern: '*Ubuntu*22.04*'
                       default-absent-tool: dos2unix
@@ -1193,13 +1193,6 @@ jobs:
                   distribution: ${{ matrix.distributions.distribution7.user-id }}
                   set-as-default: 'false'
 
-            - <<: *execute_action
-              name: Execute action for ${{ matrix.distributions.distribution8.user-id }}
-              id: execute_action8
-              with:
-                  distribution: ${{ matrix.distributions.distribution8.user-id }}
-                  set-as-default: 'false'
-
             - name: Test - wsl-bash_${{ matrix.distributions.distribution1.user-id }} should use the correct distribution
               if: always()
                   && (steps.execute_action1.outcome == 'success')
@@ -1295,7 +1288,32 @@ jobs:
             - name: Test - wsl-bash_${{ matrix.distributions.distribution5.user-id }} should use the correct distribution
               if: always()
                   && (steps.execute_action5.outcome == 'success')
+                  && (matrix.distributions.distribution5.user-id == 'Ubuntu-22.04')
               shell: wsl-bash_Ubuntu-22.04 {0}
+              run: >
+                  cat
+                  <(lsb_release -a || true)
+                  <(uname -a || true)
+                  <([ -d /etc ] && find /etc -maxdepth 1 -type f \( -name '*release' -or -name 'issue*' \) -exec cat {} + || true)
+                  <([ -d /etc/products.d ] && find /etc/products.d -maxdepth 1 -type f -name '*.prod' -exec cat {} + || true)
+                  <([ -f /proc/version ] && cat /proc/version || true)
+
+                  [[
+                  "$(cat
+                  <(lsb_release -a || true)
+                  <(uname -a || true)
+                  <([ -d /etc ] && find /etc -maxdepth 1 -type f \( -name '*release' -or -name 'issue*' \) -exec cat {} + || true)
+                  <([ -d /etc/products.d ] && find /etc/products.d -maxdepth 1 -type f -name '*.prod' -exec cat {} + || true)
+                  <([ -f /proc/version ] && cat /proc/version || true))"
+                  ==
+                  ${{ matrix.distributions.distribution5.match-pattern }}
+                  ]]
+
+            - name: Test - wsl-bash_${{ matrix.distributions.distribution5.user-id }} should use the correct distribution
+              if: always()
+                  && (steps.execute_action5.outcome == 'success')
+                  && (matrix.distributions.distribution5.user-id == 'Ubuntu-20.04')
+              shell: wsl-bash_Ubuntu-20.04 {0}
               run: >
                   cat
                   <(lsb_release -a || true)
@@ -1318,7 +1336,7 @@ jobs:
             - name: Test - wsl-bash_${{ matrix.distributions.distribution6.user-id }} should use the correct distribution
               if: always()
                   && (steps.execute_action6.outcome == 'success')
-              shell: wsl-bash_Ubuntu-20.04 {0}
+              shell: wsl-bash_Ubuntu-18.04 {0}
               run: >
                   cat
                   <(lsb_release -a || true)
@@ -1341,7 +1359,7 @@ jobs:
             - name: Test - wsl-bash_${{ matrix.distributions.distribution7.user-id }} should use the correct distribution
               if: always()
                   && (steps.execute_action7.outcome == 'success')
-              shell: wsl-bash_Ubuntu-18.04 {0}
+              shell: wsl-bash_Ubuntu-16.04 {0}
               run: >
                   cat
                   <(lsb_release -a || true)
@@ -1361,29 +1379,6 @@ jobs:
                   ${{ matrix.distributions.distribution7.match-pattern }}
                   ]]
 
-            - name: Test - wsl-bash_${{ matrix.distributions.distribution8.user-id }} should use the correct distribution
-              if: always()
-                  && (steps.execute_action8.outcome == 'success')
-              shell: wsl-bash_Ubuntu-16.04 {0}
-              run: >
-                  cat
-                  <(lsb_release -a || true)
-                  <(uname -a || true)
-                  <([ -d /etc ] && find /etc -maxdepth 1 -type f \( -name '*release' -or -name 'issue*' \) -exec cat {} + || true)
-                  <([ -d /etc/products.d ] && find /etc/products.d -maxdepth 1 -type f -name '*.prod' -exec cat {} + || true)
-                  <([ -f /proc/version ] && cat /proc/version || true)
-
-                  [[
-                  "$(cat
-                  <(lsb_release -a || true)
-                  <(uname -a || true)
-                  <([ -d /etc ] && find /etc -maxdepth 1 -type f \( -name '*release' -or -name 'issue*' \) -exec cat {} + || true)
-                  <([ -d /etc/products.d ] && find /etc/products.d -maxdepth 1 -type f -name '*.prod' -exec cat {} + || true)
-                  <([ -f /proc/version ] && cat /proc/version || true))"
-                  ==
-                  ${{ matrix.distributions.distribution8.match-pattern }}
-                  ]]
-
         strategy:
             fail-fast: false
             matrix:
@@ -1393,7 +1388,13 @@ jobs:
                       distribution2: *alpine
                       distribution3: *kali
                       distribution4: *open_suse_leap_15_2
+                      distribution5: *ubuntu_20_04
+                      distribution6: *ubuntu_18_04
+                      distribution7: *ubuntu_16_04
+                    - distribution1: *debian
+                      distribution2: *alpine
+                      distribution3: *kali
+                      distribution4: *open_suse_leap_15_2
                       distribution5: *ubuntu_22_04
-                      distribution6: *ubuntu_20_04
-                      distribution7: *ubuntu_18_04
-                      distribution8: *ubuntu_16_04
+                      distribution6: *ubuntu_18_04
+                      distribution7: *ubuntu_16_04

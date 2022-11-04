@@ -72,15 +72,25 @@ val distribution by lazy {
     }
 }
 
+val wslId = GlobalScope.async(start = LAZY) {
+    if (coreIsDebug()) {
+        exec(
+            commandLine = "wslconfig",
+            args = arrayOf("/list")
+        ).await()
+    }
+    distribution.wslId
+}
+
 val installationNeeded = GlobalScope.async(start = LAZY) {
     exec(
-        "wsl",
-        arrayOf(
+        commandLine = "wsl",
+        args = arrayOf(
             "--distribution",
             distribution.wslId,
             "true"
         ),
-        jsObject {
+        options = jsObject {
             ignoreReturnCode = true
             outStream = NullWritable()
             errStream = NullWritable()
@@ -108,9 +118,9 @@ val useCache by lazy {
     if (result && !cacheIsFeatureAvailable()) {
         val ghUrl = URL(process.env["GITHUB_SERVER_URL"] ?: "https://github.com", "")
         if (ghUrl.hostname.toUpperCase() != "GITHUB.COM") {
-            coreWarning("Caching is only supported on GHES version >= 3.5. If you are on version >= 3.5 please check with GHES admin if Actions cache service is enabled or not.");
+            coreWarning("Caching is only supported on GHES version >= 3.5. If you are on version >= 3.5 please check with GHES admin if Actions cache service is enabled or not.")
         } else {
-            coreWarning("An internal error has occurred in cache backend. Please check https://www.githubstatus.com/ for any ongoing issue in actions.");
+            coreWarning("An internal error has occurred in cache backend. Please check https://www.githubstatus.com/ for any ongoing issue in actions.")
         }
         return@lazy false
     }
@@ -131,7 +141,9 @@ val distributionDirectory = GlobalScope.async(start = LAZY) {
 
     val restoredKey = if (useCache) cacheRestoreCache(arrayOf(cacheDirectory), cacheKey).await() else null
     if (restoredKey != null) {
-        return@async cacheDirectory
+        if (existsSync(path.join(cacheDirectory, distribution.installerFile))) {
+            return@async cacheDirectory
+        }
     }
 
     val distributionDownload = toolCacheDownloadTool("${distribution.downloadUrl()}").await()
@@ -280,7 +292,7 @@ suspend fun installDistribution() {
     exec(
         commandLine = "wsl",
         args = arrayOf("--help"),
-        jsObject {
+        options = jsObject {
             ignoreReturnCode = true
             outStream = NullWritable()
             errStream = NullWritable()
@@ -319,20 +331,20 @@ suspend fun createWslConf() {
     exec(
         commandLine = "wsl",
         args = arrayOf(
-            "--distribution", distribution.wslId,
+            "--distribution", wslId(),
             "sh", "-c", "echo '$wslConf' >/etc/wsl.conf"
         )
     ).await()
     exec(
         commandLine = "wslconfig",
-        args = arrayOf("/terminate", distribution.wslId)
+        args = arrayOf("/terminate", wslId())
     ).await()
 }
 
 suspend fun setDistributionAsDefault() {
     exec(
         commandLine = "wslconfig",
-        args = arrayOf("/setdefault", distribution.wslId)
+        args = arrayOf("/setdefault", wslId())
     ).await()
 }
 
@@ -341,39 +353,39 @@ suspend fun writeWslShellWrapper() {
 
     val bashMissing = wslShellCommand.isEmpty()
             && (exec(
-        "wsl",
-        arrayOf(
+        commandLine = "wsl",
+        args = arrayOf(
             "--distribution",
-            distribution.wslId,
+            wslId(),
             "bash",
             "-c",
             "true"
         ),
-        jsObject {
+        options = jsObject {
             ignoreReturnCode = true
         }
     ).await() != 0)
 
     if (wslShellUser.isNotEmpty()) {
         val wslShellUserExists = exec(
-            "wsl",
-            arrayOf(
+            commandLine = "wsl",
+            args = arrayOf(
                 "--distribution",
-                distribution.wslId,
+                wslId(),
                 "id",
                 "-u",
                 wslShellUser
             ),
-            jsObject {
+            options = jsObject {
                 ignoreReturnCode = true
             }
         ).await() == 0
         if (!wslShellUserExists) {
             exec(
-                "wsl",
-                arrayOf(
+                commandLine = "wsl",
+                args = arrayOf(
                     "--distribution",
-                    distribution.wslId,
+                    wslId(),
                     "useradd",
                     "-m",
                     "-p",
@@ -463,7 +475,7 @@ suspend fun writeWslShellWrapper() {
     if (wslShellCommand.isNotEmpty() || !existsSync(wslShellDistributionWrapperPath)) {
         writeFileSync(
             wslShellDistributionWrapperPath,
-            scriptContent.replace("<wsl distribution parameter>", "--distribution ${distribution.wslId}"),
+            scriptContent.replace("<wsl distribution parameter>", "--distribution ${wslId()}"),
             jsObject<`T$45`>()
         )
     }

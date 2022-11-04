@@ -147,6 +147,10 @@ The first installed WSL distribution is automatically the default one, independe
 
 Either way, the wsl-shell wrapper scripts are created or overwritten according to the current action configuration.
 
+`Ubuntu-22.04` and `Ubuntu-20.04` can not be used together at the same time. They use the same WSL distribution ID,
+so the second that is used will not be installed as the first one will be found as already installed by
+WSL distribution ID.
+
 The values currently supported by this action are:
 * `Debian` **(default)**
 * `Alpine`

@@ -153,14 +153,14 @@ abstract class AptGetBasedDistribution : Distribution {
 
     private suspend fun refresh() {
         exec(
-            "wsl",
-            arrayOf(
+            commandLine = "wsl",
+            args = arrayOf(
                 "--distribution",
                 wslId,
                 "apt-get",
                 "update"
             ),
-            jsObject {
+            options = jsObject {
                 env = mapOf(
                     "DEBIAN_FRONTEND" to "noninteractive",
                     "WSLENV" to "DEBIAN_FRONTEND/u"
@@ -172,15 +172,15 @@ abstract class AptGetBasedDistribution : Distribution {
     override suspend fun update() {
         refresh()
         exec(
-            "wsl",
-            arrayOf(
+            commandLine = "wsl",
+            args = arrayOf(
                 "--distribution",
                 wslId,
                 "apt-get",
                 "upgrade",
                 "--yes"
             ),
-            jsObject {
+            options = jsObject {
                 env = mapOf(
                     "DEBIAN_FRONTEND" to "noninteractive",
                     "WSLENV" to "DEBIAN_FRONTEND/u"
@@ -192,8 +192,8 @@ abstract class AptGetBasedDistribution : Distribution {
     override suspend fun install(vararg packages: String) {
         refresh()
         exec(
-            "wsl",
-            arrayOf(
+            commandLine = "wsl",
+            args = arrayOf(
                 "--distribution",
                 wslId,
                 "apt-get",
@@ -202,7 +202,7 @@ abstract class AptGetBasedDistribution : Distribution {
                 "--no-install-recommends",
                 *packages
             ),
-            jsObject {
+            options = jsObject {
                 env = mapOf(
                     "DEBIAN_FRONTEND" to "noninteractive",
                     "WSLENV" to "DEBIAN_FRONTEND/u"
@@ -213,11 +213,12 @@ abstract class AptGetBasedDistribution : Distribution {
 }
 
 object Ubuntu2204 : AptGetBasedDistribution(
-    wslId = "Ubuntu-22.04",
+    wslId = "Ubuntu",
+    userId = "Ubuntu-22.04",
     distributionName = "Ubuntu",
     version = SemVer("22.4.0", jsObject<SemVerRangeOptions>()),
     downloadUrl = URL("https://aka.ms/wslubuntu2204"),
-    installerFile = "ubuntu2204.exe"
+    installerFile = "ubuntu.exe"
 )
 
 object Ubuntu2004 : AptGetBasedDistribution(
@@ -298,8 +299,8 @@ abstract class ZypperBasedDistribution : Distribution {
 
     protected open suspend fun refresh() {
         exec(
-            "wsl",
-            arrayOf(
+            commandLine = "wsl",
+            args = arrayOf(
                 "--distribution",
                 wslId,
                 "zypper",
@@ -312,8 +313,8 @@ abstract class ZypperBasedDistribution : Distribution {
     override suspend fun update() {
         refresh()
         exec(
-            "wsl",
-            arrayOf(
+            commandLine = "wsl",
+            args = arrayOf(
                 "--distribution",
                 wslId,
                 "zypper",
@@ -326,8 +327,8 @@ abstract class ZypperBasedDistribution : Distribution {
     override suspend fun install(vararg packages: String) {
         refresh()
         exec(
-            "wsl",
-            arrayOf(
+            commandLine = "wsl",
+            args = arrayOf(
                 "--distribution",
                 wslId,
                 "zypper",
@@ -390,8 +391,8 @@ abstract class ApkBasedDistribution : Distribution {
 
     private suspend fun refresh() {
         exec(
-            "wsl",
-            arrayOf(
+            commandLine = "wsl",
+            args = arrayOf(
                 "--distribution",
                 wslId,
                 "apk",
@@ -403,8 +404,8 @@ abstract class ApkBasedDistribution : Distribution {
     override suspend fun update() {
         refresh()
         exec(
-            "wsl",
-            arrayOf(
+            commandLine = "wsl",
+            args = arrayOf(
                 "--distribution",
                 wslId,
                 "apk",
@@ -416,8 +417,8 @@ abstract class ApkBasedDistribution : Distribution {
     override suspend fun install(vararg packages: String) {
         refresh()
         exec(
-            "wsl",
-            arrayOf(
+            commandLine = "wsl",
+            args = arrayOf(
                 "--distribution",
                 wslId,
                 "apk",
