@@ -108,5 +108,5 @@ outputs:
             wsl-shell-command is not set explicitly and the script already exists, this output will be set.
 
 runs:
-    using: node12
+    using: node16
     main: build/distributions/index.js
