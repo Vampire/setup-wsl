@@ -193,10 +193,18 @@ jobs:
                   && (steps.execute_action.outcome == 'success')
               shell: wsl-bash {0}
               run: >
-                  wslconfig.exe /list | iconv -f UTF-16LE -t UTF-8
+                  cat
+                  <(wsl.exe --list || true)
+                  <(wsl.exe --list || true | iconv -f UTF-16LE -t UTF-8)
+                  <(wslconfig.exe /list || true)
+                  <(wslconfig.exe /list || true | iconv -f UTF-16LE -t UTF-8)
 
                   [[
-                  "$(wslconfig.exe /list | iconv -f UTF-16LE -t UTF-8)"
+                  "$(cat
+                  <(wsl.exe --list || true)
+                  <(wsl.exe --list || true | iconv -f UTF-16LE -t UTF-8)
+                  <(wslconfig.exe /list || true)
+                  <(wslconfig.exe /list || true | iconv -f UTF-16LE -t UTF-8))"
                   ==
                   *${{ matrix.distribution.wsl-id }}\ \(Default\)*
                   ]]
@@ -923,12 +931,18 @@ jobs:
                   && (steps.execute_action4.outcome == 'success')
               shell: wsl-bash {0}
               run: >
-                  wslconfig.exe /list
-
-                  wslconfig.exe /list | iconv -f UTF-16LE -t UTF-8
+                  cat
+                  <(wsl.exe --list || true)
+                  <(wsl.exe --list || true | iconv -f UTF-16LE -t UTF-8)
+                  <(wslconfig.exe /list || true)
+                  <(wslconfig.exe /list || true | iconv -f UTF-16LE -t UTF-8)
 
                   [[
-                  "$(wslconfig.exe /list | iconv -f UTF-16LE -t UTF-8)"
+                  "$(cat
+                  <(wsl.exe --list || true)
+                  <(wsl.exe --list || true | iconv -f UTF-16LE -t UTF-8)
+                  <(wslconfig.exe /list || true)
+                  <(wslconfig.exe /list || true | iconv -f UTF-16LE -t UTF-8))"
                   ==
                   *${{ matrix.distributions.distribution2.wsl-id }}\ \(Default\)*
                   ]]

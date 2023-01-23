@@ -135,8 +135,11 @@ jobs:
       shell: "wsl-bash {0}"
     - if: "always() && (steps.execute_action.outcome == 'success')"
       name: "Test - the default distribution should be correct"
-      run: "wslconfig.exe /list | iconv -f UTF-16LE -t UTF-8\n[[ \"$(wslconfig.exe\
-        \ /list | iconv -f UTF-16LE -t UTF-8)\" == *${{ matrix.distribution.wsl-id\
+      run: "cat <(wsl.exe --list || true) <(wsl.exe --list || true | iconv -f UTF-16LE\
+        \ -t UTF-8) <(wslconfig.exe /list || true) <(wslconfig.exe /list || true |\
+        \ iconv -f UTF-16LE -t UTF-8)\n[[ \"$(cat <(wsl.exe --list || true) <(wsl.exe\
+        \ --list || true | iconv -f UTF-16LE -t UTF-8) <(wslconfig.exe /list || true)\
+        \ <(wslconfig.exe /list || true | iconv -f UTF-16LE -t UTF-8))\" == *${{ matrix.distribution.wsl-id\
         \ }}\\ \\(Default\\)* ]]\n"
       shell: "wsl-bash {0}"
     - if: "always() && (steps.execute_action.outcome == 'success')"
@@ -311,8 +314,11 @@ jobs:
       shell: "wsl-bash {0}"
     - if: "always() && (steps.execute_action1.outcome == 'success')"
       name: "Test - the default distribution should be correct"
-      run: "wslconfig.exe /list | iconv -f UTF-16LE -t UTF-8\n[[ \"$(wslconfig.exe\
-        \ /list | iconv -f UTF-16LE -t UTF-8)\" == *${{ matrix.distribution.wsl-id\
+      run: "cat <(wsl.exe --list || true) <(wsl.exe --list || true | iconv -f UTF-16LE\
+        \ -t UTF-8) <(wslconfig.exe /list || true) <(wslconfig.exe /list || true |\
+        \ iconv -f UTF-16LE -t UTF-8)\n[[ \"$(cat <(wsl.exe --list || true) <(wsl.exe\
+        \ --list || true | iconv -f UTF-16LE -t UTF-8) <(wslconfig.exe /list || true)\
+        \ <(wslconfig.exe /list || true | iconv -f UTF-16LE -t UTF-8))\" == *${{ matrix.distribution.wsl-id\
         \ }}\\ \\(Default\\)* ]]\n"
       shell: "wsl-bash {0}"
     - if: "always() && (steps.execute_action1.outcome == 'success')"
@@ -827,8 +833,11 @@ jobs:
     - if: "always() && (steps.execute_action4.outcome == 'success')"
       name: "Test - the default distribution should be the last installed distribution\
         \ with set-as-default true"
-      run: "wslconfig.exe /list\nwslconfig.exe /list | iconv -f UTF-16LE -t UTF-8\n\
-        [[ \"$(wslconfig.exe /list | iconv -f UTF-16LE -t UTF-8)\" == *${{ matrix.distributions.distribution2.wsl-id\
+      run: "cat <(wsl.exe --list || true) <(wsl.exe --list || true | iconv -f UTF-16LE\
+        \ -t UTF-8) <(wslconfig.exe /list || true) <(wslconfig.exe /list || true |\
+        \ iconv -f UTF-16LE -t UTF-8)\n[[ \"$(cat <(wsl.exe --list || true) <(wsl.exe\
+        \ --list || true | iconv -f UTF-16LE -t UTF-8) <(wslconfig.exe /list || true)\
+        \ <(wslconfig.exe /list || true | iconv -f UTF-16LE -t UTF-8))\" == *${{ matrix.distributions.distribution2.wsl-id\
         \ }}\\ \\(Default\\)* ]]\n"
       shell: "wsl-bash {0}"
     - if: "always() && (steps.execute_action4.outcome == 'success')"
