@@ -1,5 +1,5 @@
 /*
- * Copyright 2020-2022 Björn Kautler
+ * Copyright 2020-2023 Björn Kautler
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -26,11 +26,3 @@ operator fun <T : YamlNode> YamlMap.get(key: String) =
         .asSequence()
         .find { (it.key as? YamlScalar)?.content == key }
         ?.value as T?
-
-fun YamlMap.getKey(value: YamlNode) =
-    entries
-        .asSequence()
-        .find { it.value == value }
-        ?.key
-        ?.let { it as? YamlScalar }
-        ?.content

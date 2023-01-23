@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 Björn Kautler
+ * Copyright 2020-2023 Björn Kautler
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,7 +17,7 @@
 plugins {
     net.kautler.versions
     net.kautler.node
-    net.kautler.tests
+    net.kautler.github_actions
     net.kautler.readme
     net.kautler.publishing
 }
