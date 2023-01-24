@@ -60,6 +60,36 @@ import startGroup as coreStartGroup
 import warning as coreWarning
 import which as ioWhich
 
+val wslHelp = GlobalScope.async(start = LAZY) {
+    val stdoutBuilder = StringBuilder()
+    val stdoutBuilderUtf16Le = StringBuilder()
+    val stderrBuilder = StringBuilder()
+    val stderrBuilderUtf16Le = StringBuilder()
+    exec(
+        commandLine = "wsl",
+        args = arrayOf("--help"),
+        options = jsObject {
+            ignoreReturnCode = true
+            outStream = NullWritable()
+            errStream = NullWritable()
+            listeners = jsObject {
+                stdout = {
+                    stdoutBuilder.append(it)
+                    stdoutBuilderUtf16Le.append(it.toString("UTF-16LE"))
+                }
+                stderr = {
+                    stderrBuilder.append(it)
+                    stderrBuilderUtf16Le.append(it.toString("UTF-16LE"))
+                }
+            }
+        }
+    ).await()
+    stdoutBuilder.append(stdoutBuilderUtf16Le)
+    stdoutBuilder.append(stderrBuilder)
+    stdoutBuilder.append(stderrBuilderUtf16Le)
+    stdoutBuilder.toString()
+}
+
 val distribution by lazy {
     val distributionId = coreGetInput("distribution", jsObject {
         required = true
@@ -74,10 +104,10 @@ val distribution by lazy {
 
 val wslId = GlobalScope.async(start = LAZY) {
     if (coreIsDebug()) {
-        exec(
-            commandLine = "wslconfig",
-            args = arrayOf("/list")
-        ).await()
+        executeWslCommand(
+            wslArguments = arrayOf("--list"),
+            wslconfigArguments = arrayOf("/list")
+        )
     }
     distribution.wslId
 }
@@ -266,6 +296,23 @@ suspend fun main() {
     }
 }
 
+suspend fun executeWslCommand(
+    wslArguments: Array<String>,
+    wslconfigArguments: Array<String>? = null
+) {
+    if (wslHelp().contains(wslArguments.first())) {
+        exec(
+            commandLine = "wsl",
+            args = wslArguments
+        ).await()
+    } else if (wslconfigArguments != null) {
+        exec(
+            commandLine = "wslconfig",
+            args = wslconfigArguments
+        ).await()
+    }
+}
+
 suspend fun <T> group(name: String, fn: suspend () -> T): T {
     coreStartGroup(name)
     try {
@@ -279,45 +326,15 @@ suspend fun verifyWindowsEnvironment() {
     check(process.platform == "win32") {
         "platform '${process.platform}' is not supported by this action, please verify your 'runs-on' setting"
     }
-    check(ioWhich("wslconfig").await().isNotBlank()) {
+    check(ioWhich("wsl").await().isNotBlank() || ioWhich("wslconfig").await().isNotBlank()) {
         "This Windows environment does not have WSL enabled, please verify your 'runs-on' setting"
     }
 }
 
 suspend fun installDistribution() {
-    val stdoutBuilder = StringBuilder()
-    val stdoutBuilderUtf16Le = StringBuilder()
-    val stderrBuilder = StringBuilder()
-    val stderrBuilderUtf16Le = StringBuilder()
-    exec(
-        commandLine = "wsl",
-        args = arrayOf("--help"),
-        options = jsObject {
-            ignoreReturnCode = true
-            outStream = NullWritable()
-            errStream = NullWritable()
-            listeners = jsObject {
-                stdout = {
-                    stdoutBuilder.append(it)
-                    stdoutBuilderUtf16Le.append(it.toString("UTF-16LE"))
-                }
-                stderr = {
-                    stderrBuilder.append(it)
-                    stderrBuilderUtf16Le.append(it.toString("UTF-16LE"))
-                }
-            }
-        }
-    ).await()
-    stdoutBuilder.append(stdoutBuilderUtf16Le)
-    stdoutBuilder.append(stderrBuilder)
-    stdoutBuilder.append(stderrBuilderUtf16Le)
-    if (stdoutBuilder.toString().contains("--set-default-version")) {
-        exec(
-            commandLine = "wsl",
-            args = arrayOf("--set-default-version", "1")
-        ).await()
-    }
-
+    executeWslCommand(
+        wslArguments = arrayOf("--set-default-version", "1")
+    )
     exec(
         commandLine = """"${path.join(distributionDirectory(), distribution.installerFile)}"""",
         args = arrayOf("install", "--root"),
@@ -335,17 +352,17 @@ suspend fun createWslConf() {
             "sh", "-c", "echo '$wslConf' >/etc/wsl.conf"
         )
     ).await()
-    exec(
-        commandLine = "wslconfig",
-        args = arrayOf("/terminate", wslId())
-    ).await()
+    executeWslCommand(
+        wslArguments = arrayOf("--terminate", wslId()),
+        wslconfigArguments = arrayOf("/terminate", wslId())
+    )
 }
 
 suspend fun setDistributionAsDefault() {
-    exec(
-        commandLine = "wslconfig",
-        args = arrayOf("/setdefault", wslId())
-    ).await()
+    executeWslCommand(
+        wslArguments = arrayOf("--set-default", wslId()),
+        wslconfigArguments = arrayOf("/setdefault", wslId())
+    )
 }
 
 suspend fun writeWslShellWrapper() {
