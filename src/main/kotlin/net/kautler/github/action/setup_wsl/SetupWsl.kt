@@ -52,6 +52,7 @@ import getInput as coreGetInput
 import isDebug as coreIsDebug
 import isFeatureAvailable as cacheIsFeatureAvailable
 import mkdirP as ioMkdirP
+import mv as ioMv
 import restoreCache as cacheRestoreCache
 import saveCache as cacheSaveCache
 import setFailed as coreSetFailed
@@ -177,13 +178,13 @@ val distributionDirectory = GlobalScope.async(start = LAZY) {
     }
 
     val distributionDownload = toolCacheDownloadTool("${distribution.downloadUrl()}").await()
-    var extractedDistributionDirectory = toolCacheExtractZip(distributionDownload).await()
+    var extractedDistributionDirectory = extractZip(distributionDownload)
 
     if (!existsSync(path.join(extractedDistributionDirectory, distribution.installerFile))) {
         extractedDistributionDirectory = readdirSync(extractedDistributionDirectory, jsObject<`T$35`>())
             .asFlow()
             .filter { it.contains("""(?<!_(?:scale-(?:100|125|150|400)|ARM64))\.appx$""".toRegex()) }
-            .map { toolCacheExtractZip(path.join(extractedDistributionDirectory, it)).await() }
+            .map { extractZip(path.join(extractedDistributionDirectory, it)) }
             .firstOrNull { existsSync(path.join(it, distribution.installerFile)) }
             ?: error("'${distribution.installerFile}' not found for distribution '${distribution.userId}'")
     }
@@ -294,6 +295,13 @@ suspend fun main() {
         coreDebug(it.stackTraceToString())
         coreSetFailed(it.message ?: "$it")
     }
+}
+
+suspend fun extractZip(archive: String): String {
+    // work-around for https://github.com/actions/toolkit/issues/1319
+    val archiveZip = "$archive.zip"
+    ioMv(archive, archiveZip).await()
+    return toolCacheExtractZip(archiveZip).await()
 }
 
 suspend fun executeWslCommand(
