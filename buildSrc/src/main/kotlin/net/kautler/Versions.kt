@@ -35,7 +35,7 @@ val versions = mapOf(
     "kotlin-extensions" to "1.0.1-pre.129-kotlin-1.4.20",
     "kotlinx-coroutines-core" to "1.4.2",
     "kotlinx-nodejs" to "0.0.7",
-    "node" to "16.18.1",
+    "node" to "12.18.3",
 
     // build NPM dependencies
     "@vercel/ncc" to "0.25.1",
