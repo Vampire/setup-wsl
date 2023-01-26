@@ -46,7 +46,7 @@ file(".github/workflows")
         val camelCasedWorkflowName = workflowName.replace("""-\w""".toRegex()) {
             it.value.substring(1).capitalize()
         }.capitalize()
-        val preProcessWorkflow = tasks.register<JavaExec>("preProcess${camelCasedWorkflowName}Workflow") {
+        val preprocessWorkflow = tasks.register<JavaExec>("preprocess${camelCasedWorkflowName}Workflow") {
             inputs.file(workflowScript)
             outputs.file(workflowScript.resolveSibling("$workflowName.yaml"))
             javaLauncher.set(javaToolchains.launcherFor {
@@ -59,6 +59,6 @@ file(".github/workflows")
             args("-script", workflowScript.absolutePath)
         }
         preprocessWorkflows {
-            dependsOn(preProcessWorkflow)
+            dependsOn(preprocessWorkflow)
         }
     }
