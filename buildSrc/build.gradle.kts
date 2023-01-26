@@ -68,6 +68,7 @@ dependencies {
     implementation("org.kohsuke:github-api".withVersion)
     implementation("com.charleskorn.kaml:kaml".withVersion)
     implementation("org.jetbrains.kotlinx:kotlinx-serialization-runtime".withVersion)
+    implementation(embeddedKotlin("compiler-embeddable"))
 }
 
 kotlinDslPluginOptions {

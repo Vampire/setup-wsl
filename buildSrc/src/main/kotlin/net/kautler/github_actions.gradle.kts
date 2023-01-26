@@ -17,6 +17,18 @@
 package net.kautler
 
 import groovy.lang.Closure
+import org.jetbrains.kotlin.cli.common.CLIConfigurationKeys.MESSAGE_COLLECTOR_KEY
+import org.jetbrains.kotlin.cli.common.messages.MessageCollector
+import org.jetbrains.kotlin.cli.jvm.compiler.EnvironmentConfigFiles.JVM_CONFIG_FILES
+import org.jetbrains.kotlin.cli.jvm.compiler.KotlinCoreEnvironment
+import org.jetbrains.kotlin.com.intellij.openapi.util.Disposer
+import org.jetbrains.kotlin.com.intellij.openapi.vfs.local.CoreLocalFileSystem
+import org.jetbrains.kotlin.com.intellij.openapi.vfs.local.CoreLocalVirtualFile
+import org.jetbrains.kotlin.com.intellij.psi.PsiManager
+import org.jetbrains.kotlin.config.CompilerConfiguration
+import org.jetbrains.kotlin.psi.KtFile
+import org.jetbrains.kotlin.psi.KtLiteralStringTemplateEntry
+import org.jetbrains.kotlin.psi.KtStringTemplateExpression
 
 plugins {
     `java-base`
@@ -47,8 +59,16 @@ file(".github/workflows")
             it.value.substring(1).capitalize()
         }.capitalize()
         val preprocessWorkflow = tasks.register<JavaExec>("preprocess${camelCasedWorkflowName}Workflow") {
-            inputs.file(workflowScript)
-            outputs.file(workflowScript.resolveSibling("$workflowName.yaml"))
+            inputs
+                .file(workflowScript)
+                .withPropertyName("workflowScript")
+            inputs
+                .files(file(workflowScript).importedFiles)
+                .withPropertyName("importedFiles")
+            outputs
+                .file(workflowScript.resolveSibling("$workflowName.yaml"))
+                .withPropertyName("workflowFile")
+
             javaLauncher.set(javaToolchains.launcherFor {
                 languageVersion.set(JavaLanguageVersion.of(17))
             })
@@ -61,4 +81,39 @@ file(".github/workflows")
         preprocessWorkflows {
             dependsOn(preprocessWorkflow)
         }
+    }
+
+val File.importedFiles: List<File>
+    get() = if (!isFile) {
+        emptyList()
+    } else {
+        PsiManager
+            .getInstance(
+                KotlinCoreEnvironment
+                    .createForProduction(
+                        Disposer.newDisposable(),
+                        CompilerConfiguration().apply {
+                            put(MESSAGE_COLLECTOR_KEY, MessageCollector.NONE)
+                        },
+                        JVM_CONFIG_FILES
+                    )
+                    .project
+            )
+            .findFile(
+                CoreLocalVirtualFile(
+                    CoreLocalFileSystem(),
+                    this
+                )
+            )
+            .let { it as KtFile }
+            .fileAnnotationList
+            ?.annotationEntries
+            ?.filter { it.shortName?.asString() == "Import" }
+            ?.flatMap { it.valueArgumentList?.arguments ?: emptyList() }
+            ?.mapNotNull { it.getArgumentExpression() as? KtStringTemplateExpression }
+            ?.map { it.entries.first() }
+            ?.mapNotNull { it as? KtLiteralStringTemplateEntry }
+            ?.map { resolveSibling(it.text) }
+            ?.flatMap { it.importedFiles + it }
+            ?: emptyList()
     }
