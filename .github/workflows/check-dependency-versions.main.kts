@@ -19,7 +19,7 @@
 @file:Import("workflow-with-copyright.main.kts")
 
 import it.krzeminski.githubactions.actions.CustomAction
-import it.krzeminski.githubactions.actions.actions.CheckoutV2
+import it.krzeminski.githubactions.actions.actions.CheckoutV3
 import it.krzeminski.githubactions.domain.RunnerType.WindowsLatest
 import it.krzeminski.githubactions.domain.triggers.Cron
 import it.krzeminski.githubactions.domain.triggers.Schedule
@@ -52,7 +52,7 @@ workflowWithCopyright(
         )
         uses(
             name = "Checkout",
-            action = CheckoutV2()
+            action = CheckoutV3()
         )
         uses(
             name = "Check Dependency Versions",

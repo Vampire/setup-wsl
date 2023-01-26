@@ -18,7 +18,7 @@
 
 @file:Import("workflow-with-copyright.main.kts")
 
-import it.krzeminski.githubactions.actions.actions.CheckoutV2
+import it.krzeminski.githubactions.actions.actions.CheckoutV3
 import it.krzeminski.githubactions.actions.gradle.WrapperValidationActionV1
 import it.krzeminski.githubactions.domain.RunnerType.UbuntuLatest
 import it.krzeminski.githubactions.domain.triggers.PullRequest
@@ -43,7 +43,7 @@ workflowWithCopyright(
         )
         uses(
             name = "Checkout",
-            action = CheckoutV2()
+            action = CheckoutV3()
         )
         uses(
             name = "Validate Gradle Wrapper",

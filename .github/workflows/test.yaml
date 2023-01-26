@@ -53,7 +53,7 @@ jobs:
       run: git config --global core.autocrlf input
     - id: step-1
       name: Checkout
-      uses: actions/checkout@v2
+      uses: actions/checkout@v3
     - id: step-2
       name: Build
       uses: burrunan/gradle-cache-action@v1
@@ -64,7 +64,7 @@ jobs:
         gradle-dependencies-cache-key: buildSrc/**/Versions.kt
     - id: step-3
       name: Save built artifacts to cache
-      uses: actions/cache@v2
+      uses: actions/cache@v3
       with:
         path: |-
           action.yml
@@ -93,7 +93,7 @@ jobs:
     steps:
     - id: step-0
       name: Restore built artifacts from cache
-      uses: actions/cache@v2
+      uses: actions/cache@v3
       with:
         path: |-
           action.yml
@@ -130,7 +130,7 @@ jobs:
     steps:
     - id: step-0
       name: Restore built artifacts from cache
-      uses: actions/cache@v2
+      uses: actions/cache@v3
       with:
         path: |-
           action.yml
@@ -361,7 +361,7 @@ jobs:
     steps:
     - id: step-0
       name: Restore built artifacts from cache
-      uses: actions/cache@v2
+      uses: actions/cache@v3
       with:
         path: |-
           action.yml
@@ -852,7 +852,7 @@ jobs:
     steps:
     - id: step-0
       name: Restore built artifacts from cache
-      uses: actions/cache@v2
+      uses: actions/cache@v3
       with:
         path: |-
           action.yml
@@ -951,7 +951,7 @@ jobs:
     steps:
     - id: step-0
       name: Restore built artifacts from cache
-      uses: actions/cache@v2
+      uses: actions/cache@v3
       with:
         path: |-
           action.yml
@@ -1083,7 +1083,7 @@ jobs:
     steps:
     - id: step-0
       name: Restore built artifacts from cache
-      uses: actions/cache@v2
+      uses: actions/cache@v3
       with:
         path: |-
           action.yml
@@ -1216,7 +1216,7 @@ jobs:
     steps:
     - id: step-0
       name: Restore built artifacts from cache
-      uses: actions/cache@v2
+      uses: actions/cache@v3
       with:
         path: |-
           action.yml
@@ -1383,7 +1383,7 @@ jobs:
     steps:
     - id: step-0
       name: Restore built artifacts from cache
-      uses: actions/cache@v2
+      uses: actions/cache@v3
       with:
         path: |-
           action.yml
@@ -1554,7 +1554,7 @@ jobs:
     steps:
     - id: step-0
       name: Restore built artifacts from cache
-      uses: actions/cache@v2
+      uses: actions/cache@v3
       with:
         path: |-
           action.yml

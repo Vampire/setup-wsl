@@ -19,8 +19,8 @@
 @file:Import("workflow-with-copyright.main.kts")
 
 import it.krzeminski.githubactions.actions.CustomAction
-import it.krzeminski.githubactions.actions.actions.CacheV2
-import it.krzeminski.githubactions.actions.actions.CheckoutV2
+import it.krzeminski.githubactions.actions.actions.CacheV3
+import it.krzeminski.githubactions.actions.actions.CheckoutV3
 import it.krzeminski.githubactions.actions.vampire.SetupWslV1
 import it.krzeminski.githubactions.actions.vampire.SetupWslV1.Distribution
 import it.krzeminski.githubactions.domain.CommandStep
@@ -36,8 +36,6 @@ import it.krzeminski.githubactions.domain.triggers.Push
 import it.krzeminski.githubactions.domain.triggers.Schedule
 import it.krzeminski.githubactions.dsl.JobBuilder
 import it.krzeminski.githubactions.dsl.expressions.expr
-import it.krzeminski.githubactions.dsl.workflow
-import it.krzeminski.githubactions.yaml.writeToFile
 
 val environments = listOf(
     "windows-2019",
@@ -127,7 +125,7 @@ workflowWithCopyright(
     ),
     sourceFile = __FILE__
 ) {
-    val builtArtifactsCache = CacheV2(
+    val builtArtifactsCache = CacheV3(
         path = listOf(
             "action.yml",
             "build/distributions/"
@@ -150,7 +148,7 @@ workflowWithCopyright(
         )
         uses(
             name = "Checkout",
-            action = CheckoutV2()
+            action = CheckoutV3()
         )
         uses(
             name = "Build",
@@ -1094,7 +1092,7 @@ val Step.outcome get() = "steps.$id.outcome"
 
 // work-around for https://github.com/krzema12/github-workflows-kt/issues/640
 fun SetupWslV1.copy(
-    distribution: SetupWslV1.Distribution? = null,
+    distribution: Distribution? = null,
     useCache: Boolean? = null,
     wslConf: String? = null,
     setAsDefault: Boolean? = null,
