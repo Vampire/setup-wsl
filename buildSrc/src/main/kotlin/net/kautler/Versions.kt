@@ -38,7 +38,7 @@ val versions = mapOf(
     "node" to "16.18.1",
 
     // build NPM dependencies
-    "@vercel/ncc" to "0.25.1",
+    "@vercel/ncc" to "0.36.1",
 
     // build Java dependencies
     "com.github.ben-manes.versions" to "0.36.0",

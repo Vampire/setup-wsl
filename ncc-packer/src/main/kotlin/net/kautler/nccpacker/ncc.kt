@@ -29,6 +29,7 @@ external interface NccOptions {
     var filterAssetBase: String
     var minify: Boolean
     var sourceMap: Boolean
+    var assetBuilds: Boolean
     var sourceMapBasePrefix: String
     var sourceMapRegister: Boolean
     var license: String
@@ -63,5 +64,5 @@ inline fun AssetMap.forEach(action: (Pair<String, Asset>) -> Unit) {
 
 external interface Asset {
     val source: Buffer
-    val permissions: Number?
+    val permissions: Int?
 }
