@@ -84,11 +84,11 @@ jobs:
         - windows-2022
         - windows-latest
         distribution:
-        - id: invalid
+        - user-id: invalid
           label: invalid
-        - id: ''
+        - user-id: ''
           label: ''
-        - id: null
+        - user-id: null
           label: 'null'
     steps:
     - id: step-0

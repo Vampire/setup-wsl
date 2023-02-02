@@ -207,15 +207,15 @@ workflowWithCopyright(
                     "environment" to environments,
                     "distribution" to listOf(
                         mapOf(
-                            "id" to "invalid",
+                            "user-id" to "invalid",
                             "label" to "invalid"
                         ),
                         mapOf(
-                            "id" to "",
+                            "user-id" to "",
                             "label" to ""
                         ),
                         mapOf(
-                            "id" to null,
+                            "user-id" to null,
                             "label" to "null"
                         )
                     )
