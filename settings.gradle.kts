@@ -1,5 +1,5 @@
 /*
- * Copyright 2020-2022 Björn Kautler
+ * Copyright 2020-2023 Björn Kautler
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,8 +14,63 @@
  * limitations under the License.
  */
 
+import org.gradle.api.initialization.resolve.RepositoriesMode.PREFER_SETTINGS
+
+pluginManagement {
+    includeBuild("gradle/build-logic")
+    repositories {
+        mavenCentral()
+        gradlePluginPortal()
+    }
+}
+
 plugins {
     id("com.gradle.enterprise") version "3.6.1"
+}
+
+dependencyResolutionManagement {
+    repositories {
+        ivy("https://nodejs.org/dist/") {
+            name = "Node.js Distributions"
+            patternLayout {
+                artifact("v[revision]/[artifact](-v[revision]-[classifier]).[ext]")
+            }
+            metadataSources {
+                artifact()
+            }
+            content {
+                includeModule("org.nodejs", "node")
+            }
+        }
+        ivy("https://github.com/yarnpkg/yarn/releases/download/") {
+            name = "Yarn Distributions"
+            patternLayout {
+                artifact("v[revision]/[artifact](-v[revision]).[ext]")
+            }
+            metadataSources {
+                artifact()
+            }
+            content {
+                includeModule("com.yarnpkg", "yarn")
+            }
+        }
+        mavenCentral()
+        //TODO: Remove after getting rid of kotlin-extensions
+        maven("https://maven.pkg.jetbrains.space/kotlin/p/kotlin/kotlin-js-wrappers/") {
+            content {
+                includeModule("org.jetbrains", "kotlin-extensions")
+            }
+        }
+        //TODO: Remove after getting rid of kotlinx-nodejs
+        jcenter {
+            content {
+                includeModule("org.jetbrains.kotlinx", "kotlinx-nodejs")
+            }
+        }
+    }
+    // work-around for https://youtrack.jetbrains.com/issue/KT-56300
+    //repositoriesMode.set(FAIL_ON_PROJECT_REPOS)
+    repositoriesMode.set(PREFER_SETTINGS)
 }
 
 gradleEnterprise {
@@ -25,5 +80,11 @@ gradleEnterprise {
     }
 }
 
-rootProject.name = "setup-wsl"
+includeBuild("gradle/build-logic")
 include("ncc-packer")
+project(":ncc-packer").buildFileName = "ncc-packer.gradle.kts"
+
+rootProject.name = "setup-wsl"
+
+enableFeaturePreview("TYPESAFE_PROJECT_ACCESSORS")
+enableFeaturePreview("STABLE_CONFIGURATION_CACHE")

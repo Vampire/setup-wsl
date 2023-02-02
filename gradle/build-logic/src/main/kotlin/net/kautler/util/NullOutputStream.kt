@@ -14,10 +14,11 @@
  * limitations under the License.
  */
 
-plugins {
-    id(libs.plugins.convention.versions.get().pluginId)
-    id(libs.plugins.convention.node.get().pluginId)
-    id(libs.plugins.convention.github.actions.get().pluginId)
-    id(libs.plugins.convention.readme.get().pluginId)
-    id(libs.plugins.convention.publishing.get().pluginId)
+package net.kautler.util
+
+import java.io.OutputStream
+
+class NullOutputStream : OutputStream() {
+    override fun write(b: Int) {
+    }
 }

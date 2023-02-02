@@ -1,0 +1,78 @@
+# Copyright 2020-2023 Björn Kautler
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+[versions]
+actions-cache = "3.0.5"
+actions-core = "1.10.0"
+actions-exec = "1.1.1"
+actions-http-client = "2.0.1"
+actions-io = "1.1.2"
+actions-tool-cache = "2.0.1"
+build-dukat = "0.5.7"
+build-github-api = "1.117"
+build-gradle-plugin-github = "1.4.0"
+build-gradle-plugin-grgit = "4.1.1"
+build-gradle-plugin-release = "2.8.1"
+build-gradle-plugin-versions = "0.36.0"
+build-kaml = "0.51.0"
+build-kotlin = "1.7.10"
+build-kotlinx-serialization = "1.4.1"
+build-node = "16.18.1"
+build-vercel-ncc = "0.36.1"
+kotlin = "1.8.10"
+kotlin-extensions = "1.0.1-pre.156-kotlin-1.5.0"
+kotlinx-coroutines = "1.6.4"
+kotlinx-nodejs = "0.0.7"
+nullWritable = "1.0.5"
+semver = "7.3.8"
+types-semver = "7.3.13"
+workflows-kotlin = "1.8.10"
+
+[libraries]
+actions-cache = { module = "actions:cache", version.ref = "actions-cache" }
+actions-core = { module = "actions:core", version.ref = "actions-core" }
+actions-exec = { module = "actions:exec", version.ref = "actions-exec" }
+actions-http-client = { module = "actions:http-client", version.ref = "actions-http-client" }
+actions-io = { module = "actions:io", version.ref = "actions-io" }
+actions-tool-cache = { module = "actions:tool-cache", version.ref = "actions-tool-cache" }
+build-github-api = { module = "org.kohsuke:github-api", version.ref = "build-github-api" }
+build-kaml = { module = "com.charleskorn.kaml:kaml", version.ref = "build-kaml" }
+build-kotlinx-serialization-bom = { module = "org.jetbrains.kotlinx:kotlinx-serialization-bom", version.ref = "build-kotlinx-serialization" }
+build-kotlinx-serialization-core = { module = "org.jetbrains.kotlinx:kotlinx-serialization-core" }
+build-kotlinx-serialization-json = { module = "org.jetbrains.kotlinx:kotlinx-serialization-json" }
+build-vercel-ncc = { module = "vercel:ncc", version.ref = "build-vercel-ncc" }
+kotlin-extensions = { module = "org.jetbrains:kotlin-extensions", version.ref = "kotlin-extensions" }
+kotlinx-coroutines-core = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-core", version.ref = "kotlinx-coroutines" }
+kotlinx-nodejs = { module = "org.jetbrains.kotlinx:kotlinx-nodejs", version.ref = "kotlinx-nodejs" }
+nullWritable = { module = "<unscoped>:null-writable", version.ref = "nullWritable" }
+semver = { module = "<unscoped>:semver", version.ref = "semver" }
+types-semver = { module = "types:semver", version.ref = "types-semver" }
+workflows-kotlin-compiler = { module = "org.jetbrains.kotlin:kotlin-compiler", version.ref = "workflows-kotlin" }
+workflows-kotlin-main-kts = { module = "org.jetbrains.kotlin:kotlin-main-kts", version.ref = "workflows-kotlin" }
+workflows-kotlin-scripting-compiler = { module = "org.jetbrains.kotlin:kotlin-scripting-compiler", version.ref = "workflows-kotlin" }
+
+[plugins]
+convention-dependency-updates-report-aggregation = { id = "net.kautler.dependency-updates-report-aggregation", version = "?" }
+convention-github_actions = { id = "net.kautler.github_actions", version = "?" }
+convention-ncc-packer = { id = "net.kautler.ncc_packer", version = "?" }
+convention-node = { id = "net.kautler.node", version = "?" }
+convention-publishing = { id = "net.kautler.publishing", version = "?" }
+convention-readme = { id = "net.kautler.readme", version = "?" }
+convention-versions = { id = "net.kautler.versions", version = "?" }
+github = { id = "net.wooga.github", version.ref = "build-gradle-plugin-github" }
+grgit = { id = "org.ajoberstar.grgit", version.ref = "build-gradle-plugin-grgit" }
+kotlin-js = { id = "org.jetbrains.kotlin.js", version.ref = "kotlin" }
+kotlin-serialization = { id = "org.jetbrains.kotlin.plugin.serialization", version.ref = "build-kotlin" }
+release = { id = "net.researchgate.release", version.ref = "build-gradle-plugin-release" }
+versions = { id = "com.github.ben-manes.versions", version.ref = "build-gradle-plugin-versions" }

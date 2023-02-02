@@ -14,10 +14,24 @@
  * limitations under the License.
  */
 
-plugins {
-    id(libs.plugins.convention.versions.get().pluginId)
-    id(libs.plugins.convention.node.get().pluginId)
-    id(libs.plugins.convention.github.actions.get().pluginId)
-    id(libs.plugins.convention.readme.get().pluginId)
-    id(libs.plugins.convention.publishing.get().pluginId)
+import org.gradle.api.initialization.resolve.RepositoriesMode.FAIL_ON_PROJECT_REPOS
+
+dependencyResolutionManagement {
+    repositories {
+        mavenCentral()
+        gradlePluginPortal()
+    }
+    repositoriesMode.set(FAIL_ON_PROJECT_REPOS)
+
+    versionCatalogs {
+        create("libs") {
+            from(files("../libs.versions.toml"))
+        }
+    }
 }
+
+rootProject.name = "dependency-updates-report-aggregation"
+rootProject.buildFileName = "dependency-updates-report-aggregation.gradle.kts"
+
+enableFeaturePreview("TYPESAFE_PROJECT_ACCESSORS")
+enableFeaturePreview("STABLE_CONFIGURATION_CACHE")

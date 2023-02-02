@@ -1,5 +1,5 @@
 /*
- * Copyright 2020-2022 Björn Kautler
+ * Copyright 2020-2023 Björn Kautler
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,6 +13,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
+@file:OptIn(DelicateCoroutinesApi::class)
 
 package net.kautler.github.action.setup_wsl
 
@@ -29,6 +31,7 @@ import fs.readdirSync
 import fs.writeFileSync
 import kotlinext.js.jsObject
 import kotlinx.coroutines.CoroutineStart.LAZY
+import kotlinx.coroutines.DelicateCoroutinesApi
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.async
 import kotlinx.coroutines.await
@@ -148,7 +151,7 @@ val useCache by lazy {
 
     if (result && !cacheIsFeatureAvailable()) {
         val ghUrl = URL(process.env["GITHUB_SERVER_URL"] ?: "https://github.com", "")
-        if (ghUrl.hostname.toUpperCase() != "GITHUB.COM") {
+        if (ghUrl.hostname.uppercase() != "GITHUB.COM") {
             coreWarning("Caching is only supported on GHES version >= 3.5. If you are on version >= 3.5 please check with GHES admin if Actions cache service is enabled or not.")
         } else {
             coreWarning("An internal error has occurred in cache backend. Please check https://www.githubstatus.com/ for any ongoing issue in actions.")
@@ -162,7 +165,7 @@ val useCache by lazy {
 val distributionDirectory = GlobalScope.async(start = LAZY) {
     var cacheDirectory = toolCacheFind(distribution.distributionName, "${distribution.version}")
 
-    if (!cacheDirectory.isBlank()) {
+    if (cacheDirectory.isNotBlank()) {
         return@async cacheDirectory
     }
 
