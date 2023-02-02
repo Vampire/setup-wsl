@@ -59,8 +59,7 @@ workflowWithCopyright(
             action = GradleCacheActionV1(
                 arguments = listOf("dependencyUpdates"),
                 debug = false,
-                concurrent = true,
-                gradleDependenciesCacheKey = listOf("buildSrc/**/Versions.kt")
+                concurrent = true
             )
         )
     }

@@ -15,9 +15,5 @@
  */
 
 plugins {
-    id(libs.plugins.convention.versions.get().pluginId)
-    id(libs.plugins.convention.node.get().pluginId)
-    id(libs.plugins.convention.github.actions.get().pluginId)
-    id(libs.plugins.convention.readme.get().pluginId)
-    id(libs.plugins.convention.publishing.get().pluginId)
+    id(libs.plugins.convention.ncc.packer.get().pluginId)
 }

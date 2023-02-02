@@ -14,10 +14,23 @@
  * limitations under the License.
  */
 
-plugins {
-    id(libs.plugins.convention.versions.get().pluginId)
-    id(libs.plugins.convention.node.get().pluginId)
-    id(libs.plugins.convention.github.actions.get().pluginId)
-    id(libs.plugins.convention.readme.get().pluginId)
-    id(libs.plugins.convention.publishing.get().pluginId)
-}
+package net.kautler.util
+
+import com.github.benmanes.gradle.versions.reporter.result.DependencyOutdated
+
+fun DependencyOutdated.matches(
+    group: String,
+    name: String,
+    oldVersion: String? = null,
+    newVersion: String? = null
+) = (this.group == group)
+        && (this.name == name)
+        && oldVersion?.let { it == version } ?: true
+        && newVersion?.let { it == available.milestone } ?: true
+
+fun DependencyOutdated.matches(ignored: IgnoredDependency) = matches(
+    ignored.group,
+    ignored.name,
+    ignored.oldVersion,
+    ignored.newVersion
+)

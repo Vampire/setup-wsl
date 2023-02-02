@@ -14,10 +14,14 @@
  * limitations under the License.
  */
 
-plugins {
-    id(libs.plugins.convention.versions.get().pluginId)
-    id(libs.plugins.convention.node.get().pluginId)
-    id(libs.plugins.convention.github.actions.get().pluginId)
-    id(libs.plugins.convention.readme.get().pluginId)
-    id(libs.plugins.convention.publishing.get().pluginId)
-}
+package net.kautler.dao.action
+
+import kotlinx.serialization.Serializable
+
+@Serializable
+data class Input(
+    val description: String,
+    val required: Boolean = false,
+    val deprecationMessage: String? = null,
+    val default: String? = null
+)

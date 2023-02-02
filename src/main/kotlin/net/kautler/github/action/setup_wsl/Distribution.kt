@@ -1,5 +1,5 @@
 /*
- * Copyright 2020-2022 Björn Kautler
+ * Copyright 2020-2023 Björn Kautler
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,18 +17,18 @@
 package net.kautler.github.action.setup_wsl
 
 import HttpClient
-import RangeOptions as SemVerRangeOptions
 import SemVer
-import debug as coreDebug
 import exec
-import http.OutgoingHttpHeaders
-import info as coreInfo
 import kotlinext.js.jsObject
 import kotlinx.coroutines.CoroutineStart.LAZY
+import kotlinx.coroutines.DelicateCoroutinesApi
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.async
 import kotlinx.coroutines.await
 import org.w3c.dom.url.URL
+import RangeOptions as SemVerRangeOptions
+import debug as coreDebug
+import info as coreInfo
 
 val distributions = listOf(
     Alpine,
@@ -50,6 +50,7 @@ sealed class Distribution(
     val installerFile: String,
     val userId: String = wslId
 ) {
+    @DelicateCoroutinesApi
     val downloadUrl = GlobalScope.async(start = LAZY) {
         if (_downloadUrl != null) {
             return@async _downloadUrl

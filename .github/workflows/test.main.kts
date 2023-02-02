@@ -160,8 +160,7 @@ workflowWithCopyright(
                     "--scan"
                 ),
                 debug = false,
-                concurrent = true,
-                gradleDependenciesCacheKey = listOf("buildSrc/**/Versions.kt")
+                concurrent = true
             )
         )
         uses(

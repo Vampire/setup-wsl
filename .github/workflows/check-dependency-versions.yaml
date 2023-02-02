@@ -50,7 +50,6 @@ jobs:
       name: Check Dependency Versions
       uses: burrunan/gradle-cache-action@v1
       with:
-        gradle-dependencies-cache-key: buildSrc/**/Versions.kt
         debug: false
         concurrent: true
         arguments: dependencyUpdates
