@@ -18,9 +18,10 @@
 
 @file:Import("workflow-with-copyright.main.kts")
 
-import it.krzeminski.githubactions.actions.CustomAction
-import it.krzeminski.githubactions.actions.actions.CacheV3
+import it.krzeminski.githubactions.actions.actions.CacheRestoreV3
+import it.krzeminski.githubactions.actions.actions.CacheSaveV3
 import it.krzeminski.githubactions.actions.actions.CheckoutV3
+import it.krzeminski.githubactions.actions.burrunan.GradleCacheActionV1
 import it.krzeminski.githubactions.actions.vampire.SetupWslV1
 import it.krzeminski.githubactions.actions.vampire.SetupWslV1.Distribution
 import it.krzeminski.githubactions.domain.CommandStep
@@ -127,12 +128,9 @@ workflowWithCopyright(
     ),
     sourceFile = __FILE__
 ) {
-    val builtArtifactsCache = CacheV3(
-        path = listOf(
-            "action.yml",
-            "build/distributions/"
-        ),
-        key = expr { github.run_id }
+    val builtArtifacts = listOf(
+        "action.yml",
+        "build/distributions/"
     )
 
     val executeAction = SetupWslV1(
@@ -154,21 +152,24 @@ workflowWithCopyright(
         )
         uses(
             name = "Build",
-            action = CustomAction(
-                actionOwner = "burrunan",
-                actionName = "gradle-cache-action",
-                actionVersion = "v1",
-                inputs = mapOf(
-                    "arguments" to "build --info --stacktrace --scan",
-                    "debug" to "false",
-                    "concurrent" to "true",
-                    "gradle-dependencies-cache-key" to "buildSrc/**/Versions.kt"
-                )
+            action = GradleCacheActionV1(
+                arguments = listOf(
+                    "build",
+                    "--info",
+                    "--stacktrace",
+                    "--scan"
+                ),
+                debug = false,
+                concurrent = true,
+                gradleDependenciesCacheKey = listOf("buildSrc/**/Versions.kt")
             )
         )
         uses(
             name = "Save built artifacts to cache",
-            action = builtArtifactsCache
+            action = CacheSaveV3(
+                path = builtArtifacts,
+                key = expr { github.run_id }
+            )
         )
     }
 
@@ -184,15 +185,13 @@ workflowWithCopyright(
         runsOn = RunnerType.Custom(expr("matrix.environment")),
         _customArguments = _customArguments
     ) {
-        val restoreBuildArtifacts = uses(
+        uses(
             name = "Restore built artifacts from cache",
-            action = builtArtifactsCache
-        )
-        run(
-            name = "Fail if cache could not be restored",
-            condition = "${restoreBuildArtifacts.outputs.cacheHit} == false",
-            shell = Cmd,
-            command = "exit 1"
+            action = CacheRestoreV3(
+                path = builtArtifacts,
+                key = expr { github.run_id },
+                failOnCacheMiss = true
+            )
         )
         block()
     }

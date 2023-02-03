@@ -18,8 +18,8 @@
 
 @file:Import("workflow-with-copyright.main.kts")
 
-import it.krzeminski.githubactions.actions.CustomAction
 import it.krzeminski.githubactions.actions.actions.CheckoutV3
+import it.krzeminski.githubactions.actions.burrunan.GradleCacheActionV1
 import it.krzeminski.githubactions.domain.RunnerType.WindowsLatest
 import it.krzeminski.githubactions.domain.triggers.Cron
 import it.krzeminski.githubactions.domain.triggers.Schedule
@@ -56,16 +56,11 @@ workflowWithCopyright(
         )
         uses(
             name = "Check Dependency Versions",
-            action = CustomAction(
-                actionOwner = "burrunan",
-                actionName = "gradle-cache-action",
-                actionVersion = "v1",
-                inputs = mapOf(
-                    "arguments" to "dependencyUpdates",
-                    "debug" to "false",
-                    "concurrent" to "true",
-                    "gradle-dependencies-cache-key" to "buildSrc/**/Versions.kt"
-                )
+            action = GradleCacheActionV1(
+                arguments = listOf("dependencyUpdates"),
+                debug = false,
+                concurrent = true,
+                gradleDependenciesCacheKey = listOf("buildSrc/**/Versions.kt")
             )
         )
     }
