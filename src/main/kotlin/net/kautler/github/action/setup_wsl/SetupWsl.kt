@@ -18,18 +18,10 @@
 
 package net.kautler.github.action.setup_wsl
 
-import Buffer
-import NodeJS.get
 import NullWritable
 import exec
-import fs.`T$32`
-import fs.`T$35`
-import fs.`T$45`
-import fs.existsSync
-import fs.mkdtempSync
-import fs.readdirSync
-import fs.writeFileSync
-import kotlinext.js.jsObject
+import js.core.get
+import js.core.jso
 import kotlinx.coroutines.CoroutineStart.LAZY
 import kotlinx.coroutines.DelicateCoroutinesApi
 import kotlinx.coroutines.GlobalScope
@@ -39,10 +31,18 @@ import kotlinx.coroutines.flow.asFlow
 import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.flow.map
-import os.tmpdir
-import path.path
-import process
-import url.URL
+import node.buffer.Buffer
+import node.buffer.BufferEncoding.utf16le
+import node.fs.PathLike
+import node.fs.accessAsync
+import node.fs.mkdtemp
+import node.fs.readdir
+import node.fs.writeFile
+import node.os.tmpdir
+import node.path.path
+import node.process.Platform.win32
+import node.process.process
+import node.url.URL
 import addPath as coreAddPath
 import cacheDir as toolCacheCacheDir
 import debug as coreDebug
@@ -72,18 +72,18 @@ val wslHelp = GlobalScope.async(start = LAZY) {
     exec(
         commandLine = "wsl",
         args = arrayOf("--help"),
-        options = jsObject {
+        options = jso {
             ignoreReturnCode = true
             outStream = NullWritable()
             errStream = NullWritable()
-            listeners = jsObject {
+            listeners = jso {
                 stdout = {
                     stdoutBuilder.append(it)
-                    stdoutBuilderUtf16Le.append(it.toString("UTF-16LE"))
+                    stdoutBuilderUtf16Le.append(it.toString(utf16le))
                 }
                 stderr = {
                     stderrBuilder.append(it)
-                    stderrBuilderUtf16Le.append(it.toString("UTF-16LE"))
+                    stderrBuilderUtf16Le.append(it.toString(utf16le))
                 }
             }
         }
@@ -95,7 +95,7 @@ val wslHelp = GlobalScope.async(start = LAZY) {
 }
 
 val distribution by lazy {
-    val distributionId = coreGetInput("distribution", jsObject {
+    val distributionId = coreGetInput("distribution", jso {
         required = true
     })
 
@@ -124,7 +124,7 @@ val installationNeeded = GlobalScope.async(start = LAZY) {
             distribution.wslId,
             "true"
         ),
-        options = jsObject {
+        options = jso {
             ignoreReturnCode = true
             outStream = NullWritable()
             errStream = NullWritable()
@@ -133,12 +133,12 @@ val installationNeeded = GlobalScope.async(start = LAZY) {
 }
 
 val toolCacheDir = GlobalScope.async(start = LAZY) {
-    val fakeDir = mkdtempSync(path.join(tmpdir(), "setup_wsl_fake_dir_"), jsObject<`T$32`>())
+    val fakeDir = mkdtemp(path.join(tmpdir(), "setup_wsl_fake_dir_"))
     toolCacheCacheDir(fakeDir, distribution.distributionName, "${distribution.version}").await()
 }
 
 val useCache by lazy {
-    val input = coreGetInput("use-cache", jsObject {
+    val input = coreGetInput("use-cache", jso {
         required = true
     })
 
@@ -175,7 +175,7 @@ val distributionDirectory = GlobalScope.async(start = LAZY) {
 
     val restoredKey = if (useCache) cacheRestoreCache(arrayOf(cacheDirectory), cacheKey).await() else null
     if (restoredKey != null) {
-        if (existsSync(path.join(cacheDirectory, distribution.installerFile))) {
+        if (exists(path.join(cacheDirectory, distribution.installerFile))) {
             return@async cacheDirectory
         }
     }
@@ -183,12 +183,12 @@ val distributionDirectory = GlobalScope.async(start = LAZY) {
     val distributionDownload = toolCacheDownloadTool("${distribution.downloadUrl()}").await()
     var extractedDistributionDirectory = extractZip(distributionDownload)
 
-    if (!existsSync(path.join(extractedDistributionDirectory, distribution.installerFile))) {
-        extractedDistributionDirectory = readdirSync(extractedDistributionDirectory, jsObject<`T$35`>())
+    if (!exists(path.join(extractedDistributionDirectory, distribution.installerFile))) {
+        extractedDistributionDirectory = readdir(extractedDistributionDirectory)
             .asFlow()
             .filter { it.contains("""(?<!_(?:scale-(?:100|125|150|400)|ARM64))\.appx$""".toRegex()) }
             .map { extractZip(path.join(extractedDistributionDirectory, it)) }
-            .firstOrNull { existsSync(path.join(it, distribution.installerFile)) }
+            .firstOrNull { exists(path.join(it, distribution.installerFile)) }
             ?: error("'${distribution.installerFile}' not found for distribution '${distribution.userId}'")
     }
 
@@ -210,7 +210,7 @@ val wslConf by lazy {
 }
 
 val setAsDefault = GlobalScope.async(start = LAZY) {
-    val input = coreGetInput("set-as-default", jsObject {
+    val input = coreGetInput("set-as-default", jso {
         required = true
     })
 
@@ -223,7 +223,7 @@ val setAsDefault = GlobalScope.async(start = LAZY) {
 }
 
 val update by lazy {
-    coreGetBooleanInput("update", jsObject {
+    coreGetBooleanInput("update", jso {
         required = true
     })
 }
@@ -286,8 +286,8 @@ suspend fun main() {
         }
 
         if (wslShellCommand.isNotEmpty()
-            || !existsSync(wslShellWrapperPath)
-            || !existsSync(wslShellDistributionWrapperPath)
+            || !exists(wslShellWrapperPath)
+            || !exists(wslShellDistributionWrapperPath)
         ) {
             group("Write WSL Shell Wrapper", ::writeWslShellWrapper)
         }
@@ -334,7 +334,7 @@ suspend fun <T> group(name: String, fn: suspend () -> T): T {
 }
 
 suspend fun verifyWindowsEnvironment() {
-    check(process.platform == "win32") {
+    check(process.platform == win32) {
         "platform '${process.platform}' is not supported by this action, please verify your 'runs-on' setting"
     }
     check(ioWhich("wsl").await().isNotBlank() || ioWhich("wslconfig").await().isNotBlank()) {
@@ -349,7 +349,7 @@ suspend fun installDistribution() {
     exec(
         commandLine = """"${path.join(distributionDirectory(), distribution.installerFile)}"""",
         args = arrayOf("install", "--root"),
-        options = jsObject {
+        options = jso {
             input = Buffer.from("")
         }
     ).await()
@@ -389,7 +389,7 @@ suspend fun writeWslShellWrapper() {
             "-c",
             "true"
         ),
-        options = jsObject {
+        options = jso {
             ignoreReturnCode = true
         }
     ).await() != 0)
@@ -404,7 +404,7 @@ suspend fun writeWslShellWrapper() {
                 "-u",
                 wslShellUser
             ),
-            options = jsObject {
+            options = jso {
                 ignoreReturnCode = true
             }
         ).await() == 0
@@ -491,22 +491,24 @@ suspend fun writeWslShellWrapper() {
     }
     """).trimIndent().lines().joinToString("\r\n")
 
-    if (wslShellCommand.isNotEmpty() || !existsSync(wslShellWrapperPath)) {
-        writeFileSync(
+    if (wslShellCommand.isNotEmpty() || !exists(wslShellWrapperPath)) {
+        writeFile(
             wslShellWrapperPath,
-            scriptContent.replace("<wsl distribution parameter> ", ""),
-            jsObject<`T$45`>()
+            scriptContent.replace("<wsl distribution parameter> ", "")
         )
     }
 
-
-    if (wslShellCommand.isNotEmpty() || !existsSync(wslShellDistributionWrapperPath)) {
-        writeFileSync(
+    if (wslShellCommand.isNotEmpty() || !exists(wslShellDistributionWrapperPath)) {
+        writeFile(
             wslShellDistributionWrapperPath,
-            scriptContent.replace("<wsl distribution parameter>", "--distribution ${wslId()}"),
-            jsObject<`T$45`>()
+            scriptContent.replace("<wsl distribution parameter>", "--distribution ${wslId()}")
         )
     }
 
     coreAddPath(wslShellWrapperDirectory)
 }
+
+suspend fun exists(path: PathLike) = accessAsync(path)
+    .then { true }
+    .catch { false }
+    .await()

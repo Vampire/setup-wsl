@@ -31,9 +31,8 @@ build-kotlinx-serialization = "1.4.1"
 build-node = "16.18.1"
 build-vercel-ncc = "0.36.1"
 kotlin = "1.8.10"
-kotlin-extensions = "1.0.1-pre.156-kotlin-1.5.0"
+kotlin-wrappers = "1.0.0-pre.491"
 kotlinx-coroutines = "1.6.4"
-kotlinx-nodejs = "0.0.7"
 nullWritable = "1.0.5"
 semver = "7.3.8"
 types-semver = "7.3.13"
@@ -52,9 +51,10 @@ build-kotlinx-serialization-bom = { module = "org.jetbrains.kotlinx:kotlinx-seri
 build-kotlinx-serialization-core = { module = "org.jetbrains.kotlinx:kotlinx-serialization-core" }
 build-kotlinx-serialization-json = { module = "org.jetbrains.kotlinx:kotlinx-serialization-json" }
 build-vercel-ncc = { module = "vercel:ncc", version.ref = "build-vercel-ncc" }
-kotlin-extensions = { module = "org.jetbrains:kotlin-extensions", version.ref = "kotlin-extensions" }
+kotlin-wrapper-js = { module = "org.jetbrains.kotlin-wrappers:kotlin-js" }
+kotlin-wrapper-node = { module = "org.jetbrains.kotlin-wrappers:kotlin-node" }
+kotlin-wrappers-bom = { module = "org.jetbrains.kotlin-wrappers:kotlin-wrappers-bom", version.ref = "kotlin-wrappers" }
 kotlinx-coroutines-core = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-core", version.ref = "kotlinx-coroutines" }
-kotlinx-nodejs = { module = "org.jetbrains.kotlinx:kotlinx-nodejs", version.ref = "kotlinx-nodejs" }
 nullWritable = { module = "<unscoped>:null-writable", version.ref = "nullWritable" }
 semver = { module = "<unscoped>:semver", version.ref = "semver" }
 types-semver = { module = "types:semver", version.ref = "types-semver" }

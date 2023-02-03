@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 Björn Kautler
+ * Copyright 2020-2023 Björn Kautler
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,8 +16,8 @@
 
 package net.kautler.nccpacker
 
-import Buffer
-import kotlinext.js.Object
+import js.core.Object
+import node.buffer.Buffer
 import kotlin.js.Promise
 
 @JsModule("@vercel/ncc")
