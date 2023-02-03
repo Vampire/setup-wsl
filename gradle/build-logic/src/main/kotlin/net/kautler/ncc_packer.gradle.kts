@@ -82,7 +82,8 @@ val libs = the<LibrariesForLibs>()
 
 dependencies {
     implementation(libs.kotlinx.coroutines.core)
-    implementation(libs.kotlin.extensions)
-    implementation(libs.kotlinx.nodejs)
+    implementation(platform(libs.kotlin.wrappers.bom))
+    implementation(libs.kotlin.wrapper.js)
+    implementation(libs.kotlin.wrapper.node)
     implementation(npm(libs.build.vercel.ncc, generateExternals = false))
 }

@@ -186,6 +186,11 @@
   resolved "https://registry.yarnpkg.com/@types/node/-/node-18.11.0.tgz#f38c7139247a1d619f6cc6f27b072606af7c289d"
   integrity sha512-IOXCvVRToe7e0ny7HpT/X9Rb2RYtElG1a+VshjwT00HxrM2dWBApHQoqsI6WiY7Q03vdf2bCrIGzVrkF/5t10w==
 
+"@types/node@^18.11.18":
+  version "18.11.18"
+  resolved "https://registry.yarnpkg.com/@types/node/-/node-18.11.18.tgz#8dfb97f0da23c2293e554c5a50d61ef134d7697f"
+  integrity sha512-DHQpWGjyQKSHj3ebjFI/wRKcqQcdR+MoFBygntYOZytCqNfkd2ZC4ARDJ2DQqhjH5p85Nnd3jhUJIXrszFX/JA==
+
 "@types/semver@7.3.13":
   version "7.3.13"
   resolved "https://registry.yarnpkg.com/@types/semver/-/semver-7.3.13.tgz#da4bfd73f49bd541d28920ab0e2bf0ee80f71c91"
@@ -379,6 +384,14 @@ dukat@0.5.7:
   version "0.5.7"
   resolved "https://registry.yarnpkg.com/dukat/-/dukat-0.5.7.tgz#4b3981f3fbde993546cc6f674b9027923f7293c6"
   integrity sha512-PBM+B1oIE/aHbcrtdqX8yHfwdfdJ5ejJzkbU2LOW7bbAC3r1EcEyrS9ytFdHMPv06gVkF2QO77zGcMbGcsmXaA==
+  dependencies:
+    google-protobuf "3.12.2"
+    typescript "3.9.5"
+
+dukat@0.5.8-rc.4:
+  version "0.5.8-rc.4"
+  resolved "https://registry.yarnpkg.com/dukat/-/dukat-0.5.8-rc.4.tgz#90384dcb50b14c26f0e99dae92b2dea44f5fce21"
+  integrity sha512-ZnMt6DGBjlVgK2uQamXfd7uP/AxH7RqI0BL9GLrrJb2gKdDxvJChWy+M9AQEaL+7/6TmxzJxFOsRiInY9oGWTA==
   dependencies:
     google-protobuf "3.12.2"
     typescript "3.9.5"

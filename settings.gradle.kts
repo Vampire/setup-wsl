@@ -55,18 +55,6 @@ dependencyResolutionManagement {
             }
         }
         mavenCentral()
-        //TODO: Remove after getting rid of kotlin-extensions
-        maven("https://maven.pkg.jetbrains.space/kotlin/p/kotlin/kotlin-js-wrappers/") {
-            content {
-                includeModule("org.jetbrains", "kotlin-extensions")
-            }
-        }
-        //TODO: Remove after getting rid of kotlinx-nodejs
-        jcenter {
-            content {
-                includeModule("org.jetbrains.kotlinx", "kotlinx-nodejs")
-            }
-        }
     }
     // work-around for https://youtrack.jetbrains.com/issue/KT-56300
     //repositoriesMode.set(FAIL_ON_PROJECT_REPOS)
