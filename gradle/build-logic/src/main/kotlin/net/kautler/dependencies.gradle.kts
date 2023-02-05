@@ -16,6 +16,7 @@
 
 package net.kautler
 
+import com.autonomousapps.DependencyAnalysisExtension
 import net.kautler.util.NullOutputStream
 import net.kautler.util.add
 import net.kautler.util.ignoredDependencies
@@ -25,6 +26,10 @@ import java.security.MessageDigest
 
 plugins {
     id("net.kautler.dependency-updates-report-aggregation")
+    // part of work-around for https://github.com/autonomousapps/dependency-analysis-android-gradle-plugin/issues/719
+    if (JavaVersion.current().isJava11Compatible) {
+        id("com.autonomousapps.dependency-analysis")
+    }
 }
 
 val majorVersion by extra("$version".substringBefore('.'))
@@ -74,5 +79,24 @@ tasks.dependencyUpdates {
         add(group = "org.jetbrains.kotlin", name = "kotlin-sam-with-receiver")
         add(group = "org.jetbrains.kotlin", name = "kotlin-scripting-compiler-embeddable")
         add(group = "org.jetbrains.kotlin", name = "kotlin-stdlib-jdk8")
+    }
+}
+
+// part of work-around for https://github.com/autonomousapps/dependency-analysis-android-gradle-plugin/issues/719
+if (JavaVersion.current().isJava11Compatible) {
+    configure<DependencyAnalysisExtension> {
+        issues {
+            all {
+                onAny {
+                    severity("fail")
+                }
+            }
+        }
+    }
+}
+
+tasks.configureEach {
+    if (name == "buildHealth") {
+        dependsOn(gradle.includedBuilds.map { it.task(":buildHealth") })
     }
 }

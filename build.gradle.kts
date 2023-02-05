@@ -14,8 +14,30 @@
  * limitations under the License.
  */
 
+// part of work-around for https://github.com/autonomousapps/dependency-analysis-android-gradle-plugin/issues/719
+buildscript {
+    if (!JavaVersion.current().isJava11Compatible) {
+        dependencies {
+            components {
+                listOf(
+                    "com.autonomousapps:dependency-analysis-gradle-plugin",
+                    "com.autonomousapps:graph-support"
+                ).forEach {
+                    withModule(it) {
+                        allVariants {
+                            attributes {
+                                attribute(TargetJvmVersion.TARGET_JVM_VERSION_ATTRIBUTE, 8)
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+}
+
 plugins {
-    id(libs.plugins.convention.versions.get().pluginId)
+    id(libs.plugins.convention.dependencies.get().pluginId)
     id(libs.plugins.convention.node.get().pluginId)
     id(libs.plugins.convention.github.actions.get().pluginId)
     id(libs.plugins.convention.readme.get().pluginId)

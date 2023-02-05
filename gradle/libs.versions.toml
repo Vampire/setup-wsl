@@ -21,10 +21,12 @@ actions-io = "1.1.2"
 actions-tool-cache = "2.0.1"
 build-dukat = "0.5.7"
 build-github-api = "1.117"
+build-gradle-plugin-dependency-analysis = "1.19.0"
 build-gradle-plugin-github = "1.4.0"
 build-gradle-plugin-grgit = "4.1.1"
 build-gradle-plugin-release = "2.8.1"
 build-gradle-plugin-versions = "0.36.0"
+build-inject = "1"
 build-kaml = "0.51.0"
 build-kotlin = "1.7.10"
 build-kotlinx-serialization = "1.4.1"
@@ -46,6 +48,7 @@ actions-http-client = { module = "actions:http-client", version.ref = "actions-h
 actions-io = { module = "actions:io", version.ref = "actions-io" }
 actions-tool-cache = { module = "actions:tool-cache", version.ref = "actions-tool-cache" }
 build-github-api = { module = "org.kohsuke:github-api", version.ref = "build-github-api" }
+build-inject = { module = "javax.inject:javax.inject", version.ref = "build-inject" }
 build-kaml = { module = "com.charleskorn.kaml:kaml", version.ref = "build-kaml" }
 build-kotlinx-serialization-bom = { module = "org.jetbrains.kotlinx:kotlinx-serialization-bom", version.ref = "build-kotlinx-serialization" }
 build-kotlinx-serialization-core = { module = "org.jetbrains.kotlinx:kotlinx-serialization-core" }
@@ -63,13 +66,14 @@ workflows-kotlin-main-kts = { module = "org.jetbrains.kotlin:kotlin-main-kts", v
 workflows-kotlin-scripting-compiler = { module = "org.jetbrains.kotlin:kotlin-scripting-compiler", version.ref = "workflows-kotlin" }
 
 [plugins]
+convention-dependencies = { id = "net.kautler.dependencies", version = "?" }
 convention-dependency-updates-report-aggregation = { id = "net.kautler.dependency-updates-report-aggregation", version = "?" }
 convention-github_actions = { id = "net.kautler.github_actions", version = "?" }
 convention-ncc-packer = { id = "net.kautler.ncc_packer", version = "?" }
 convention-node = { id = "net.kautler.node", version = "?" }
 convention-publishing = { id = "net.kautler.publishing", version = "?" }
 convention-readme = { id = "net.kautler.readme", version = "?" }
-convention-versions = { id = "net.kautler.versions", version = "?" }
+dependency-analysis = { id = "com.autonomousapps.dependency-analysis", version.ref = "build-gradle-plugin-dependency-analysis" }
 github = { id = "net.wooga.github", version.ref = "build-gradle-plugin-github" }
 grgit = { id = "org.ajoberstar.grgit", version.ref = "build-gradle-plugin-grgit" }
 kotlin-js = { id = "org.jetbrains.kotlin.js", version.ref = "kotlin" }

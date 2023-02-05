@@ -46,7 +46,7 @@ import kotlin.LazyThreadSafetyMode.NONE
 
 plugins {
     // needed for accessing majorVersion
-    id("net.kautler.versions")
+    id("net.kautler.dependencies")
     id("org.ajoberstar.grgit")
     id("net.wooga.github")
 }
@@ -98,7 +98,7 @@ val releaseTagName by lazy(NONE) {
     releasePlugin.tagName()!!
 }
 
-val github by lazy(NONE) {
+private val github by lazy(NONE) {
     GitHub.connectUsingOAuth(extra["github.token"] as String)!!
 }
 
