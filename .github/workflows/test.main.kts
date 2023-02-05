@@ -21,6 +21,8 @@
 import it.krzeminski.githubactions.actions.actions.CacheRestoreV3
 import it.krzeminski.githubactions.actions.actions.CacheSaveV3
 import it.krzeminski.githubactions.actions.actions.CheckoutV3
+import it.krzeminski.githubactions.actions.actions.SetupJavaV3
+import it.krzeminski.githubactions.actions.actions.SetupJavaV3.Distribution.Temurin
 import it.krzeminski.githubactions.actions.burrunan.GradleCacheActionV1
 import it.krzeminski.githubactions.actions.vampire.SetupWslV1
 import it.krzeminski.githubactions.actions.vampire.SetupWslV1.Distribution
@@ -149,6 +151,13 @@ workflowWithCopyright(
         uses(
             name = "Checkout",
             action = CheckoutV3()
+        )
+        uses(
+            name = "Setup Java 11",
+            action = SetupJavaV3(
+                javaVersion = "11",
+                distribution = Temurin
+            )
         )
         uses(
             name = "Build",

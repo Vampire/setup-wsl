@@ -49,6 +49,12 @@ jobs:
       name: Checkout
       uses: actions/checkout@v3
     - id: step-2
+      name: Setup Java 11
+      uses: actions/setup-java@v3
+      with:
+        java-version: 11
+        distribution: temurin
+    - id: step-3
       name: Build
       uses: burrunan/gradle-cache-action@v1
       with:
@@ -59,7 +65,7 @@ jobs:
           --info
           --stacktrace
           --scan
-    - id: step-3
+    - id: step-4
       name: Save built artifacts to cache
       uses: actions/cache/save@v3
       with:

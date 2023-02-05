@@ -20,6 +20,7 @@ plugins {
     `kotlin-dsl`
     alias(libs.plugins.kotlin.serialization)
     alias(libs.plugins.versions)
+    alias(libs.plugins.dependency.analysis)
 }
 
 dependencies {
@@ -27,6 +28,22 @@ dependencies {
     implementation(platform(libs.build.kotlinx.serialization.bom))
     implementation(libs.build.kotlinx.serialization.core)
     implementation(libs.build.kotlinx.serialization.json)
+}
+
+dependencyAnalysis {
+    dependencies {
+        bundle("com.github.ben-manes.versions.gradle.plugin") {
+            includeDependency("com.github.ben-manes.versions:com.github.ben-manes.versions.gradle.plugin")
+            includeDependency("com.github.ben-manes:gradle-versions-plugin")
+        }
+    }
+    issues {
+        all {
+            onAny {
+                severity("fail")
+            }
+        }
+    }
 }
 
 tasks.withType<KotlinCompile>().configureEach {

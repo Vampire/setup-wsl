@@ -20,7 +20,7 @@ import java.security.MessageDigest
 
 plugins {
     // needed for accessing majorVersion
-    id("net.kautler.versions")
+    id("net.kautler.dependencies")
     `lifecycle-base`
 }
 

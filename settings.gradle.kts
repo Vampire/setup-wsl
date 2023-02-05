@@ -17,6 +17,10 @@
 import org.gradle.api.initialization.resolve.RepositoriesMode.PREFER_SETTINGS
 
 pluginManagement {
+    require(JavaVersion.current().isJava11Compatible) {
+        "This build requires Gradle to be run with at least Java 11"
+    }
+
     includeBuild("gradle/build-logic")
     repositories {
         mavenCentral()

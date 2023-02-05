@@ -19,6 +19,8 @@
 @file:Import("workflow-with-copyright.main.kts")
 
 import it.krzeminski.githubactions.actions.actions.CheckoutV3
+import it.krzeminski.githubactions.actions.actions.SetupJavaV3
+import it.krzeminski.githubactions.actions.actions.SetupJavaV3.Distribution.Temurin
 import it.krzeminski.githubactions.actions.burrunan.GradleCacheActionV1
 import it.krzeminski.githubactions.domain.RunnerType.WindowsLatest
 import it.krzeminski.githubactions.domain.triggers.Cron
@@ -53,6 +55,13 @@ workflowWithCopyright(
         uses(
             name = "Checkout",
             action = CheckoutV3()
+        )
+        uses(
+            name = "Setup Java 11",
+            action = SetupJavaV3(
+                javaVersion = "11",
+                distribution = Temurin
+            )
         )
         uses(
             name = "Check Dependency Versions",
