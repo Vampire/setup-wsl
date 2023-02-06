@@ -19,8 +19,6 @@ package net.kautler.dao.result
 import com.github.benmanes.gradle.versions.reporter.result.Dependency
 import kotlinx.serialization.ExperimentalSerializationApi
 import kotlinx.serialization.KSerializer
-import kotlinx.serialization.MissingFieldException
-import kotlinx.serialization.Serializer
 import kotlinx.serialization.builtins.nullable
 import kotlinx.serialization.builtins.serializer
 import kotlinx.serialization.descriptors.buildClassSerialDescriptor
@@ -31,14 +29,13 @@ import kotlinx.serialization.encoding.Encoder
 import kotlinx.serialization.encoding.decodeStructure
 import kotlinx.serialization.encoding.encodeStructure
 
-@ExperimentalSerializationApi
-@Serializer(forClass = Dependency::class)
 object DependencySerializer : KSerializer<Dependency> {
     override val descriptor = buildClassSerialDescriptor("com.github.benmanes.gradle.versions.reporter.result.Dependency") {
-        element<String>("group")
-        element<String>("name")
-        element<String>("version")
+        element<String?>("group")
+        element<String?>("name")
+        element<String?>("version")
         element<String?>("projectUrl")
+        element<String?>("userReason")
     }
 
     override fun deserialize(decoder: Decoder) = decoder.decodeStructure(descriptor) {
@@ -46,38 +43,32 @@ object DependencySerializer : KSerializer<Dependency> {
         var name: String? = null
         var version: String? = null
         var projectUrl: String? = null
+        var userReason: String? = null
 
         while (true) {
+            @OptIn(ExperimentalSerializationApi::class)
             when (val index = decodeElementIndex(descriptor)) {
                 DECODE_DONE -> break
-                0 -> group = decodeStringElement(descriptor, index)
-                1 -> name = decodeStringElement(descriptor, index)
-                2 -> version = decodeStringElement(descriptor, index)
+                0 -> group = decodeNullableSerializableElement(descriptor, index, String.serializer().nullable)
+                1 -> name = decodeNullableSerializableElement(descriptor, index, String.serializer().nullable)
+                2 -> version = decodeNullableSerializableElement(descriptor, index, String.serializer().nullable)
                 3 -> projectUrl = decodeNullableSerializableElement(descriptor, index, String.serializer().nullable)
+                4 -> userReason = decodeNullableSerializableElement(descriptor, index, String.serializer().nullable)
                 else -> error("Unexpected index $index")
             }
         }
 
-        listOf(
-            "group" to group,
-            "name" to name,
-            "version" to version
-        )
-            .filter { it.second == null }
-            .map { it.first }
-            .toList()
-            .takeIf { it.isNotEmpty() }
-            ?.also { throw MissingFieldException(it, descriptor.serialName) }
-
-        Dependency(group, name, version, projectUrl)
+        Dependency(group, name, version, projectUrl, userReason)
     }
 
     override fun serialize(encoder: Encoder, value: Dependency) {
+        @OptIn(ExperimentalSerializationApi::class)
         encoder.encodeStructure(descriptor) {
-            encodeStringElement(descriptor, 0, value.group)
-            encodeStringElement(descriptor, 1, value.name)
-            encodeStringElement(descriptor, 2, value.version)
+            encodeNullableSerializableElement(descriptor, 0, String.serializer(), value.group)
+            encodeNullableSerializableElement(descriptor, 1, String.serializer(), value.name)
+            encodeNullableSerializableElement(descriptor, 2, String.serializer(), value.version)
             encodeNullableSerializableElement(descriptor, 3, String.serializer(), value.projectUrl)
+            encodeNullableSerializableElement(descriptor, 4, String.serializer(), value.userReason)
         }
     }
 }

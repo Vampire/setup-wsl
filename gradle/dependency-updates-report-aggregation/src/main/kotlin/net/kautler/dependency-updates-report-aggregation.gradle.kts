@@ -27,7 +27,7 @@ import kotlinx.serialization.json.encodeToStream
 import net.kautler.dao.result.ResultSerializer
 import net.kautler.util.IgnoredDependency
 import net.kautler.util.matches
-import net.kautler.util.updateCounts
+import net.kautler.util.withUpdatedCounts
 import org.gradle.api.attributes.Category.CATEGORY_ATTRIBUTE
 import org.gradle.api.attributes.Category.VERIFICATION
 import org.gradle.api.attributes.VerificationType.VERIFICATION_TYPE_ATTRIBUTE
@@ -102,6 +102,7 @@ if (gradle.parent == null && parent == null) {
                 current.dependencies.addAll(dependencyUpdatesResult.current.dependencies)
                 outdated.dependencies.addAll(dependencyUpdatesResult.outdated.dependencies)
                 exceeded.dependencies.addAll(dependencyUpdatesResult.exceeded.dependencies)
+                undeclared.dependencies.addAll(dependencyUpdatesResult.undeclared.dependencies)
                 unresolved.dependencies.addAll(dependencyUpdatesResult.unresolved.dependencies)
             }
 
@@ -117,24 +118,24 @@ if (gradle.parent == null && parent == null) {
                         && (it.version == "+")
             }
 
-            updateCounts()
+            val result = withUpdatedCounts
 
-            PlainTextReporter(project, revisionLevel(), gradleReleaseChannelLevel())
-                .write(System.out, this)
+            PlainTextReporter(project, revision, gradleReleaseChannel)
+                .write(System.out, result)
 
             if (ignored.isNotEmpty()) {
-                println("\nThe following dependencies have later ${revisionLevel()} versions but were ignored:")
+                println("\nThe following dependencies have later $revision versions but were ignored:")
                 ignored.forEach {
-                    println(" - ${it.group}:${it.name} [${it.version} -> ${it.available.getProperty(revisionLevel())}]")
+                    println(" - ${it.group}:${it.name} [${it.version} -> ${it.available[revision]}]")
                     it.projectUrl?.let { println("     $it") }
                 }
             }
 
-            if (gradle.current.isFailure || (unresolved.count != 0)) {
+            if (gradle.current.isFailure || (result.unresolved.count != 0)) {
                 error("Unresolved libraries found")
             }
 
-            if (gradle.current.isUpdateAvailable || (outdated.count != 0)) {
+            if (gradle.current.isUpdateAvailable || (result.outdated.count != 0)) {
                 error("Outdated libraries found")
             }
         }

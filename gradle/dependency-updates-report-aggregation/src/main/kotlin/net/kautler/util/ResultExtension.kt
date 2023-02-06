@@ -16,12 +16,16 @@
 
 package net.kautler.util
 
+import com.github.benmanes.gradle.versions.reporter.result.DependenciesGroup
 import com.github.benmanes.gradle.versions.reporter.result.Result
 
-fun Result.updateCounts() {
-    val dependencyGroups = listOf(current, outdated, exceeded, unresolved)
-    dependencyGroups.forEach {
-        it.count = it.dependencies.size
-    }
-    count = dependencyGroups.map { it.count }.sum()
-}
+val Result.withUpdatedCounts: Result
+    get() = Result(
+        listOf(current, outdated, exceeded, undeclared, unresolved).sumOf { it.dependencies.size },
+        DependenciesGroup(current.dependencies.size, current.dependencies),
+        DependenciesGroup(outdated.dependencies.size, outdated.dependencies),
+        DependenciesGroup(exceeded.dependencies.size, exceeded.dependencies),
+        DependenciesGroup(undeclared.dependencies.size, undeclared.dependencies),
+        DependenciesGroup(unresolved.dependencies.size, unresolved.dependencies),
+        gradle
+    )
