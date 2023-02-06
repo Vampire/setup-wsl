@@ -78,6 +78,7 @@ if (gradle.parent == null && parent == null) {
 
     dependencies {
         includedBuildNames
+            .filterNot { it == "conditional-refresh-versions" }
             .forEach { dependencyUpdatesResults(":$it") }
     }
 
