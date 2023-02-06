@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import de.fayard.refreshVersions.core.FeatureFlag.GRADLE_UPDATES
 import org.gradle.api.initialization.resolve.RepositoriesMode.PREFER_SETTINGS
 
 pluginManagement {
@@ -29,7 +30,39 @@ pluginManagement {
 }
 
 plugins {
+    id("de.fayard.refreshVersions") version "0.51.0"
     id("com.gradle.enterprise") version "3.6.1"
+}
+
+refreshVersions {
+    featureFlags {
+        disable(GRADLE_UPDATES)
+    }
+    rejectVersionIf {
+        candidate.stabilityLevel.isLessStableThan(current.stabilityLevel)
+    }
+    // work-around for https://github.com/jmfayard/refreshVersions/issues/662
+    file("build/tmp/refreshVersions").mkdirs()
+    // work-around for https://github.com/jmfayard/refreshVersions/issues/640
+    versionsPropertiesFile = file("build/tmp/refreshVersions/versions.properties")
+}
+
+gradle.rootProject {
+    tasks.configureEach {
+        if (name == "refreshVersions") {
+            doLast {
+                // work-around for https://github.com/jmfayard/refreshVersions/issues/661
+                // and https://github.com/jmfayard/refreshVersions/issues/663
+                file("gradle/libs.versions.toml").apply {
+                    readText()
+                        .replace("⬆ =", " ⬆ =")
+                        .replace("]\n\n", "]\n")
+                        .replace("""(?s)^(.*)(\n\Q[plugins]\E[^\[]*)(\n.*)$""".toRegex(), "$1$3$2")
+                        .also { writeText(it) }
+                }
+            }
+        }
+    }
 }
 
 dependencyResolutionManagement {

@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import de.fayard.refreshVersions.core.FeatureFlag.GRADLE_UPDATES
 import org.gradle.api.initialization.resolve.RepositoriesMode.FAIL_ON_PROJECT_REPOS
 
 pluginManagement {
@@ -21,6 +22,53 @@ pluginManagement {
     repositories {
         mavenCentral()
         gradlePluginPortal()
+    }
+}
+
+plugins {
+    id("de.fayard.refreshVersions") version "0.51.0"
+}
+
+refreshVersions {
+    featureFlags {
+        disable(GRADLE_UPDATES)
+    }
+    rejectVersionIf {
+        candidate.stabilityLevel.isLessStableThan(current.stabilityLevel)
+    }
+    // work-around for https://github.com/jmfayard/refreshVersions/issues/662
+    file("build/tmp/refreshVersions").mkdirs()
+    // work-around for https://github.com/jmfayard/refreshVersions/issues/640
+    versionsPropertiesFile = file("build/tmp/refreshVersions/versions.properties")
+}
+
+// work-around for https://github.com/jmfayard/refreshVersions/issues/596
+gradle.rootProject {
+    tasks.configureEach {
+        if (name == "refreshVersions") {
+            doFirst {
+                copy {
+                    from(gradle.parent!!.rootProject.file("gradle/libs.versions.toml"))
+                    into("gradle")
+                }
+            }
+            doLast {
+                // work-around for https://github.com/jmfayard/refreshVersions/issues/661
+                // and https://github.com/jmfayard/refreshVersions/issues/663
+                file("gradle/libs.versions.toml").apply {
+                    readText()
+                        .replace("⬆ =", " ⬆ =")
+                        .replace("]\n\n", "]\n")
+                        .replace("""(?s)^(.*)(\n\Q[plugins]\E[^\[]*)(\n.*)$""".toRegex(), "$1$3$2")
+                        .also { writeText(it) }
+                }
+                copy {
+                    from("gradle/libs.versions.toml")
+                    into(gradle.parent!!.rootProject.file("gradle"))
+                }
+                delete("gradle")
+            }
+        }
     }
 }
 
