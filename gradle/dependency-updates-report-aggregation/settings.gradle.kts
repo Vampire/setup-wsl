@@ -15,13 +15,18 @@
  */
 
 import de.fayard.refreshVersions.core.FeatureFlag.GRADLE_UPDATES
+import net.kautler.conditionalRefreshVersions
 import org.gradle.api.initialization.resolve.RepositoriesMode.FAIL_ON_PROJECT_REPOS
 
-plugins {
-    id("de.fayard.refreshVersions") version "0.51.0"
+pluginManagement {
+    includeBuild("../conditional-refresh-versions")
 }
 
-refreshVersions {
+plugins {
+    id("net.kautler.conditional-refresh-versions")
+}
+
+conditionalRefreshVersions {
     featureFlags {
         disable(GRADLE_UPDATES)
     }

@@ -18,6 +18,7 @@ build-github-api = "1.117"
 build-gradle-plugin-dependency-analysis = "1.19.0"
 build-gradle-plugin-github = "1.4.0"
 build-gradle-plugin-grgit = "4.1.1"
+build-gradle-plugin-refresh-versions = "0.51.0"
 build-gradle-plugin-release = "2.8.1"
 build-gradle-plugin-versions = "0.45.0"
 build-inject = "1"
@@ -67,5 +68,6 @@ github = { id = "net.wooga.github", version.ref = "build-gradle-plugin-github" }
 grgit = { id = "org.ajoberstar.grgit", version.ref = "build-gradle-plugin-grgit" }
 kotlin-js = { id = "org.jetbrains.kotlin.js", version.ref = "kotlin" }
 kotlin-serialization = { id = "org.jetbrains.kotlin.plugin.serialization", version.ref = "build-kotlin" }
+refresh-versions = { id = "de.fayard.refreshVersions", version.ref = "build-gradle-plugin-refresh-versions" }
 release = { id = "net.researchgate.release", version.ref = "build-gradle-plugin-release" }
 versions = { id = "com.github.ben-manes.versions", version.ref = "build-gradle-plugin-versions" }
