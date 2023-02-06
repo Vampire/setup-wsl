@@ -19,7 +19,6 @@ package net.kautler.dao.result
 import com.github.benmanes.gradle.versions.reporter.result.VersionAvailable
 import kotlinx.serialization.ExperimentalSerializationApi
 import kotlinx.serialization.KSerializer
-import kotlinx.serialization.Serializer
 import kotlinx.serialization.builtins.nullable
 import kotlinx.serialization.builtins.serializer
 import kotlinx.serialization.descriptors.buildClassSerialDescriptor
@@ -30,8 +29,6 @@ import kotlinx.serialization.encoding.Encoder
 import kotlinx.serialization.encoding.decodeStructure
 import kotlinx.serialization.encoding.encodeStructure
 
-@ExperimentalSerializationApi
-@Serializer(forClass = VersionAvailable::class)
 object VersionAvailableSerializer : KSerializer<VersionAvailable> {
     override val descriptor = buildClassSerialDescriptor("com.github.benmanes.gradle.versions.reporter.result.VersionAvailable") {
         element<String?>("release")
@@ -45,6 +42,7 @@ object VersionAvailableSerializer : KSerializer<VersionAvailable> {
         var integration: String? = null
 
         while (true) {
+            @OptIn(ExperimentalSerializationApi::class)
             when (val index = decodeElementIndex(descriptor)) {
                 DECODE_DONE -> break
                 0 -> release = decodeNullableSerializableElement(descriptor, index, String.serializer().nullable)
@@ -58,6 +56,7 @@ object VersionAvailableSerializer : KSerializer<VersionAvailable> {
     }
 
     override fun serialize(encoder: Encoder, value: VersionAvailable) {
+        @OptIn(ExperimentalSerializationApi::class)
         encoder.encodeStructure(descriptor) {
             encodeNullableSerializableElement(descriptor, 0, String.serializer(), value.release)
             encodeNullableSerializableElement(descriptor, 1, String.serializer(), value.milestone)

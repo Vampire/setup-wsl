@@ -21,7 +21,6 @@ import com.github.benmanes.gradle.versions.reporter.result.Dependency
 import kotlinx.serialization.ExperimentalSerializationApi
 import kotlinx.serialization.KSerializer
 import kotlinx.serialization.MissingFieldException
-import kotlinx.serialization.Serializer
 import kotlinx.serialization.builtins.SetSerializer
 import kotlinx.serialization.descriptors.buildClassSerialDescriptor
 import kotlinx.serialization.descriptors.element
@@ -32,8 +31,6 @@ import kotlinx.serialization.encoding.decodeStructure
 import kotlinx.serialization.encoding.encodeStructure
 import java.util.SortedSet
 
-@ExperimentalSerializationApi
-@Serializer(forClass = DependenciesGroup::class)
 class DependenciesGroupSerializer<E : Dependency>(
     private val elementSerializer: KSerializer<E>
 ) : KSerializer<DependenciesGroup<E>> {
@@ -63,9 +60,12 @@ class DependenciesGroupSerializer<E : Dependency>(
             .map { it.first }
             .toList()
             .takeIf { it.isNotEmpty() }
-            ?.also { throw MissingFieldException(it, descriptor.serialName) }
+            ?.also {
+                @OptIn(ExperimentalSerializationApi::class)
+                throw MissingFieldException(it, descriptor.serialName)
+            }
 
-        DependenciesGroup(count!!, dependencies)
+        DependenciesGroup(count!!, dependencies!!.toMutableSet())
     }
 
     override fun serialize(encoder: Encoder, value: DependenciesGroup<E>) {
