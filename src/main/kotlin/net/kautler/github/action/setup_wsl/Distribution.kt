@@ -16,9 +16,11 @@
 
 package net.kautler.github.action.setup_wsl
 
-import HttpClient
 import SemVer
-import exec
+import actions.core.debug
+import actions.core.info
+import actions.exec.exec
+import actions.http.client.HttpClient
 import js.core.jso
 import js.core.recordOf
 import kotlinx.coroutines.CoroutineStart.LAZY
@@ -28,8 +30,6 @@ import kotlinx.coroutines.async
 import kotlinx.coroutines.await
 import org.w3c.dom.url.URL
 import RangeOptions as SemVerRangeOptions
-import debug as coreDebug
-import info as coreInfo
 
 val distributions = listOf(
     Alpine,
@@ -445,8 +445,8 @@ private suspend inline fun <T> retry(amount: Int, crossinline block: suspend () 
             return block()
         }.onFailure {
             if (i != 5) {
-                coreDebug(it.stackTraceToString())
-                coreInfo("Failure happened, retrying (${it.message ?: it})")
+                debug(it.stackTraceToString())
+                info("Failure happened, retrying (${it.message ?: it})")
             }
         }
     }.last().getOrThrow<Nothing>()

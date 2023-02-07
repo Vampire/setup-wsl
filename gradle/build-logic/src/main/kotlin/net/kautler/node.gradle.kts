@@ -131,14 +131,9 @@ configure<NodeJsRootExtension> {
 dependencies {
     implementation(libs.kotlinx.coroutines.core)
     implementation(platform(libs.kotlin.wrappers.bom))
+    implementation(libs.kotlin.wrapper.actions.toolkit)
     implementation(libs.kotlin.wrapper.js)
     implementation(libs.kotlin.wrapper.node)
-    implementation(npm(libs.actions.cache))
-    implementation(npm(libs.actions.core))
-    implementation(npm(libs.actions.exec))
-    implementation(npm(libs.actions.http.client))
-    implementation(npm(libs.actions.io))
-    implementation(npm(libs.actions.tool.cache))
     implementation(npm(libs.types.semver))
     implementation(npm(libs.semver, generateExternals = false))
     implementation(npm(libs.nullWritable))
@@ -146,16 +141,6 @@ dependencies {
 
 tasks.withType(IntegratedDukatTask::class).configureEach {
     doLast {
-        // work-around for https://github.com/Kotlin/dukat/issues/240
-        addJsModuleAnnotations(
-            this,
-            "core.module_@actions_core.kt" to "@actions/core",
-            "io.module_@actions_io.kt" to "@actions/io",
-            "exec.module_@actions_exec.kt" to "@actions/exec",
-            "index.module_@actions_http-client.kt" to "@actions/http-client",
-            "tool-cache.module_@actions_tool-cache.kt" to "@actions/tool-cache",
-            "cache.module_@actions_cache.kt" to "@actions/cache"
-        )
         // work-around for https://github.com/Kotlin/dukat/issues/397
         deleteExternalsFiles(
             this,
@@ -164,31 +149,12 @@ tasks.withType(IntegratedDukatTask::class).configureEach {
         )
         fixExternalsFiles(
             this,
-            "index.module_@actions_http-client.kt" to listOf(
-                """\Qimport http.IncomingMessage\E$""" to "import node.http.IncomingMessage",
-                """\Qimport http.OutgoingHttpHeaders\E$""" to "import node.http.OutgoingHttpHeaders",
-                """\Qimport NodeJS.ReadableStream\E$""" to "import node.ReadableStream",
-                """\Qimport http.Agent\E$""" to "import node.http.Agent",
-                """\Qtypealias HttpClientError = Error\E$""" to "external class HttpClientError : Throwable"
-            ),
-            "interfaces.module_@actions_exec.kt" to listOf(
-                """\Qimport stream.internal.Writable\E$""" to "import node.stream.Writable",
-                """\Qimport buffer.global.Buffer\E$""" to "import node.buffer.Buffer",
-                """\Qvar env: `T$2`?\E\r?\n\Q        get() = definedExternally\E\r?\n\Q        set(value) = definedExternally\E""" to "var env: js.core.ReadonlyRecord<String, String>?"
-            ),
-            "interfaces.module_@actions_http-client.kt" to listOf(
-                """\Qimport http.OutgoingHttpHeaders\E$""" to "import node.http.OutgoingHttpHeaders",
-                """\Qimport NodeJS.ReadableStream\E$""" to "import node.ReadableStream",
-                """\Qimport http.IncomingHttpHeaders\E$""" to "import node.http.IncomingHttpHeaders",
-                """\Qexternal interface HttpClient {\E$""" to "external interface HttpClient2 {",
-                """\Qoptions: http.RequestOptions\E(\))?$""" to "options: node.http.RequestOptions$1"
-            ),
             "lib.dom.kt" to listOf(
                 """\Qimport url.URL as _URL\E$""" to "import node.url.URL as _URL",
                 """\Qimport url.URLSearchParams as _URLSearchParams\E$""" to "import node.url.URLSearchParams as _URLSearchParams",
                 """\Qoverride fun addEventListener(type: String, listener: EventListenerObject\E""" to "fun addEventListener(type: String, listener: EventListenerObject",
                 """\Qoverride fun removeEventListener(type: String, callback: EventListenerObject\E""" to "fun removeEventListener(type: String, callback: EventListenerObject",
-                """\Q`T$16`\E""" to """`T\$16`<R, T>"""
+                """\Q`T$19`\E""" to """`T\$19`<R, T>"""
             ),
             // work-around for https://github.com/Kotlin/dukat/issues/402
             "lib.es2018.asynciterable.module_dukat.kt" to listOf(
@@ -204,25 +170,12 @@ tasks.withType(IntegratedDukatTask::class).configureEach {
             ),
             // work-around for https://github.com/Kotlin/dukat/issues/401
             "null-writable.module_null-writable.kt" to listOf(
-                """\Qimport stream.internal.`T$13`\E$""" to "",
+                """\Qimport stream.internal.`T$17`\E$""" to "",
                 """\Qimport stream.internal.Writable\E$""" to "import node.stream.Writable",
                 """\Qoverride fun _write(_chunk: Any, _encoding: String, callback: (error: Error?) -> Unit)\E$""" to "override fun _write(chunk: Any, encoding: node.buffer.BufferEncoding, callback: (error: Error?) -> Unit)",
-                """\Qopen fun _writev(_chunks: Array<`T$88`>, callback: (error: Error?) -> Unit)\E$""" to "",
-                """\Qoverride fun _writev(chunks: Array<`T$13`>, callback: (error: Error?) -> Unit)\E$""" to ""
+                """\Qopen fun _writev(_chunks: Array<`T$3`>, callback: (error: Error?) -> Unit)\E$""" to "",
+                """\Qoverride fun _writev(chunks: Array<`T$17`>, callback: (error: Error?) -> Unit)\E$""" to ""
             ),
-            // work-around for https://github.com/Kotlin/dukat/issues/399
-            "tool-cache.module_@actions_tool-cache.kt" to listOf(
-                """\Qimport http.OutgoingHttpHeaders\E$""" to "import node.http.OutgoingHttpHeaders",
-                """\Qtypealias HTTPError = Error\E$""" to "external class HTTPError : Throwable",
-                """\Qtypealias IToolRelease = IToolRelease\E$""" to "",
-                """\Qtypealias IToolReleaseFile = IToolReleaseFile\E$""" to ""
-            ),
-            // work-around for https://github.com/Kotlin/dukat/issues/398
-            "cache.module_@actions_cache.kt" to listOf(
-                """\Qtypealias ValidationError = Error\E$""" to "external class ValidationError : Throwable",
-                """\Qtypealias ReserveCacheError = Error\E$""" to "external class ReserveCacheError : Throwable"
-            ),
-            // work-around for https://github.com/Kotlin/dukat/issues/400
             "semver.module_semver.kt" to listOf(
                 """\Q@JsModule("semver")\E$""" to """@JsModule("semver/classes/semver")"""
             )
@@ -232,25 +185,6 @@ tasks.withType(IntegratedDukatTask::class).configureEach {
 
 tasks.assemble {
     dependsOn(project(":ncc-packer").tasks.named("nodeProductionRun"))
-}
-
-fun addJsModuleAnnotations(task: Task, vararg pairs: Pair<String, String>) {
-    for ((file, module) in pairs) {
-        task
-            .outputs
-            .files
-            .asFileTree
-            .matching { include("**/$file") }
-            .singleFile
-            .apply {
-                writeText(
-                    """
-                        |@file:JsModule("$module")
-                        ${readText().prependIndent("|")}
-                    """.trimMargin()
-                )
-            }
-    }
 }
 
 fun deleteExternalsFiles(task: Task, vararg files: String) {

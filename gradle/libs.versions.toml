@@ -13,12 +13,6 @@
 # limitations under the License.
 
 [versions]
-actions-cache = "3.0.5"
-actions-core = "1.10.0"
-actions-exec = "1.1.1"
-actions-http-client = "2.0.1"
-actions-io = "1.1.2"
-actions-tool-cache = "2.0.1"
 build-dukat = "0.5.7"
 build-github-api = "1.117"
 build-gradle-plugin-dependency-analysis = "1.19.0"
@@ -33,7 +27,7 @@ build-kotlinx-serialization = "1.4.1"
 build-node = "16.18.1"
 build-vercel-ncc = "0.36.1"
 kotlin = "1.8.10"
-kotlin-wrappers = "1.0.0-pre.491"
+kotlin-wrappers = "1.0.0-pre.494"
 kotlinx-coroutines = "1.6.4"
 nullWritable = "1.0.5"
 semver = "7.3.8"
@@ -41,12 +35,6 @@ types-semver = "7.3.13"
 workflows-kotlin = "1.8.10"
 
 [libraries]
-actions-cache = { module = "actions:cache", version.ref = "actions-cache" }
-actions-core = { module = "actions:core", version.ref = "actions-core" }
-actions-exec = { module = "actions:exec", version.ref = "actions-exec" }
-actions-http-client = { module = "actions:http-client", version.ref = "actions-http-client" }
-actions-io = { module = "actions:io", version.ref = "actions-io" }
-actions-tool-cache = { module = "actions:tool-cache", version.ref = "actions-tool-cache" }
 build-github-api = { module = "org.kohsuke:github-api", version.ref = "build-github-api" }
 build-inject = { module = "javax.inject:javax.inject", version.ref = "build-inject" }
 build-kaml = { module = "com.charleskorn.kaml:kaml", version.ref = "build-kaml" }
@@ -54,6 +42,7 @@ build-kotlinx-serialization-bom = { module = "org.jetbrains.kotlinx:kotlinx-seri
 build-kotlinx-serialization-core = { module = "org.jetbrains.kotlinx:kotlinx-serialization-core" }
 build-kotlinx-serialization-json = { module = "org.jetbrains.kotlinx:kotlinx-serialization-json" }
 build-vercel-ncc = { module = "vercel:ncc", version.ref = "build-vercel-ncc" }
+kotlin-wrapper-actions-toolkit = { module = "org.jetbrains.kotlin-wrappers:kotlin-actions-toolkit" }
 kotlin-wrapper-js = { module = "org.jetbrains.kotlin-wrappers:kotlin-js" }
 kotlin-wrapper-node = { module = "org.jetbrains.kotlin-wrappers:kotlin-node" }
 kotlin-wrappers-bom = { module = "org.jetbrains.kotlin-wrappers:kotlin-wrappers-bom", version.ref = "kotlin-wrappers" }
