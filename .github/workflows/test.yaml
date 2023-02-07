@@ -55,6 +55,7 @@ jobs:
         debug: false
         concurrent: true
         arguments: |-
+          --show-version
           build
           --info
           --stacktrace
