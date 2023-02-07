@@ -66,7 +66,7 @@ workflowWithCopyright(
         uses(
             name = "Check Dependency Versions",
             action = GradleCacheActionV1(
-                arguments = listOf("dependencyUpdates"),
+                arguments = listOf("--show-version", "dependencyUpdates"),
                 debug = false,
                 concurrent = true
             )

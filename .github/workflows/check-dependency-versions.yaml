@@ -58,4 +58,6 @@ jobs:
       with:
         debug: false
         concurrent: true
-        arguments: dependencyUpdates
+        arguments: |-
+          --show-version
+          dependencyUpdates

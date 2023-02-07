@@ -163,6 +163,7 @@ workflowWithCopyright(
             name = "Build",
             action = GradleCacheActionV1(
                 arguments = listOf(
+                    "--show-version",
                     "build",
                     "--info",
                     "--stacktrace",
