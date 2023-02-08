@@ -41,7 +41,6 @@ buildscript {
 
 plugins {
     `kotlin-dsl`
-    alias(libs.plugins.kotlin.serialization)
     id(libs.plugins.convention.dependency.updates.report.aggregation.get().pluginId)
     // part of work-around for https://github.com/autonomousapps/dependency-analysis-android-gradle-plugin/issues/719
     alias(libs.plugins.dependency.analysis) apply JavaVersion.current().isJava11Compatible
@@ -74,9 +73,7 @@ dependencies {
     implementation(":dependency-updates-report-aggregation")
     implementation(libs.build.inject)
     implementation(libs.build.github.api)
-    implementation(platform(libs.build.kotlinx.serialization.bom))
-    implementation(libs.build.kotlinx.serialization.core)
-    implementation(libs.build.kaml)
+    implementation(libs.build.snakeyaml)
     implementation(embeddedKotlin("compiler-embeddable"))
 }
 
