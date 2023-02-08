@@ -16,16 +16,15 @@
 
 package net.kautler
 
-import com.charleskorn.kaml.Yaml
-import kotlinx.serialization.ExperimentalSerializationApi
+import java.security.MessageDigest
+import kotlin.text.RegexOption.MULTILINE
 import net.kautler.dao.action.GitHubAction
 import net.kautler.util.npm
 import org.gradle.accessors.dm.LibrariesForLibs
 import org.jetbrains.kotlin.gradle.targets.js.dukat.IntegratedDukatTask
 import org.jetbrains.kotlin.gradle.targets.js.nodejs.NodeJsExec
 import org.jetbrains.kotlin.gradle.targets.js.nodejs.NodeJsRootExtension
-import java.security.MessageDigest
-import kotlin.text.RegexOption.MULTILINE
+import org.yaml.snakeyaml.Yaml
 
 plugins {
     kotlin("js")
@@ -48,13 +47,13 @@ tasks.withType<Copy>().configureEach {
     }
 }
 
-@ExperimentalSerializationApi
 val inputDefaultValues by lazy {
-    Yaml
-        .default
-        .decodeFromString(GitHubAction.serializer(), file("action.yml").readText())
+    file("action.yml")
+        .inputStream()
+        .use { Yaml().loadAs(it, GitHubAction::class.java) }
         .inputs
         ?.filterValues { it.default != null }
+        ?.mapValues { it.value.default!! }
         ?.filterKeys { !System.getenv().containsKey("INPUT_${it.uppercase()}") }
 }
 
@@ -65,11 +64,10 @@ tasks.withType<NodeJsExec>().configureEach {
     environment("RUNNER_TEMP", "$temporaryDir/runner-temp")
     environment("RUNNER_TOOL_CACHE", toolCacheDir)
 
-    @OptIn(ExperimentalSerializationApi::class)
-    inputDefaultValues?.forEach { (name, input) ->
+    inputDefaultValues?.forEach { (name, default) ->
         environment(
             "INPUT_${name.uppercase()}",
-            if (name == "use-cache") "false" else input.default!!
+            if (name == "use-cache") "false" else default
         )
     }
 

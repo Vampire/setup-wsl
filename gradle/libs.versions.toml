@@ -22,10 +22,10 @@ build-gradle-plugin-refresh-versions = "0.51.0"
 build-gradle-plugin-release = "2.8.1"
 build-gradle-plugin-versions = "0.45.0"
 build-inject = "1"
-build-kaml = "0.51.0"
 build-kotlin = "1.8.10"
 build-kotlinx-serialization = "1.4.1"
 build-node = "16.18.1"
+build-snakeyaml = "1.33"
 build-vercel-ncc = "0.36.1"
 kotlin = "1.8.10"
 kotlin-wrappers = "1.0.0-pre.498"
@@ -38,10 +38,10 @@ workflows-kotlin = "1.8.10"
 [libraries]
 build-github-api = { module = "org.kohsuke:github-api", version.ref = "build-github-api" }
 build-inject = { module = "javax.inject:javax.inject", version.ref = "build-inject" }
-build-kaml = { module = "com.charleskorn.kaml:kaml", version.ref = "build-kaml" }
 build-kotlinx-serialization-bom = { module = "org.jetbrains.kotlinx:kotlinx-serialization-bom", version.ref = "build-kotlinx-serialization" }
 build-kotlinx-serialization-core = { module = "org.jetbrains.kotlinx:kotlinx-serialization-core" }
 build-kotlinx-serialization-json = { module = "org.jetbrains.kotlinx:kotlinx-serialization-json" }
+build-snakeyaml = { module = "org.yaml:snakeyaml", version.ref = "build-snakeyaml" }
 build-vercel-ncc = { module = "vercel:ncc", version.ref = "build-vercel-ncc" }
 kotlin-wrapper-actions-toolkit = { module = "org.jetbrains.kotlin-wrappers:kotlin-actions-toolkit" }
 kotlin-wrapper-js = { module = "org.jetbrains.kotlin-wrappers:kotlin-js" }

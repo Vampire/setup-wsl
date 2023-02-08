@@ -16,29 +16,12 @@
 
 package net.kautler.dao.action
 
-import kotlinx.serialization.ExperimentalSerializationApi
-import kotlinx.serialization.Serializable
-import net.kautler.dao.action.Output.CompositeOutput
-import net.kautler.dao.action.Output.NormalOutput
-
-@ExperimentalSerializationApi
-@Serializable
-data class GitHubAction(
-    val name: String,
-    val author: String? = null,
-    val description: String,
-    val inputs: Map<String, Input>? = null,
-    @Serializable(with = OutputMapSerializer::class)
-    val outputs: Map<String, Output>? = null,
-    val runs: Runs,
-    val branding: Branding? = null
-) {
-    init {
-        require((runs.using == "composite") || (outputs.orEmpty().values.all { it is NormalOutput })) {
-            "Non-composite actions must only contain normal outputs"
-        }
-        require((runs.using != "composite") || (outputs.orEmpty().values.all { it is CompositeOutput })) {
-            "Composite actions must only contain composite outputs"
-        }
-    }
+class GitHubAction {
+    var name: String? = null
+    var author: String? = null
+    var description: String? = null
+    var inputs: Map<String, Input>? = null
+    var outputs: Map<String, Any>? = null
+    var runs: Map<String, Any>? = null
+    var branding: Map<String, String>? = null
 }

@@ -16,12 +16,9 @@
 
 package net.kautler.dao.action
 
-import kotlinx.serialization.Serializable
-
-@Serializable
-data class Input(
-    val description: String,
-    val required: Boolean = false,
-    val deprecationMessage: String? = null,
-    val default: String? = null
-)
+class Input {
+    var description: String? = null
+    var required: Boolean = false
+    var deprecationMessage: String? = null
+    var default: String? = null
+}

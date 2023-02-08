@@ -62,8 +62,6 @@ tasks.dependencyUpdates {
     dependsOn(validateGradleWrapperJar)
 
     ignoredDependencies {
-        // Should match the Kotlin version of Gradle as the serialization is used during the build
-        add(group = "org.jetbrains.kotlin.plugin.serialization", name = "org.jetbrains.kotlin.plugin.serialization.gradle.plugin")
         // This plugin should always be used without version as it is tightly
         // tied to the Gradle version that is building the precompiled script plugins
         add(group = "org.gradle.kotlin.kotlin-dsl", name = "org.gradle.kotlin.kotlin-dsl.gradle.plugin")
