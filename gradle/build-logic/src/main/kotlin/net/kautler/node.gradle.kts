@@ -61,6 +61,9 @@ val inputDefaultValues by lazy {
 tasks.withType<NodeJsExec>().configureEach {
     val toolCacheDir = "$temporaryDir/tool-cache"
 
+    // only execute safe actions that do not change the execution environment
+    environment("INPUT_ONLY_SAFE_ACTIONS", true)
+
     environment("RUNNER_TEMP", "$temporaryDir/runner-temp")
     environment("RUNNER_TOOL_CACHE", toolCacheDir)
 

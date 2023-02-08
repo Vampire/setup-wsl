@@ -265,31 +265,35 @@ suspend fun main() {
     runCatching {
         group("Verify Windows Environment", ::verifyWindowsEnvironment)
 
-        if (installationNeeded()) {
-            group("Install Distribution", ::installDistribution)
-        }
-
-        if (wslConf.isNotEmpty()) {
-            group("Create /etc/wsl.conf", ::createWslConf)
-        }
-
-        if (setAsDefault()) {
-            group("Set Distribution as Default", ::setDistributionAsDefault)
-        }
-
-        if (update) {
-            group("Update Distribution", distribution::update)
-        }
-
-        if (additionalPackages.isNotEmpty()) {
-            group("Install Additional Packages", suspend { distribution.install(*additionalPackages) })
-        }
-
-        if (wslShellCommand.isNotEmpty()
-            || !exists(wslShellWrapperPath)
-            || !exists(wslShellDistributionWrapperPath)
+        if (getInput("only safe actions").isEmpty()
+            || !getBooleanInput("only safe actions")
         ) {
-            group("Write WSL Shell Wrapper", ::writeWslShellWrapper)
+            if (installationNeeded()) {
+                group("Install Distribution", ::installDistribution)
+            }
+
+            if (wslConf.isNotEmpty()) {
+                group("Create /etc/wsl.conf", ::createWslConf)
+            }
+
+            if (setAsDefault()) {
+                group("Set Distribution as Default", ::setDistributionAsDefault)
+            }
+
+            if (update) {
+                group("Update Distribution", distribution::update)
+            }
+
+            if (additionalPackages.isNotEmpty()) {
+                group("Install Additional Packages", suspend { distribution.install(*additionalPackages) })
+            }
+
+            if (wslShellCommand.isNotEmpty()
+                || !exists(wslShellWrapperPath)
+                || !exists(wslShellDistributionWrapperPath)
+            ) {
+                group("Write WSL Shell Wrapper", ::writeWslShellWrapper)
+            }
         }
 
         setOutput("wsl-shell-wrapper-path", wslShellWrapperPath)
