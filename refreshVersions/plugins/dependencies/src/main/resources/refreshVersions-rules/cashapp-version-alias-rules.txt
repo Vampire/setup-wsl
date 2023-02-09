@@ -1,0 +1,5 @@
+app.cash.*:*
+^^^^^^^^^^
+
+app.cash.licensee:licensee-gradle-plugin
+^^^^^^^^^^^^^^^^^

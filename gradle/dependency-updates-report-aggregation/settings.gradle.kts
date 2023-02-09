@@ -19,6 +19,7 @@ import net.kautler.conditionalRefreshVersions
 import org.gradle.api.initialization.resolve.RepositoriesMode.FAIL_ON_PROJECT_REPOS
 
 pluginManagement {
+    includeBuild("../../refreshVersions/plugins")
     includeBuild("../conditional-refresh-versions")
 }
 

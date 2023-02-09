@@ -20,6 +20,7 @@ import org.gradle.api.initialization.resolve.RepositoriesMode.PREFER_SETTINGS
 
 pluginManagement {
     includeBuild("gradle/build-logic")
+    includeBuild("refreshVersions/plugins")
     includeBuild("gradle/conditional-refresh-versions")
     repositories {
         mavenCentral()

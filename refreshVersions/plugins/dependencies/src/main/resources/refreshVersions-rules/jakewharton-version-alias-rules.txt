@@ -1,0 +1,29 @@
+com.jakewharton.timber:timber
+    ^^^^^^^^^^^^^^^^^^
+
+com.jakewharton.picnic:picnic
+    ^^^^^^^^^^^^^^^^^^
+
+com.jakewharton.retrofit:retrofit2-kotlinx-serialization-converter
+    ^^^^^^^^^^^.         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+com.jakewharton.confundus:confundus-gradle
+    ^^^^^^^^^^^^^^^^^^^^^
+
+com.jakewharton.wormhole:wormhole-gradle
+    ^^^^^^^^^^^^^^^^^^^^
+
+com.jakewharton.moshi:shimo
+    ^^^^^^^^^^^^^^^^^.^^^^^
+
+com.jakewharton.rxbinding3:rxbinding(-*)
+    ^^^^^^^^^^^^^^^^^^^^^^
+
+com.jakewharton.rxbinding4:rxbinding(-*)
+    ^^^^^^^^^^^^^^^^^^^^^^
+
+com.jakewharton.rxrelay2:rxrelay
+    ^^^^^^^^^^^^^^^^^^^^
+
+com.jakewharton.rxrelay3:rxrelay
+    ^^^^^^^^^^^^^^^^^^^^

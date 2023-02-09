@@ -20,6 +20,7 @@ import org.gradle.api.initialization.resolve.RepositoriesMode.FAIL_ON_PROJECT_RE
 
 pluginManagement {
     includeBuild("../dependency-updates-report-aggregation")
+    includeBuild("../../refreshVersions/plugins")
     includeBuild("../conditional-refresh-versions")
 }
 

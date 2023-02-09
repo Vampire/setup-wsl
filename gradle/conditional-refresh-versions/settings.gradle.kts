@@ -30,6 +30,8 @@ dependencyResolutionManagement {
     }
 }
 
+includeBuild("../../refreshVersions/plugins")
+
 rootProject.name = "conditional-refresh-versions"
 rootProject.buildFileName = "conditional-refresh-versions.gradle.kts"
 
