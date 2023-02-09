@@ -23,13 +23,11 @@ import org.jetbrains.kotlin.gradle.targets.js.npm.NpmDependency
 import org.jetbrains.kotlin.gradle.targets.js.npm.NpmDependencyExtension
 
 fun DependencyHandler.npm(
-    dependency: Provider<MinimalExternalModuleDependency>,
-    generateExternals: Boolean = true
+    dependency: Provider<MinimalExternalModuleDependency>
 ): NpmDependency {
     val dep = dependency.get()
     return (extensions.getByName("npm") as NpmDependencyExtension)(
         name = if (dep.group == "<unscoped>") dep.name else "@${dep.group}/${dep.name}",
-        version = dep.version!!,
-        generateExternals = generateExternals
+        version = dep.version!!
     )
 }

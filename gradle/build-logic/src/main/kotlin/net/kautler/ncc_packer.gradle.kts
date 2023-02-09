@@ -85,5 +85,5 @@ dependencies {
     implementation(platform(libs.kotlin.wrappers.bom))
     implementation(libs.kotlin.wrapper.js)
     implementation(libs.kotlin.wrapper.node)
-    implementation(npm(libs.build.vercel.ncc, generateExternals = false))
+    implementation(npm(libs.build.vercel.ncc))
 }

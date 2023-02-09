@@ -13,7 +13,6 @@
 # limitations under the License.
 
 [versions]
-build-dukat = "0.5.7"
 build-github-api = "1.117"
 build-gradle-plugin-dependency-analysis = "1.19.0"
 build-gradle-plugin-github = "1.4.0"
@@ -32,7 +31,6 @@ kotlin-wrappers = "1.0.0-pre.498"
 kotlinx-coroutines = "1.6.4"
 nullWritable = "1.0.5"
 semver = "7.3.8"
-types-semver = "7.3.13"
 workflows-kotlin = "1.8.10"
 
 [libraries]
@@ -50,7 +48,6 @@ kotlin-wrappers-bom = { module = "org.jetbrains.kotlin-wrappers:kotlin-wrappers-
 kotlinx-coroutines-core = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-core", version.ref = "kotlinx-coroutines" }
 nullWritable = { module = "<unscoped>:null-writable", version.ref = "nullWritable" }
 semver = { module = "<unscoped>:semver", version.ref = "semver" }
-types-semver = { module = "types:semver", version.ref = "types-semver" }
 workflows-kotlin-compiler = { module = "org.jetbrains.kotlin:kotlin-compiler", version.ref = "workflows-kotlin" }
 workflows-kotlin-main-kts = { module = "org.jetbrains.kotlin:kotlin-main-kts", version.ref = "workflows-kotlin" }
 workflows-kotlin-scripting-compiler = { module = "org.jetbrains.kotlin:kotlin-scripting-compiler", version.ref = "workflows-kotlin" }

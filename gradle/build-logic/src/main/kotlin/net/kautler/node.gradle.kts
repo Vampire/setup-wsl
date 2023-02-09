@@ -16,12 +16,9 @@
 
 package net.kautler
 
-import java.security.MessageDigest
-import kotlin.text.RegexOption.MULTILINE
 import net.kautler.dao.action.GitHubAction
 import net.kautler.util.npm
 import org.gradle.accessors.dm.LibrariesForLibs
-import org.jetbrains.kotlin.gradle.targets.js.dukat.IntegratedDukatTask
 import org.jetbrains.kotlin.gradle.targets.js.nodejs.NodeJsExec
 import org.jetbrains.kotlin.gradle.targets.js.nodejs.NodeJsRootExtension
 import org.yaml.snakeyaml.Yaml
@@ -83,50 +80,6 @@ val libs = the<LibrariesForLibs>()
 
 configure<NodeJsRootExtension> {
     nodeVersion = libs.versions.build.node.get()
-    versions.dukat.version = libs.versions.build.dukat.get()
-
-    // work-around for https://github.com/Kotlin/dukat/issues/103
-    npmInstallTaskProvider!!.configure {
-        val patchedDukat0012CliJs = layout
-            .projectDirectory
-            .file("resources/dukat-cli-0.0.12.js")
-
-        val patchedDukat057CliJs = layout
-            .projectDirectory
-            .file("resources/dukat-cli-0.5.7.js")
-
-        inputs
-            .files(patchedDukat0012CliJs, patchedDukat057CliJs)
-            .withPropertyName("patched dukat-cli.js files")
-
-        doLast {
-            val dukatCliJs = rootPackageDir.resolve("node_modules/dukat/bin/dukat-cli.js")
-
-            if (dukatCliJs.exists()) {
-                val sha256 = MessageDigest
-                    .getInstance("SHA-256")
-                    .digest(dukatCliJs.readBytes())
-                    .joinToString("") { "%02x".format(it) }
-
-                when (sha256) {
-                    // already a patched version
-                    "32b7c91ecf8c94b8f1e554da870a617437e421db07e40d558dbb959bd221cb5e",
-                    "e16d684be9b90c2d5d78f90077dc9690253fd4d7bc6b48f94bbd48b1692bf2d5" ->
-                        return@doLast
-
-                    // original 0.0.12 version
-                    "ceebdfbb94d103eb44da265b572e51fb69ff4bb1c524b94f621c6a6e94716ac8" ->
-                        patchedDukat0012CliJs.asFile.copyTo(dukatCliJs, overwrite = true)
-
-                    // original 0.5.7 version
-                    "12645e1491b68638d2c1c4146502ae9ed5037baa82cc12e6c55070471d962187" ->
-                        patchedDukat057CliJs.asFile.copyTo(dukatCliJs, overwrite = true)
-
-                    else -> throw RuntimeException("dukat-cli.js has unexpected checksum $sha256")
-                }
-            }
-        }
-    }
 }
 
 dependencies {
@@ -135,92 +88,12 @@ dependencies {
     implementation(libs.kotlin.wrapper.actions.toolkit)
     implementation(libs.kotlin.wrapper.js)
     implementation(libs.kotlin.wrapper.node)
-    implementation(npm(libs.types.semver))
-    implementation(npm(libs.semver, generateExternals = false))
+    implementation(npm(libs.semver))
     implementation(npm(libs.nullWritable))
-}
-
-tasks.withType(IntegratedDukatTask::class).configureEach {
-    doLast {
-        // work-around for https://github.com/Kotlin/dukat/issues/397
-        deleteExternalsFiles(
-            this,
-            "*.module_node.kt",
-            "*.nonDeclarations.kt"
-        )
-        fixExternalsFiles(
-            this,
-            "lib.dom.kt" to listOf(
-                """\Qimport url.URL as _URL\E$""" to "import node.url.URL as _URL",
-                """\Qimport url.URLSearchParams as _URLSearchParams\E$""" to "import node.url.URLSearchParams as _URLSearchParams",
-                """\Qoverride fun addEventListener(type: String, listener: EventListenerObject\E""" to "fun addEventListener(type: String, listener: EventListenerObject",
-                """\Qoverride fun removeEventListener(type: String, callback: EventListenerObject\E""" to "fun removeEventListener(type: String, callback: EventListenerObject",
-                """\Q`T$19`\E""" to """`T\$19`<R, T>"""
-            ),
-            // work-around for https://github.com/Kotlin/dukat/issues/402
-            "lib.es2018.asynciterable.module_dukat.kt" to listOf(
-                """\Qval `return`: ((value: TReturn) -> Promise<dynamic /* IteratorYieldResult<T> | IteratorReturnResult<TReturn> */>)?\E$""" to "val `return`: ((value: dynamic) -> Promise<dynamic /* IteratorYieldResult<T> | IteratorReturnResult<TReturn> */>)?",
-                """\Qval `return`: ((value: PromiseLike<TReturn>) -> Promise<dynamic /* IteratorYieldResult<T> | IteratorReturnResult<TReturn> */>)?\E\r?\n\Q        get() = definedExternally\E\r?\n""" to ""
-            ),
-            "lib.es2020.bigint.module_dukat.kt" to listOf(
-                """\Q : RelativeIndexable<Any>\E""" to ""
-            ),
-            "lib.es5.kt" to listOf(
-                """\Qimport NodeJS.CallSite\E$""" to "import node.CallSite",
-                """\Qval resolve: ((specified: String, parent: URL) -> Promise<String>)?\E$""" to "val resolve2: ((specified: String, parent: URL) -> Promise<String>)?"
-            ),
-            // work-around for https://github.com/Kotlin/dukat/issues/401
-            "null-writable.module_null-writable.kt" to listOf(
-                """\Qimport stream.internal.`T$17`\E$""" to "",
-                """\Qimport stream.internal.Writable\E$""" to "import node.stream.Writable",
-                """\Qoverride fun _write(_chunk: Any, _encoding: String, callback: (error: Error?) -> Unit)\E$""" to "override fun _write(chunk: Any, encoding: node.buffer.BufferEncoding, callback: (error: Error?) -> Unit)",
-                """\Qopen fun _writev(_chunks: Array<`T$3`>, callback: (error: Error?) -> Unit)\E$""" to "",
-                """\Qoverride fun _writev(chunks: Array<`T$17`>, callback: (error: Error?) -> Unit)\E$""" to ""
-            ),
-            "semver.module_semver.kt" to listOf(
-                """\Q@JsModule("semver")\E$""" to """@JsModule("semver/classes/semver")"""
-            )
-        )
-    }
 }
 
 tasks.assemble {
     dependsOn(project(":ncc-packer").tasks.named("nodeProductionRun"))
-}
-
-fun deleteExternalsFiles(task: Task, vararg files: String) {
-    if (files.isNotEmpty()) {
-        task
-            .outputs
-            .files
-            .asFileTree
-            .matching {
-                for (file in files) {
-                    include("**/$file")
-                }
-            }
-            .forEach { it.delete() }
-    }
-}
-
-fun fixExternalsFiles(task: Task, vararg pairs: Pair<String, List<Pair<String, String>>>) {
-    for ((file, fixups) in pairs) {
-        task
-            .outputs
-            .files
-            .asFileTree
-            .matching { include("**/$file") }
-            .singleFile
-            .apply {
-                writeText(
-                    fixups
-                        .map { (pattern, replacement) -> pattern.toRegex(MULTILINE) to replacement }
-                        .fold(readText()) { current, (regex, replacement) ->
-                            regex.replace(current, replacement)
-                        }
-                )
-            }
-    }
 }
 
 fun plugin(plugin: Provider<PluginDependency>) = plugin.map {
