@@ -13,7 +13,7 @@
 # limitations under the License.
 
 [versions]
-build-github-api = "1.117"
+build-github-api = "1.313"
 build-gradle-plugin-dependency-analysis = "1.19.0"
 build-gradle-plugin-github = "1.4.0"
 build-gradle-plugin-grgit = "4.1.1"
