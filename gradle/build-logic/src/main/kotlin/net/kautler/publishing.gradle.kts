@@ -49,7 +49,7 @@ import kotlin.LazyThreadSafetyMode.NONE
 plugins {
     // needed for accessing majorVersion
     id("net.kautler.dependencies")
-    id("org.ajoberstar.grgit")
+    id("org.ajoberstar.grgit.service")
     id("net.wooga.github")
 }
 
@@ -72,7 +72,10 @@ release {
 }
 
 val githubRepositoryName by lazy(NONE) {
-    grgit
+    grgitService
+        .service
+        .get()
+        .grgit
         .remote
         .list()
         .find { it.name == "origin" }
@@ -105,14 +108,23 @@ internal val github by lazy(NONE) {
 }
 
 val releaseBody by lazy(NONE) {
-    val releaseBody = grgit.log {
-        includes.add(release.git.requireBranch)
-        github.getRepository(githubRepositoryName).latestRelease?.apply { excludes.add(tagName) }
-    }.filter { commit ->
-        !commit.shortMessage.startsWith("[Gradle Release Plugin] ")
-    }.asReversed().joinToString("\n") { commit ->
-        "- ${commit.shortMessage} [${commit.id}]"
-    }
+    val releaseBody = grgitService
+        .service
+        .get()
+        .grgit
+        .log {
+            includes.add(release.git.requireBranch)
+            github.getRepository(githubRepositoryName).latestRelease?.apply {
+                excludes.add(tagName)
+            }
+        }
+        .filter { commit ->
+            !commit.shortMessage.startsWith("[Gradle Release Plugin] ")
+        }
+        .asReversed()
+        .joinToString("\n") { commit ->
+            "- ${commit.shortMessage} [${commit.id}]"
+        }
 
     if (isHeadless()) {
         return@lazy releaseBody
@@ -166,12 +178,18 @@ val releaseVersion get() = !"$version".endsWith("-SNAPSHOT")
 
 val removeDistributionsFromGit by tasks.registering {
     mustRunAfter(tasks.checkoutMergeFromReleaseBranch)
+    // work-around for https://github.com/ajoberstar/grgit/pull/382
+    //usesService(grgitService.service)
 
     doLast("Remove distributions from Git") {
-        grgit.remove {
-            cached = true
-            patterns = setOf("build/distributions")
-        }
+        grgitService
+            .service
+            .get()
+            .grgit
+            .remove {
+                cached = true
+                patterns = setOf("build/distributions")
+            }
     }
 }
 tasks.updateVersion {
@@ -210,6 +228,8 @@ tasks.withType<GithubPublish>().configureEach {
 }
 
 tasks.githubPublish {
+    // work-around for https://github.com/ajoberstar/grgit/pull/382
+    //usesService(grgitService.service)
     body { releaseBody }
     draft(true)
 }
@@ -220,6 +240,8 @@ val undraftGithubRelease by tasks.registering(GithubPublish::class) {
 
 val finishMilestone by tasks.registering {
     enabled = releaseVersion
+    // work-around for https://github.com/ajoberstar/grgit/pull/382
+    //usesService(grgitService.service)
 
     doLast("finish milestone") {
         github.getRepository(githubRepositoryName)!!.apply {
@@ -237,15 +259,21 @@ val finishMilestone by tasks.registering {
 
 val addDistributionsToGit by tasks.registering {
     dependsOn(tasks.named("assemble"))
+    // work-around for https://github.com/ajoberstar/grgit/pull/382
+    //usesService(grgitService.service)
 
     doLast("Add distributions to Git") {
         val gitIgnore = file(".gitignore")
         val gitIgnoreBak = file(".gitignore.bak")
         gitIgnore.renameTo(gitIgnoreBak)
         try {
-            grgit.add {
-                patterns = setOf("build/distributions")
-            }
+            grgitService
+                .service
+                .get()
+                .grgit
+                .add {
+                    patterns = setOf("build/distributions")
+                }
         } finally {
             gitIgnoreBak.renameTo(gitIgnore)
         }
@@ -285,6 +313,9 @@ tasks.updateVersion {
 }
 
 val checkBranchProtectionCompatibility by tasks.registering {
+    // work-around for https://github.com/ajoberstar/grgit/pull/382
+    //usesService(grgitService.service)
+
     doLast {
         check(
             !github

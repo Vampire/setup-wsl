@@ -67,8 +67,9 @@ dependencyAnalysis {
             includeDependency("net.wooga.github:net.wooga.github.gradle.plugin")
             includeDependency("gradle.plugin.net.wooga.gradle:atlas-github")
         }
-        bundle("org.ajoberstar.grgit.gradle.plugin") {
-            includeDependency("org.ajoberstar.grgit:org.ajoberstar.grgit.gradle.plugin")
+        bundle("org.ajoberstar.grgit.service.gradle.plugin") {
+            includeDependency("org.ajoberstar.grgit.service:org.ajoberstar.grgit.service.gradle.plugin")
+            includeDependency("org.ajoberstar.grgit:grgit-gradle")
             includeDependency("org.ajoberstar.grgit:grgit-core")
         }
         bundle("org.jetbrains.kotlin.js.gradle.plugin") {
