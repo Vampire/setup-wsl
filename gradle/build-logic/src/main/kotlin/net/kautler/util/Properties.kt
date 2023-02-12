@@ -20,6 +20,7 @@ import org.gradle.api.Project
 import org.gradle.api.Task
 import kotlin.properties.ReadOnlyProperty
 import kotlin.reflect.KProperty
+import kotlin.properties.PropertyDelegateProvider as KotlinPropertyDelegateProvider
 
 sealed class Property<out T> constructor(
     private val default: () -> T,
@@ -137,20 +138,19 @@ sealed class Property<out T> constructor(
     }
 }
 
-//TODO: ": PropertyDelegateProvider" when Kotlin 1.4 is used in the build scripts
 class PropertyDelegateProvider<out T>(
     private val default: () -> T,
     private val propertyName: String? = null,
     private val project: Project? = null,
     private val delegateFactory: (() -> T, String, Project) -> Property<T>
-) {
+) : KotlinPropertyDelegateProvider<Any?, Property<T>> {
     operator fun provideDelegate(thisRef: Project, property: KProperty<*>) =
         delegateFactory(default, propertyName ?: property.name, project ?: thisRef)
 
     operator fun provideDelegate(thisRef: Task, property: KProperty<*>) =
         provideDelegate(thisRef.project, property)
 
-    operator fun provideDelegate(thisRef: Any?, property: KProperty<*>) =
+    override operator fun provideDelegate(thisRef: Any?, property: KProperty<*>) =
         project?.let {
             provideDelegate(it, property)
         } ?: error(

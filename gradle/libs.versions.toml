@@ -15,7 +15,7 @@
 [versions]
 build-github-api = "1.313"
 build-gradle-plugin-dependency-analysis = "1.19.0"
-build-gradle-plugin-github = "1.4.0"
+build-gradle-plugin-github = "3.0.0"
 build-gradle-plugin-grgit = "5.0.0"
 build-gradle-plugin-refresh-versions = "0.51.0"
 build-gradle-plugin-release = "2.8.1"
