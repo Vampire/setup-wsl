@@ -22,7 +22,6 @@ import net.kautler.util.afterReleaseBuild
 import net.kautler.util.beforeReleaseBuild
 import net.kautler.util.checkoutMergeFromReleaseBranch
 import net.kautler.util.createReleaseTag
-import net.kautler.util.git
 import net.kautler.util.preTagCommit
 import net.kautler.util.release
 import net.kautler.util.runBuildTasks
@@ -63,10 +62,11 @@ extra["release.newVersion"] = optionalString(project, "release.newVersion").getV
 val majorVersion: String by project
 
 release {
-    pushReleaseVersionBranch = "v$majorVersion"
-    tagTemplate = "v\$version"
+    pushReleaseVersionBranch.set("v$majorVersion")
+    tagTemplate.set("v\$version")
     git {
-        signTag = true
+        requireBranch.set("master")
+        signTag.set(true)
     }
 }
 
@@ -145,7 +145,7 @@ tasks.githubPublish {
             .get()
             .grgit
             .log {
-                includes.add(release.git.requireBranch)
+                includes.add(release.git.requireBranch.get())
                 github
                     .clientProvider
                     .get()
@@ -298,7 +298,7 @@ val checkBranchProtectionCompatibility by tasks.registering(Github::class) {
     doLast {
         check(
             !repository
-                .getBranch(release.git.requireBranch)
+                .getBranch(release.git.requireBranch.get())
                 .protection
                 .enforceAdmins
                 .isEnabled
@@ -306,7 +306,7 @@ val checkBranchProtectionCompatibility by tasks.registering(Github::class) {
             """
                 Please disable branch protection for administrators before triggering a release, for example using
 
-                gh api 'repos/{owner}/{repo}/branches/${release.git.requireBranch}/protection/enforce_admins' -X DELETE
+                gh api 'repos/{owner}/{repo}/branches/${release.git.requireBranch.get()}/protection/enforce_admins' -X DELETE
             """.trimIndent()
         }
     }

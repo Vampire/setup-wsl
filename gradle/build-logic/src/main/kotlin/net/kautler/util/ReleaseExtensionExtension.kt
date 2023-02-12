@@ -16,7 +16,6 @@
 
 package net.kautler.util
 
-import net.researchgate.release.GitAdapter.GitConfig
 import net.researchgate.release.ReleaseExtension
 import org.gradle.api.Action
 import org.gradle.api.Project
@@ -26,12 +25,6 @@ import org.gradle.api.tasks.TaskContainer
 import org.gradle.api.tasks.TaskProvider
 import org.gradle.kotlin.dsl.getByName
 import org.gradle.kotlin.dsl.named
-
-val ReleaseExtension.git
-    get() = getProperty("git") as GitConfig
-
-fun ReleaseExtension.git(configure: GitConfig.() -> Unit) =
-    git.configure()
 
 // part of work-around for https://github.com/gradle/gradle/issues/23747
 val Project.release: ReleaseExtension
