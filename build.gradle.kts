@@ -15,9 +15,9 @@
  */
 
 plugins {
-    net.kautler.versions
-    net.kautler.node
-    net.kautler.github_actions
-    net.kautler.readme
-    net.kautler.publishing
+    id(libs.plugins.convention.dependencies.get().pluginId)
+    id(libs.plugins.convention.node.get().pluginId)
+    id(libs.plugins.convention.github.actions.get().pluginId)
+    id(libs.plugins.convention.readme.get().pluginId)
+    id(libs.plugins.convention.publishing.get().pluginId)
 }

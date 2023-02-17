@@ -19,7 +19,7 @@
 @file:Import("workflow-with-copyright.main.kts")
 
 import it.krzeminski.githubactions.actions.actions.CheckoutV3
-import it.krzeminski.githubactions.actions.krzema12.GithubActionsTypingV0
+import it.krzeminski.githubactions.actions.krzema12.GithubActionsTypingV1
 import it.krzeminski.githubactions.domain.RunnerType.UbuntuLatest
 import it.krzeminski.githubactions.domain.triggers.PullRequest
 import it.krzeminski.githubactions.domain.triggers.Push
@@ -47,7 +47,7 @@ workflowWithCopyright(
         )
         uses(
             name = "Check Action Typing",
-            action = GithubActionsTypingV0()
+            action = GithubActionsTypingV1()
         )
     }
 }

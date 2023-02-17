@@ -18,13 +18,17 @@
 
 @file:Import("workflow-with-copyright.main.kts")
 
-import it.krzeminski.githubactions.actions.CustomAction
-import it.krzeminski.githubactions.actions.actions.CacheV2
-import it.krzeminski.githubactions.actions.actions.CheckoutV2
+import it.krzeminski.githubactions.actions.actions.CacheRestoreV3
+import it.krzeminski.githubactions.actions.actions.CacheSaveV3
+import it.krzeminski.githubactions.actions.actions.CheckoutV3
+import it.krzeminski.githubactions.actions.actions.SetupJavaV3
+import it.krzeminski.githubactions.actions.actions.SetupJavaV3.Distribution.Temurin
+import it.krzeminski.githubactions.actions.burrunan.GradleCacheActionV1
 import it.krzeminski.githubactions.actions.vampire.SetupWslV1
 import it.krzeminski.githubactions.actions.vampire.SetupWslV1.Distribution
 import it.krzeminski.githubactions.domain.CommandStep
-import it.krzeminski.githubactions.domain.ExternalActionStepWithOutputs
+import it.krzeminski.githubactions.domain.ExternalActionStep
+import it.krzeminski.githubactions.domain.JobOutputs.EMPTY
 import it.krzeminski.githubactions.domain.RunnerType
 import it.krzeminski.githubactions.domain.RunnerType.WindowsLatest
 import it.krzeminski.githubactions.domain.Shell
@@ -35,9 +39,8 @@ import it.krzeminski.githubactions.domain.triggers.PullRequest
 import it.krzeminski.githubactions.domain.triggers.Push
 import it.krzeminski.githubactions.domain.triggers.Schedule
 import it.krzeminski.githubactions.dsl.JobBuilder
+import it.krzeminski.githubactions.dsl.WorkflowBuilder
 import it.krzeminski.githubactions.dsl.expressions.expr
-import it.krzeminski.githubactions.dsl.workflow
-import it.krzeminski.githubactions.yaml.writeToFile
 
 val environments = listOf(
     "windows-2019",
@@ -116,7 +119,7 @@ val wslBash = Shell.Custom("wsl-bash {0}")
 
 val wslSh = Shell.Custom("wsl-sh {0}")
 
-lateinit var executeActionStep: ExternalActionStepWithOutputs<SetupWslV1.Outputs>
+lateinit var executeActionStep: ExternalActionStep<SetupWslV1.Outputs>
 
 workflowWithCopyright(
     name = "Build and Test",
@@ -127,12 +130,9 @@ workflowWithCopyright(
     ),
     sourceFile = __FILE__
 ) {
-    val builtArtifactsCache = CacheV2(
-        path = listOf(
-            "action.yml",
-            "build/distributions/"
-        ),
-        key = expr { github.run_id }
+    val builtArtifacts = listOf(
+        "action.yml",
+        "build/distributions/"
     )
 
     val executeAction = SetupWslV1(
@@ -150,33 +150,64 @@ workflowWithCopyright(
         )
         uses(
             name = "Checkout",
-            action = CheckoutV2()
+            action = CheckoutV3()
+        )
+        uses(
+            name = "Setup Java 11",
+            action = SetupJavaV3(
+                javaVersion = "11",
+                distribution = Temurin
+            )
         )
         uses(
             name = "Build",
-            action = CustomAction(
-                actionOwner = "burrunan",
-                actionName = "gradle-cache-action",
-                actionVersion = "v1",
-                inputs = mapOf(
-                    "arguments" to "build --info --stacktrace --scan",
-                    "debug" to "false",
-                    "concurrent" to "true",
-                    "gradle-dependencies-cache-key" to "buildSrc/**/Versions.kt"
-                )
+            action = GradleCacheActionV1(
+                arguments = listOf(
+                    "--show-version",
+                    "build",
+                    "--info",
+                    "--stacktrace",
+                    "--scan"
+                ),
+                debug = false,
+                concurrent = true
             )
         )
         uses(
             name = "Save built artifacts to cache",
-            action = builtArtifactsCache
+            action = CacheSaveV3(
+                path = builtArtifacts,
+                key = expr { github.run_id }
+            )
         )
     }
 
-    job(
-        id = "test_invalid_distribution",
-        name = """Test "${expr("matrix.distribution.label")}" distribution on ${expr("matrix.environment")}""",
+    fun WorkflowBuilder.testJob(
+        id: String,
+        name: String,
+        _customArguments: Map<String, Any?> = mapOf(),
+        block: JobBuilder<EMPTY>.() -> Unit,
+    ) = job(
+        id = id,
+        name = name,
         needs = listOf(build),
         runsOn = RunnerType.Custom(expr("matrix.environment")),
+        _customArguments = _customArguments
+    ) {
+        uses(
+            name = "Restore built artifacts from cache",
+            action = CacheRestoreV3(
+                path = builtArtifacts,
+                key = expr { github.run_id },
+                failOnCacheMiss = true
+            )
+        )
+        block()
+    }
+
+    testJob(
+        id = "test_invalid_distribution",
+        name = """Test "${expr("matrix.distribution.label")}" distribution on ${expr("matrix.environment")}""",
         _customArguments = mapOf(
             "strategy" to mapOf(
                 "fail-fast" to false,
@@ -184,15 +215,15 @@ workflowWithCopyright(
                     "environment" to environments,
                     "distribution" to listOf(
                         mapOf(
-                            "id" to "invalid",
+                            "user-id" to "invalid",
                             "label" to "invalid"
                         ),
                         mapOf(
-                            "id" to "",
+                            "user-id" to "",
                             "label" to ""
                         ),
                         mapOf(
-                            "id" to null,
+                            "user-id" to null,
                             "label" to "null"
                         )
                     )
@@ -200,10 +231,6 @@ workflowWithCopyright(
             )
         )
     ) {
-        uses(
-            name = "Restore built artifacts from cache",
-            action = builtArtifactsCache
-        )
         executeActionStep = usesSelf(
             action = executeAction,
             continueOnError = true
@@ -215,11 +242,9 @@ workflowWithCopyright(
         )
     }
 
-    job(
+    testJob(
         id = "test_default_distribution",
         name = "Test default distribution on ${expr("matrix.environment")}",
-        needs = listOf(build),
-        runsOn = RunnerType.Custom(expr("matrix.environment")),
         _customArguments = mapOf(
             "strategy" to mapOf(
                 "fail-fast" to false,
@@ -230,10 +255,6 @@ workflowWithCopyright(
             )
         )
     ) {
-        uses(
-            name = "Restore built artifacts from cache",
-            action = builtArtifactsCache
-        )
         executeActionStep = usesSelf(
             action = SetupWslV1(
                 update = true
@@ -262,11 +283,9 @@ workflowWithCopyright(
         )
     }
 
-    job(
+    testJob(
         id = "test",
         name = """Test "${expr("matrix.distribution.user-id")}" distribution on ${expr("matrix.environment")}""",
-        needs = listOf(build),
-        runsOn = RunnerType.Custom(expr("matrix.environment")),
         _customArguments = mapOf(
             "strategy" to mapOf(
                 "fail-fast" to false,
@@ -277,10 +296,6 @@ workflowWithCopyright(
             )
         )
     ) {
-        uses(
-            name = "Restore built artifacts from cache",
-            action = builtArtifactsCache
-        )
         executeActionStep = usesSelf(
             action = executeAction.copy(
                 useCache = false
@@ -466,11 +481,9 @@ workflowWithCopyright(
         )
     }
 
-    job(
+    testJob(
         id = "test_wsl-conf_on_initial_execution",
         name = """Test /etc/wsl.conf handling on initial execution for "${expr("matrix.distribution.user-id")}" distribution on ${expr("matrix.environment")}""",
-        needs = listOf(build),
-        runsOn = RunnerType.Custom(expr("matrix.environment")),
         _customArguments = mapOf(
             "strategy" to mapOf(
                 "fail-fast" to false,
@@ -481,10 +494,6 @@ workflowWithCopyright(
             )
         )
     ) {
-        uses(
-            name = "Restore built artifacts from cache",
-            action = builtArtifactsCache
-        )
         executeActionStep = usesSelf(
             action = executeAction.copy(
                 wslConf = """
@@ -517,11 +526,9 @@ workflowWithCopyright(
         )
     }
 
-    job(
+    testJob(
         id = "test_wsl-conf_on_subsequent_execution",
         name = """Test /etc/wsl.conf handling on subsequent execution for "${expr("matrix.distribution.user-id")}" distribution on ${expr("matrix.environment")}""",
-        needs = listOf(build),
-        runsOn = RunnerType.Custom(expr("matrix.environment")),
         _customArguments = mapOf(
             "strategy" to mapOf(
                 "fail-fast" to false,
@@ -532,10 +539,6 @@ workflowWithCopyright(
             )
         )
     ) {
-        uses(
-            name = "Restore built artifacts from cache",
-            action = builtArtifactsCache
-        )
         executeActionStep = usesSelf(
             action = executeAction
         )
@@ -589,11 +592,9 @@ workflowWithCopyright(
         )
     }
 
-    job(
+    testJob(
         id = "test_additional_packages",
         name = """Test additional packages for "${expr("matrix.distribution.user-id")}" distribution on ${expr("matrix.environment")}""",
-        needs = listOf(build),
-        runsOn = RunnerType.Custom(expr("matrix.environment")),
         _customArguments = mapOf(
             "strategy" to mapOf(
                 "fail-fast" to false,
@@ -604,10 +605,6 @@ workflowWithCopyright(
             )
         )
     ) {
-        uses(
-            name = "Restore built artifacts from cache",
-            action = builtArtifactsCache
-        )
         executeActionStep = usesSelf(
             action = executeAction.copy(
                 additionalPackages = listOf(
@@ -626,7 +623,7 @@ workflowWithCopyright(
         )
     }
 
-    job(
+    testJob(
         id = "test_multiple_usage_with_different_distributions",
         name = """
             Test multiple usage with different distributions
@@ -635,8 +632,6 @@ workflowWithCopyright(
             / "${expr("matrix.distributions.distribution3.user-id")}")
             on ${expr("matrix.environment")}
         """.trimIndent().replace("\n", " "),
-        needs = listOf(build),
-        runsOn = RunnerType.Custom(expr("matrix.environment")),
         _customArguments = mapOf(
             "strategy" to mapOf(
                 "fail-fast" to false,
@@ -678,10 +673,6 @@ workflowWithCopyright(
             )
         )
     ) {
-        uses(
-            name = "Restore built artifacts from cache",
-            action = builtArtifactsCache
-        )
         usesSelf(
             name = "Execute action for ${expr("matrix.distributions.distribution1.user-id")}",
             action = SetupWslV1(
@@ -724,11 +715,9 @@ workflowWithCopyright(
         )
     }
 
-    job(
+    testJob(
         id = "test_multiple_usage_with_same_distribution",
         name = """Test multiple usage with "${expr("matrix.distribution.user-id")}" distribution on ${expr("matrix.environment")}""",
-        needs = listOf(build),
-        runsOn = RunnerType.Custom(expr("matrix.environment")),
         _customArguments = mapOf(
             "strategy" to mapOf(
                 "fail-fast" to false,
@@ -754,10 +743,6 @@ workflowWithCopyright(
             )
         )
     ) {
-        uses(
-            name = "Restore built artifacts from cache",
-            action = builtArtifactsCache
-        )
         usesSelf(
             action = executeAction.copy(
                 additionalPackages = listOf("bash")
@@ -810,11 +795,9 @@ workflowWithCopyright(
         )
     }
 
-    job(
+    testJob(
         id = "test_distribution_specific_wsl_bash_scripts",
         name = "Test distribution specific wsl-bash scripts on ${expr("matrix.environment")}",
-        needs = listOf(build),
-        runsOn = RunnerType.Custom(expr("matrix.environment")),
         _customArguments = mapOf(
             "strategy" to mapOf(
                 "fail-fast" to false,
@@ -836,10 +819,6 @@ workflowWithCopyright(
             )
         )
     ) {
-        uses(
-            name = "Restore built artifacts from cache",
-            action = builtArtifactsCache
-        )
         (1 until distributions.size)
             .associateWith {
                 usesSelf(
@@ -1094,7 +1073,7 @@ val Step.outcome get() = "steps.$id.outcome"
 
 // work-around for https://github.com/krzema12/github-workflows-kt/issues/640
 fun SetupWslV1.copy(
-    distribution: SetupWslV1.Distribution? = null,
+    distribution: Distribution? = null,
     useCache: Boolean? = null,
     wslConf: String? = null,
     setAsDefault: Boolean? = null,

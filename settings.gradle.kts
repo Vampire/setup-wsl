@@ -1,5 +1,5 @@
 /*
- * Copyright 2020-2022 Björn Kautler
+ * Copyright 2020-2023 Björn Kautler
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,8 +14,90 @@
  * limitations under the License.
  */
 
+import de.fayard.refreshVersions.core.FeatureFlag.GRADLE_UPDATES
+import net.kautler.conditionalRefreshVersions
+import org.gradle.api.initialization.resolve.RepositoriesMode.PREFER_SETTINGS
+
+pluginManagement {
+    require(JavaVersion.current().isJava11Compatible) {
+        "This build requires Gradle to be run with at least Java 11"
+    }
+
+    includeBuild("gradle/build-logic")
+    includeBuild("gradle/conditional-refresh-versions")
+    repositories {
+        mavenCentral()
+        gradlePluginPortal()
+    }
+}
+
 plugins {
-    id("com.gradle.enterprise") version "3.6.1"
+    id("net.kautler.conditional-refresh-versions")
+    id("com.gradle.enterprise") version "3.12.3"
+}
+
+conditionalRefreshVersions {
+    featureFlags {
+        disable(GRADLE_UPDATES)
+    }
+    rejectVersionIf {
+        candidate.stabilityLevel.isLessStableThan(current.stabilityLevel)
+    }
+    // work-around for https://github.com/jmfayard/refreshVersions/issues/662
+    file("build/tmp/refreshVersions").mkdirs()
+    // work-around for https://github.com/jmfayard/refreshVersions/issues/640
+    versionsPropertiesFile = file("build/tmp/refreshVersions/versions.properties")
+}
+
+gradle.rootProject {
+    tasks.configureEach {
+        if (name == "refreshVersions") {
+            doLast {
+                // work-around for https://github.com/jmfayard/refreshVersions/issues/661
+                // and https://github.com/jmfayard/refreshVersions/issues/663
+                file("gradle/libs.versions.toml").apply {
+                    readText()
+                        .replace("⬆ =", " ⬆ =")
+                        .replace("]\n\n", "]\n")
+                        .replace("""(?s)^(.*)(\n\Q[plugins]\E[^\[]*)(\n.*)$""".toRegex(), "$1$3$2")
+                        .also { writeText(it) }
+                }
+            }
+        }
+    }
+}
+
+dependencyResolutionManagement {
+    repositories {
+        ivy("https://nodejs.org/dist/") {
+            name = "Node.js Distributions"
+            patternLayout {
+                artifact("v[revision]/[artifact](-v[revision]-[classifier]).[ext]")
+            }
+            metadataSources {
+                artifact()
+            }
+            content {
+                includeModule("org.nodejs", "node")
+            }
+        }
+        ivy("https://github.com/yarnpkg/yarn/releases/download/") {
+            name = "Yarn Distributions"
+            patternLayout {
+                artifact("v[revision]/[artifact](-v[revision]).[ext]")
+            }
+            metadataSources {
+                artifact()
+            }
+            content {
+                includeModule("com.yarnpkg", "yarn")
+            }
+        }
+        mavenCentral()
+    }
+    // work-around for https://youtrack.jetbrains.com/issue/KT-56300
+    //repositoriesMode.set(FAIL_ON_PROJECT_REPOS)
+    repositoriesMode.set(PREFER_SETTINGS)
 }
 
 gradleEnterprise {
@@ -25,5 +107,11 @@ gradleEnterprise {
     }
 }
 
-rootProject.name = "setup-wsl"
+includeBuild("gradle/build-logic")
 include("ncc-packer")
+project(":ncc-packer").buildFileName = "ncc-packer.gradle.kts"
+
+rootProject.name = "setup-wsl"
+
+enableFeaturePreview("TYPESAFE_PROJECT_ACCESSORS")
+enableFeaturePreview("STABLE_CONFIGURATION_CACHE")

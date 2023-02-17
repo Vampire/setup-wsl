@@ -22,22 +22,16 @@ on:
   - cron: 0 0 * * 5
 jobs:
   check_yaml_consistency:
+    name: Check YAML consistency
     runs-on: ubuntu-latest
     steps:
     - id: step-0
       name: Check out
       uses: actions/checkout@v3
     - id: step-1
-      name: Set up Java in proper version
-      uses: actions/setup-java@v3
-      with:
-        java-version: 17
-        distribution: zulu
-        cache: gradle
-    - id: step-2
       name: Execute script
       run: rm '.github/workflows/check-dependency-versions.yaml' && '.github/workflows/check-dependency-versions.main.kts'
-    - id: step-3
+    - id: step-2
       name: Consistency check
       run: git diff --exit-code '.github/workflows/check-dependency-versions.yaml'
   check_dependency_versions:
@@ -51,12 +45,19 @@ jobs:
       run: git config --global core.autocrlf input
     - id: step-1
       name: Checkout
-      uses: actions/checkout@v2
+      uses: actions/checkout@v3
     - id: step-2
+      name: Setup Java 11
+      uses: actions/setup-java@v3
+      with:
+        java-version: 11
+        distribution: temurin
+    - id: step-3
       name: Check Dependency Versions
       uses: burrunan/gradle-cache-action@v1
       with:
-        arguments: dependencyUpdates
         debug: false
         concurrent: true
-        gradle-dependencies-cache-key: buildSrc/**/Versions.kt
+        arguments: |-
+          --show-version
+          dependencyUpdates

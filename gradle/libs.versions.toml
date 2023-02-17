@@ -1,0 +1,70 @@
+# Copyright 2020-2023 Björn Kautler
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+[versions]
+build-github-api = "1.313"
+build-gradle-plugin-dependency-analysis = "1.19.0"
+build-gradle-plugin-github = "3.0.0"
+build-gradle-plugin-grgit = "5.0.0"
+build-gradle-plugin-refresh-versions = "0.51.0"
+build-gradle-plugin-release = "3.0.2"
+build-gradle-plugin-versions = "0.45.0"
+build-inject = "1"
+build-kotlin = "1.8.10"
+build-kotlinx-serialization = "1.4.1"
+build-node = "16.18.1"
+build-snakeyaml = "1.33"
+build-vercel-ncc = "0.36.1"
+kotlin = "1.8.10"
+kotlin-wrappers = "1.0.0-pre.498"
+kotlinx-coroutines = "1.6.4"
+nullWritable = "1.0.5"
+semver = "7.3.8"
+workflows-kotlin = "1.8.10"
+
+[libraries]
+build-github-api = { module = "org.kohsuke:github-api", version.ref = "build-github-api" }
+build-inject = { module = "javax.inject:javax.inject", version.ref = "build-inject" }
+build-kotlinx-serialization-bom = { module = "org.jetbrains.kotlinx:kotlinx-serialization-bom", version.ref = "build-kotlinx-serialization" }
+build-kotlinx-serialization-core = { module = "org.jetbrains.kotlinx:kotlinx-serialization-core" }
+build-kotlinx-serialization-json = { module = "org.jetbrains.kotlinx:kotlinx-serialization-json" }
+build-snakeyaml = { module = "org.yaml:snakeyaml", version.ref = "build-snakeyaml" }
+build-vercel-ncc = { module = "vercel:ncc", version.ref = "build-vercel-ncc" }
+kotlin-wrapper-actions-toolkit = { module = "org.jetbrains.kotlin-wrappers:kotlin-actions-toolkit" }
+kotlin-wrapper-js = { module = "org.jetbrains.kotlin-wrappers:kotlin-js" }
+kotlin-wrapper-node = { module = "org.jetbrains.kotlin-wrappers:kotlin-node" }
+kotlin-wrappers-bom = { module = "org.jetbrains.kotlin-wrappers:kotlin-wrappers-bom", version.ref = "kotlin-wrappers" }
+kotlinx-coroutines-core = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-core", version.ref = "kotlinx-coroutines" }
+nullWritable = { module = "<unscoped>:null-writable", version.ref = "nullWritable" }
+semver = { module = "<unscoped>:semver", version.ref = "semver" }
+workflows-kotlin-compiler = { module = "org.jetbrains.kotlin:kotlin-compiler", version.ref = "workflows-kotlin" }
+workflows-kotlin-main-kts = { module = "org.jetbrains.kotlin:kotlin-main-kts", version.ref = "workflows-kotlin" }
+workflows-kotlin-scripting-compiler = { module = "org.jetbrains.kotlin:kotlin-scripting-compiler", version.ref = "workflows-kotlin" }
+
+[plugins]
+convention-dependencies = { id = "net.kautler.dependencies", version = "?" }
+convention-dependency-updates-report-aggregation = { id = "net.kautler.dependency-updates-report-aggregation", version = "?" }
+convention-github_actions = { id = "net.kautler.github_actions", version = "?" }
+convention-ncc-packer = { id = "net.kautler.ncc_packer", version = "?" }
+convention-node = { id = "net.kautler.node", version = "?" }
+convention-publishing = { id = "net.kautler.publishing", version = "?" }
+convention-readme = { id = "net.kautler.readme", version = "?" }
+dependency-analysis = { id = "com.autonomousapps.dependency-analysis", version.ref = "build-gradle-plugin-dependency-analysis" }
+github = { id = "net.wooga.github", version.ref = "build-gradle-plugin-github" }
+grgit = { id = "org.ajoberstar.grgit.service", version.ref = "build-gradle-plugin-grgit" }
+kotlin-js = { id = "org.jetbrains.kotlin.js", version.ref = "kotlin" }
+kotlin-serialization = { id = "org.jetbrains.kotlin.plugin.serialization", version.ref = "build-kotlin" }
+refresh-versions = { id = "de.fayard.refreshVersions", version.ref = "build-gradle-plugin-refresh-versions" }
+release = { id = "net.researchgate.release", version.ref = "build-gradle-plugin-release" }
+versions = { id = "com.github.ben-manes.versions", version.ref = "build-gradle-plugin-versions" }

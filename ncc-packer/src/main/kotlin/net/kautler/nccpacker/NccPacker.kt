@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 Björn Kautler
+ * Copyright 2020-2023 Björn Kautler
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,35 +16,35 @@
 
 package net.kautler.nccpacker
 
-import fs.MakeDirectoryOptions
-import fs.`T$45`
-import fs.mkdirSync
-import fs.writeFileSync
-import kotlinext.js.jsObject
+import js.core.jso
 import kotlinx.coroutines.await
-import path.path
-import process
+import node.fs.MakeDirectoryOptions
+import node.fs.WriteFileOptions
+import node.fs.mkdir
+import node.fs.writeFile
+import node.path.path
+import node.process.process
 
 suspend fun main() {
     runCatching {
         val (input, output) = process.argv.filterIndexed { i, _ -> i > 1 }
-        val result = ncc(input, jsObject {
+        val result = ncc(input, jso {
             sourceMap = true
             license = "LICENSES"
         }).await()
 
-        mkdirSync(output, jsObject<MakeDirectoryOptions> {
+        mkdir(output, jso<MakeDirectoryOptions> {
             recursive = true
         })
-        writeFileSync(path.join(output, "index.js"), result.code, jsObject<`T$45`>())
-        result.map?.also { writeFileSync(path.join(output, "index.js.map"), it, jsObject<`T$45`>()) }
+        writeFile(path.join(output, "index.js"), result.code)
+        result.map?.also { writeFile(path.join(output, "index.js.map"), it) }
 
         result.assets?.forEach { (assetFileName, asset) ->
             val assetFilePath = path.join(output, assetFileName)
-            mkdirSync(path.dirname(assetFilePath), jsObject<MakeDirectoryOptions> {
+            mkdir(path.dirname(assetFilePath), jso<MakeDirectoryOptions> {
                 recursive = true
             })
-            writeFileSync(assetFilePath, asset.source, jsObject<`T$45`> {
+            writeFile(assetFilePath, asset.source, jso<WriteFileOptions> {
                 mode = asset.permissions
             })
         }
