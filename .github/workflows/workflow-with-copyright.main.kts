@@ -23,7 +23,6 @@ import it.krzeminski.githubactions.dsl.workflow
 import it.krzeminski.githubactions.yaml.Preamble.WithOriginalAfter
 import it.krzeminski.githubactions.yaml.writeToFile
 import java.io.File
-import kotlin.io.path.invariantSeparatorsPathString
 
 fun workflowWithCopyright(
     name: String,
