@@ -27,7 +27,7 @@ import it.krzeminski.githubactions.actions.burrunan.GradleCacheActionV1
 import it.krzeminski.githubactions.actions.vampire.SetupWslV1
 import it.krzeminski.githubactions.actions.vampire.SetupWslV1.Distribution
 import it.krzeminski.githubactions.domain.CommandStep
-import it.krzeminski.githubactions.domain.ExternalActionStepWithOutputs
+import it.krzeminski.githubactions.domain.ExternalActionStep
 import it.krzeminski.githubactions.domain.JobOutputs.EMPTY
 import it.krzeminski.githubactions.domain.RunnerType
 import it.krzeminski.githubactions.domain.RunnerType.WindowsLatest
@@ -119,7 +119,7 @@ val wslBash = Shell.Custom("wsl-bash {0}")
 
 val wslSh = Shell.Custom("wsl-sh {0}")
 
-lateinit var executeActionStep: ExternalActionStepWithOutputs<SetupWslV1.Outputs>
+lateinit var executeActionStep: ExternalActionStep<SetupWslV1.Outputs>
 
 workflowWithCopyright(
     name = "Build and Test",
