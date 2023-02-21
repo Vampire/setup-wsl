@@ -38,8 +38,8 @@ dependencies {
 }
 
 tasks.withType<KotlinCompile>().configureEach {
-    kotlinOptions {
-        allWarningsAsErrors = true
+    compilerOptions {
+        allWarningsAsErrors.set(true)
     }
 }
 
