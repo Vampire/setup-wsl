@@ -43,12 +43,6 @@ tasks.withType<KotlinCompile>().configureEach {
     }
 }
 
-tasks.compileKotlin {
-    kotlinOptions {
-        freeCompilerArgs = listOf("-opt-in=kotlin.RequiresOptIn")
-    }
-}
-
 dependencyAnalysis {
     dependencies {
         bundle("com.autonomousapps.dependency-analysis.gradle.plugin") {

@@ -52,12 +52,6 @@ tasks.withType<KotlinCompile>().configureEach {
     }
 }
 
-tasks.compileKotlin {
-    kotlinOptions {
-        freeCompilerArgs = listOf("-opt-in=kotlin.RequiresOptIn")
-    }
-}
-
 tasks.dependencyUpdates {
     checkForGradleUpdate = false
     checkConstraints = true
