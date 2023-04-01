@@ -34,9 +34,7 @@ workflowWithCopyright(
                 Cron(
                     minute = "0",
                     hour = "0",
-                    // work-around for https://github.com/krzema12/github-workflows-kt/issues/642
-                    // use FRI after the issue is fixed
-                    dayWeek = "5"
+                    dayWeek = "FRI"
                 )
             )
         )

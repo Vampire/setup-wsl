@@ -1070,24 +1070,3 @@ val Step.successNotOnUbuntu2204Condition
     """.trimIndent()
 
 val Step.outcome get() = "steps.$id.outcome"
-
-// work-around for https://github.com/krzema12/github-workflows-kt/issues/640
-fun SetupWslV1.copy(
-    distribution: Distribution? = null,
-    useCache: Boolean? = null,
-    wslConf: String? = null,
-    setAsDefault: Boolean? = null,
-    update: Boolean? = null,
-    additionalPackages: List<String>? = null,
-    wslShellUser: String? = null,
-    wslShellCommand: String? = null
-) = SetupWslV1(
-    distribution = distribution ?: this.distribution,
-    useCache = useCache ?: this.useCache,
-    wslConf = wslConf ?: this.wslConf,
-    setAsDefault = setAsDefault ?: this.setAsDefault,
-    update = update ?: this.update,
-    additionalPackages = additionalPackages ?: this.additionalPackages,
-    wslShellUser = wslShellUser ?: this.wslShellUser,
-    wslShellCommand = wslShellCommand ?: this.wslShellCommand
-)
