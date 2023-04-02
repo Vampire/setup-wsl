@@ -18,7 +18,7 @@ import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
 plugins {
     `kotlin-dsl`
-    id(libs.plugins.convention.dependency.updates.report.aggregation.get().pluginId)
+    alias(libs.plugins.convention.dependency.updates.report.aggregation)
     alias(libs.plugins.dependency.analysis)
 }
 

@@ -15,5 +15,5 @@
  */
 
 plugins {
-    id(libs.plugins.convention.ncc.packer.get().pluginId)
+    alias(libs.plugins.convention.ncc.packer)
 }

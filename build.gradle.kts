@@ -15,9 +15,9 @@
  */
 
 plugins {
-    id(libs.plugins.convention.dependencies.get().pluginId)
-    id(libs.plugins.convention.node.get().pluginId)
-    id(libs.plugins.convention.github.actions.get().pluginId)
-    id(libs.plugins.convention.readme.get().pluginId)
-    id(libs.plugins.convention.publishing.get().pluginId)
+    alias(libs.plugins.convention.dependencies)
+    alias(libs.plugins.convention.node)
+    alias(libs.plugins.convention.github.actions)
+    alias(libs.plugins.convention.readme)
+    alias(libs.plugins.convention.publishing)
 }
