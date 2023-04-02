@@ -33,7 +33,7 @@ pluginManagement {
 
 plugins {
     id("net.kautler.conditional-refresh-versions")
-    id("com.gradle.enterprise") version "3.12.3"
+    id("com.gradle.enterprise") version "3.12.6"
 }
 
 conditionalRefreshVersions {

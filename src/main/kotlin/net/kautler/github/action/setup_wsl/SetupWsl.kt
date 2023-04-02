@@ -39,7 +39,6 @@ import actions.io.which
 import actions.tool.cache.cacheDir
 import actions.tool.cache.downloadTool
 import actions.tool.cache.find
-import js.core.get
 import js.core.jso
 import kotlinx.coroutines.CoroutineStart.LAZY
 import kotlinx.coroutines.DelicateCoroutinesApi
@@ -50,14 +49,14 @@ import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.flow.map
 import node.buffer.Buffer
-import node.buffer.BufferEncoding.utf16le
+import node.buffer.BufferEncoding
 import node.fs.exists
 import node.fs.mkdtemp
 import node.fs.readdir
 import node.fs.writeFile
 import node.os.tmpdir
 import node.path.path
-import node.process.Platform.win32
+import node.process.Platform
 import node.process.process
 import node.url.URL
 import actions.tool.cache.extractZip as toolCacheExtractZip
@@ -77,11 +76,11 @@ val wslHelp = GlobalScope.async(start = LAZY) {
             listeners = jso {
                 stdout = {
                     stdoutBuilder.append(it)
-                    stdoutBuilderUtf16Le.append(it.toString(utf16le))
+                    stdoutBuilderUtf16Le.append(it.toString(BufferEncoding.utf16le))
                 }
                 stderr = {
                     stderrBuilder.append(it)
-                    stderrBuilderUtf16Le.append(it.toString(utf16le))
+                    stderrBuilderUtf16Le.append(it.toString(BufferEncoding.utf16le))
                 }
             }
         }
@@ -336,7 +335,7 @@ suspend fun <T> group(name: String, fn: suspend () -> T): T {
 }
 
 suspend fun verifyWindowsEnvironment() {
-    check(process.platform == win32) {
+    check(process.platform == Platform.win32) {
         "platform '${process.platform}' is not supported by this action, please verify your 'runs-on' setting"
     }
     check(which("wsl").isNotBlank() || which("wslconfig").isNotBlank()) {
