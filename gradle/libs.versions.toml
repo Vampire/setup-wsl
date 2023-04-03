@@ -25,12 +25,12 @@ build-kotlinx-serialization = "1.5.0"
 build-node = "16.18.1"
 build-snakeyaml = "2.0"
 build-vercel-ncc = "0.36.1"
-kotlin = "1.8.10"
-kotlin-wrappers = "1.0.0-pre.526"
+kotlin = "1.8.20"
+kotlin-wrappers = "1.0.0-pre.529"
 kotlinx-coroutines = "1.6.4"
 nullWritable = "1.0.5"
 semver = "7.3.8"
-workflows-kotlin = "1.8.10"
+workflows-kotlin = "1.8.20"
 
 [libraries]
 build-github-api = { module = "org.kohsuke:github-api", version.ref = "build-github-api" }
