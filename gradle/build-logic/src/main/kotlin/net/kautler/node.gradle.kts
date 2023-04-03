@@ -21,26 +21,41 @@ import net.kautler.util.npm
 import org.gradle.accessors.dm.LibrariesForLibs
 import org.jetbrains.kotlin.gradle.targets.js.nodejs.NodeJsExec
 import org.jetbrains.kotlin.gradle.targets.js.nodejs.NodeJsRootExtension
+import org.jetbrains.kotlin.gradle.tasks.IncrementalSyncTask
 import org.yaml.snakeyaml.Yaml
 
 plugins {
-    kotlin("js")
+    kotlin("multiplatform")
 }
 
+val libs = the<LibrariesForLibs>()
+
 kotlin {
-    js(IR) {
+    js {
         useCommonJs()
         binaries.executable()
         nodejs()
     }
+
+    sourceSets {
+        jsMain {
+            dependencies {
+                implementation(libs.kotlinx.coroutines.core)
+                implementation(dependencies.platform(libs.kotlin.wrappers.bom))
+                implementation(libs.kotlin.wrapper.actions.toolkit)
+                implementation(libs.kotlin.wrapper.js)
+                implementation(libs.kotlin.wrapper.node)
+                implementation(npm(libs.semver))
+                implementation(npm(libs.nullWritable))
+            }
+        }
+    }
 }
 
 // work-around for https://youtrack.jetbrains.com/issue/KT-56305
-tasks.withType<Copy>().configureEach {
-    if (name.endsWith("ExecutableCompileSync")) {
-        doFirst {
-            outputs.files.forEach { it.deleteRecursively() }
-        }
+tasks.withType<IncrementalSyncTask>().configureEach {
+    doFirst {
+        outputs.files.forEach { it.deleteRecursively() }
     }
 }
 
@@ -76,26 +91,10 @@ tasks.withType<NodeJsExec>().configureEach {
     }
 }
 
-val libs = the<LibrariesForLibs>()
-
 configure<NodeJsRootExtension> {
-    nodeVersion = libs.versions.build.node.get()
-}
-
-dependencies {
-    implementation(libs.kotlinx.coroutines.core)
-    implementation(platform(libs.kotlin.wrappers.bom))
-    implementation(libs.kotlin.wrapper.actions.toolkit)
-    implementation(libs.kotlin.wrapper.js)
-    implementation(libs.kotlin.wrapper.node)
-    implementation(npm(libs.semver))
-    implementation(npm(libs.nullWritable))
+    version = libs.versions.build.node.get()
 }
 
 tasks.assemble {
-    dependsOn(project(":ncc-packer").tasks.named("nodeProductionRun"))
-}
-
-fun plugin(plugin: Provider<PluginDependency>) = plugin.map {
-    "${it.pluginId}:${it.pluginId}.gradle.plugin:${it.version.requiredVersion}"
+    dependsOn(project(":ncc-packer").tasks.named("jsNodeProductionRun"))
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright 2020-2023 Björn Kautler
+ * Copyright 2020-2024 Björn Kautler
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,25 +19,38 @@ package net.kautler
 import net.kautler.util.npm
 import org.gradle.accessors.dm.LibrariesForLibs
 import org.jetbrains.kotlin.gradle.targets.js.nodejs.NodeJsExec
+import org.jetbrains.kotlin.gradle.tasks.IncrementalSyncTask
 
 plugins {
-    kotlin("js")
+    kotlin("multiplatform")
 }
 
+val libs = the<LibrariesForLibs>()
+
 kotlin {
-    js(IR) {
+    js {
         useCommonJs()
         binaries.executable()
         nodejs()
     }
+
+    sourceSets {
+        jsMain {
+            dependencies {
+                implementation(libs.kotlinx.coroutines.core)
+                implementation(dependencies.platform(libs.kotlin.wrappers.bom))
+                implementation(libs.kotlin.wrapper.js)
+                implementation(libs.kotlin.wrapper.node)
+                implementation(npm(libs.build.vercel.ncc))
+            }
+        }
+    }
 }
 
 // work-around for https://youtrack.jetbrains.com/issue/KT-56305
-tasks.withType<Copy>().configureEach {
-    if (name.endsWith("ExecutableCompileSync")) {
-        doFirst {
-            outputs.files.forEach { it.deleteRecursively() }
-        }
+tasks.withType<IncrementalSyncTask>().configureEach {
+    doFirst {
+        outputs.files.forEach { it.deleteRecursively() }
     }
 }
 
@@ -55,7 +68,7 @@ tasks.withType<NodeJsExec>().configureEach {
             input.fileProvider(
                 rootProject
                     .tasks
-                    .named<Copy>("productionExecutableCompileSync")
+                    .named<IncrementalSyncTask>("jsProductionExecutableCompileSync")
                     .map {
                         it
                             .outputs
@@ -76,14 +89,4 @@ tasks.withType<NodeJsExec>().configureEach {
             )
     }
     argumentProviders.add(objects.newInstance<ArgumentProvider>(rootProject))
-}
-
-val libs = the<LibrariesForLibs>()
-
-dependencies {
-    implementation(libs.kotlinx.coroutines.core)
-    implementation(platform(libs.kotlin.wrappers.bom))
-    implementation(libs.kotlin.wrapper.js)
-    implementation(libs.kotlin.wrapper.node)
-    implementation(npm(libs.build.vercel.ncc))
 }

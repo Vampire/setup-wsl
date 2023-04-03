@@ -1,5 +1,5 @@
 /*
- * Copyright 2020-2023 Björn Kautler
+ * Copyright 2020-2024 Björn Kautler
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -48,13 +48,13 @@ external interface NccResult {
 
 external interface AssetMap
 
-inline operator fun AssetMap.get(key: String) = asDynamic()[key].unsafeCast<Asset>()
+operator fun AssetMap.get(key: String) = asDynamic()[key].unsafeCast<Asset>()
 
-inline operator fun AssetMap.set(key: String, value: Asset) {
+operator fun AssetMap.set(key: String, value: Asset) {
     asDynamic()[key] = value
 }
 
-inline operator fun AssetMap.iterator() = Object.keys(this).map { it to this[it] }.iterator()
+operator fun AssetMap.iterator() = Object.keys(this).map { it to this[it] }.iterator()
 
 inline fun AssetMap.forEach(action: (Pair<String, Asset>) -> Unit) {
     for (element in this) {

@@ -1,5 +1,5 @@
 /*
- * Copyright 2020-2023 Björn Kautler
+ * Copyright 2020-2024 Björn Kautler
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,17 +16,16 @@
 
 package net.kautler.util
 
+import org.gradle.api.artifacts.Dependency
 import org.gradle.api.artifacts.MinimalExternalModuleDependency
-import org.gradle.api.artifacts.dsl.DependencyHandler
 import org.gradle.api.provider.Provider
-import org.jetbrains.kotlin.gradle.targets.js.npm.NpmDependency
-import org.jetbrains.kotlin.gradle.targets.js.npm.NpmDependencyExtension
+import org.jetbrains.kotlin.gradle.plugin.KotlinDependencyHandler
 
-fun DependencyHandler.npm(
+fun KotlinDependencyHandler.npm(
     dependency: Provider<MinimalExternalModuleDependency>
-): NpmDependency {
+): Dependency {
     val dep = dependency.get()
-    return (extensions.getByName("npm") as NpmDependencyExtension)(
+    return npm(
         name = if (dep.group == "<unscoped>") dep.name else "@${dep.group}/${dep.name}",
         version = dep.version!!
     )

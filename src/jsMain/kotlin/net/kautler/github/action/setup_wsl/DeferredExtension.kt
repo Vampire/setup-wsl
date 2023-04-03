@@ -1,5 +1,5 @@
 /*
- * Copyright 2020-2023 Björn Kautler
+ * Copyright 2020-2024 Björn Kautler
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-@file:JsModule("null-writable")
+package net.kautler.github.action.setup_wsl
 
-import node.stream.Writable
+import kotlinx.coroutines.Deferred
 
-external class NullWritable : Writable
+suspend operator fun <T> Deferred<T>.invoke() = await()

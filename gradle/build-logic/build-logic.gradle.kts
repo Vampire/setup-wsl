@@ -1,5 +1,5 @@
 /*
- * Copyright 2020-2023 Björn Kautler
+ * Copyright 2020-2024 Björn Kautler
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -29,7 +29,7 @@ dependencies {
     implementation(plugin(libs.plugins.release))
     implementation(plugin(libs.plugins.grgit))
     implementation(plugin(libs.plugins.github))
-    implementation(plugin(libs.plugins.kotlin.js))
+    implementation(plugin(libs.plugins.kotlin.multiplatform))
     implementation(":dependency-updates-report-aggregation")
     implementation(libs.build.inject)
     implementation(libs.build.github.api)
