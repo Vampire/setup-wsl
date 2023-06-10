@@ -53,6 +53,7 @@ plugins {
 }
 
 // part of work-around for https://github.com/gradle/gradle/issues/23747
+// part of work-around for https://github.com/researchgate/gradle-release/issues/304
 apply(plugin = "net.researchgate.release")
 
 extra["release.useAutomaticVersion"] = boolean(project, "release.useAutomaticVersion").getValue()
@@ -106,6 +107,7 @@ github {
     token.set(provider { gitHubToken })
 }
 
+// part of work-around for https://github.com/researchgate/gradle-release/issues/304
 configure(listOf(tasks.release, tasks.runBuildTasks)) {
     configure {
         actions.clear()
