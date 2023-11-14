@@ -260,7 +260,7 @@ object Kali : AptGetBasedDistribution(
     wslId = "kali-linux",
     distributionName = "Kali",
     version = SemVer("1.0.0", jso<SemVerRangeOptions>()),
-    productId = "9pkr34tncv07",
+    downloadUrl = URL("https://aka.ms/wsl-kali-linux-new"),
     installerFile = "kali.exe"
 )
 
