@@ -38,14 +38,8 @@ dependencies {
 }
 
 tasks.withType<KotlinCompile>().configureEach {
-    kotlinOptions {
-        allWarningsAsErrors = true
-    }
-}
-
-tasks.compileKotlin {
-    kotlinOptions {
-        freeCompilerArgs = listOf("-opt-in=kotlin.RequiresOptIn")
+    compilerOptions {
+        allWarningsAsErrors.set(true)
     }
 }
 

@@ -18,7 +18,7 @@ import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
 plugins {
     `kotlin-dsl`
-    alias(libs.plugins.kotlin.serialization)
+    kotlin("plugin.serialization") version embeddedKotlinVersion
     alias(libs.plugins.versions)
     alias(libs.plugins.dependency.analysis)
 }
@@ -47,14 +47,8 @@ dependencyAnalysis {
 }
 
 tasks.withType<KotlinCompile>().configureEach {
-    kotlinOptions {
-        allWarningsAsErrors = true
-    }
-}
-
-tasks.compileKotlin {
-    kotlinOptions {
-        freeCompilerArgs = listOf("-opt-in=kotlin.RequiresOptIn")
+    compilerOptions {
+        allWarningsAsErrors.set(true)
     }
 }
 

@@ -19,7 +19,7 @@
 name: Check Dependency Versions
 on:
   schedule:
-  - cron: 0 0 * * 5
+  - cron: 0 0 * * FRI
 jobs:
   check_yaml_consistency:
     name: Check YAML consistency

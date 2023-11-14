@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-@file:DependsOn("it.krzeminski:github-actions-kotlin-dsl:0.37.0")
+@file:DependsOn("it.krzeminski:github-actions-kotlin-dsl:0.40.0")
 
 import it.krzeminski.githubactions.domain.Concurrency
 import it.krzeminski.githubactions.domain.triggers.Trigger
@@ -23,7 +23,6 @@ import it.krzeminski.githubactions.dsl.workflow
 import it.krzeminski.githubactions.yaml.Preamble.WithOriginalAfter
 import it.krzeminski.githubactions.yaml.writeToFile
 import java.io.File
-import kotlin.io.path.invariantSeparatorsPathString
 
 fun workflowWithCopyright(
     name: String,
