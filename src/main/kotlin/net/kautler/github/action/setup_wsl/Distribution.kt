@@ -346,7 +346,7 @@ object OpenSuseLeap15_2 : ZypperBasedDistribution(
     wslId = "openSUSE-Leap-15.2",
     distributionName = "openSUSE Leap",
     version = SemVer("15.2.0", jso<SemVerRangeOptions>()),
-    productId = "9mzd0n9z4m4h",
+    downloadUrl = URL("https://aka.ms/wsl-opensuseleap15-2"),
     installerFile = "openSUSE-Leap-15.2.exe"
 ) {
     override suspend fun refresh() {
