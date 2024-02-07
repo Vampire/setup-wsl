@@ -41,6 +41,7 @@ import it.krzeminski.githubactions.domain.triggers.Schedule
 import it.krzeminski.githubactions.dsl.JobBuilder
 import it.krzeminski.githubactions.dsl.WorkflowBuilder
 import it.krzeminski.githubactions.dsl.expressions.expr
+import kotlin.math.min
 
 val environments = listOf(
     "windows-2019",
@@ -106,7 +107,8 @@ val ubuntu1604 = mapOf(
 
 val distributions = listOf(
     debian,
-    alpine,
+    // disable testing on Alpine for the time being due to https://github.com/Vampire/setup-wsl/issues/50
+    //alpine,
     kali,
     openSuseLeap15_2,
     ubuntu2204,
@@ -834,20 +836,20 @@ workflowWithCopyright(
                 executeActionStep = localExecuteActionStep
                 verifyInstalledDistribution(
                     name = "Test - wsl-bash_${expr("matrix.distributions.distribution$i.user-id")} should use the correct distribution",
-                    conditionTransformer = if (i == 5) {
-                        { executeActionStep.successNotOnUbuntu2004Condition }
+                    conditionTransformer = if (distributions[i] == ubuntu2004) {
+                        { executeActionStep.getSuccessNotOnUbuntu2004Condition(i) }
                     } else {
                         { it }
                     },
-                    // the formula adds 1 to the indices after 5
-                    // to mitigate the double entry for index 5
-                    shell = Shell.Custom("wsl-bash_${distributions[(i / 6) + i - 1]["user-id"]} {0}"),
+                    // the formula adds 1 to the indices from ubuntu2004 on
+                    // to mitigate the double entry for the previous index
+                    shell = Shell.Custom("wsl-bash_${distributions[min(1, i / (distributions.indexOf(ubuntu2004) + 1)) + i - 1]["user-id"]} {0}"),
                     expectedPatternExpression = "matrix.distributions.distribution$i.match-pattern"
                 )
-                if (i == 5) {
+                if (distributions[i] == ubuntu2004) {
                     verifyInstalledDistribution(
                         name = "Test - wsl-bash_${expr("matrix.distributions.distribution$i.user-id")} should use the correct distribution",
-                        conditionTransformer = { executeActionStep.successNotOnUbuntu2204Condition },
+                        conditionTransformer = { executeActionStep.getSuccessNotOnUbuntu2204Condition(i) },
                         shell = Shell.Custom("wsl-bash_${distributions[i]["user-id"]} {0}"),
                         expectedPatternExpression = "matrix.distributions.distribution$i.match-pattern"
                     )
@@ -1055,18 +1057,16 @@ val Step.successOnAlpineCondition
         && (matrix.distribution.user-id == 'Alpine')
     """.trimIndent()
 
-val Step.successNotOnUbuntu2004Condition
-    get() = """
-        always()
-        && ($outcome == 'success')
-        && (matrix.distributions.distribution5.user-id != 'Ubuntu-20.04')
-    """.trimIndent()
+fun Step.getSuccessNotOnUbuntu2004Condition(i: Int) = """
+    always()
+    && ($outcome == 'success')
+    && (matrix.distributions.distribution$i.user-id != 'Ubuntu-20.04')
+""".trimIndent()
 
-val Step.successNotOnUbuntu2204Condition
-    get() = """
-        always()
-        && ($outcome == 'success')
-        && (matrix.distributions.distribution5.user-id != 'Ubuntu-22.04')
-    """.trimIndent()
+fun Step.getSuccessNotOnUbuntu2204Condition(i: Int) = """
+    always()
+    && ($outcome == 'success')
+    && (matrix.distributions.distribution$i.user-id != 'Ubuntu-22.04')
+""".trimIndent()
 
 val Step.outcome get() = "steps.$id.outcome"
