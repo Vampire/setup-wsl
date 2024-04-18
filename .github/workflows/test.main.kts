@@ -29,6 +29,7 @@ import io.github.typesafegithub.workflows.actions.vampire.SetupWslV1.Distributio
 import io.github.typesafegithub.workflows.domain.CommandStep
 import io.github.typesafegithub.workflows.domain.ActionStep
 import io.github.typesafegithub.workflows.domain.JobOutputs.EMPTY
+import io.github.typesafegithub.workflows.domain.AbstractResult.Status.Success
 import io.github.typesafegithub.workflows.domain.RunnerType
 import io.github.typesafegithub.workflows.domain.RunnerType.WindowsLatest
 import io.github.typesafegithub.workflows.domain.Shell
@@ -1047,19 +1048,19 @@ fun JobBuilder<*>.verifyCommandResult(
 val Step.successCondition
     get() = """
         always()
-        && ($outcome == 'success')
+        && (${outcome.eq(Success)})
     """.trimIndent()
 
 val Step.successOnAlpineCondition
     get() = """
         always()
-        && ($outcome == 'success')
+        && (${outcome.eq(Success)})
         && (matrix.distribution.user-id == 'Alpine')
     """.trimIndent()
 
 fun Step.getSuccessNotOnUbuntu2004Condition(i: Int) = """
     always()
-    && ($outcome == 'success')
+    && (${outcome.eq(Success)})
     && (matrix.distributions.distribution$i.user-id != 'Ubuntu-20.04')
 """.trimIndent()
 
