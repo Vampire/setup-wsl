@@ -18,29 +18,29 @@
 
 @file:Import("workflow-with-copyright.main.kts")
 
-import it.krzeminski.githubactions.actions.actions.CacheRestoreV3
-import it.krzeminski.githubactions.actions.actions.CacheSaveV3
-import it.krzeminski.githubactions.actions.actions.CheckoutV3
-import it.krzeminski.githubactions.actions.actions.SetupJavaV3
-import it.krzeminski.githubactions.actions.actions.SetupJavaV3.Distribution.Temurin
-import it.krzeminski.githubactions.actions.burrunan.GradleCacheActionV1
-import it.krzeminski.githubactions.actions.vampire.SetupWslV1
-import it.krzeminski.githubactions.actions.vampire.SetupWslV1.Distribution
-import it.krzeminski.githubactions.domain.CommandStep
-import it.krzeminski.githubactions.domain.ExternalActionStep
-import it.krzeminski.githubactions.domain.JobOutputs.EMPTY
-import it.krzeminski.githubactions.domain.RunnerType
-import it.krzeminski.githubactions.domain.RunnerType.WindowsLatest
-import it.krzeminski.githubactions.domain.Shell
-import it.krzeminski.githubactions.domain.Shell.Cmd
-import it.krzeminski.githubactions.domain.Step
-import it.krzeminski.githubactions.domain.triggers.Cron
-import it.krzeminski.githubactions.domain.triggers.PullRequest
-import it.krzeminski.githubactions.domain.triggers.Push
-import it.krzeminski.githubactions.domain.triggers.Schedule
-import it.krzeminski.githubactions.dsl.JobBuilder
-import it.krzeminski.githubactions.dsl.WorkflowBuilder
-import it.krzeminski.githubactions.dsl.expressions.expr
+import io.github.typesafegithub.workflows.actions.actions.CacheRestoreV3
+import io.github.typesafegithub.workflows.actions.actions.CacheSaveV3
+import io.github.typesafegithub.workflows.actions.actions.CheckoutV3
+import io.github.typesafegithub.workflows.actions.actions.SetupJavaV3
+import io.github.typesafegithub.workflows.actions.actions.SetupJavaV3.Distribution.Temurin
+import io.github.typesafegithub.workflows.actions.burrunan.GradleCacheActionV1
+import io.github.typesafegithub.workflows.actions.vampire.SetupWslV1
+import io.github.typesafegithub.workflows.actions.vampire.SetupWslV1.Distribution
+import io.github.typesafegithub.workflows.domain.CommandStep
+import io.github.typesafegithub.workflows.domain.ActionStep
+import io.github.typesafegithub.workflows.domain.JobOutputs.EMPTY
+import io.github.typesafegithub.workflows.domain.RunnerType
+import io.github.typesafegithub.workflows.domain.RunnerType.WindowsLatest
+import io.github.typesafegithub.workflows.domain.Shell
+import io.github.typesafegithub.workflows.domain.Shell.Cmd
+import io.github.typesafegithub.workflows.domain.Step
+import io.github.typesafegithub.workflows.domain.triggers.Cron
+import io.github.typesafegithub.workflows.domain.triggers.PullRequest
+import io.github.typesafegithub.workflows.domain.triggers.Push
+import io.github.typesafegithub.workflows.domain.triggers.Schedule
+import io.github.typesafegithub.workflows.dsl.JobBuilder
+import io.github.typesafegithub.workflows.dsl.WorkflowBuilder
+import io.github.typesafegithub.workflows.dsl.expressions.expr
 import kotlin.math.min
 
 val environments = listOf(
@@ -121,7 +121,7 @@ val wslBash = Shell.Custom("wsl-bash {0}")
 
 val wslSh = Shell.Custom("wsl-sh {0}")
 
-lateinit var executeActionStep: ExternalActionStep<SetupWslV1.Outputs>
+lateinit var executeActionStep: ActionStep<SetupWslV1.Outputs>
 
 workflowWithCopyright(
     name = "Build and Test",
@@ -240,7 +240,7 @@ workflowWithCopyright(
         run(
             name = "Test - action should fail if an invalid distribution is given",
             shell = Cmd,
-            command = "if '${expr(executeActionStep.outcome)}' NEQ 'failure' exit 1"
+            command = "if '${expr("${executeActionStep.outcome}")}' NEQ 'failure' exit 1"
         )
     }
 
@@ -871,7 +871,7 @@ fun JobBuilder<*>.commonTests() {
             // do not just rely on false here, but explicitly use exit
             // in case failing commands do not make the script fail
             // and use "shell = Cmd" to capture that the wrapper script is hiding errors
-            "IF '${expr(provocationStep.outcome)}' NEQ 'failure' EXIT /B 1"
+            "IF '${expr("${provocationStep.outcome}") }' NEQ 'failure' EXIT /B 1"
         }
     )
     verifyFailure(
@@ -988,7 +988,7 @@ fun JobBuilder<*>.verifyFailure(
         shell = verificationShell,
         command = verificationTransformer(
             provocationStep,
-            "[ '${expr(provocationStep.outcome)}' == 'failure' ]"
+            "[ '${expr("${provocationStep.outcome}")}' == 'failure' ]"
         )
     )
 }
@@ -1068,5 +1068,3 @@ fun Step.getSuccessNotOnUbuntu2204Condition(i: Int) = """
     && ($outcome == 'success')
     && (matrix.distributions.distribution$i.user-id != 'Ubuntu-22.04')
 """.trimIndent()
-
-val Step.outcome get() = "steps.$id.outcome"

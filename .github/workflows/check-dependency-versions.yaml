@@ -14,50 +14,50 @@
 
 # This file was generated using Kotlin DSL (.github/workflows/check-dependency-versions.main.kts).
 # If you want to modify the workflow, please change the Kotlin file and regenerate this YAML file.
-# Generated with https://github.com/krzema12/github-workflows-kt
+# Generated with https://github.com/typesafegithub/github-workflows-kt
 
-name: Check Dependency Versions
+name: 'Check Dependency Versions'
 on:
   schedule:
-  - cron: 0 0 * * FRI
+  - cron: '0 0 * * FRI'
 jobs:
   check_yaml_consistency:
-    name: Check YAML consistency
-    runs-on: ubuntu-latest
+    name: 'Check YAML consistency'
+    runs-on: 'ubuntu-latest'
     steps:
-    - id: step-0
-      name: Check out
-      uses: actions/checkout@v3
-    - id: step-1
-      name: Execute script
-      run: rm '.github/workflows/check-dependency-versions.yaml' && '.github/workflows/check-dependency-versions.main.kts'
-    - id: step-2
-      name: Consistency check
-      run: git diff --exit-code '.github/workflows/check-dependency-versions.yaml'
+    - id: 'step-0'
+      name: 'Check out'
+      uses: 'actions/checkout@v4'
+    - id: 'step-1'
+      name: 'Execute script'
+      run: 'rm ''.github/workflows/check-dependency-versions.yaml'' && ''.github/workflows/check-dependency-versions.main.kts'''
+    - id: 'step-2'
+      name: 'Consistency check'
+      run: 'git diff --exit-code ''.github/workflows/check-dependency-versions.yaml'''
   check_dependency_versions:
-    name: Check Dependency Versions
-    runs-on: windows-latest
+    name: 'Check Dependency Versions'
+    runs-on: 'windows-latest'
     needs:
-    - check_yaml_consistency
+    - 'check_yaml_consistency'
     steps:
-    - id: step-0
-      name: Configure Git
-      run: git config --global core.autocrlf input
-    - id: step-1
-      name: Checkout
-      uses: actions/checkout@v3
-    - id: step-2
-      name: Setup Java 11
-      uses: actions/setup-java@v3
+    - id: 'step-0'
+      name: 'Configure Git'
+      run: 'git config --global core.autocrlf input'
+    - id: 'step-1'
+      name: 'Checkout'
+      uses: 'actions/checkout@v3'
+    - id: 'step-2'
+      name: 'Setup Java 11'
+      uses: 'actions/setup-java@v3'
       with:
-        java-version: 11
-        distribution: temurin
-    - id: step-3
-      name: Check Dependency Versions
-      uses: burrunan/gradle-cache-action@v1
+        java-version: '11'
+        distribution: 'temurin'
+    - id: 'step-3'
+      name: 'Check Dependency Versions'
+      uses: 'burrunan/gradle-cache-action@v1'
       with:
-        debug: false
-        concurrent: true
+        debug: 'false'
+        concurrent: 'true'
         arguments: |-
           --show-version
           dependencyUpdates

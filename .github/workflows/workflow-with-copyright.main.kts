@@ -14,14 +14,14 @@
  * limitations under the License.
  */
 
-@file:DependsOn("it.krzeminski:github-actions-kotlin-dsl:0.40.0")
+@file:DependsOn("io.github.typesafegithub:github-workflows-kt:1.14.0")
 
-import it.krzeminski.githubactions.domain.Concurrency
-import it.krzeminski.githubactions.domain.triggers.Trigger
-import it.krzeminski.githubactions.dsl.WorkflowBuilder
-import it.krzeminski.githubactions.dsl.workflow
-import it.krzeminski.githubactions.yaml.Preamble.WithOriginalAfter
-import it.krzeminski.githubactions.yaml.writeToFile
+import io.github.typesafegithub.workflows.domain.Concurrency
+import io.github.typesafegithub.workflows.domain.triggers.Trigger
+import io.github.typesafegithub.workflows.dsl.WorkflowBuilder
+import io.github.typesafegithub.workflows.dsl.workflow
+import io.github.typesafegithub.workflows.yaml.Preamble.WithOriginalAfter
+import io.github.typesafegithub.workflows.yaml.writeToFile
 import java.io.File
 
 fun workflowWithCopyright(
