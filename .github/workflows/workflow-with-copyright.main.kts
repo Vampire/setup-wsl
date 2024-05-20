@@ -14,33 +14,29 @@
  * limitations under the License.
  */
 
-@file:DependsOn("io.github.typesafegithub:github-workflows-kt:1.14.0")
+@file:DependsOn("io.github.typesafegithub:github-workflows-kt:2.0.0")
 
 import io.github.typesafegithub.workflows.domain.Concurrency
 import io.github.typesafegithub.workflows.domain.triggers.Trigger
 import io.github.typesafegithub.workflows.dsl.WorkflowBuilder
 import io.github.typesafegithub.workflows.dsl.workflow
 import io.github.typesafegithub.workflows.yaml.Preamble.WithOriginalAfter
-import io.github.typesafegithub.workflows.yaml.writeToFile
 import java.io.File
 
 fun workflowWithCopyright(
     name: String,
     on: List<Trigger>,
-    env: LinkedHashMap<String, String> = linkedMapOf(),
+    env: Map<String, String> = mapOf(),
     sourceFile: File,
     concurrency: Concurrency? = null,
     block: WorkflowBuilder.() -> Unit
 ) {
-    val sourceFilePath = sourceFile.toPath()
     workflow(
         name = name,
         on = on,
         env = env,
-        sourceFile = sourceFilePath,
+        sourceFile = sourceFile,
         concurrency = concurrency,
-        block = block
-    ).writeToFile(
         preamble = WithOriginalAfter(
             """
                 Copyright 2020-2023 Björn Kautler
@@ -57,6 +53,7 @@ fun workflowWithCopyright(
                 See the License for the specific language governing permissions and
                 limitations under the License.
             """.trimIndent()
-        )
+        ),
+        block = block
     )
 }
