@@ -19,6 +19,7 @@ package net.kautler.github.action.setup_wsl
 import SemVer
 import actions.core.debug
 import actions.core.info
+import actions.core.isDebug
 import actions.exec.exec
 import actions.http.client.HttpClient
 import js.core.jso
@@ -67,6 +68,35 @@ sealed class Distribution(
             ).await()
 
             if (response.message.statusCode != 200) {
+                if (isDebug()) {
+                    val echoResponse = HttpClient().post(
+                        requestUrl = "https://echo.free.beeceptor.com/api/GetFiles",
+                        data = "type=ProductId&url=$productId",
+                        additionalHeaders = recordOf(
+                            "Content-Type" to "application/x-www-form-urlencoded"
+                        )
+                    ).await()
+                    if (echoResponse.message.statusCode == 200) {
+                        debug("Request:\n${echoResponse.readBody().await()}")
+                    } else {
+                        debug("Could not get echo response (statusCode: ${echoResponse.message.statusCode} / statusMessage: ${echoResponse.message.statusMessage})")
+                    }
+
+                    val responseMessage = JSON.stringify(
+                        recordOf(
+                            "httpVersion" to response.message.httpVersion,
+                            "headers" to response.message.headers,
+                            "trailers" to response.message.trailers,
+                            "method" to (response.message.method ?: "<unknown>"),
+                            "url" to (response.message.url ?: "<unknown>"),
+                            "statusCode" to (response.message.statusCode ?: "<unknown>"),
+                            "statusMessage" to (response.message.statusMessage ?: "<unknown>"),
+                            "body" to response.readBody().await()
+                        ),
+                        space = 2
+                    )
+                    debug("Response:\n$responseMessage")
+                }
                 error("Could not determine download URL (statusCode: ${response.message.statusCode} / statusMessage: ${response.message.statusMessage})")
             }
 
