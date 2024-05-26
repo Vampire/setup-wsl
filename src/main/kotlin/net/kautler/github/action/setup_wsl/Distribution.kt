@@ -40,7 +40,8 @@ val distributions = listOf(
     Ubuntu1604,
     Ubuntu1804,
     Ubuntu2004,
-    Ubuntu2204
+    Ubuntu2204,
+    Ubuntu2404
 ).associateBy { it.userId }
 
 sealed class Distribution(
@@ -245,6 +246,16 @@ abstract class AptGetBasedDistribution : Distribution {
         )
     }
 }
+
+object Ubuntu2404 : AptGetBasedDistribution(
+    wslId = "Ubuntu-24.04",
+    distributionName = "Ubuntu",
+    version = SemVer("24.4.0", jso<SemVerRangeOptions>()),
+    // work-around for missing shortlink on https://learn.microsoft.com/en-us/windows/wsl/install-manual#downloading-distributions
+    //downloadUrl = URL("https://aka.ms/wslubuntu2404"),
+    productId = "9nz3klhxdjp5",
+    installerFile = "ubuntu2404.exe"
+)
 
 object Ubuntu2204 : AptGetBasedDistribution(
     wslId = "Ubuntu",

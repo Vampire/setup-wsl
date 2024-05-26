@@ -156,6 +156,7 @@ The values currently supported by this action are:
 * `Alpine`
 * `kali-linux`
 * `openSUSE-Leap-15.2`
+* `Ubuntu-24.04`
 * `Ubuntu-22.04`
 * `Ubuntu-20.04`
 * `Ubuntu-18.04`

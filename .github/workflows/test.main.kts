@@ -78,6 +78,13 @@ val openSuseLeap15_2 = mapOf(
     "default-absent-tool" to "which"
 )
 
+val ubuntu2404 = mapOf(
+    "wsl-id" to "Ubuntu-24.04",
+    "user-id" to "Ubuntu-24.04",
+    "match-pattern" to "*Ubuntu*24.04*",
+    "default-absent-tool" to "dos2unix"
+)
+
 val ubuntu2204 = mapOf(
     "wsl-id" to "Ubuntu",
     "user-id" to "Ubuntu-22.04",
@@ -111,6 +118,7 @@ val distributions = listOf(
     alpine,
     kali,
     openSuseLeap15_2,
+    ubuntu2404,
     ubuntu2204,
     ubuntu2004,
     ubuntu1804,
@@ -554,7 +562,8 @@ workflowWithCopyright(
         )
         runAfterSuccess(
             name = "Test - /etc/wsl.conf should not exist",
-            command = "[ ! -f /etc/wsl.conf ] || { cat /etc/wsl.conf; false; }"
+            command = "[ ! -f /etc/wsl.conf ] || { cat /etc/wsl.conf; false; }",
+            conditionTransformer = { executeActionStep.successNotOnUbuntu2404Condition }
         )
         runAfterSuccess(
             name = "Test - C: should be mounted at /mnt/c",
@@ -1055,6 +1064,13 @@ val Step.successOnAlpineCondition
         always()
         && (${outcome.eq(Success)})
         && (matrix.distribution.user-id == 'Alpine')
+    """.trimIndent()
+
+val Step.successNotOnUbuntu2404Condition
+    get() = """
+        always()
+        && (${outcome.eq(Success)})
+        && (matrix.distribution.user-id != 'Ubuntu-24.04')
     """.trimIndent()
 
 fun Step.getSuccessNotOnDistributionCondition(i: Int, distribution: String) = """
