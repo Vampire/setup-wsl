@@ -53,15 +53,19 @@ dependencies {
     }
 }
 
-val preprocessWorkflows by tasks.registering
+val preprocessWorkflows by tasks.registering {
+    group = "github actions"
+}
 file(".github/workflows")
     .listFiles { _, name -> name.endsWith(".main.kts") }!!
     .forEach { workflowScript ->
         val workflowName = workflowScript.name.removeSuffix(".main.kts")
-        val camelCasedWorkflowName = workflowName.replace("""-\w""".toRegex()) {
+        val pascalCasedWorkflowName = workflowName.replace("""-\w""".toRegex()) {
             it.value.substring(1).replaceFirstChar(Char::uppercaseChar)
         }.replaceFirstChar(Char::uppercaseChar)
-        val preprocessWorkflow = tasks.register<JavaExec>("preprocess${camelCasedWorkflowName}Workflow") {
+        val preprocessWorkflow = tasks.register<JavaExec>("preprocess${pascalCasedWorkflowName}Workflow") {
+            group = "github actions"
+
             inputs
                 .file(workflowScript)
                 .withPropertyName("workflowScript")
@@ -80,6 +84,9 @@ file(".github/workflows")
             args("-no-stdlib", "-no-reflect")
             args("-classpath", scriptClasspath.asPath)
             args("-script", workflowScript.absolutePath)
+
+            // work-around for https://youtrack.jetbrains.com/issue/KT-42101
+            systemProperty("kotlin.main.kts.compiled.scripts.cache.dir", "")
         }
         preprocessWorkflows {
             dependsOn(preprocessWorkflow)
