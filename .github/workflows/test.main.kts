@@ -108,8 +108,7 @@ val ubuntu1604 = mapOf(
 
 val distributions = listOf(
     debian,
-    // disable testing on Alpine for the time being due to https://github.com/Vampire/setup-wsl/issues/50
-    //alpine,
+    alpine,
     kali,
     openSuseLeap15_2,
     ubuntu2204,

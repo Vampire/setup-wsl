@@ -63,7 +63,8 @@ sealed class Distribution(
                 requestUrl = "https://store.rg-adguard.net/api/GetFiles",
                 data = "type=ProductId&url=$productId",
                 additionalHeaders = recordOf(
-                    "Content-Type" to "application/x-www-form-urlencoded"
+                    "Content-Type" to "application/x-www-form-urlencoded",
+                    "User-Agent" to "Setup WSL GitHub Action"
                 )
             ).await()
 
@@ -73,7 +74,8 @@ sealed class Distribution(
                         requestUrl = "https://echo.free.beeceptor.com/api/GetFiles",
                         data = "type=ProductId&url=$productId",
                         additionalHeaders = recordOf(
-                            "Content-Type" to "application/x-www-form-urlencoded"
+                            "Content-Type" to "application/x-www-form-urlencoded",
+                            "User-Agent" to "Setup WSL GitHub Action"
                         )
                     ).await()
                     if (echoResponse.message.statusCode == 200) {
