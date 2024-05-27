@@ -837,7 +837,7 @@ workflowWithCopyright(
                 verifyInstalledDistribution(
                     name = "Test - wsl-bash_${expr("matrix.distributions.distribution$i.user-id")} should use the correct distribution",
                     conditionTransformer = if (distributions[i] == ubuntu2004) {
-                        { executeActionStep.getSuccessNotOnUbuntu2004Condition(i) }
+                        { executeActionStep.getSuccessNotOnDistributionCondition(i, "Ubuntu-20.04") }
                     } else {
                         { it }
                     },
@@ -849,7 +849,7 @@ workflowWithCopyright(
                 if (distributions[i] == ubuntu2004) {
                     verifyInstalledDistribution(
                         name = "Test - wsl-bash_${expr("matrix.distributions.distribution$i.user-id")} should use the correct distribution",
-                        conditionTransformer = { executeActionStep.getSuccessNotOnUbuntu2204Condition(i) },
+                        conditionTransformer = { executeActionStep.getSuccessNotOnDistributionCondition(i, "Ubuntu-22.04") },
                         shell = Shell.Custom("wsl-bash_${distributions[i]["user-id"]} {0}"),
                         expectedPatternExpression = "matrix.distributions.distribution$i.match-pattern"
                     )
@@ -1057,14 +1057,8 @@ val Step.successOnAlpineCondition
         && (matrix.distribution.user-id == 'Alpine')
     """.trimIndent()
 
-fun Step.getSuccessNotOnUbuntu2004Condition(i: Int) = """
+fun Step.getSuccessNotOnDistributionCondition(i: Int, distribution: String) = """
     always()
     && (${outcome.eq(Success)})
-    && (matrix.distributions.distribution$i.user-id != 'Ubuntu-20.04')
-""".trimIndent()
-
-fun Step.getSuccessNotOnUbuntu2204Condition(i: Int) = """
-    always()
-    && ($outcome == 'success')
-    && (matrix.distributions.distribution$i.user-id != 'Ubuntu-22.04')
+    && (matrix.distributions.distribution$i.user-id != '$distribution')
 """.trimIndent()
