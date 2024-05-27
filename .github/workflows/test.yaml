@@ -14,792 +14,800 @@
 
 # This file was generated using Kotlin DSL (.github/workflows/test.main.kts).
 # If you want to modify the workflow, please change the Kotlin file and regenerate this YAML file.
-# Generated with https://github.com/krzema12/github-workflows-kt
+# Generated with https://github.com/typesafegithub/github-workflows-kt
 
-name: Build and Test
+name: 'Build and Test'
 on:
   push: {}
   pull_request: {}
   schedule:
-  - cron: 0 0 * * *
+  - cron: '0 0 * * *'
 jobs:
   check_yaml_consistency:
-    name: Check YAML consistency
-    runs-on: ubuntu-latest
+    name: 'Check YAML consistency'
+    runs-on: 'ubuntu-latest'
     steps:
-    - id: step-0
-      name: Check out
-      uses: actions/checkout@v3
-    - id: step-1
-      name: Execute script
-      run: rm '.github/workflows/test.yaml' && '.github/workflows/test.main.kts'
-    - id: step-2
-      name: Consistency check
-      run: git diff --exit-code '.github/workflows/test.yaml'
+    - id: 'step-0'
+      name: 'Check out'
+      uses: 'actions/checkout@v4'
+    - id: 'step-1'
+      name: 'Execute script'
+      run: 'rm ''.github/workflows/test.yaml'' && ''.github/workflows/test.main.kts'''
+    - id: 'step-2'
+      name: 'Consistency check'
+      run: 'git diff --exit-code ''.github/workflows/test.yaml'''
   build:
-    name: Build
-    runs-on: windows-latest
+    name: 'Build'
+    runs-on: 'windows-latest'
     needs:
-    - check_yaml_consistency
+    - 'check_yaml_consistency'
     steps:
-    - id: step-0
-      name: Configure Git
-      run: git config --global core.autocrlf input
-    - id: step-1
-      name: Checkout
-      uses: actions/checkout@v3
-    - id: step-2
-      name: Setup Java 11
-      uses: actions/setup-java@v3
+    - id: 'step-0'
+      name: 'Configure Git'
+      run: 'git config --global core.autocrlf input'
+    - id: 'step-1'
+      name: 'Checkout'
+      uses: 'actions/checkout@v4'
+    - id: 'step-2'
+      name: 'Setup Java 11'
+      uses: 'actions/setup-java@v4'
       with:
-        java-version: 11
-        distribution: temurin
-    - id: step-3
-      name: Build
-      uses: burrunan/gradle-cache-action@v1
+        java-version: '11'
+        distribution: 'temurin'
+    - id: 'step-3'
+      name: 'Build'
+      uses: 'burrunan/gradle-cache-action@v1'
       with:
-        debug: false
-        concurrent: true
+        debug: 'false'
+        concurrent: 'true'
         arguments: |-
           --show-version
           build
           --info
           --stacktrace
           --scan
-    - id: step-4
-      name: Save built artifacts to cache
-      uses: actions/cache/save@v3
+    - id: 'step-4'
+      name: 'Save built artifacts to cache'
+      uses: 'actions/cache/save@v4'
       with:
         path: |-
           action.yml
           build/distributions/
-        key: ${{ github.run_id }}
+        key: '${{ github.run_id }}'
   test_invalid_distribution:
-    name: Test "${{ matrix.distribution.label }}" distribution on ${{ matrix.environment }}
-    runs-on: ${{ matrix.environment }}
+    name: 'Test "${{ matrix.distribution.label }}" distribution on ${{ matrix.environment }}'
+    runs-on: '${{ matrix.environment }}'
     needs:
-    - build
-    - check_yaml_consistency
+    - 'build'
+    - 'check_yaml_consistency'
     strategy:
       fail-fast: false
       matrix:
         environment:
-        - windows-2019
-        - windows-2022
-        - windows-latest
+        - 'windows-2019'
+        - 'windows-2022'
+        - 'windows-latest'
         distribution:
-        - user-id: invalid
-          label: invalid
+        - user-id: 'invalid'
+          label: 'invalid'
         - user-id: ''
           label: ''
         - user-id: null
           label: 'null'
     steps:
-    - id: step-0
-      name: Restore built artifacts from cache
-      uses: actions/cache/restore@v3
+    - id: 'step-0'
+      name: 'Restore built artifacts from cache'
+      uses: 'actions/cache/restore@v4'
       with:
         path: |-
           action.yml
           build/distributions/
-        key: ${{ github.run_id }}
-        fail-on-cache-miss: true
-    - id: step-1
-      name: Execute action
+        key: '${{ github.run_id }}'
+        fail-on-cache-miss: 'true'
+    - id: 'step-1'
+      name: 'Execute action'
       continue-on-error: true
-      uses: ./
+      uses: './'
       with:
-        distribution: ${{ matrix.distribution.user-id }}
-    - id: step-2
-      name: Test - action should fail if an invalid distribution is given
-      shell: cmd
-      run: if '${{ steps.step-1.outcome }}' NEQ 'failure' exit 1
+        distribution: '${{ matrix.distribution.user-id }}'
+    - id: 'step-2'
+      name: 'Test - action should fail if an invalid distribution is given'
+      shell: 'cmd'
+      run: 'if ''${{ steps.step-1.outcome }}'' NEQ ''failure'' exit 1'
   test_default_distribution:
-    name: Test default distribution on ${{ matrix.environment }}
-    runs-on: ${{ matrix.environment }}
+    name: 'Test default distribution on ${{ matrix.environment }}'
+    runs-on: '${{ matrix.environment }}'
     needs:
-    - build
-    - check_yaml_consistency
+    - 'build'
+    - 'check_yaml_consistency'
     strategy:
       fail-fast: false
       matrix:
         environment:
-        - windows-2019
-        - windows-2022
-        - windows-latest
+        - 'windows-2019'
+        - 'windows-2022'
+        - 'windows-latest'
         distribution:
-        - wsl-id: Debian
-          user-id: Debian
+        - wsl-id: 'Debian'
+          user-id: 'Debian'
           match-pattern: '*Debian*'
-          default-absent-tool: dos2unix
+          default-absent-tool: 'dos2unix'
     steps:
-    - id: step-0
-      name: Restore built artifacts from cache
-      uses: actions/cache/restore@v3
+    - id: 'step-0'
+      name: 'Restore built artifacts from cache'
+      uses: 'actions/cache/restore@v4'
       with:
         path: |-
           action.yml
           build/distributions/
-        key: ${{ github.run_id }}
-        fail-on-cache-miss: true
-    - id: step-1
-      name: Execute action
-      uses: ./
+        key: '${{ github.run_id }}'
+        fail-on-cache-miss: 'true'
+    - id: 'step-1'
+      name: 'Execute action'
+      uses: './'
       with:
-        update: true
-    - id: step-2
-      name: Test - wsl-bash should be available as custom shell
-      shell: wsl-bash {0}
+        update: 'true'
+    - id: 'step-2'
+      name: 'Test - wsl-bash should be available as custom shell'
+      shell: 'wsl-bash {0}'
       run: ':'
       if: |-
         always()
         && (steps.step-1.outcome == 'success')
-    - id: step-3
-      name: Test - wsl-bash should fail if the script fails (provocation)
+    - id: 'step-3'
+      name: 'Test - wsl-bash should fail if the script fails (provocation)'
       continue-on-error: true
-      shell: wsl-bash {0}
-      run: false
+      shell: 'wsl-bash {0}'
+      run: 'false'
       if: |-
         always()
         && (steps.step-1.outcome == 'success')
-    - id: step-4
-      name: Test - wsl-bash should fail if the script fails (verification)
-      shell: cmd
-      run: IF '${{ steps.step-3.outcome }}' NEQ 'failure' EXIT /B 1
+    - id: 'step-4'
+      name: 'Test - wsl-bash should fail if the script fails (verification)'
+      shell: 'cmd'
+      run: 'IF ''${{ steps.step-3.outcome }}'' NEQ ''failure'' EXIT /B 1'
       if: |-
         always()
         && (steps.step-1.outcome == 'success')
-    - id: step-5
-      name: Test - wsl-bash should fail if one of the commands fails (provocation)
+    - id: 'step-5'
+      name: 'Test - wsl-bash should fail if one of the commands fails (provocation)'
       continue-on-error: true
-      shell: wsl-bash {0}
+      shell: 'wsl-bash {0}'
       run: |-
         false
         :
       if: |-
         always()
         && (steps.step-1.outcome == 'success')
-    - id: step-6
-      name: Test - wsl-bash should fail if one of the commands fails (verification)
-      shell: wsl-bash {0}
+    - id: 'step-6'
+      name: 'Test - wsl-bash should fail if one of the commands fails (verification)'
+      shell: 'wsl-bash {0}'
       run: '[ ''${{ steps.step-5.outcome }}'' == ''failure'' ] || exit 1'
       if: |-
         always()
         && (steps.step-1.outcome == 'success')
-    - id: step-7
-      name: Test - wsl-bash should fail if an undefined variable is used (provocation)
+    - id: 'step-7'
+      name: 'Test - wsl-bash should fail if an undefined variable is used (provocation)'
       continue-on-error: true
-      shell: wsl-bash {0}
-      run: $foo
+      shell: 'wsl-bash {0}'
+      run: '$foo'
       if: |-
         always()
         && (steps.step-1.outcome == 'success')
-    - id: step-8
-      name: Test - wsl-bash should fail if an undefined variable is used (verification)
-      shell: wsl-bash {0}
+    - id: 'step-8'
+      name: 'Test - wsl-bash should fail if an undefined variable is used (verification)'
+      shell: 'wsl-bash {0}'
       run: '[ ''${{ steps.step-7.outcome }}'' == ''failure'' ]'
       if: |-
         always()
         && (steps.step-1.outcome == 'success')
-    - id: step-9
-      name: Test - wsl-bash should fail if any command in a pipe fails (provocation)
+    - id: 'step-9'
+      name: 'Test - wsl-bash should fail if any command in a pipe fails (provocation)'
       continue-on-error: true
-      shell: wsl-bash {0}
-      run: false | true
+      shell: 'wsl-bash {0}'
+      run: 'false | true'
       if: |-
         always()
         && (steps.step-1.outcome == 'success')
-    - id: step-10
-      name: Test - wsl-bash should fail if any command in a pipe fails (verification)
-      shell: wsl-bash {0}
+    - id: 'step-10'
+      name: 'Test - wsl-bash should fail if any command in a pipe fails (verification)'
+      shell: 'wsl-bash {0}'
       run: '[ ''${{ steps.step-9.outcome }}'' == ''failure'' ]'
       if: |-
         always()
         && (steps.step-1.outcome == 'success')
-    - id: step-11
-      name: Test - the default distribution should be correct
-      shell: wsl-bash {0}
+    - id: 'step-11'
+      name: 'Test - the default distribution should be correct'
+      shell: 'wsl-bash {0}'
       run: |-
         cat <(wsl.exe --list || true) <(wsl.exe --list || true | iconv -f UTF-16LE -t UTF-8) <(wslconfig.exe /list || true) <(wslconfig.exe /list || true | iconv -f UTF-16LE -t UTF-8)
         [[ "$(cat <(wsl.exe --list || true) <(wsl.exe --list || true | iconv -f UTF-16LE -t UTF-8) <(wslconfig.exe /list || true) <(wslconfig.exe /list || true | iconv -f UTF-16LE -t UTF-8))" == *${{ matrix.distribution.wsl-id }}\ \(Default\)* ]]
       if: |-
         always()
         && (steps.step-1.outcome == 'success')
-    - id: step-12
-      name: Test - wsl-bash should use the correct distribution
-      shell: wsl-bash {0}
+    - id: 'step-12'
+      name: 'Test - wsl-bash should use the correct distribution'
+      shell: 'wsl-bash {0}'
       run: |-
         cat <(lsb_release -a || true) <(uname -a || true) <([ -d /etc ] && find /etc -maxdepth 1 -type f \( -name '*release' -or -name 'issue*' \) -exec cat {} + || true) <([ -d /etc/products.d ] && find /etc/products.d -maxdepth 1 -type f -name '*.prod' -exec cat {} + || true) <([ -f /proc/version ] && cat /proc/version || true)
         [[ "$(cat <(lsb_release -a || true) <(uname -a || true) <([ -d /etc ] && find /etc -maxdepth 1 -type f \( -name '*release' -or -name 'issue*' \) -exec cat {} + || true) <([ -d /etc/products.d ] && find /etc/products.d -maxdepth 1 -type f -name '*.prod' -exec cat {} + || true) <([ -f /proc/version ] && cat /proc/version || true))" == ${{ matrix.distribution.match-pattern }} ]]
       if: |-
         always()
         && (steps.step-1.outcome == 'success')
-    - id: step-13
-      name: Test - multi-line commands should not be disturbed by CRLF line endings
-      shell: wsl-bash {0}
+    - id: 'step-13'
+      name: 'Test - multi-line commands should not be disturbed by CRLF line endings'
+      shell: 'wsl-bash {0}'
       run: |-
         : # this comment catches the CR if present
         ! grep -q $'\r' "$0" # this comment catches the CR if present
       if: |-
         always()
         && (steps.step-1.outcome == 'success')
-    - id: step-14
-      name: Test - wsl-bash should fail if no script file is given (provocation)
+    - id: 'step-14'
+      name: 'Test - wsl-bash should fail if no script file is given (provocation)'
       continue-on-error: true
-      shell: wsl-bash
+      shell: 'wsl-bash'
       run: ':'
       if: |-
         always()
         && (steps.step-1.outcome == 'success')
-    - id: step-15
-      name: Test - wsl-bash should fail if no script file is given (verification)
-      shell: wsl-bash {0}
+    - id: 'step-15'
+      name: 'Test - wsl-bash should fail if no script file is given (verification)'
+      shell: 'wsl-bash {0}'
       run: '[ ''${{ steps.step-14.outcome }}'' == ''failure'' ]'
       if: |-
         always()
         && (steps.step-1.outcome == 'success')
-    - id: step-16
-      name: Test - wsl-bash should fail if more than one parameter is given and first is not -u (provocation)
+    - id: 'step-16'
+      name: 'Test - wsl-bash should fail if more than one parameter is given and first is not -u (provocation)'
       continue-on-error: true
-      shell: wsl-bash user {0}
+      shell: 'wsl-bash user {0}'
       run: ':'
       if: |-
         always()
         && (steps.step-1.outcome == 'success')
-    - id: step-17
-      name: Test - wsl-bash should fail if more than one parameter is given and first is not -u (verification)
-      shell: wsl-bash {0}
+    - id: 'step-17'
+      name: 'Test - wsl-bash should fail if more than one parameter is given and first is not -u (verification)'
+      shell: 'wsl-bash {0}'
       run: '[ ''${{ steps.step-16.outcome }}'' == ''failure'' ]'
       if: |-
         always()
         && (steps.step-1.outcome == 'success')
-    - id: step-18
-      name: Test - wsl-bash should fail if only user is given (provocation)
+    - id: 'step-18'
+      name: 'Test - wsl-bash should fail if only user is given (provocation)'
       continue-on-error: true
-      shell: wsl-bash -u {0}
+      shell: 'wsl-bash -u {0}'
       run: ':'
       if: |-
         always()
         && (steps.step-1.outcome == 'success')
-    - id: step-19
-      name: Test - wsl-bash should fail if only user is given (verification)
-      shell: wsl-bash {0}
+    - id: 'step-19'
+      name: 'Test - wsl-bash should fail if only user is given (verification)'
+      shell: 'wsl-bash {0}'
       run: '[ ''${{ steps.step-18.outcome }}'' == ''failure'' ]'
       if: |-
         always()
         && (steps.step-1.outcome == 'success')
-    - id: step-20
-      name: Test - wsl-bash should fail if excess argument is given (provocation)
+    - id: 'step-20'
+      name: 'Test - wsl-bash should fail if excess argument is given (provocation)'
       continue-on-error: true
-      shell: wsl-bash -u user {0} foo
+      shell: 'wsl-bash -u user {0} foo'
       run: ':'
       if: |-
         always()
         && (steps.step-1.outcome == 'success')
-    - id: step-21
-      name: Test - wsl-bash should fail if excess argument is given (verification)
-      shell: wsl-bash {0}
+    - id: 'step-21'
+      name: 'Test - wsl-bash should fail if excess argument is given (verification)'
+      shell: 'wsl-bash {0}'
       run: '[ ''${{ steps.step-20.outcome }}'' == ''failure'' ]'
       if: |-
         always()
         && (steps.step-1.outcome == 'success')
-    - id: step-22
-      name: Test - wsl-bash should fail if given script file does not exist (provocation)
+    - id: 'step-22'
+      name: 'Test - wsl-bash should fail if given script file does not exist (provocation)'
       continue-on-error: true
-      shell: wsl-bash -u user {0}foo
+      shell: 'wsl-bash -u user {0}foo'
       run: ':'
       if: |-
         always()
         && (steps.step-1.outcome == 'success')
-    - id: step-23
-      name: Test - wsl-bash should fail if given script file does not exist (verification)
-      shell: wsl-bash {0}
+    - id: 'step-23'
+      name: 'Test - wsl-bash should fail if given script file does not exist (verification)'
+      shell: 'wsl-bash {0}'
       run: '[ ''${{ steps.step-22.outcome }}'' == ''failure'' ]'
       if: |-
         always()
         && (steps.step-1.outcome == 'success')
   test:
-    name: Test "${{ matrix.distribution.user-id }}" distribution on ${{ matrix.environment }}
-    runs-on: ${{ matrix.environment }}
+    name: 'Test "${{ matrix.distribution.user-id }}" distribution on ${{ matrix.environment }}'
+    runs-on: '${{ matrix.environment }}'
     needs:
-    - build
-    - check_yaml_consistency
+    - 'build'
+    - 'check_yaml_consistency'
     strategy:
       fail-fast: false
       matrix:
         environment:
-        - windows-2019
-        - windows-2022
-        - windows-latest
+        - 'windows-2019'
+        - 'windows-2022'
+        - 'windows-latest'
         distribution:
-        - wsl-id: Debian
-          user-id: Debian
+        - wsl-id: 'Debian'
+          user-id: 'Debian'
           match-pattern: '*Debian*'
-          default-absent-tool: dos2unix
-        - wsl-id: kali-linux
-          user-id: kali-linux
+          default-absent-tool: 'dos2unix'
+        - wsl-id: 'Alpine'
+          user-id: 'Alpine'
+          match-pattern: '*Alpine*'
+          default-absent-tool: 'dos2unix'
+        - wsl-id: 'kali-linux'
+          user-id: 'kali-linux'
           match-pattern: '*Kali*'
-          default-absent-tool: dos2unix
-        - wsl-id: openSUSE-Leap-15.2
-          user-id: openSUSE-Leap-15.2
+          default-absent-tool: 'dos2unix'
+        - wsl-id: 'openSUSE-Leap-15.2'
+          user-id: 'openSUSE-Leap-15.2'
           match-pattern: '*openSUSE*Leap*15.2*'
-          default-absent-tool: which
-        - wsl-id: Ubuntu
-          user-id: Ubuntu-22.04
+          default-absent-tool: 'which'
+        - wsl-id: 'Ubuntu-24.04'
+          user-id: 'Ubuntu-24.04'
+          match-pattern: '*Ubuntu*24.04*'
+          default-absent-tool: 'dos2unix'
+        - wsl-id: 'Ubuntu'
+          user-id: 'Ubuntu-22.04'
           match-pattern: '*Ubuntu*22.04*'
-          default-absent-tool: dos2unix
-        - wsl-id: Ubuntu
-          user-id: Ubuntu-20.04
+          default-absent-tool: 'dos2unix'
+        - wsl-id: 'Ubuntu'
+          user-id: 'Ubuntu-20.04'
           match-pattern: '*Ubuntu*20.04*'
-          default-absent-tool: dos2unix
-        - wsl-id: Ubuntu-18.04
-          user-id: Ubuntu-18.04
+          default-absent-tool: 'dos2unix'
+        - wsl-id: 'Ubuntu-18.04'
+          user-id: 'Ubuntu-18.04'
           match-pattern: '*Ubuntu*18.04*'
-          default-absent-tool: dos2unix
-        - wsl-id: Ubuntu-16.04
-          user-id: Ubuntu-16.04
+          default-absent-tool: 'dos2unix'
+        - wsl-id: 'Ubuntu-16.04'
+          user-id: 'Ubuntu-16.04'
           match-pattern: '*Ubuntu*16.04*'
-          default-absent-tool: dos2unix
+          default-absent-tool: 'dos2unix'
     steps:
-    - id: step-0
-      name: Restore built artifacts from cache
-      uses: actions/cache/restore@v3
+    - id: 'step-0'
+      name: 'Restore built artifacts from cache'
+      uses: 'actions/cache/restore@v4'
       with:
         path: |-
           action.yml
           build/distributions/
-        key: ${{ github.run_id }}
-        fail-on-cache-miss: true
-    - id: step-1
-      name: Execute action
-      uses: ./
+        key: '${{ github.run_id }}'
+        fail-on-cache-miss: 'true'
+    - id: 'step-1'
+      name: 'Execute action'
+      uses: './'
       with:
-        distribution: ${{ matrix.distribution.user-id }}
-        use-cache: false
-    - id: step-2
-      name: Test - wsl-bash should fail if bash is not present by default (provocation)
+        distribution: '${{ matrix.distribution.user-id }}'
+        use-cache: 'false'
+    - id: 'step-2'
+      name: 'Test - wsl-bash should fail if bash is not present by default (provocation)'
       continue-on-error: true
-      shell: wsl-bash {0}
+      shell: 'wsl-bash {0}'
       run: ':'
       if: |-
         always()
         && (steps.step-1.outcome == 'success')
         && (matrix.distribution.user-id == 'Alpine')
-    - id: step-3
-      name: Test - wsl-bash should fail if bash is not present by default (verification)
-      run: wsl sh -euc "[ '${{ steps.step-2.outcome }}' = 'failure' ]"
+    - id: 'step-3'
+      name: 'Test - wsl-bash should fail if bash is not present by default (verification)'
+      run: 'wsl sh -euc "[ ''${{ steps.step-2.outcome }}'' = ''failure'' ]"'
       if: |-
         always()
         && (steps.step-1.outcome == 'success')
         && (matrix.distribution.user-id == 'Alpine')
-    - id: step-4
-      name: Delete wsl-bash
-      shell: cmd
-      run: DEL /F "${{ steps.step-1.outputs.wsl-shell-wrapper-path }}"
+    - id: 'step-4'
+      name: 'Delete wsl-bash'
+      shell: 'cmd'
+      run: 'DEL /F "${{ steps.step-1.outputs.wsl-shell-wrapper-path }}"'
       if: |-
         always()
         && (steps.step-1.outcome == 'success')
         && (matrix.distribution.user-id == 'Alpine')
-    - id: step-5
-      name: Install Bash on Alpine
-      uses: ./
+    - id: 'step-5'
+      name: 'Install Bash on Alpine'
+      uses: './'
       with:
-        distribution: ${{ matrix.distribution.user-id }}
-        additional-packages: bash
+        distribution: '${{ matrix.distribution.user-id }}'
+        additional-packages: 'bash'
       if: |-
         always()
         && (steps.step-1.outcome == 'success')
         && (matrix.distribution.user-id == 'Alpine')
-    - id: step-6
-      name: Test - wsl-bash should be available as custom shell
-      shell: wsl-bash {0}
+    - id: 'step-6'
+      name: 'Test - wsl-bash should be available as custom shell'
+      shell: 'wsl-bash {0}'
       run: ':'
       if: |-
         always()
         && (steps.step-1.outcome == 'success')
-    - id: step-7
-      name: Test - wsl-bash should fail if the script fails (provocation)
+    - id: 'step-7'
+      name: 'Test - wsl-bash should fail if the script fails (provocation)'
       continue-on-error: true
-      shell: wsl-bash {0}
-      run: false
+      shell: 'wsl-bash {0}'
+      run: 'false'
       if: |-
         always()
         && (steps.step-1.outcome == 'success')
-    - id: step-8
-      name: Test - wsl-bash should fail if the script fails (verification)
-      shell: cmd
-      run: IF '${{ steps.step-7.outcome }}' NEQ 'failure' EXIT /B 1
+    - id: 'step-8'
+      name: 'Test - wsl-bash should fail if the script fails (verification)'
+      shell: 'cmd'
+      run: 'IF ''${{ steps.step-7.outcome }}'' NEQ ''failure'' EXIT /B 1'
       if: |-
         always()
         && (steps.step-1.outcome == 'success')
-    - id: step-9
-      name: Test - wsl-bash should fail if one of the commands fails (provocation)
+    - id: 'step-9'
+      name: 'Test - wsl-bash should fail if one of the commands fails (provocation)'
       continue-on-error: true
-      shell: wsl-bash {0}
+      shell: 'wsl-bash {0}'
       run: |-
         false
         :
       if: |-
         always()
         && (steps.step-1.outcome == 'success')
-    - id: step-10
-      name: Test - wsl-bash should fail if one of the commands fails (verification)
-      shell: wsl-bash {0}
+    - id: 'step-10'
+      name: 'Test - wsl-bash should fail if one of the commands fails (verification)'
+      shell: 'wsl-bash {0}'
       run: '[ ''${{ steps.step-9.outcome }}'' == ''failure'' ] || exit 1'
       if: |-
         always()
         && (steps.step-1.outcome == 'success')
-    - id: step-11
-      name: Test - wsl-bash should fail if an undefined variable is used (provocation)
+    - id: 'step-11'
+      name: 'Test - wsl-bash should fail if an undefined variable is used (provocation)'
       continue-on-error: true
-      shell: wsl-bash {0}
-      run: $foo
+      shell: 'wsl-bash {0}'
+      run: '$foo'
       if: |-
         always()
         && (steps.step-1.outcome == 'success')
-    - id: step-12
-      name: Test - wsl-bash should fail if an undefined variable is used (verification)
-      shell: wsl-bash {0}
+    - id: 'step-12'
+      name: 'Test - wsl-bash should fail if an undefined variable is used (verification)'
+      shell: 'wsl-bash {0}'
       run: '[ ''${{ steps.step-11.outcome }}'' == ''failure'' ]'
       if: |-
         always()
         && (steps.step-1.outcome == 'success')
-    - id: step-13
-      name: Test - wsl-bash should fail if any command in a pipe fails (provocation)
+    - id: 'step-13'
+      name: 'Test - wsl-bash should fail if any command in a pipe fails (provocation)'
       continue-on-error: true
-      shell: wsl-bash {0}
-      run: false | true
+      shell: 'wsl-bash {0}'
+      run: 'false | true'
       if: |-
         always()
         && (steps.step-1.outcome == 'success')
-    - id: step-14
-      name: Test - wsl-bash should fail if any command in a pipe fails (verification)
-      shell: wsl-bash {0}
+    - id: 'step-14'
+      name: 'Test - wsl-bash should fail if any command in a pipe fails (verification)'
+      shell: 'wsl-bash {0}'
       run: '[ ''${{ steps.step-13.outcome }}'' == ''failure'' ]'
       if: |-
         always()
         && (steps.step-1.outcome == 'success')
-    - id: step-15
-      name: Test - the default distribution should be correct
-      shell: wsl-bash {0}
+    - id: 'step-15'
+      name: 'Test - the default distribution should be correct'
+      shell: 'wsl-bash {0}'
       run: |-
         cat <(wsl.exe --list || true) <(wsl.exe --list || true | iconv -f UTF-16LE -t UTF-8) <(wslconfig.exe /list || true) <(wslconfig.exe /list || true | iconv -f UTF-16LE -t UTF-8)
         [[ "$(cat <(wsl.exe --list || true) <(wsl.exe --list || true | iconv -f UTF-16LE -t UTF-8) <(wslconfig.exe /list || true) <(wslconfig.exe /list || true | iconv -f UTF-16LE -t UTF-8))" == *${{ matrix.distribution.wsl-id }}\ \(Default\)* ]]
       if: |-
         always()
         && (steps.step-1.outcome == 'success')
-    - id: step-16
-      name: Test - wsl-bash should use the correct distribution
-      shell: wsl-bash {0}
+    - id: 'step-16'
+      name: 'Test - wsl-bash should use the correct distribution'
+      shell: 'wsl-bash {0}'
       run: |-
         cat <(lsb_release -a || true) <(uname -a || true) <([ -d /etc ] && find /etc -maxdepth 1 -type f \( -name '*release' -or -name 'issue*' \) -exec cat {} + || true) <([ -d /etc/products.d ] && find /etc/products.d -maxdepth 1 -type f -name '*.prod' -exec cat {} + || true) <([ -f /proc/version ] && cat /proc/version || true)
         [[ "$(cat <(lsb_release -a || true) <(uname -a || true) <([ -d /etc ] && find /etc -maxdepth 1 -type f \( -name '*release' -or -name 'issue*' \) -exec cat {} + || true) <([ -d /etc/products.d ] && find /etc/products.d -maxdepth 1 -type f -name '*.prod' -exec cat {} + || true) <([ -f /proc/version ] && cat /proc/version || true))" == ${{ matrix.distribution.match-pattern }} ]]
       if: |-
         always()
         && (steps.step-1.outcome == 'success')
-    - id: step-17
-      name: Test - multi-line commands should not be disturbed by CRLF line endings
-      shell: wsl-bash {0}
+    - id: 'step-17'
+      name: 'Test - multi-line commands should not be disturbed by CRLF line endings'
+      shell: 'wsl-bash {0}'
       run: |-
         : # this comment catches the CR if present
         ! grep -q $'\r' "$0" # this comment catches the CR if present
       if: |-
         always()
         && (steps.step-1.outcome == 'success')
-    - id: step-18
-      name: Test - ${{ matrix.distribution.default-absent-tool }} should not be installed by default (provocation)
+    - id: 'step-18'
+      name: 'Test - ${{ matrix.distribution.default-absent-tool }} should not be installed by default (provocation)'
       continue-on-error: true
-      shell: wsl-bash {0}
-      run: ${{ matrix.distribution.default-absent-tool }} --version
+      shell: 'wsl-bash {0}'
+      run: '${{ matrix.distribution.default-absent-tool }} --version'
       if: |-
         always()
         && (steps.step-1.outcome == 'success')
-    - id: step-19
-      name: Test - ${{ matrix.distribution.default-absent-tool }} should not be installed by default (verification)
-      shell: wsl-bash {0}
+    - id: 'step-19'
+      name: 'Test - ${{ matrix.distribution.default-absent-tool }} should not be installed by default (verification)'
+      shell: 'wsl-bash {0}'
       run: '[ ''${{ steps.step-18.outcome }}'' == ''failure'' ]'
       if: |-
         always()
         && (steps.step-1.outcome == 'success')
-    - id: step-20
-      name: Test - bash should be installed by default
-      shell: wsl-bash {0}
-      run: bash -c true
+    - id: 'step-20'
+      name: 'Test - bash should be installed by default'
+      shell: 'wsl-bash {0}'
+      run: 'bash -c true'
       if: |-
         always()
         && (steps.step-1.outcome == 'success')
-    - id: step-21
-      name: Test - sh should be installed by default
-      shell: wsl-bash {0}
-      run: sh -c true
+    - id: 'step-21'
+      name: 'Test - sh should be installed by default'
+      shell: 'wsl-bash {0}'
+      run: 'sh -c true'
       if: |-
         always()
         && (steps.step-1.outcome == 'success')
-    - id: step-22
-      name: Test - wsl-sh should not be present (provocation)
+    - id: 'step-22'
+      name: 'Test - wsl-sh should not be present (provocation)'
       continue-on-error: true
-      shell: wsl-sh {0}
+      shell: 'wsl-sh {0}'
       run: ':'
       if: |-
         always()
         && (steps.step-1.outcome == 'success')
-    - id: step-23
-      name: Test - wsl-sh should not be present (verification)
-      shell: wsl-bash {0}
+    - id: 'step-23'
+      name: 'Test - wsl-sh should not be present (verification)'
+      shell: 'wsl-bash {0}'
       run: '[ ''${{ steps.step-22.outcome }}'' == ''failure'' ]'
       if: |-
         always()
         && (steps.step-1.outcome == 'success')
-    - id: step-24
-      name: Add wsl-sh wrapper
-      uses: ./
+    - id: 'step-24'
+      name: 'Add wsl-sh wrapper'
+      uses: './'
       with:
-        distribution: ${{ matrix.distribution.user-id }}
-        wsl-shell-command: sh -eu
+        distribution: '${{ matrix.distribution.user-id }}'
+        wsl-shell-command: 'sh -eu'
       if: |-
         always()
         && (steps.step-1.outcome == 'success')
-    - id: step-25
-      name: Test - wsl-sh should be present
-      shell: wsl-sh {0}
+    - id: 'step-25'
+      name: 'Test - wsl-sh should be present'
+      shell: 'wsl-sh {0}'
       run: ':'
       if: |-
         always()
         && (steps.step-24.outcome == 'success')
-    - id: step-26
-      name: Test - wsl-bash should use bash
-      shell: wsl-bash {0}
+    - id: 'step-26'
+      name: 'Test - wsl-bash should use bash'
+      shell: 'wsl-bash {0}'
       run: |-
         ps -o pid='' -o comm='' | grep "^\s\+$$\s\+" | grep -o '\S\+$'
         [ "$(ps -o pid='' -o comm='' 2>/dev/null | grep "^\s\+$$\s\+" | grep -o '\S\+$')" == 'bash' ]
       if: |-
         always()
         && (steps.step-24.outcome == 'success')
-    - id: step-27
-      name: Test - wsl-sh should use sh
-      shell: wsl-sh {0}
+    - id: 'step-27'
+      name: 'Test - wsl-sh should use sh'
+      shell: 'wsl-sh {0}'
       run: |-
         ps -o pid='' -o comm='' | grep "^\s\+$$\s\+" | grep -o '\S\+$'
         [ "$(ps -o pid='' -o comm='' 2>/dev/null | grep "^\s\+$$\s\+" | grep -o '\S\+$')" = 'sh' ]
       if: |-
         always()
         && (steps.step-24.outcome == 'success')
-    - id: step-28
-      name: Delete wsl-bash
-      shell: cmd
-      run: DEL /F "${{ steps.step-1.outputs.wsl-shell-wrapper-path }}"
+    - id: 'step-28'
+      name: 'Delete wsl-bash'
+      shell: 'cmd'
+      run: 'DEL /F "${{ steps.step-1.outputs.wsl-shell-wrapper-path }}"'
       if: |-
         always()
         && (steps.step-24.outcome == 'success')
-    - id: step-29
-      name: Test - wsl-bash should not be present (provocation)
+    - id: 'step-29'
+      name: 'Test - wsl-bash should not be present (provocation)'
       continue-on-error: true
-      shell: wsl-bash {0}
+      shell: 'wsl-bash {0}'
       run: ':'
       if: |-
         always()
         && (steps.step-24.outcome == 'success')
-    - id: step-30
-      name: Test - wsl-bash should not be present (verification)
-      shell: wsl-sh {0}
+    - id: 'step-30'
+      name: 'Test - wsl-bash should not be present (verification)'
+      shell: 'wsl-sh {0}'
       run: '[ ''${{ steps.step-29.outcome }}'' = ''failure'' ]'
       if: |-
         always()
         && (steps.step-24.outcome == 'success')
-    - id: step-31
-      name: Re-add wsl-bash wrapper
-      uses: ./
+    - id: 'step-31'
+      name: 'Re-add wsl-bash wrapper'
+      uses: './'
       with:
-        distribution: ${{ matrix.distribution.user-id }}
+        distribution: '${{ matrix.distribution.user-id }}'
       if: |-
         always()
         && (steps.step-24.outcome == 'success')
-    - id: step-32
-      name: Test - wsl-bash should be present
-      shell: wsl-bash {0}
+    - id: 'step-32'
+      name: 'Test - wsl-bash should be present'
+      shell: 'wsl-bash {0}'
       run: ':'
       if: |-
         always()
         && (steps.step-31.outcome == 'success')
-    - id: step-33
-      name: Test - wsl-bash should use bash
-      shell: wsl-bash {0}
+    - id: 'step-33'
+      name: 'Test - wsl-bash should use bash'
+      shell: 'wsl-bash {0}'
       run: |-
         ps -o pid='' -o comm='' | grep "^\s\+$$\s\+" | grep -o '\S\+$'
         [ "$(ps -o pid='' -o comm='' 2>/dev/null | grep "^\s\+$$\s\+" | grep -o '\S\+$')" == 'bash' ]
       if: |-
         always()
         && (steps.step-31.outcome == 'success')
-    - id: step-34
-      name: Test - wsl-bash should use root as default user
-      shell: wsl-bash {0}
+    - id: 'step-34'
+      name: 'Test - wsl-bash should use root as default user'
+      shell: 'wsl-bash {0}'
       run: |-
         whoami
         [ "$(whoami)" == 'root' ]
       if: |-
         always()
         && (steps.step-31.outcome == 'success')
-    - id: step-35
-      name: Add user test
-      shell: wsl-bash {0}
-      run: useradd -m -p 4qBD5NWD3IkbU test
+    - id: 'step-35'
+      name: 'Add user test'
+      shell: 'wsl-bash {0}'
+      run: 'useradd -m -p 4qBD5NWD3IkbU test'
       if: |-
         always()
         && (steps.step-31.outcome == 'success')
-    - id: step-36
-      name: Set wsl-bash wrapper to use user test by default
-      uses: ./
+    - id: 'step-36'
+      name: 'Set wsl-bash wrapper to use user test by default'
+      uses: './'
       with:
-        distribution: ${{ matrix.distribution.user-id }}
-        additional-packages: sudo
-        wsl-shell-command: bash -c "sudo -u test bash --noprofile --norc -euo pipefail "\
+        distribution: '${{ matrix.distribution.user-id }}'
+        additional-packages: 'sudo'
+        wsl-shell-command: 'bash -c "sudo -u test bash --noprofile --norc -euo pipefail "\'
       if: |-
         always()
         && (steps.step-31.outcome == 'success')
-    - id: step-37
-      name: Test - wsl-bash should use test as default user
-      shell: wsl-bash {0}
+    - id: 'step-37'
+      name: 'Test - wsl-bash should use test as default user'
+      shell: 'wsl-bash {0}'
       run: |-
         whoami
         [ "$(whoami)" == 'test' ]
       if: |-
         always()
         && (steps.step-36.outcome == 'success')
-    - id: step-38
-      name: Set wsl-bash wrapper to use user test by default with inline script usage
-      uses: ./
+    - id: 'step-38'
+      name: 'Set wsl-bash wrapper to use user test by default with inline script usage'
+      uses: './'
       with:
-        distribution: ${{ matrix.distribution.user-id }}
-        wsl-shell-command: bash -c "sudo -u test bash --noprofile --norc -euo pipefail '{0}'"
+        distribution: '${{ matrix.distribution.user-id }}'
+        wsl-shell-command: 'bash -c "sudo -u test bash --noprofile --norc -euo pipefail ''{0}''"'
       if: |-
         always()
         && (steps.step-36.outcome == 'success')
-    - id: step-39
-      name: Test - wsl-bash should use test as default user with inline script usage
-      shell: wsl-bash {0}
+    - id: 'step-39'
+      name: 'Test - wsl-bash should use test as default user with inline script usage'
+      shell: 'wsl-bash {0}'
       run: |-
         whoami
         [ "$(whoami)" == 'test' ]
       if: |-
         always()
         && (steps.step-38.outcome == 'success')
-    - id: step-40
-      name: Delete wsl-bash
-      shell: cmd
-      run: DEL /F "${{ steps.step-38.outputs.wsl-shell-wrapper-path }}"
+    - id: 'step-40'
+      name: 'Delete wsl-bash'
+      shell: 'cmd'
+      run: 'DEL /F "${{ steps.step-38.outputs.wsl-shell-wrapper-path }}"'
       if: |-
         always()
         && (steps.step-38.outcome == 'success')
-    - id: step-41
-      name: Set wsl-bash wrapper to use default user by default
-      uses: ./
+    - id: 'step-41'
+      name: 'Set wsl-bash wrapper to use default user by default'
+      uses: './'
       with:
-        distribution: ${{ matrix.distribution.user-id }}
+        distribution: '${{ matrix.distribution.user-id }}'
       if: |-
         always()
         && (steps.step-38.outcome == 'success')
-    - id: step-42
-      name: Test - wsl-bash should use root as default user
-      shell: wsl-bash {0}
+    - id: 'step-42'
+      name: 'Test - wsl-bash should use root as default user'
+      shell: 'wsl-bash {0}'
       run: |-
         whoami
         [ "$(whoami)" == 'root' ]
       if: |-
         always()
         && (steps.step-41.outcome == 'success')
-    - id: step-43
-      name: Test - test user does already exist
-      shell: wsl-bash {0}
-      run: id -u test
+    - id: 'step-43'
+      name: 'Test - test user does already exist'
+      shell: 'wsl-bash {0}'
+      run: 'id -u test'
       if: |-
         always()
         && (steps.step-41.outcome == 'success')
-    - id: step-44
-      name: Delete wsl-bash
-      shell: cmd
-      run: DEL /F "${{ steps.step-41.outputs.wsl-shell-wrapper-path }}"
+    - id: 'step-44'
+      name: 'Delete wsl-bash'
+      shell: 'cmd'
+      run: 'DEL /F "${{ steps.step-41.outputs.wsl-shell-wrapper-path }}"'
       if: |-
         always()
         && (steps.step-41.outcome == 'success')
-    - id: step-45
-      name: Set wsl-bash wrapper to use existing user test by default with extra parameter
-      uses: ./
+    - id: 'step-45'
+      name: 'Set wsl-bash wrapper to use existing user test by default with extra parameter'
+      uses: './'
       with:
-        distribution: ${{ matrix.distribution.user-id }}
-        wsl-shell-user: test
+        distribution: '${{ matrix.distribution.user-id }}'
+        wsl-shell-user: 'test'
       if: |-
         always()
         && (steps.step-41.outcome == 'success')
-    - id: step-46
-      name: Test - wsl-bash should use existing user test as default user with extra parameter
-      shell: wsl-bash {0}
+    - id: 'step-46'
+      name: 'Test - wsl-bash should use existing user test as default user with extra parameter'
+      shell: 'wsl-bash {0}'
       run: |-
         whoami
         [ "$(whoami)" == 'test' ]
       if: |-
         always()
         && (steps.step-45.outcome == 'success')
-    - id: step-47
-      name: Test - test2 user does not exist
-      shell: wsl-bash {0}
+    - id: 'step-47'
+      name: 'Test - test2 user does not exist'
+      shell: 'wsl-bash {0}'
       run: '! id -u test2'
       if: |-
         always()
         && (steps.step-45.outcome == 'success')
-    - id: step-48
-      name: Delete wsl-bash
-      shell: cmd
-      run: DEL /F "${{ steps.step-45.outputs.wsl-shell-wrapper-path }}"
+    - id: 'step-48'
+      name: 'Delete wsl-bash'
+      shell: 'cmd'
+      run: 'DEL /F "${{ steps.step-45.outputs.wsl-shell-wrapper-path }}"'
       if: |-
         always()
         && (steps.step-45.outcome == 'success')
-    - id: step-49
-      name: Set wsl-bash wrapper to use non-existing user test2 by default with extra parameter
-      uses: ./
+    - id: 'step-49'
+      name: 'Set wsl-bash wrapper to use non-existing user test2 by default with extra parameter'
+      uses: './'
       with:
-        distribution: ${{ matrix.distribution.user-id }}
-        wsl-shell-user: test2
+        distribution: '${{ matrix.distribution.user-id }}'
+        wsl-shell-user: 'test2'
       if: |-
         always()
         && (steps.step-45.outcome == 'success')
-    - id: step-50
-      name: Test - wsl-bash should use auto-generated user test2 as default user
-      shell: wsl-bash {0}
+    - id: 'step-50'
+      name: 'Test - wsl-bash should use auto-generated user test2 as default user'
+      shell: 'wsl-bash {0}'
       run: |-
         whoami
         [ "$(whoami)" == 'test2' ]
       if: |-
         always()
         && (steps.step-49.outcome == 'success')
-    - id: step-51
-      name: Test - wsl-bash should use ad-hoc user test
-      shell: wsl-bash -u test {0}
+    - id: 'step-51'
+      name: 'Test - wsl-bash should use ad-hoc user test'
+      shell: 'wsl-bash -u test {0}'
       run: |-
         whoami
         [ "$(whoami)" == 'test' ]
       if: |-
         always()
         && (steps.step-49.outcome == 'success')
-    - id: step-52
-      name: Test - wsl-bash should use ad-hoc user root
-      shell: wsl-bash -u root {0}
+    - id: 'step-52'
+      name: 'Test - wsl-bash should use ad-hoc user root'
+      shell: 'wsl-bash -u root {0}'
       run: |-
         whoami
         [ "$(whoami)" == 'root' ]
       if: |-
         always()
         && (steps.step-49.outcome == 'success')
-    - id: step-53
-      name: Make a no-op execution of the action
-      uses: ./
+    - id: 'step-53'
+      name: 'Make a no-op execution of the action'
+      uses: './'
       with:
-        distribution: ${{ matrix.distribution.user-id }}
+        distribution: '${{ matrix.distribution.user-id }}'
       if: |-
         always()
         && (steps.step-49.outcome == 'success')
-    - id: step-54
-      name: Test - wsl-bash should still use test2 as default user
-      shell: wsl-bash {0}
+    - id: 'step-54'
+      name: 'Test - wsl-bash should still use test2 as default user'
+      shell: 'wsl-bash {0}'
       run: |-
         whoami
         [ "$(whoami)" == 'test2' ]
@@ -807,95 +815,103 @@ jobs:
         always()
         && (steps.step-53.outcome == 'success')
   test_wsl-conf_on_initial_execution:
-    name: Test /etc/wsl.conf handling on initial execution for "${{ matrix.distribution.user-id }}" distribution on ${{ matrix.environment }}
-    runs-on: ${{ matrix.environment }}
+    name: 'Test /etc/wsl.conf handling on initial execution for "${{ matrix.distribution.user-id }}" distribution on ${{ matrix.environment }}'
+    runs-on: '${{ matrix.environment }}'
     needs:
-    - build
-    - check_yaml_consistency
+    - 'build'
+    - 'check_yaml_consistency'
     strategy:
       fail-fast: false
       matrix:
         environment:
-        - windows-2019
-        - windows-2022
-        - windows-latest
+        - 'windows-2019'
+        - 'windows-2022'
+        - 'windows-latest'
         distribution:
-        - wsl-id: Debian
-          user-id: Debian
+        - wsl-id: 'Debian'
+          user-id: 'Debian'
           match-pattern: '*Debian*'
-          default-absent-tool: dos2unix
-        - wsl-id: kali-linux
-          user-id: kali-linux
+          default-absent-tool: 'dos2unix'
+        - wsl-id: 'Alpine'
+          user-id: 'Alpine'
+          match-pattern: '*Alpine*'
+          default-absent-tool: 'dos2unix'
+        - wsl-id: 'kali-linux'
+          user-id: 'kali-linux'
           match-pattern: '*Kali*'
-          default-absent-tool: dos2unix
-        - wsl-id: openSUSE-Leap-15.2
-          user-id: openSUSE-Leap-15.2
+          default-absent-tool: 'dos2unix'
+        - wsl-id: 'openSUSE-Leap-15.2'
+          user-id: 'openSUSE-Leap-15.2'
           match-pattern: '*openSUSE*Leap*15.2*'
-          default-absent-tool: which
-        - wsl-id: Ubuntu
-          user-id: Ubuntu-22.04
+          default-absent-tool: 'which'
+        - wsl-id: 'Ubuntu-24.04'
+          user-id: 'Ubuntu-24.04'
+          match-pattern: '*Ubuntu*24.04*'
+          default-absent-tool: 'dos2unix'
+        - wsl-id: 'Ubuntu'
+          user-id: 'Ubuntu-22.04'
           match-pattern: '*Ubuntu*22.04*'
-          default-absent-tool: dos2unix
-        - wsl-id: Ubuntu
-          user-id: Ubuntu-20.04
+          default-absent-tool: 'dos2unix'
+        - wsl-id: 'Ubuntu'
+          user-id: 'Ubuntu-20.04'
           match-pattern: '*Ubuntu*20.04*'
-          default-absent-tool: dos2unix
-        - wsl-id: Ubuntu-18.04
-          user-id: Ubuntu-18.04
+          default-absent-tool: 'dos2unix'
+        - wsl-id: 'Ubuntu-18.04'
+          user-id: 'Ubuntu-18.04'
           match-pattern: '*Ubuntu*18.04*'
-          default-absent-tool: dos2unix
-        - wsl-id: Ubuntu-16.04
-          user-id: Ubuntu-16.04
+          default-absent-tool: 'dos2unix'
+        - wsl-id: 'Ubuntu-16.04'
+          user-id: 'Ubuntu-16.04'
           match-pattern: '*Ubuntu*16.04*'
-          default-absent-tool: dos2unix
+          default-absent-tool: 'dos2unix'
     steps:
-    - id: step-0
-      name: Restore built artifacts from cache
-      uses: actions/cache/restore@v3
+    - id: 'step-0'
+      name: 'Restore built artifacts from cache'
+      uses: 'actions/cache/restore@v4'
       with:
         path: |-
           action.yml
           build/distributions/
-        key: ${{ github.run_id }}
-        fail-on-cache-miss: true
-    - id: step-1
-      name: Execute action
-      uses: ./
+        key: '${{ github.run_id }}'
+        fail-on-cache-miss: 'true'
+    - id: 'step-1'
+      name: 'Execute action'
+      uses: './'
       with:
-        distribution: ${{ matrix.distribution.user-id }}
+        distribution: '${{ matrix.distribution.user-id }}'
         wsl-conf: |-
           [automount]
           options = uid=1000
-    - id: step-2
-      name: Delete wsl-bash
-      shell: cmd
-      run: DEL /F "${{ steps.step-1.outputs.wsl-shell-wrapper-path }}"
+    - id: 'step-2'
+      name: 'Delete wsl-bash'
+      shell: 'cmd'
+      run: 'DEL /F "${{ steps.step-1.outputs.wsl-shell-wrapper-path }}"'
       if: |-
         always()
         && (steps.step-1.outcome == 'success')
         && (matrix.distribution.user-id == 'Alpine')
-    - id: step-3
-      name: Install Bash on Alpine
-      uses: ./
+    - id: 'step-3'
+      name: 'Install Bash on Alpine'
+      uses: './'
       with:
-        distribution: ${{ matrix.distribution.user-id }}
-        additional-packages: bash
+        distribution: '${{ matrix.distribution.user-id }}'
+        additional-packages: 'bash'
       if: |-
         always()
         && (steps.step-1.outcome == 'success')
         && (matrix.distribution.user-id == 'Alpine')
-    - id: step-4
-      name: Test - /etc/wsl.conf should exist
-      shell: wsl-bash {0}
+    - id: 'step-4'
+      name: 'Test - /etc/wsl.conf should exist'
+      shell: 'wsl-bash {0}'
       run: |-
         [ -f /etc/wsl.conf ]
         cat /etc/wsl.conf
       if: |-
         always()
         && (steps.step-1.outcome == 'success')
-    - id: step-5
-      name: Test - /mnt/c should be mounted with uid 1000
-      shell: wsl-bash {0}
+    - id: 'step-5'
+      name: 'Test - /mnt/c should be mounted with uid 1000'
+      shell: 'wsl-bash {0}'
       run: |-
         ls -alh /mnt
         [[ "$(stat -c %u /mnt/c)" == 1000 ]]
@@ -903,128 +919,137 @@ jobs:
         always()
         && (steps.step-1.outcome == 'success')
   test_wsl-conf_on_subsequent_execution:
-    name: Test /etc/wsl.conf handling on subsequent execution for "${{ matrix.distribution.user-id }}" distribution on ${{ matrix.environment }}
-    runs-on: ${{ matrix.environment }}
+    name: 'Test /etc/wsl.conf handling on subsequent execution for "${{ matrix.distribution.user-id }}" distribution on ${{ matrix.environment }}'
+    runs-on: '${{ matrix.environment }}'
     needs:
-    - build
-    - check_yaml_consistency
+    - 'build'
+    - 'check_yaml_consistency'
     strategy:
       fail-fast: false
       matrix:
         environment:
-        - windows-2019
-        - windows-2022
-        - windows-latest
+        - 'windows-2019'
+        - 'windows-2022'
+        - 'windows-latest'
         distribution:
-        - wsl-id: Debian
-          user-id: Debian
+        - wsl-id: 'Debian'
+          user-id: 'Debian'
           match-pattern: '*Debian*'
-          default-absent-tool: dos2unix
-        - wsl-id: kali-linux
-          user-id: kali-linux
+          default-absent-tool: 'dos2unix'
+        - wsl-id: 'Alpine'
+          user-id: 'Alpine'
+          match-pattern: '*Alpine*'
+          default-absent-tool: 'dos2unix'
+        - wsl-id: 'kali-linux'
+          user-id: 'kali-linux'
           match-pattern: '*Kali*'
-          default-absent-tool: dos2unix
-        - wsl-id: openSUSE-Leap-15.2
-          user-id: openSUSE-Leap-15.2
+          default-absent-tool: 'dos2unix'
+        - wsl-id: 'openSUSE-Leap-15.2'
+          user-id: 'openSUSE-Leap-15.2'
           match-pattern: '*openSUSE*Leap*15.2*'
-          default-absent-tool: which
-        - wsl-id: Ubuntu
-          user-id: Ubuntu-22.04
+          default-absent-tool: 'which'
+        - wsl-id: 'Ubuntu-24.04'
+          user-id: 'Ubuntu-24.04'
+          match-pattern: '*Ubuntu*24.04*'
+          default-absent-tool: 'dos2unix'
+        - wsl-id: 'Ubuntu'
+          user-id: 'Ubuntu-22.04'
           match-pattern: '*Ubuntu*22.04*'
-          default-absent-tool: dos2unix
-        - wsl-id: Ubuntu
-          user-id: Ubuntu-20.04
+          default-absent-tool: 'dos2unix'
+        - wsl-id: 'Ubuntu'
+          user-id: 'Ubuntu-20.04'
           match-pattern: '*Ubuntu*20.04*'
-          default-absent-tool: dos2unix
-        - wsl-id: Ubuntu-18.04
-          user-id: Ubuntu-18.04
+          default-absent-tool: 'dos2unix'
+        - wsl-id: 'Ubuntu-18.04'
+          user-id: 'Ubuntu-18.04'
           match-pattern: '*Ubuntu*18.04*'
-          default-absent-tool: dos2unix
-        - wsl-id: Ubuntu-16.04
-          user-id: Ubuntu-16.04
+          default-absent-tool: 'dos2unix'
+        - wsl-id: 'Ubuntu-16.04'
+          user-id: 'Ubuntu-16.04'
           match-pattern: '*Ubuntu*16.04*'
-          default-absent-tool: dos2unix
+          default-absent-tool: 'dos2unix'
     steps:
-    - id: step-0
-      name: Restore built artifacts from cache
-      uses: actions/cache/restore@v3
+    - id: 'step-0'
+      name: 'Restore built artifacts from cache'
+      uses: 'actions/cache/restore@v4'
       with:
         path: |-
           action.yml
           build/distributions/
-        key: ${{ github.run_id }}
-        fail-on-cache-miss: true
-    - id: step-1
-      name: Execute action
-      uses: ./
+        key: '${{ github.run_id }}'
+        fail-on-cache-miss: 'true'
+    - id: 'step-1'
+      name: 'Execute action'
+      uses: './'
       with:
-        distribution: ${{ matrix.distribution.user-id }}
-    - id: step-2
-      name: Delete wsl-bash
-      shell: cmd
-      run: DEL /F "${{ steps.step-1.outputs.wsl-shell-wrapper-path }}"
+        distribution: '${{ matrix.distribution.user-id }}'
+    - id: 'step-2'
+      name: 'Delete wsl-bash'
+      shell: 'cmd'
+      run: 'DEL /F "${{ steps.step-1.outputs.wsl-shell-wrapper-path }}"'
       if: |-
         always()
         && (steps.step-1.outcome == 'success')
         && (matrix.distribution.user-id == 'Alpine')
-    - id: step-3
-      name: Install Bash on Alpine
-      uses: ./
+    - id: 'step-3'
+      name: 'Install Bash on Alpine'
+      uses: './'
       with:
-        distribution: ${{ matrix.distribution.user-id }}
-        additional-packages: bash
+        distribution: '${{ matrix.distribution.user-id }}'
+        additional-packages: 'bash'
       if: |-
         always()
         && (steps.step-1.outcome == 'success')
         && (matrix.distribution.user-id == 'Alpine')
-    - id: step-4
-      name: Test - /etc/wsl.conf should not exist
-      shell: wsl-bash {0}
-      run: '[ ! -f /etc/wsl.conf ]'
+    - id: 'step-4'
+      name: 'Test - /etc/wsl.conf should not exist'
+      shell: 'wsl-bash {0}'
+      run: '[ ! -f /etc/wsl.conf ] || { cat /etc/wsl.conf; false; }'
       if: |-
         always()
         && (steps.step-1.outcome == 'success')
-    - id: step-5
+        && (matrix.distribution.user-id != 'Ubuntu-24.04')
+    - id: 'step-5'
       name: 'Test - C: should be mounted at /mnt/c'
-      shell: wsl-bash {0}
+      shell: 'wsl-bash {0}'
       run: |-
         mount
         mount | grep 'C:.* on /mnt/c'
       if: |-
         always()
         && (steps.step-1.outcome == 'success')
-    - id: step-6
-      name: Test - /mnt/c should be mounted with uid 0
-      shell: wsl-bash {0}
+    - id: 'step-6'
+      name: 'Test - /mnt/c should be mounted with uid 0'
+      shell: 'wsl-bash {0}'
       run: |-
         ls -alh /mnt
         [[ "$(stat -c %u /mnt/c)" == 0 ]]
       if: |-
         always()
         && (steps.step-1.outcome == 'success')
-    - id: step-7
-      name: Execute action
-      uses: ./
+    - id: 'step-7'
+      name: 'Execute action'
+      uses: './'
       with:
-        distribution: ${{ matrix.distribution.user-id }}
+        distribution: '${{ matrix.distribution.user-id }}'
         wsl-conf: |-
           [automount]
           root = /
       if: |-
         always()
         && (steps.step-1.outcome == 'success')
-    - id: step-8
-      name: Test - /etc/wsl.conf should exist
-      shell: wsl-bash {0}
+    - id: 'step-8'
+      name: 'Test - /etc/wsl.conf should exist'
+      shell: 'wsl-bash {0}'
       run: |-
         [ -f /etc/wsl.conf ]
         cat /etc/wsl.conf
       if: |-
         always()
         && (steps.step-7.outcome == 'success')
-    - id: step-9
+    - id: 'step-9'
       name: 'Test - C: should be mounted at /c'
-      shell: wsl-bash {0}
+      shell: 'wsl-bash {0}'
       run: |-
         mount
         mount | grep 'C:.* on /c'
@@ -1032,224 +1057,232 @@ jobs:
         always()
         && (steps.step-7.outcome == 'success')
   test_additional_packages:
-    name: Test additional packages for "${{ matrix.distribution.user-id }}" distribution on ${{ matrix.environment }}
-    runs-on: ${{ matrix.environment }}
+    name: 'Test additional packages for "${{ matrix.distribution.user-id }}" distribution on ${{ matrix.environment }}'
+    runs-on: '${{ matrix.environment }}'
     needs:
-    - build
-    - check_yaml_consistency
+    - 'build'
+    - 'check_yaml_consistency'
     strategy:
       fail-fast: false
       matrix:
         environment:
-        - windows-2019
-        - windows-2022
-        - windows-latest
+        - 'windows-2019'
+        - 'windows-2022'
+        - 'windows-latest'
         distribution:
-        - wsl-id: Debian
-          user-id: Debian
+        - wsl-id: 'Debian'
+          user-id: 'Debian'
           match-pattern: '*Debian*'
-          default-absent-tool: dos2unix
-        - wsl-id: kali-linux
-          user-id: kali-linux
+          default-absent-tool: 'dos2unix'
+        - wsl-id: 'Alpine'
+          user-id: 'Alpine'
+          match-pattern: '*Alpine*'
+          default-absent-tool: 'dos2unix'
+        - wsl-id: 'kali-linux'
+          user-id: 'kali-linux'
           match-pattern: '*Kali*'
-          default-absent-tool: dos2unix
-        - wsl-id: openSUSE-Leap-15.2
-          user-id: openSUSE-Leap-15.2
+          default-absent-tool: 'dos2unix'
+        - wsl-id: 'openSUSE-Leap-15.2'
+          user-id: 'openSUSE-Leap-15.2'
           match-pattern: '*openSUSE*Leap*15.2*'
-          default-absent-tool: which
-        - wsl-id: Ubuntu
-          user-id: Ubuntu-22.04
+          default-absent-tool: 'which'
+        - wsl-id: 'Ubuntu-24.04'
+          user-id: 'Ubuntu-24.04'
+          match-pattern: '*Ubuntu*24.04*'
+          default-absent-tool: 'dos2unix'
+        - wsl-id: 'Ubuntu'
+          user-id: 'Ubuntu-22.04'
           match-pattern: '*Ubuntu*22.04*'
-          default-absent-tool: dos2unix
-        - wsl-id: Ubuntu
-          user-id: Ubuntu-20.04
+          default-absent-tool: 'dos2unix'
+        - wsl-id: 'Ubuntu'
+          user-id: 'Ubuntu-20.04'
           match-pattern: '*Ubuntu*20.04*'
-          default-absent-tool: dos2unix
-        - wsl-id: Ubuntu-18.04
-          user-id: Ubuntu-18.04
+          default-absent-tool: 'dos2unix'
+        - wsl-id: 'Ubuntu-18.04'
+          user-id: 'Ubuntu-18.04'
           match-pattern: '*Ubuntu*18.04*'
-          default-absent-tool: dos2unix
-        - wsl-id: Ubuntu-16.04
-          user-id: Ubuntu-16.04
+          default-absent-tool: 'dos2unix'
+        - wsl-id: 'Ubuntu-16.04'
+          user-id: 'Ubuntu-16.04'
           match-pattern: '*Ubuntu*16.04*'
-          default-absent-tool: dos2unix
+          default-absent-tool: 'dos2unix'
     steps:
-    - id: step-0
-      name: Restore built artifacts from cache
-      uses: actions/cache/restore@v3
+    - id: 'step-0'
+      name: 'Restore built artifacts from cache'
+      uses: 'actions/cache/restore@v4'
       with:
         path: |-
           action.yml
           build/distributions/
-        key: ${{ github.run_id }}
-        fail-on-cache-miss: true
-    - id: step-1
-      name: Execute action
-      uses: ./
+        key: '${{ github.run_id }}'
+        fail-on-cache-miss: 'true'
+    - id: 'step-1'
+      name: 'Execute action'
+      uses: './'
       with:
-        distribution: ${{ matrix.distribution.user-id }}
-        additional-packages: ${{ matrix.distribution.default-absent-tool }} bash
-    - id: step-2
-      name: Test - ${{ matrix.distribution.default-absent-tool }} should be installed
-      shell: wsl-bash {0}
-      run: ${{ matrix.distribution.default-absent-tool }} --version
+        distribution: '${{ matrix.distribution.user-id }}'
+        additional-packages: '${{ matrix.distribution.default-absent-tool }} bash'
+    - id: 'step-2'
+      name: 'Test - ${{ matrix.distribution.default-absent-tool }} should be installed'
+      shell: 'wsl-bash {0}'
+      run: '${{ matrix.distribution.default-absent-tool }} --version'
       if: |-
         always()
         && (steps.step-1.outcome == 'success')
-    - id: step-3
-      name: Test - bash should be installed
-      shell: wsl-bash {0}
-      run: bash -c true
+    - id: 'step-3'
+      name: 'Test - bash should be installed'
+      shell: 'wsl-bash {0}'
+      run: 'bash -c true'
       if: |-
         always()
         && (steps.step-1.outcome == 'success')
   test_multiple_usage_with_different_distributions:
-    name: Test multiple usage with different distributions ("${{ matrix.distributions.distribution1.user-id }}" / "${{ matrix.distributions.distribution2.user-id }}" / "${{ matrix.distributions.distribution3.user-id }}") on ${{ matrix.environment }}
-    runs-on: ${{ matrix.environment }}
+    name: 'Test multiple usage with different distributions ("${{ matrix.distributions.distribution1.user-id }}" / "${{ matrix.distributions.distribution2.user-id }}" / "${{ matrix.distributions.distribution3.user-id }}") on ${{ matrix.environment }}'
+    runs-on: '${{ matrix.environment }}'
     needs:
-    - build
-    - check_yaml_consistency
+    - 'build'
+    - 'check_yaml_consistency'
     strategy:
       fail-fast: false
       matrix:
         environment:
-        - windows-2019
-        - windows-2022
-        - windows-latest
+        - 'windows-2019'
+        - 'windows-2022'
+        - 'windows-latest'
         distributions:
         - distribution1:
-            wsl-id: Debian
-            user-id: Debian
+            wsl-id: 'Debian'
+            user-id: 'Debian'
             match-pattern: '*Debian*'
-            default-absent-tool: dos2unix
+            default-absent-tool: 'dos2unix'
           distribution2:
-            wsl-id: Ubuntu
-            user-id: Ubuntu-20.04
+            wsl-id: 'Ubuntu'
+            user-id: 'Ubuntu-20.04'
             match-pattern: '*Ubuntu*20.04*'
-            default-absent-tool: dos2unix
+            default-absent-tool: 'dos2unix'
           distribution3:
-            wsl-id: Ubuntu-18.04
-            user-id: Ubuntu-18.04
+            wsl-id: 'Ubuntu-18.04'
+            user-id: 'Ubuntu-18.04'
             match-pattern: '*Ubuntu*18.04*'
-            default-absent-tool: dos2unix
+            default-absent-tool: 'dos2unix'
         - distribution1:
-            wsl-id: Debian
-            user-id: Debian
+            wsl-id: 'Debian'
+            user-id: 'Debian'
             match-pattern: '*Debian*'
-            default-absent-tool: dos2unix
+            default-absent-tool: 'dos2unix'
           distribution2:
-            wsl-id: Ubuntu-18.04
-            user-id: Ubuntu-18.04
+            wsl-id: 'Ubuntu-18.04'
+            user-id: 'Ubuntu-18.04'
             match-pattern: '*Ubuntu*18.04*'
-            default-absent-tool: dos2unix
+            default-absent-tool: 'dos2unix'
           distribution3:
-            wsl-id: Ubuntu
-            user-id: Ubuntu-20.04
+            wsl-id: 'Ubuntu'
+            user-id: 'Ubuntu-20.04'
             match-pattern: '*Ubuntu*20.04*'
-            default-absent-tool: dos2unix
+            default-absent-tool: 'dos2unix'
         - distribution1:
-            wsl-id: Ubuntu
-            user-id: Ubuntu-20.04
+            wsl-id: 'Ubuntu'
+            user-id: 'Ubuntu-20.04'
             match-pattern: '*Ubuntu*20.04*'
-            default-absent-tool: dos2unix
+            default-absent-tool: 'dos2unix'
           distribution2:
-            wsl-id: Debian
-            user-id: Debian
+            wsl-id: 'Debian'
+            user-id: 'Debian'
             match-pattern: '*Debian*'
-            default-absent-tool: dos2unix
+            default-absent-tool: 'dos2unix'
           distribution3:
-            wsl-id: Ubuntu-18.04
-            user-id: Ubuntu-18.04
+            wsl-id: 'Ubuntu-18.04'
+            user-id: 'Ubuntu-18.04'
             match-pattern: '*Ubuntu*18.04*'
-            default-absent-tool: dos2unix
+            default-absent-tool: 'dos2unix'
         - distribution1:
-            wsl-id: Ubuntu
-            user-id: Ubuntu-20.04
+            wsl-id: 'Ubuntu'
+            user-id: 'Ubuntu-20.04'
             match-pattern: '*Ubuntu*20.04*'
-            default-absent-tool: dos2unix
+            default-absent-tool: 'dos2unix'
           distribution2:
-            wsl-id: Ubuntu-18.04
-            user-id: Ubuntu-18.04
+            wsl-id: 'Ubuntu-18.04'
+            user-id: 'Ubuntu-18.04'
             match-pattern: '*Ubuntu*18.04*'
-            default-absent-tool: dos2unix
+            default-absent-tool: 'dos2unix'
           distribution3:
-            wsl-id: Debian
-            user-id: Debian
+            wsl-id: 'Debian'
+            user-id: 'Debian'
             match-pattern: '*Debian*'
-            default-absent-tool: dos2unix
+            default-absent-tool: 'dos2unix'
         - distribution1:
-            wsl-id: Ubuntu-18.04
-            user-id: Ubuntu-18.04
+            wsl-id: 'Ubuntu-18.04'
+            user-id: 'Ubuntu-18.04'
             match-pattern: '*Ubuntu*18.04*'
-            default-absent-tool: dos2unix
+            default-absent-tool: 'dos2unix'
           distribution2:
-            wsl-id: Debian
-            user-id: Debian
+            wsl-id: 'Debian'
+            user-id: 'Debian'
             match-pattern: '*Debian*'
-            default-absent-tool: dos2unix
+            default-absent-tool: 'dos2unix'
           distribution3:
-            wsl-id: Ubuntu
-            user-id: Ubuntu-20.04
+            wsl-id: 'Ubuntu'
+            user-id: 'Ubuntu-20.04'
             match-pattern: '*Ubuntu*20.04*'
-            default-absent-tool: dos2unix
+            default-absent-tool: 'dos2unix'
         - distribution1:
-            wsl-id: Ubuntu-18.04
-            user-id: Ubuntu-18.04
+            wsl-id: 'Ubuntu-18.04'
+            user-id: 'Ubuntu-18.04'
             match-pattern: '*Ubuntu*18.04*'
-            default-absent-tool: dos2unix
+            default-absent-tool: 'dos2unix'
           distribution2:
-            wsl-id: Ubuntu
-            user-id: Ubuntu-20.04
+            wsl-id: 'Ubuntu'
+            user-id: 'Ubuntu-20.04'
             match-pattern: '*Ubuntu*20.04*'
-            default-absent-tool: dos2unix
+            default-absent-tool: 'dos2unix'
           distribution3:
-            wsl-id: Debian
-            user-id: Debian
+            wsl-id: 'Debian'
+            user-id: 'Debian'
             match-pattern: '*Debian*'
-            default-absent-tool: dos2unix
+            default-absent-tool: 'dos2unix'
     steps:
-    - id: step-0
-      name: Restore built artifacts from cache
-      uses: actions/cache/restore@v3
+    - id: 'step-0'
+      name: 'Restore built artifacts from cache'
+      uses: 'actions/cache/restore@v4'
       with:
         path: |-
           action.yml
           build/distributions/
-        key: ${{ github.run_id }}
-        fail-on-cache-miss: true
-    - id: step-1
-      name: Execute action for ${{ matrix.distributions.distribution1.user-id }}
-      uses: ./
+        key: '${{ github.run_id }}'
+        fail-on-cache-miss: 'true'
+    - id: 'step-1'
+      name: 'Execute action for ${{ matrix.distributions.distribution1.user-id }}'
+      uses: './'
       with:
-        distribution: ${{ matrix.distributions.distribution1.user-id }}
-    - id: step-2
-      name: Execute action for ${{ matrix.distributions.distribution2.user-id }}
-      uses: ./
+        distribution: '${{ matrix.distributions.distribution1.user-id }}'
+    - id: 'step-2'
+      name: 'Execute action for ${{ matrix.distributions.distribution2.user-id }}'
+      uses: './'
       with:
-        distribution: ${{ matrix.distributions.distribution2.user-id }}
-    - id: step-3
-      name: Execute action for ${{ matrix.distributions.distribution3.user-id }}
-      uses: ./
+        distribution: '${{ matrix.distributions.distribution2.user-id }}'
+    - id: 'step-3'
+      name: 'Execute action for ${{ matrix.distributions.distribution3.user-id }}'
+      uses: './'
       with:
-        distribution: ${{ matrix.distributions.distribution3.user-id }}
-        set-as-default: false
-    - id: step-4
-      name: Execute action for ${{ matrix.distributions.distribution1.user-id }} again
-      uses: ./
+        distribution: '${{ matrix.distributions.distribution3.user-id }}'
+        set-as-default: 'false'
+    - id: 'step-4'
+      name: 'Execute action for ${{ matrix.distributions.distribution1.user-id }} again'
+      uses: './'
       with:
-        distribution: ${{ matrix.distributions.distribution1.user-id }}
-    - id: step-5
-      name: Test - the default distribution should be the last installed distribution with set-as-default true
-      shell: wsl-bash {0}
+        distribution: '${{ matrix.distributions.distribution1.user-id }}'
+    - id: 'step-5'
+      name: 'Test - the default distribution should be the last installed distribution with set-as-default true'
+      shell: 'wsl-bash {0}'
       run: |-
         cat <(wsl.exe --list || true) <(wsl.exe --list || true | iconv -f UTF-16LE -t UTF-8) <(wslconfig.exe /list || true) <(wslconfig.exe /list || true | iconv -f UTF-16LE -t UTF-8)
         [[ "$(cat <(wsl.exe --list || true) <(wsl.exe --list || true | iconv -f UTF-16LE -t UTF-8) <(wslconfig.exe /list || true) <(wslconfig.exe /list || true | iconv -f UTF-16LE -t UTF-8))" == *${{ matrix.distributions.distribution2.wsl-id }}\ \(Default\)* ]]
       if: |-
         always()
         && (steps.step-4.outcome == 'success')
-    - id: step-6
-      name: Test - wsl-bash should use the last installed distribution with set-as-default true
-      shell: wsl-bash {0}
+    - id: 'step-6'
+      name: 'Test - wsl-bash should use the last installed distribution with set-as-default true'
+      shell: 'wsl-bash {0}'
       run: |-
         cat <(lsb_release -a || true) <(uname -a || true) <([ -d /etc ] && find /etc -maxdepth 1 -type f \( -name '*release' -or -name 'issue*' \) -exec cat {} + || true) <([ -d /etc/products.d ] && find /etc/products.d -maxdepth 1 -type f -name '*.prod' -exec cat {} + || true) <([ -f /proc/version ] && cat /proc/version || true)
         [[ "$(cat <(lsb_release -a || true) <(uname -a || true) <([ -d /etc ] && find /etc -maxdepth 1 -type f \( -name '*release' -or -name 'issue*' \) -exec cat {} + || true) <([ -d /etc/products.d ] && find /etc/products.d -maxdepth 1 -type f -name '*.prod' -exec cat {} + || true) <([ -f /proc/version ] && cat /proc/version || true))" == ${{ matrix.distributions.distribution2.match-pattern }} ]]
@@ -1257,202 +1290,210 @@ jobs:
         always()
         && (steps.step-4.outcome == 'success')
   test_multiple_usage_with_same_distribution:
-    name: Test multiple usage with "${{ matrix.distribution.user-id }}" distribution on ${{ matrix.environment }}
-    runs-on: ${{ matrix.environment }}
+    name: 'Test multiple usage with "${{ matrix.distribution.user-id }}" distribution on ${{ matrix.environment }}'
+    runs-on: '${{ matrix.environment }}'
     needs:
-    - build
-    - check_yaml_consistency
+    - 'build'
+    - 'check_yaml_consistency'
     strategy:
       fail-fast: false
       matrix:
         environment:
-        - windows-2019
-        - windows-2022
-        - windows-latest
+        - 'windows-2019'
+        - 'windows-2022'
+        - 'windows-latest'
         distribution:
-        - wsl-id: Debian
-          user-id: Debian
+        - wsl-id: 'Debian'
+          user-id: 'Debian'
           match-pattern: '*Debian*'
-          default-absent-tool: dos2unix
-        - wsl-id: kali-linux
-          user-id: kali-linux
+          default-absent-tool: 'dos2unix'
+        - wsl-id: 'Alpine'
+          user-id: 'Alpine'
+          match-pattern: '*Alpine*'
+          default-absent-tool: 'dos2unix'
+        - wsl-id: 'kali-linux'
+          user-id: 'kali-linux'
           match-pattern: '*Kali*'
-          default-absent-tool: dos2unix
-        - wsl-id: openSUSE-Leap-15.2
-          user-id: openSUSE-Leap-15.2
+          default-absent-tool: 'dos2unix'
+        - wsl-id: 'openSUSE-Leap-15.2'
+          user-id: 'openSUSE-Leap-15.2'
           match-pattern: '*openSUSE*Leap*15.2*'
-          default-absent-tool: which
-        - wsl-id: Ubuntu
-          user-id: Ubuntu-22.04
+          default-absent-tool: 'which'
+        - wsl-id: 'Ubuntu-24.04'
+          user-id: 'Ubuntu-24.04'
+          match-pattern: '*Ubuntu*24.04*'
+          default-absent-tool: 'dos2unix'
+        - wsl-id: 'Ubuntu'
+          user-id: 'Ubuntu-22.04'
           match-pattern: '*Ubuntu*22.04*'
-          default-absent-tool: dos2unix
-        - wsl-id: Ubuntu
-          user-id: Ubuntu-20.04
+          default-absent-tool: 'dos2unix'
+        - wsl-id: 'Ubuntu'
+          user-id: 'Ubuntu-20.04'
           match-pattern: '*Ubuntu*20.04*'
-          default-absent-tool: dos2unix
-        - wsl-id: Ubuntu-18.04
-          user-id: Ubuntu-18.04
+          default-absent-tool: 'dos2unix'
+        - wsl-id: 'Ubuntu-18.04'
+          user-id: 'Ubuntu-18.04'
           match-pattern: '*Ubuntu*18.04*'
-          default-absent-tool: dos2unix
-        - wsl-id: Ubuntu-16.04
-          user-id: Ubuntu-16.04
+          default-absent-tool: 'dos2unix'
+        - wsl-id: 'Ubuntu-16.04'
+          user-id: 'Ubuntu-16.04'
           match-pattern: '*Ubuntu*16.04*'
-          default-absent-tool: dos2unix
+          default-absent-tool: 'dos2unix'
         distribution2:
-        - wsl-id: Debian
-          user-id: Debian
+        - wsl-id: 'Debian'
+          user-id: 'Debian'
           match-pattern: '*Debian*'
-          default-absent-tool: dos2unix
+          default-absent-tool: 'dos2unix'
         exclude:
-        - environment: windows-2019
+        - environment: 'windows-2019'
           distribution:
-            wsl-id: Debian
-            user-id: Debian
+            wsl-id: 'Debian'
+            user-id: 'Debian'
             match-pattern: '*Debian*'
-            default-absent-tool: dos2unix
+            default-absent-tool: 'dos2unix'
           distribution2:
-            wsl-id: Debian
-            user-id: Debian
+            wsl-id: 'Debian'
+            user-id: 'Debian'
             match-pattern: '*Debian*'
-            default-absent-tool: dos2unix
-        - environment: windows-2022
+            default-absent-tool: 'dos2unix'
+        - environment: 'windows-2022'
           distribution:
-            wsl-id: Debian
-            user-id: Debian
+            wsl-id: 'Debian'
+            user-id: 'Debian'
             match-pattern: '*Debian*'
-            default-absent-tool: dos2unix
+            default-absent-tool: 'dos2unix'
           distribution2:
-            wsl-id: Debian
-            user-id: Debian
+            wsl-id: 'Debian'
+            user-id: 'Debian'
             match-pattern: '*Debian*'
-            default-absent-tool: dos2unix
-        - environment: windows-latest
+            default-absent-tool: 'dos2unix'
+        - environment: 'windows-latest'
           distribution:
-            wsl-id: Debian
-            user-id: Debian
+            wsl-id: 'Debian'
+            user-id: 'Debian'
             match-pattern: '*Debian*'
-            default-absent-tool: dos2unix
+            default-absent-tool: 'dos2unix'
           distribution2:
-            wsl-id: Debian
-            user-id: Debian
+            wsl-id: 'Debian'
+            user-id: 'Debian'
             match-pattern: '*Debian*'
-            default-absent-tool: dos2unix
+            default-absent-tool: 'dos2unix'
         include:
-        - environment: windows-2019
+        - environment: 'windows-2019'
           distribution:
-            wsl-id: Debian
-            user-id: Debian
+            wsl-id: 'Debian'
+            user-id: 'Debian'
             match-pattern: '*Debian*'
-            default-absent-tool: dos2unix
+            default-absent-tool: 'dos2unix'
           distribution2:
-            wsl-id: Ubuntu
-            user-id: Ubuntu-20.04
+            wsl-id: 'Ubuntu'
+            user-id: 'Ubuntu-20.04'
             match-pattern: '*Ubuntu*20.04*'
-            default-absent-tool: dos2unix
-        - environment: windows-2022
+            default-absent-tool: 'dos2unix'
+        - environment: 'windows-2022'
           distribution:
-            wsl-id: Debian
-            user-id: Debian
+            wsl-id: 'Debian'
+            user-id: 'Debian'
             match-pattern: '*Debian*'
-            default-absent-tool: dos2unix
+            default-absent-tool: 'dos2unix'
           distribution2:
-            wsl-id: Ubuntu
-            user-id: Ubuntu-20.04
+            wsl-id: 'Ubuntu'
+            user-id: 'Ubuntu-20.04'
             match-pattern: '*Ubuntu*20.04*'
-            default-absent-tool: dos2unix
-        - environment: windows-latest
+            default-absent-tool: 'dos2unix'
+        - environment: 'windows-latest'
           distribution:
-            wsl-id: Debian
-            user-id: Debian
+            wsl-id: 'Debian'
+            user-id: 'Debian'
             match-pattern: '*Debian*'
-            default-absent-tool: dos2unix
+            default-absent-tool: 'dos2unix'
           distribution2:
-            wsl-id: Ubuntu
-            user-id: Ubuntu-20.04
+            wsl-id: 'Ubuntu'
+            user-id: 'Ubuntu-20.04'
             match-pattern: '*Ubuntu*20.04*'
-            default-absent-tool: dos2unix
+            default-absent-tool: 'dos2unix'
     steps:
-    - id: step-0
-      name: Restore built artifacts from cache
-      uses: actions/cache/restore@v3
+    - id: 'step-0'
+      name: 'Restore built artifacts from cache'
+      uses: 'actions/cache/restore@v4'
       with:
         path: |-
           action.yml
           build/distributions/
-        key: ${{ github.run_id }}
-        fail-on-cache-miss: true
-    - id: step-1
-      name: Execute action
-      uses: ./
+        key: '${{ github.run_id }}'
+        fail-on-cache-miss: 'true'
+    - id: 'step-1'
+      name: 'Execute action'
+      uses: './'
       with:
-        distribution: ${{ matrix.distribution.user-id }}
-        additional-packages: bash
-    - id: step-2
-      name: Update distribution
-      uses: ./
+        distribution: '${{ matrix.distribution.user-id }}'
+        additional-packages: 'bash'
+    - id: 'step-2'
+      name: 'Update distribution'
+      uses: './'
       with:
-        distribution: ${{ matrix.distribution.user-id }}
-        update: true
-      if: matrix.distribution.user-id != 'kali-linux'
-    - id: step-3
-      name: Install default absent tool
-      uses: ./
+        distribution: '${{ matrix.distribution.user-id }}'
+        update: 'true'
+      if: 'matrix.distribution.user-id != ''kali-linux'''
+    - id: 'step-3'
+      name: 'Install default absent tool'
+      uses: './'
       with:
-        distribution: ${{ matrix.distribution.user-id }}
-        additional-packages: ${{ matrix.distribution.default-absent-tool }}
-    - id: step-4
-      name: Test - ${{ matrix.distribution.default-absent-tool }} should be installed
-      shell: wsl-bash {0}
-      run: ${{ matrix.distribution.default-absent-tool }} --version
+        distribution: '${{ matrix.distribution.user-id }}'
+        additional-packages: '${{ matrix.distribution.default-absent-tool }}'
+    - id: 'step-4'
+      name: 'Test - ${{ matrix.distribution.default-absent-tool }} should be installed'
+      shell: 'wsl-bash {0}'
+      run: '${{ matrix.distribution.default-absent-tool }} --version'
       if: |-
         always()
         && (steps.step-3.outcome == 'success')
-    - id: step-5
-      name: Execute action for ${{ matrix.distribution2.user-id }}
-      uses: ./
+    - id: 'step-5'
+      name: 'Execute action for ${{ matrix.distribution2.user-id }}'
+      uses: './'
       with:
-        distribution: ${{ matrix.distribution2.user-id }}
+        distribution: '${{ matrix.distribution2.user-id }}'
       if: |-
         always()
         && (steps.step-3.outcome == 'success')
-    - id: step-6
-      name: Test - "${{ matrix.distribution2.user-id }}" should be the default distribution after installation
-      shell: wsl-bash {0}
+    - id: 'step-6'
+      name: 'Test - "${{ matrix.distribution2.user-id }}" should be the default distribution after installation'
+      shell: 'wsl-bash {0}'
       run: |-
         cat <(lsb_release -a || true) <(uname -a || true) <([ -d /etc ] && find /etc -maxdepth 1 -type f \( -name '*release' -or -name 'issue*' \) -exec cat {} + || true) <([ -d /etc/products.d ] && find /etc/products.d -maxdepth 1 -type f -name '*.prod' -exec cat {} + || true) <([ -f /proc/version ] && cat /proc/version || true)
         [[ "$(cat <(lsb_release -a || true) <(uname -a || true) <([ -d /etc ] && find /etc -maxdepth 1 -type f \( -name '*release' -or -name 'issue*' \) -exec cat {} + || true) <([ -d /etc/products.d ] && find /etc/products.d -maxdepth 1 -type f -name '*.prod' -exec cat {} + || true) <([ -f /proc/version ] && cat /proc/version || true))" == ${{ matrix.distribution2.match-pattern }} ]]
       if: |-
         always()
         && (steps.step-5.outcome == 'success')
-    - id: step-7
-      name: Re-execute action
-      uses: ./
+    - id: 'step-7'
+      name: 'Re-execute action'
+      uses: './'
       with:
-        distribution: ${{ matrix.distribution.user-id }}
+        distribution: '${{ matrix.distribution.user-id }}'
       if: |-
         always()
         && (steps.step-5.outcome == 'success')
-    - id: step-8
-      name: Test - "${{ matrix.distribution2.user-id }}" should still be the default distribution after re-running for "${{ matrix.distribution.user-id }}"
-      shell: wsl-bash {0}
+    - id: 'step-8'
+      name: 'Test - "${{ matrix.distribution2.user-id }}" should still be the default distribution after re-running for "${{ matrix.distribution.user-id }}"'
+      shell: 'wsl-bash {0}'
       run: |-
         cat <(lsb_release -a || true) <(uname -a || true) <([ -d /etc ] && find /etc -maxdepth 1 -type f \( -name '*release' -or -name 'issue*' \) -exec cat {} + || true) <([ -d /etc/products.d ] && find /etc/products.d -maxdepth 1 -type f -name '*.prod' -exec cat {} + || true) <([ -f /proc/version ] && cat /proc/version || true)
         [[ "$(cat <(lsb_release -a || true) <(uname -a || true) <([ -d /etc ] && find /etc -maxdepth 1 -type f \( -name '*release' -or -name 'issue*' \) -exec cat {} + || true) <([ -d /etc/products.d ] && find /etc/products.d -maxdepth 1 -type f -name '*.prod' -exec cat {} + || true) <([ -f /proc/version ] && cat /proc/version || true))" == ${{ matrix.distribution2.match-pattern }} ]]
       if: |-
         always()
         && (steps.step-7.outcome == 'success')
-    - id: step-9
-      name: Set as default
-      uses: ./
+    - id: 'step-9'
+      name: 'Set as default'
+      uses: './'
       with:
-        distribution: ${{ matrix.distribution.user-id }}
-        set-as-default: true
+        distribution: '${{ matrix.distribution.user-id }}'
+        set-as-default: 'true'
       if: |-
         always()
         && (steps.step-7.outcome == 'success')
-    - id: step-10
-      name: Test - "${{ matrix.distribution.user-id }}" should be the default distribution after re-running with set-as-default true
-      shell: wsl-bash {0}
+    - id: 'step-10'
+      name: 'Test - "${{ matrix.distribution.user-id }}" should be the default distribution after re-running with set-as-default true'
+      shell: 'wsl-bash {0}'
       run: |-
         cat <(lsb_release -a || true) <(uname -a || true) <([ -d /etc ] && find /etc -maxdepth 1 -type f \( -name '*release' -or -name 'issue*' \) -exec cat {} + || true) <([ -d /etc/products.d ] && find /etc/products.d -maxdepth 1 -type f -name '*.prod' -exec cat {} + || true) <([ -f /proc/version ] && cat /proc/version || true)
         [[ "$(cat <(lsb_release -a || true) <(uname -a || true) <([ -d /etc ] && find /etc -maxdepth 1 -type f \( -name '*release' -or -name 'issue*' \) -exec cat {} + || true) <([ -d /etc/products.d ] && find /etc/products.d -maxdepth 1 -type f -name '*.prod' -exec cat {} + || true) <([ -f /proc/version ] && cat /proc/version || true))" == ${{ matrix.distribution.match-pattern }} ]]
@@ -1460,186 +1501,238 @@ jobs:
         always()
         && (steps.step-9.outcome == 'success')
   test_distribution_specific_wsl_bash_scripts:
-    name: Test distribution specific wsl-bash scripts on ${{ matrix.environment }}
-    runs-on: ${{ matrix.environment }}
+    name: 'Test distribution specific wsl-bash scripts on ${{ matrix.environment }} (without ${{ matrix.distributions.incompatibleUbuntu }})'
+    runs-on: '${{ matrix.environment }}'
     needs:
-    - build
-    - check_yaml_consistency
+    - 'build'
+    - 'check_yaml_consistency'
     strategy:
       fail-fast: false
       matrix:
         environment:
-        - windows-2019
-        - windows-2022
-        - windows-latest
+        - 'windows-2019'
+        - 'windows-2022'
+        - 'windows-latest'
         distributions:
-        - distribution1:
-            wsl-id: Debian
-            user-id: Debian
+        - incompatibleUbuntu: 'Ubuntu-22.04'
+          distribution1:
+            wsl-id: 'Debian'
+            user-id: 'Debian'
             match-pattern: '*Debian*'
-            default-absent-tool: dos2unix
+            default-absent-tool: 'dos2unix'
           distribution2:
-            wsl-id: kali-linux
-            user-id: kali-linux
-            match-pattern: '*Kali*'
-            default-absent-tool: dos2unix
+            wsl-id: 'Alpine'
+            user-id: 'Alpine'
+            match-pattern: '*Alpine*'
+            default-absent-tool: 'dos2unix'
           distribution3:
-            wsl-id: openSUSE-Leap-15.2
-            user-id: openSUSE-Leap-15.2
-            match-pattern: '*openSUSE*Leap*15.2*'
-            default-absent-tool: which
+            wsl-id: 'kali-linux'
+            user-id: 'kali-linux'
+            match-pattern: '*Kali*'
+            default-absent-tool: 'dos2unix'
           distribution4:
-            wsl-id: Ubuntu
-            user-id: Ubuntu-20.04
+            wsl-id: 'openSUSE-Leap-15.2'
+            user-id: 'openSUSE-Leap-15.2'
+            match-pattern: '*openSUSE*Leap*15.2*'
+            default-absent-tool: 'which'
+          distribution5:
+            wsl-id: 'Ubuntu-24.04'
+            user-id: 'Ubuntu-24.04'
+            match-pattern: '*Ubuntu*24.04*'
+            default-absent-tool: 'dos2unix'
+          distribution6:
+            wsl-id: 'Ubuntu'
+            user-id: 'Ubuntu-20.04'
             match-pattern: '*Ubuntu*20.04*'
-            default-absent-tool: dos2unix
-          distribution5:
-            wsl-id: Ubuntu-18.04
-            user-id: Ubuntu-18.04
+            default-absent-tool: 'dos2unix'
+          distribution7:
+            wsl-id: 'Ubuntu-18.04'
+            user-id: 'Ubuntu-18.04'
             match-pattern: '*Ubuntu*18.04*'
-            default-absent-tool: dos2unix
-          distribution6:
-            wsl-id: Ubuntu-16.04
-            user-id: Ubuntu-16.04
+            default-absent-tool: 'dos2unix'
+          distribution8:
+            wsl-id: 'Ubuntu-16.04'
+            user-id: 'Ubuntu-16.04'
             match-pattern: '*Ubuntu*16.04*'
-            default-absent-tool: dos2unix
-        - distribution1:
-            wsl-id: Debian
-            user-id: Debian
+            default-absent-tool: 'dos2unix'
+        - incompatibleUbuntu: 'Ubuntu-20.04'
+          distribution1:
+            wsl-id: 'Debian'
+            user-id: 'Debian'
             match-pattern: '*Debian*'
-            default-absent-tool: dos2unix
+            default-absent-tool: 'dos2unix'
           distribution2:
-            wsl-id: kali-linux
-            user-id: kali-linux
-            match-pattern: '*Kali*'
-            default-absent-tool: dos2unix
+            wsl-id: 'Alpine'
+            user-id: 'Alpine'
+            match-pattern: '*Alpine*'
+            default-absent-tool: 'dos2unix'
           distribution3:
-            wsl-id: openSUSE-Leap-15.2
-            user-id: openSUSE-Leap-15.2
-            match-pattern: '*openSUSE*Leap*15.2*'
-            default-absent-tool: which
+            wsl-id: 'kali-linux'
+            user-id: 'kali-linux'
+            match-pattern: '*Kali*'
+            default-absent-tool: 'dos2unix'
           distribution4:
-            wsl-id: Ubuntu
-            user-id: Ubuntu-22.04
-            match-pattern: '*Ubuntu*22.04*'
-            default-absent-tool: dos2unix
+            wsl-id: 'openSUSE-Leap-15.2'
+            user-id: 'openSUSE-Leap-15.2'
+            match-pattern: '*openSUSE*Leap*15.2*'
+            default-absent-tool: 'which'
           distribution5:
-            wsl-id: Ubuntu-18.04
-            user-id: Ubuntu-18.04
-            match-pattern: '*Ubuntu*18.04*'
-            default-absent-tool: dos2unix
+            wsl-id: 'Ubuntu-24.04'
+            user-id: 'Ubuntu-24.04'
+            match-pattern: '*Ubuntu*24.04*'
+            default-absent-tool: 'dos2unix'
           distribution6:
-            wsl-id: Ubuntu-16.04
-            user-id: Ubuntu-16.04
+            wsl-id: 'Ubuntu'
+            user-id: 'Ubuntu-22.04'
+            match-pattern: '*Ubuntu*22.04*'
+            default-absent-tool: 'dos2unix'
+          distribution7:
+            wsl-id: 'Ubuntu-18.04'
+            user-id: 'Ubuntu-18.04'
+            match-pattern: '*Ubuntu*18.04*'
+            default-absent-tool: 'dos2unix'
+          distribution8:
+            wsl-id: 'Ubuntu-16.04'
+            user-id: 'Ubuntu-16.04'
             match-pattern: '*Ubuntu*16.04*'
-            default-absent-tool: dos2unix
+            default-absent-tool: 'dos2unix'
     steps:
-    - id: step-0
-      name: Restore built artifacts from cache
-      uses: actions/cache/restore@v3
+    - id: 'step-0'
+      name: 'Restore built artifacts from cache'
+      uses: 'actions/cache/restore@v4'
       with:
         path: |-
           action.yml
           build/distributions/
-        key: ${{ github.run_id }}
-        fail-on-cache-miss: true
-    - id: step-1
-      name: Execute action for ${{ matrix.distributions.distribution1.user-id }}
-      uses: ./
+        key: '${{ github.run_id }}'
+        fail-on-cache-miss: 'true'
+    - id: 'step-1'
+      name: 'Execute action for ${{ matrix.distributions.distribution1.user-id }}'
+      uses: './'
       with:
-        distribution: ${{ matrix.distributions.distribution1.user-id }}
-    - id: step-2
-      name: Execute action for ${{ matrix.distributions.distribution2.user-id }}
-      uses: ./
+        distribution: '${{ matrix.distributions.distribution1.user-id }}'
+    - id: 'step-2'
+      name: 'Execute action for ${{ matrix.distributions.distribution2.user-id }}'
+      uses: './'
       with:
-        distribution: ${{ matrix.distributions.distribution2.user-id }}
-        additional-packages: bash
-    - id: step-3
-      name: Execute action for ${{ matrix.distributions.distribution3.user-id }}
-      uses: ./
+        distribution: '${{ matrix.distributions.distribution2.user-id }}'
+        additional-packages: 'bash'
+    - id: 'step-3'
+      name: 'Execute action for ${{ matrix.distributions.distribution3.user-id }}'
+      uses: './'
       with:
-        distribution: ${{ matrix.distributions.distribution3.user-id }}
-        set-as-default: false
-    - id: step-4
-      name: Execute action for ${{ matrix.distributions.distribution4.user-id }}
-      uses: ./
+        distribution: '${{ matrix.distributions.distribution3.user-id }}'
+        set-as-default: 'false'
+    - id: 'step-4'
+      name: 'Execute action for ${{ matrix.distributions.distribution4.user-id }}'
+      uses: './'
       with:
-        distribution: ${{ matrix.distributions.distribution4.user-id }}
-        set-as-default: false
-    - id: step-5
-      name: Execute action for ${{ matrix.distributions.distribution5.user-id }}
-      uses: ./
+        distribution: '${{ matrix.distributions.distribution4.user-id }}'
+        set-as-default: 'false'
+    - id: 'step-5'
+      name: 'Execute action for ${{ matrix.distributions.distribution5.user-id }}'
+      uses: './'
       with:
-        distribution: ${{ matrix.distributions.distribution5.user-id }}
-        set-as-default: false
-    - id: step-6
-      name: Execute action for ${{ matrix.distributions.distribution6.user-id }}
-      uses: ./
+        distribution: '${{ matrix.distributions.distribution5.user-id }}'
+        set-as-default: 'false'
+    - id: 'step-6'
+      name: 'Execute action for ${{ matrix.distributions.distribution6.user-id }}'
+      uses: './'
       with:
-        distribution: ${{ matrix.distributions.distribution6.user-id }}
-        set-as-default: false
-    - id: step-7
-      name: Test - wsl-bash_${{ matrix.distributions.distribution1.user-id }} should use the correct distribution
-      shell: wsl-bash_Debian {0}
+        distribution: '${{ matrix.distributions.distribution6.user-id }}'
+        set-as-default: 'false'
+    - id: 'step-7'
+      name: 'Execute action for ${{ matrix.distributions.distribution7.user-id }}'
+      uses: './'
+      with:
+        distribution: '${{ matrix.distributions.distribution7.user-id }}'
+        set-as-default: 'false'
+    - id: 'step-8'
+      name: 'Execute action for ${{ matrix.distributions.distribution8.user-id }}'
+      uses: './'
+      with:
+        distribution: '${{ matrix.distributions.distribution8.user-id }}'
+        set-as-default: 'false'
+    - id: 'step-9'
+      name: 'Test - wsl-bash_${{ matrix.distributions.distribution1.user-id }} should use the correct distribution'
+      shell: 'wsl-bash_Debian {0}'
       run: |-
         cat <(lsb_release -a || true) <(uname -a || true) <([ -d /etc ] && find /etc -maxdepth 1 -type f \( -name '*release' -or -name 'issue*' \) -exec cat {} + || true) <([ -d /etc/products.d ] && find /etc/products.d -maxdepth 1 -type f -name '*.prod' -exec cat {} + || true) <([ -f /proc/version ] && cat /proc/version || true)
         [[ "$(cat <(lsb_release -a || true) <(uname -a || true) <([ -d /etc ] && find /etc -maxdepth 1 -type f \( -name '*release' -or -name 'issue*' \) -exec cat {} + || true) <([ -d /etc/products.d ] && find /etc/products.d -maxdepth 1 -type f -name '*.prod' -exec cat {} + || true) <([ -f /proc/version ] && cat /proc/version || true))" == ${{ matrix.distributions.distribution1.match-pattern }} ]]
       if: |-
         always()
         && (steps.step-1.outcome == 'success')
-    - id: step-8
-      name: Test - wsl-bash_${{ matrix.distributions.distribution2.user-id }} should use the correct distribution
-      shell: wsl-bash_kali-linux {0}
+    - id: 'step-10'
+      name: 'Test - wsl-bash_${{ matrix.distributions.distribution2.user-id }} should use the correct distribution'
+      shell: 'wsl-bash_Alpine {0}'
       run: |-
         cat <(lsb_release -a || true) <(uname -a || true) <([ -d /etc ] && find /etc -maxdepth 1 -type f \( -name '*release' -or -name 'issue*' \) -exec cat {} + || true) <([ -d /etc/products.d ] && find /etc/products.d -maxdepth 1 -type f -name '*.prod' -exec cat {} + || true) <([ -f /proc/version ] && cat /proc/version || true)
         [[ "$(cat <(lsb_release -a || true) <(uname -a || true) <([ -d /etc ] && find /etc -maxdepth 1 -type f \( -name '*release' -or -name 'issue*' \) -exec cat {} + || true) <([ -d /etc/products.d ] && find /etc/products.d -maxdepth 1 -type f -name '*.prod' -exec cat {} + || true) <([ -f /proc/version ] && cat /proc/version || true))" == ${{ matrix.distributions.distribution2.match-pattern }} ]]
       if: |-
         always()
         && (steps.step-2.outcome == 'success')
-    - id: step-9
-      name: Test - wsl-bash_${{ matrix.distributions.distribution3.user-id }} should use the correct distribution
-      shell: wsl-bash_openSUSE-Leap-15.2 {0}
+    - id: 'step-11'
+      name: 'Test - wsl-bash_${{ matrix.distributions.distribution3.user-id }} should use the correct distribution'
+      shell: 'wsl-bash_kali-linux {0}'
       run: |-
         cat <(lsb_release -a || true) <(uname -a || true) <([ -d /etc ] && find /etc -maxdepth 1 -type f \( -name '*release' -or -name 'issue*' \) -exec cat {} + || true) <([ -d /etc/products.d ] && find /etc/products.d -maxdepth 1 -type f -name '*.prod' -exec cat {} + || true) <([ -f /proc/version ] && cat /proc/version || true)
         [[ "$(cat <(lsb_release -a || true) <(uname -a || true) <([ -d /etc ] && find /etc -maxdepth 1 -type f \( -name '*release' -or -name 'issue*' \) -exec cat {} + || true) <([ -d /etc/products.d ] && find /etc/products.d -maxdepth 1 -type f -name '*.prod' -exec cat {} + || true) <([ -f /proc/version ] && cat /proc/version || true))" == ${{ matrix.distributions.distribution3.match-pattern }} ]]
       if: |-
         always()
         && (steps.step-3.outcome == 'success')
-    - id: step-10
-      name: Test - wsl-bash_${{ matrix.distributions.distribution4.user-id }} should use the correct distribution
-      shell: wsl-bash_Ubuntu-22.04 {0}
+    - id: 'step-12'
+      name: 'Test - wsl-bash_${{ matrix.distributions.distribution4.user-id }} should use the correct distribution'
+      shell: 'wsl-bash_openSUSE-Leap-15.2 {0}'
       run: |-
         cat <(lsb_release -a || true) <(uname -a || true) <([ -d /etc ] && find /etc -maxdepth 1 -type f \( -name '*release' -or -name 'issue*' \) -exec cat {} + || true) <([ -d /etc/products.d ] && find /etc/products.d -maxdepth 1 -type f -name '*.prod' -exec cat {} + || true) <([ -f /proc/version ] && cat /proc/version || true)
         [[ "$(cat <(lsb_release -a || true) <(uname -a || true) <([ -d /etc ] && find /etc -maxdepth 1 -type f \( -name '*release' -or -name 'issue*' \) -exec cat {} + || true) <([ -d /etc/products.d ] && find /etc/products.d -maxdepth 1 -type f -name '*.prod' -exec cat {} + || true) <([ -f /proc/version ] && cat /proc/version || true))" == ${{ matrix.distributions.distribution4.match-pattern }} ]]
       if: |-
         always()
         && (steps.step-4.outcome == 'success')
-        && (matrix.distributions.distribution4.user-id != 'Ubuntu-20.04')
-    - id: step-11
-      name: Test - wsl-bash_${{ matrix.distributions.distribution4.user-id }} should use the correct distribution
-      shell: wsl-bash_Ubuntu-20.04 {0}
-      run: |-
-        cat <(lsb_release -a || true) <(uname -a || true) <([ -d /etc ] && find /etc -maxdepth 1 -type f \( -name '*release' -or -name 'issue*' \) -exec cat {} + || true) <([ -d /etc/products.d ] && find /etc/products.d -maxdepth 1 -type f -name '*.prod' -exec cat {} + || true) <([ -f /proc/version ] && cat /proc/version || true)
-        [[ "$(cat <(lsb_release -a || true) <(uname -a || true) <([ -d /etc ] && find /etc -maxdepth 1 -type f \( -name '*release' -or -name 'issue*' \) -exec cat {} + || true) <([ -d /etc/products.d ] && find /etc/products.d -maxdepth 1 -type f -name '*.prod' -exec cat {} + || true) <([ -f /proc/version ] && cat /proc/version || true))" == ${{ matrix.distributions.distribution4.match-pattern }} ]]
-      if: |-
-        always()
-        && (steps.step-4.outcome == 'success')
-        && (matrix.distributions.distribution4.user-id != 'Ubuntu-22.04')
-    - id: step-12
-      name: Test - wsl-bash_${{ matrix.distributions.distribution5.user-id }} should use the correct distribution
-      shell: wsl-bash_Ubuntu-18.04 {0}
+    - id: 'step-13'
+      name: 'Test - wsl-bash_${{ matrix.distributions.distribution5.user-id }} should use the correct distribution'
+      shell: 'wsl-bash_Ubuntu-24.04 {0}'
       run: |-
         cat <(lsb_release -a || true) <(uname -a || true) <([ -d /etc ] && find /etc -maxdepth 1 -type f \( -name '*release' -or -name 'issue*' \) -exec cat {} + || true) <([ -d /etc/products.d ] && find /etc/products.d -maxdepth 1 -type f -name '*.prod' -exec cat {} + || true) <([ -f /proc/version ] && cat /proc/version || true)
         [[ "$(cat <(lsb_release -a || true) <(uname -a || true) <([ -d /etc ] && find /etc -maxdepth 1 -type f \( -name '*release' -or -name 'issue*' \) -exec cat {} + || true) <([ -d /etc/products.d ] && find /etc/products.d -maxdepth 1 -type f -name '*.prod' -exec cat {} + || true) <([ -f /proc/version ] && cat /proc/version || true))" == ${{ matrix.distributions.distribution5.match-pattern }} ]]
       if: |-
         always()
         && (steps.step-5.outcome == 'success')
-    - id: step-13
-      name: Test - wsl-bash_${{ matrix.distributions.distribution6.user-id }} should use the correct distribution
-      shell: wsl-bash_Ubuntu-16.04 {0}
+    - id: 'step-14'
+      name: 'Test - wsl-bash_${{ matrix.distributions.distribution6.user-id }} should use the correct distribution'
+      shell: 'wsl-bash_Ubuntu-22.04 {0}'
       run: |-
         cat <(lsb_release -a || true) <(uname -a || true) <([ -d /etc ] && find /etc -maxdepth 1 -type f \( -name '*release' -or -name 'issue*' \) -exec cat {} + || true) <([ -d /etc/products.d ] && find /etc/products.d -maxdepth 1 -type f -name '*.prod' -exec cat {} + || true) <([ -f /proc/version ] && cat /proc/version || true)
         [[ "$(cat <(lsb_release -a || true) <(uname -a || true) <([ -d /etc ] && find /etc -maxdepth 1 -type f \( -name '*release' -or -name 'issue*' \) -exec cat {} + || true) <([ -d /etc/products.d ] && find /etc/products.d -maxdepth 1 -type f -name '*.prod' -exec cat {} + || true) <([ -f /proc/version ] && cat /proc/version || true))" == ${{ matrix.distributions.distribution6.match-pattern }} ]]
       if: |-
         always()
         && (steps.step-6.outcome == 'success')
+        && (matrix.distributions.distribution6.user-id != 'Ubuntu-20.04')
+    - id: 'step-15'
+      name: 'Test - wsl-bash_${{ matrix.distributions.distribution6.user-id }} should use the correct distribution'
+      shell: 'wsl-bash_Ubuntu-20.04 {0}'
+      run: |-
+        cat <(lsb_release -a || true) <(uname -a || true) <([ -d /etc ] && find /etc -maxdepth 1 -type f \( -name '*release' -or -name 'issue*' \) -exec cat {} + || true) <([ -d /etc/products.d ] && find /etc/products.d -maxdepth 1 -type f -name '*.prod' -exec cat {} + || true) <([ -f /proc/version ] && cat /proc/version || true)
+        [[ "$(cat <(lsb_release -a || true) <(uname -a || true) <([ -d /etc ] && find /etc -maxdepth 1 -type f \( -name '*release' -or -name 'issue*' \) -exec cat {} + || true) <([ -d /etc/products.d ] && find /etc/products.d -maxdepth 1 -type f -name '*.prod' -exec cat {} + || true) <([ -f /proc/version ] && cat /proc/version || true))" == ${{ matrix.distributions.distribution6.match-pattern }} ]]
+      if: |-
+        always()
+        && (steps.step-6.outcome == 'success')
+        && (matrix.distributions.distribution6.user-id != 'Ubuntu-22.04')
+    - id: 'step-16'
+      name: 'Test - wsl-bash_${{ matrix.distributions.distribution7.user-id }} should use the correct distribution'
+      shell: 'wsl-bash_Ubuntu-18.04 {0}'
+      run: |-
+        cat <(lsb_release -a || true) <(uname -a || true) <([ -d /etc ] && find /etc -maxdepth 1 -type f \( -name '*release' -or -name 'issue*' \) -exec cat {} + || true) <([ -d /etc/products.d ] && find /etc/products.d -maxdepth 1 -type f -name '*.prod' -exec cat {} + || true) <([ -f /proc/version ] && cat /proc/version || true)
+        [[ "$(cat <(lsb_release -a || true) <(uname -a || true) <([ -d /etc ] && find /etc -maxdepth 1 -type f \( -name '*release' -or -name 'issue*' \) -exec cat {} + || true) <([ -d /etc/products.d ] && find /etc/products.d -maxdepth 1 -type f -name '*.prod' -exec cat {} + || true) <([ -f /proc/version ] && cat /proc/version || true))" == ${{ matrix.distributions.distribution7.match-pattern }} ]]
+      if: |-
+        always()
+        && (steps.step-7.outcome == 'success')
+    - id: 'step-17'
+      name: 'Test - wsl-bash_${{ matrix.distributions.distribution8.user-id }} should use the correct distribution'
+      shell: 'wsl-bash_Ubuntu-16.04 {0}'
+      run: |-
+        cat <(lsb_release -a || true) <(uname -a || true) <([ -d /etc ] && find /etc -maxdepth 1 -type f \( -name '*release' -or -name 'issue*' \) -exec cat {} + || true) <([ -d /etc/products.d ] && find /etc/products.d -maxdepth 1 -type f -name '*.prod' -exec cat {} + || true) <([ -f /proc/version ] && cat /proc/version || true)
+        [[ "$(cat <(lsb_release -a || true) <(uname -a || true) <([ -d /etc ] && find /etc -maxdepth 1 -type f \( -name '*release' -or -name 'issue*' \) -exec cat {} + || true) <([ -d /etc/products.d ] && find /etc/products.d -maxdepth 1 -type f -name '*.prod' -exec cat {} + || true) <([ -f /proc/version ] && cat /proc/version || true))" == ${{ matrix.distributions.distribution8.match-pattern }} ]]
+      if: |-
+        always()
+        && (steps.step-8.outcome == 'success')

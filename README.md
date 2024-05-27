@@ -156,6 +156,7 @@ The values currently supported by this action are:
 * `Alpine`
 * `kali-linux`
 * `openSUSE-Leap-15.2`
+* `Ubuntu-24.04`
 * `Ubuntu-22.04`
 * `Ubuntu-20.04`
 * `Ubuntu-18.04`
@@ -191,6 +192,11 @@ The content that will be written to /etc/wsl.conf of the installed distribution.
 This can be used to adjust various settings as documented at
 https://docs.microsoft.com/en-us/windows/wsl/wsl-config#configuration-settings-for-wslconf.
 This can also be used if the distribution is installed already.
+
+**WARNING:** Setting this option will overwrite any existing content of the file.
+Some distributions like Ubuntu-24.04 might already ship with a wsl.conf file.
+Make sure to check whether a file exists by default and whether you want to included
+its contents in your configured value.
 
 **Default value:** none
 

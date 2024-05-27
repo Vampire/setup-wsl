@@ -283,8 +283,8 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.saveCache = exports.reserveCache = exports.downloadCache = exports.getCacheEntry = exports.getCacheVersion = void 0;
 const core = __importStar(__nccwpck_require__(7117));
-const http_client_1 = __nccwpck_require__(7301);
-const auth_1 = __nccwpck_require__(9873);
+const http_client_1 = __nccwpck_require__(8119);
+const auth_1 = __nccwpck_require__(1677);
 const crypto = __importStar(__nccwpck_require__(6113));
 const fs = __importStar(__nccwpck_require__(7147));
 const url_1 = __nccwpck_require__(7310);
@@ -791,7 +791,7 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.downloadCacheStorageSDK = exports.downloadCacheHttpClient = exports.DownloadProgress = void 0;
 const core = __importStar(__nccwpck_require__(7117));
-const http_client_1 = __nccwpck_require__(7301);
+const http_client_1 = __nccwpck_require__(8119);
 const storage_blob_1 = __nccwpck_require__(3625);
 const buffer = __importStar(__nccwpck_require__(4300));
 const fs = __importStar(__nccwpck_require__(7147));
@@ -1067,7 +1067,7 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.retryHttpClientResponse = exports.retryTypedResponse = exports.retry = exports.isRetryableStatusCode = exports.isServerErrorStatusCode = exports.isSuccessStatusCode = void 0;
 const core = __importStar(__nccwpck_require__(7117));
-const http_client_1 = __nccwpck_require__(7301);
+const http_client_1 = __nccwpck_require__(8119);
 const constants_1 = __nccwpck_require__(648);
 function isSuccessStatusCode(statusCode) {
     if (!statusCode) {
@@ -2613,6 +2613,842 @@ class SearchState {
 }
 exports.SearchState = SearchState;
 //# sourceMappingURL=internal-search-state.js.map
+
+/***/ }),
+
+/***/ 1677:
+/***/ (function(__unused_webpack_module, exports) {
+
+"use strict";
+
+var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
+    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
+    return new (P || (P = Promise))(function (resolve, reject) {
+        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
+        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
+        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
+        step((generator = generator.apply(thisArg, _arguments || [])).next());
+    });
+};
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.PersonalAccessTokenCredentialHandler = exports.BearerCredentialHandler = exports.BasicCredentialHandler = void 0;
+class BasicCredentialHandler {
+    constructor(username, password) {
+        this.username = username;
+        this.password = password;
+    }
+    prepareRequest(options) {
+        if (!options.headers) {
+            throw Error('The request has no headers');
+        }
+        options.headers['Authorization'] = `Basic ${Buffer.from(`${this.username}:${this.password}`).toString('base64')}`;
+    }
+    // This handler cannot handle 401
+    canHandleAuthentication() {
+        return false;
+    }
+    handleAuthentication() {
+        return __awaiter(this, void 0, void 0, function* () {
+            throw new Error('not implemented');
+        });
+    }
+}
+exports.BasicCredentialHandler = BasicCredentialHandler;
+class BearerCredentialHandler {
+    constructor(token) {
+        this.token = token;
+    }
+    // currently implements pre-authorization
+    // TODO: support preAuth = false where it hooks on 401
+    prepareRequest(options) {
+        if (!options.headers) {
+            throw Error('The request has no headers');
+        }
+        options.headers['Authorization'] = `Bearer ${this.token}`;
+    }
+    // This handler cannot handle 401
+    canHandleAuthentication() {
+        return false;
+    }
+    handleAuthentication() {
+        return __awaiter(this, void 0, void 0, function* () {
+            throw new Error('not implemented');
+        });
+    }
+}
+exports.BearerCredentialHandler = BearerCredentialHandler;
+class PersonalAccessTokenCredentialHandler {
+    constructor(token) {
+        this.token = token;
+    }
+    // currently implements pre-authorization
+    // TODO: support preAuth = false where it hooks on 401
+    prepareRequest(options) {
+        if (!options.headers) {
+            throw Error('The request has no headers');
+        }
+        options.headers['Authorization'] = `Basic ${Buffer.from(`PAT:${this.token}`).toString('base64')}`;
+    }
+    // This handler cannot handle 401
+    canHandleAuthentication() {
+        return false;
+    }
+    handleAuthentication() {
+        return __awaiter(this, void 0, void 0, function* () {
+            throw new Error('not implemented');
+        });
+    }
+}
+exports.PersonalAccessTokenCredentialHandler = PersonalAccessTokenCredentialHandler;
+//# sourceMappingURL=auth.js.map
+
+/***/ }),
+
+/***/ 8119:
+/***/ (function(__unused_webpack_module, exports, __nccwpck_require__) {
+
+"use strict";
+
+/* eslint-disable @typescript-eslint/no-explicit-any */
+var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    var desc = Object.getOwnPropertyDescriptor(m, k);
+    if (!desc || ("get" in desc ? !m.__esModule : desc.writable || desc.configurable)) {
+      desc = { enumerable: true, get: function() { return m[k]; } };
+    }
+    Object.defineProperty(o, k2, desc);
+}) : (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    o[k2] = m[k];
+}));
+var __setModuleDefault = (this && this.__setModuleDefault) || (Object.create ? (function(o, v) {
+    Object.defineProperty(o, "default", { enumerable: true, value: v });
+}) : function(o, v) {
+    o["default"] = v;
+});
+var __importStar = (this && this.__importStar) || function (mod) {
+    if (mod && mod.__esModule) return mod;
+    var result = {};
+    if (mod != null) for (var k in mod) if (k !== "default" && Object.prototype.hasOwnProperty.call(mod, k)) __createBinding(result, mod, k);
+    __setModuleDefault(result, mod);
+    return result;
+};
+var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
+    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
+    return new (P || (P = Promise))(function (resolve, reject) {
+        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
+        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
+        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
+        step((generator = generator.apply(thisArg, _arguments || [])).next());
+    });
+};
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.HttpClient = exports.isHttps = exports.HttpClientResponse = exports.HttpClientError = exports.getProxyUrl = exports.MediaTypes = exports.Headers = exports.HttpCodes = void 0;
+const http = __importStar(__nccwpck_require__(3685));
+const https = __importStar(__nccwpck_require__(5687));
+const pm = __importStar(__nccwpck_require__(1762));
+const tunnel = __importStar(__nccwpck_require__(9382));
+const undici_1 = __nccwpck_require__(2009);
+var HttpCodes;
+(function (HttpCodes) {
+    HttpCodes[HttpCodes["OK"] = 200] = "OK";
+    HttpCodes[HttpCodes["MultipleChoices"] = 300] = "MultipleChoices";
+    HttpCodes[HttpCodes["MovedPermanently"] = 301] = "MovedPermanently";
+    HttpCodes[HttpCodes["ResourceMoved"] = 302] = "ResourceMoved";
+    HttpCodes[HttpCodes["SeeOther"] = 303] = "SeeOther";
+    HttpCodes[HttpCodes["NotModified"] = 304] = "NotModified";
+    HttpCodes[HttpCodes["UseProxy"] = 305] = "UseProxy";
+    HttpCodes[HttpCodes["SwitchProxy"] = 306] = "SwitchProxy";
+    HttpCodes[HttpCodes["TemporaryRedirect"] = 307] = "TemporaryRedirect";
+    HttpCodes[HttpCodes["PermanentRedirect"] = 308] = "PermanentRedirect";
+    HttpCodes[HttpCodes["BadRequest"] = 400] = "BadRequest";
+    HttpCodes[HttpCodes["Unauthorized"] = 401] = "Unauthorized";
+    HttpCodes[HttpCodes["PaymentRequired"] = 402] = "PaymentRequired";
+    HttpCodes[HttpCodes["Forbidden"] = 403] = "Forbidden";
+    HttpCodes[HttpCodes["NotFound"] = 404] = "NotFound";
+    HttpCodes[HttpCodes["MethodNotAllowed"] = 405] = "MethodNotAllowed";
+    HttpCodes[HttpCodes["NotAcceptable"] = 406] = "NotAcceptable";
+    HttpCodes[HttpCodes["ProxyAuthenticationRequired"] = 407] = "ProxyAuthenticationRequired";
+    HttpCodes[HttpCodes["RequestTimeout"] = 408] = "RequestTimeout";
+    HttpCodes[HttpCodes["Conflict"] = 409] = "Conflict";
+    HttpCodes[HttpCodes["Gone"] = 410] = "Gone";
+    HttpCodes[HttpCodes["TooManyRequests"] = 429] = "TooManyRequests";
+    HttpCodes[HttpCodes["InternalServerError"] = 500] = "InternalServerError";
+    HttpCodes[HttpCodes["NotImplemented"] = 501] = "NotImplemented";
+    HttpCodes[HttpCodes["BadGateway"] = 502] = "BadGateway";
+    HttpCodes[HttpCodes["ServiceUnavailable"] = 503] = "ServiceUnavailable";
+    HttpCodes[HttpCodes["GatewayTimeout"] = 504] = "GatewayTimeout";
+})(HttpCodes || (exports.HttpCodes = HttpCodes = {}));
+var Headers;
+(function (Headers) {
+    Headers["Accept"] = "accept";
+    Headers["ContentType"] = "content-type";
+})(Headers || (exports.Headers = Headers = {}));
+var MediaTypes;
+(function (MediaTypes) {
+    MediaTypes["ApplicationJson"] = "application/json";
+})(MediaTypes || (exports.MediaTypes = MediaTypes = {}));
+/**
+ * Returns the proxy URL, depending upon the supplied url and proxy environment variables.
+ * @param serverUrl  The server URL where the request will be sent. For example, https://api.github.com
+ */
+function getProxyUrl(serverUrl) {
+    const proxyUrl = pm.getProxyUrl(new URL(serverUrl));
+    return proxyUrl ? proxyUrl.href : '';
+}
+exports.getProxyUrl = getProxyUrl;
+const HttpRedirectCodes = [
+    HttpCodes.MovedPermanently,
+    HttpCodes.ResourceMoved,
+    HttpCodes.SeeOther,
+    HttpCodes.TemporaryRedirect,
+    HttpCodes.PermanentRedirect
+];
+const HttpResponseRetryCodes = [
+    HttpCodes.BadGateway,
+    HttpCodes.ServiceUnavailable,
+    HttpCodes.GatewayTimeout
+];
+const RetryableHttpVerbs = ['OPTIONS', 'GET', 'DELETE', 'HEAD'];
+const ExponentialBackoffCeiling = 10;
+const ExponentialBackoffTimeSlice = 5;
+class HttpClientError extends Error {
+    constructor(message, statusCode) {
+        super(message);
+        this.name = 'HttpClientError';
+        this.statusCode = statusCode;
+        Object.setPrototypeOf(this, HttpClientError.prototype);
+    }
+}
+exports.HttpClientError = HttpClientError;
+class HttpClientResponse {
+    constructor(message) {
+        this.message = message;
+    }
+    readBody() {
+        return __awaiter(this, void 0, void 0, function* () {
+            return new Promise((resolve) => __awaiter(this, void 0, void 0, function* () {
+                let output = Buffer.alloc(0);
+                this.message.on('data', (chunk) => {
+                    output = Buffer.concat([output, chunk]);
+                });
+                this.message.on('end', () => {
+                    resolve(output.toString());
+                });
+            }));
+        });
+    }
+    readBodyBuffer() {
+        return __awaiter(this, void 0, void 0, function* () {
+            return new Promise((resolve) => __awaiter(this, void 0, void 0, function* () {
+                const chunks = [];
+                this.message.on('data', (chunk) => {
+                    chunks.push(chunk);
+                });
+                this.message.on('end', () => {
+                    resolve(Buffer.concat(chunks));
+                });
+            }));
+        });
+    }
+}
+exports.HttpClientResponse = HttpClientResponse;
+function isHttps(requestUrl) {
+    const parsedUrl = new URL(requestUrl);
+    return parsedUrl.protocol === 'https:';
+}
+exports.isHttps = isHttps;
+class HttpClient {
+    constructor(userAgent, handlers, requestOptions) {
+        this._ignoreSslError = false;
+        this._allowRedirects = true;
+        this._allowRedirectDowngrade = false;
+        this._maxRedirects = 50;
+        this._allowRetries = false;
+        this._maxRetries = 1;
+        this._keepAlive = false;
+        this._disposed = false;
+        this.userAgent = userAgent;
+        this.handlers = handlers || [];
+        this.requestOptions = requestOptions;
+        if (requestOptions) {
+            if (requestOptions.ignoreSslError != null) {
+                this._ignoreSslError = requestOptions.ignoreSslError;
+            }
+            this._socketTimeout = requestOptions.socketTimeout;
+            if (requestOptions.allowRedirects != null) {
+                this._allowRedirects = requestOptions.allowRedirects;
+            }
+            if (requestOptions.allowRedirectDowngrade != null) {
+                this._allowRedirectDowngrade = requestOptions.allowRedirectDowngrade;
+            }
+            if (requestOptions.maxRedirects != null) {
+                this._maxRedirects = Math.max(requestOptions.maxRedirects, 0);
+            }
+            if (requestOptions.keepAlive != null) {
+                this._keepAlive = requestOptions.keepAlive;
+            }
+            if (requestOptions.allowRetries != null) {
+                this._allowRetries = requestOptions.allowRetries;
+            }
+            if (requestOptions.maxRetries != null) {
+                this._maxRetries = requestOptions.maxRetries;
+            }
+        }
+    }
+    options(requestUrl, additionalHeaders) {
+        return __awaiter(this, void 0, void 0, function* () {
+            return this.request('OPTIONS', requestUrl, null, additionalHeaders || {});
+        });
+    }
+    get(requestUrl, additionalHeaders) {
+        return __awaiter(this, void 0, void 0, function* () {
+            return this.request('GET', requestUrl, null, additionalHeaders || {});
+        });
+    }
+    del(requestUrl, additionalHeaders) {
+        return __awaiter(this, void 0, void 0, function* () {
+            return this.request('DELETE', requestUrl, null, additionalHeaders || {});
+        });
+    }
+    post(requestUrl, data, additionalHeaders) {
+        return __awaiter(this, void 0, void 0, function* () {
+            return this.request('POST', requestUrl, data, additionalHeaders || {});
+        });
+    }
+    patch(requestUrl, data, additionalHeaders) {
+        return __awaiter(this, void 0, void 0, function* () {
+            return this.request('PATCH', requestUrl, data, additionalHeaders || {});
+        });
+    }
+    put(requestUrl, data, additionalHeaders) {
+        return __awaiter(this, void 0, void 0, function* () {
+            return this.request('PUT', requestUrl, data, additionalHeaders || {});
+        });
+    }
+    head(requestUrl, additionalHeaders) {
+        return __awaiter(this, void 0, void 0, function* () {
+            return this.request('HEAD', requestUrl, null, additionalHeaders || {});
+        });
+    }
+    sendStream(verb, requestUrl, stream, additionalHeaders) {
+        return __awaiter(this, void 0, void 0, function* () {
+            return this.request(verb, requestUrl, stream, additionalHeaders);
+        });
+    }
+    /**
+     * Gets a typed object from an endpoint
+     * Be aware that not found returns a null.  Other errors (4xx, 5xx) reject the promise
+     */
+    getJson(requestUrl, additionalHeaders = {}) {
+        return __awaiter(this, void 0, void 0, function* () {
+            additionalHeaders[Headers.Accept] = this._getExistingOrDefaultHeader(additionalHeaders, Headers.Accept, MediaTypes.ApplicationJson);
+            const res = yield this.get(requestUrl, additionalHeaders);
+            return this._processResponse(res, this.requestOptions);
+        });
+    }
+    postJson(requestUrl, obj, additionalHeaders = {}) {
+        return __awaiter(this, void 0, void 0, function* () {
+            const data = JSON.stringify(obj, null, 2);
+            additionalHeaders[Headers.Accept] = this._getExistingOrDefaultHeader(additionalHeaders, Headers.Accept, MediaTypes.ApplicationJson);
+            additionalHeaders[Headers.ContentType] = this._getExistingOrDefaultHeader(additionalHeaders, Headers.ContentType, MediaTypes.ApplicationJson);
+            const res = yield this.post(requestUrl, data, additionalHeaders);
+            return this._processResponse(res, this.requestOptions);
+        });
+    }
+    putJson(requestUrl, obj, additionalHeaders = {}) {
+        return __awaiter(this, void 0, void 0, function* () {
+            const data = JSON.stringify(obj, null, 2);
+            additionalHeaders[Headers.Accept] = this._getExistingOrDefaultHeader(additionalHeaders, Headers.Accept, MediaTypes.ApplicationJson);
+            additionalHeaders[Headers.ContentType] = this._getExistingOrDefaultHeader(additionalHeaders, Headers.ContentType, MediaTypes.ApplicationJson);
+            const res = yield this.put(requestUrl, data, additionalHeaders);
+            return this._processResponse(res, this.requestOptions);
+        });
+    }
+    patchJson(requestUrl, obj, additionalHeaders = {}) {
+        return __awaiter(this, void 0, void 0, function* () {
+            const data = JSON.stringify(obj, null, 2);
+            additionalHeaders[Headers.Accept] = this._getExistingOrDefaultHeader(additionalHeaders, Headers.Accept, MediaTypes.ApplicationJson);
+            additionalHeaders[Headers.ContentType] = this._getExistingOrDefaultHeader(additionalHeaders, Headers.ContentType, MediaTypes.ApplicationJson);
+            const res = yield this.patch(requestUrl, data, additionalHeaders);
+            return this._processResponse(res, this.requestOptions);
+        });
+    }
+    /**
+     * Makes a raw http request.
+     * All other methods such as get, post, patch, and request ultimately call this.
+     * Prefer get, del, post and patch
+     */
+    request(verb, requestUrl, data, headers) {
+        return __awaiter(this, void 0, void 0, function* () {
+            if (this._disposed) {
+                throw new Error('Client has already been disposed.');
+            }
+            const parsedUrl = new URL(requestUrl);
+            let info = this._prepareRequest(verb, parsedUrl, headers);
+            // Only perform retries on reads since writes may not be idempotent.
+            const maxTries = this._allowRetries && RetryableHttpVerbs.includes(verb)
+                ? this._maxRetries + 1
+                : 1;
+            let numTries = 0;
+            let response;
+            do {
+                response = yield this.requestRaw(info, data);
+                // Check if it's an authentication challenge
+                if (response &&
+                    response.message &&
+                    response.message.statusCode === HttpCodes.Unauthorized) {
+                    let authenticationHandler;
+                    for (const handler of this.handlers) {
+                        if (handler.canHandleAuthentication(response)) {
+                            authenticationHandler = handler;
+                            break;
+                        }
+                    }
+                    if (authenticationHandler) {
+                        return authenticationHandler.handleAuthentication(this, info, data);
+                    }
+                    else {
+                        // We have received an unauthorized response but have no handlers to handle it.
+                        // Let the response return to the caller.
+                        return response;
+                    }
+                }
+                let redirectsRemaining = this._maxRedirects;
+                while (response.message.statusCode &&
+                    HttpRedirectCodes.includes(response.message.statusCode) &&
+                    this._allowRedirects &&
+                    redirectsRemaining > 0) {
+                    const redirectUrl = response.message.headers['location'];
+                    if (!redirectUrl) {
+                        // if there's no location to redirect to, we won't
+                        break;
+                    }
+                    const parsedRedirectUrl = new URL(redirectUrl);
+                    if (parsedUrl.protocol === 'https:' &&
+                        parsedUrl.protocol !== parsedRedirectUrl.protocol &&
+                        !this._allowRedirectDowngrade) {
+                        throw new Error('Redirect from HTTPS to HTTP protocol. This downgrade is not allowed for security reasons. If you want to allow this behavior, set the allowRedirectDowngrade option to true.');
+                    }
+                    // we need to finish reading the response before reassigning response
+                    // which will leak the open socket.
+                    yield response.readBody();
+                    // strip authorization header if redirected to a different hostname
+                    if (parsedRedirectUrl.hostname !== parsedUrl.hostname) {
+                        for (const header in headers) {
+                            // header names are case insensitive
+                            if (header.toLowerCase() === 'authorization') {
+                                delete headers[header];
+                            }
+                        }
+                    }
+                    // let's make the request with the new redirectUrl
+                    info = this._prepareRequest(verb, parsedRedirectUrl, headers);
+                    response = yield this.requestRaw(info, data);
+                    redirectsRemaining--;
+                }
+                if (!response.message.statusCode ||
+                    !HttpResponseRetryCodes.includes(response.message.statusCode)) {
+                    // If not a retry code, return immediately instead of retrying
+                    return response;
+                }
+                numTries += 1;
+                if (numTries < maxTries) {
+                    yield response.readBody();
+                    yield this._performExponentialBackoff(numTries);
+                }
+            } while (numTries < maxTries);
+            return response;
+        });
+    }
+    /**
+     * Needs to be called if keepAlive is set to true in request options.
+     */
+    dispose() {
+        if (this._agent) {
+            this._agent.destroy();
+        }
+        this._disposed = true;
+    }
+    /**
+     * Raw request.
+     * @param info
+     * @param data
+     */
+    requestRaw(info, data) {
+        return __awaiter(this, void 0, void 0, function* () {
+            return new Promise((resolve, reject) => {
+                function callbackForResult(err, res) {
+                    if (err) {
+                        reject(err);
+                    }
+                    else if (!res) {
+                        // If `err` is not passed, then `res` must be passed.
+                        reject(new Error('Unknown error'));
+                    }
+                    else {
+                        resolve(res);
+                    }
+                }
+                this.requestRawWithCallback(info, data, callbackForResult);
+            });
+        });
+    }
+    /**
+     * Raw request with callback.
+     * @param info
+     * @param data
+     * @param onResult
+     */
+    requestRawWithCallback(info, data, onResult) {
+        if (typeof data === 'string') {
+            if (!info.options.headers) {
+                info.options.headers = {};
+            }
+            info.options.headers['Content-Length'] = Buffer.byteLength(data, 'utf8');
+        }
+        let callbackCalled = false;
+        function handleResult(err, res) {
+            if (!callbackCalled) {
+                callbackCalled = true;
+                onResult(err, res);
+            }
+        }
+        const req = info.httpModule.request(info.options, (msg) => {
+            const res = new HttpClientResponse(msg);
+            handleResult(undefined, res);
+        });
+        let socket;
+        req.on('socket', sock => {
+            socket = sock;
+        });
+        // If we ever get disconnected, we want the socket to timeout eventually
+        req.setTimeout(this._socketTimeout || 3 * 60000, () => {
+            if (socket) {
+                socket.end();
+            }
+            handleResult(new Error(`Request timeout: ${info.options.path}`));
+        });
+        req.on('error', function (err) {
+            // err has statusCode property
+            // res should have headers
+            handleResult(err);
+        });
+        if (data && typeof data === 'string') {
+            req.write(data, 'utf8');
+        }
+        if (data && typeof data !== 'string') {
+            data.on('close', function () {
+                req.end();
+            });
+            data.pipe(req);
+        }
+        else {
+            req.end();
+        }
+    }
+    /**
+     * Gets an http agent. This function is useful when you need an http agent that handles
+     * routing through a proxy server - depending upon the url and proxy environment variables.
+     * @param serverUrl  The server URL where the request will be sent. For example, https://api.github.com
+     */
+    getAgent(serverUrl) {
+        const parsedUrl = new URL(serverUrl);
+        return this._getAgent(parsedUrl);
+    }
+    getAgentDispatcher(serverUrl) {
+        const parsedUrl = new URL(serverUrl);
+        const proxyUrl = pm.getProxyUrl(parsedUrl);
+        const useProxy = proxyUrl && proxyUrl.hostname;
+        if (!useProxy) {
+            return;
+        }
+        return this._getProxyAgentDispatcher(parsedUrl, proxyUrl);
+    }
+    _prepareRequest(method, requestUrl, headers) {
+        const info = {};
+        info.parsedUrl = requestUrl;
+        const usingSsl = info.parsedUrl.protocol === 'https:';
+        info.httpModule = usingSsl ? https : http;
+        const defaultPort = usingSsl ? 443 : 80;
+        info.options = {};
+        info.options.host = info.parsedUrl.hostname;
+        info.options.port = info.parsedUrl.port
+            ? parseInt(info.parsedUrl.port)
+            : defaultPort;
+        info.options.path =
+            (info.parsedUrl.pathname || '') + (info.parsedUrl.search || '');
+        info.options.method = method;
+        info.options.headers = this._mergeHeaders(headers);
+        if (this.userAgent != null) {
+            info.options.headers['user-agent'] = this.userAgent;
+        }
+        info.options.agent = this._getAgent(info.parsedUrl);
+        // gives handlers an opportunity to participate
+        if (this.handlers) {
+            for (const handler of this.handlers) {
+                handler.prepareRequest(info.options);
+            }
+        }
+        return info;
+    }
+    _mergeHeaders(headers) {
+        if (this.requestOptions && this.requestOptions.headers) {
+            return Object.assign({}, lowercaseKeys(this.requestOptions.headers), lowercaseKeys(headers || {}));
+        }
+        return lowercaseKeys(headers || {});
+    }
+    _getExistingOrDefaultHeader(additionalHeaders, header, _default) {
+        let clientHeader;
+        if (this.requestOptions && this.requestOptions.headers) {
+            clientHeader = lowercaseKeys(this.requestOptions.headers)[header];
+        }
+        return additionalHeaders[header] || clientHeader || _default;
+    }
+    _getAgent(parsedUrl) {
+        let agent;
+        const proxyUrl = pm.getProxyUrl(parsedUrl);
+        const useProxy = proxyUrl && proxyUrl.hostname;
+        if (this._keepAlive && useProxy) {
+            agent = this._proxyAgent;
+        }
+        if (!useProxy) {
+            agent = this._agent;
+        }
+        // if agent is already assigned use that agent.
+        if (agent) {
+            return agent;
+        }
+        const usingSsl = parsedUrl.protocol === 'https:';
+        let maxSockets = 100;
+        if (this.requestOptions) {
+            maxSockets = this.requestOptions.maxSockets || http.globalAgent.maxSockets;
+        }
+        // This is `useProxy` again, but we need to check `proxyURl` directly for TypeScripts's flow analysis.
+        if (proxyUrl && proxyUrl.hostname) {
+            const agentOptions = {
+                maxSockets,
+                keepAlive: this._keepAlive,
+                proxy: Object.assign(Object.assign({}, ((proxyUrl.username || proxyUrl.password) && {
+                    proxyAuth: `${proxyUrl.username}:${proxyUrl.password}`
+                })), { host: proxyUrl.hostname, port: proxyUrl.port })
+            };
+            let tunnelAgent;
+            const overHttps = proxyUrl.protocol === 'https:';
+            if (usingSsl) {
+                tunnelAgent = overHttps ? tunnel.httpsOverHttps : tunnel.httpsOverHttp;
+            }
+            else {
+                tunnelAgent = overHttps ? tunnel.httpOverHttps : tunnel.httpOverHttp;
+            }
+            agent = tunnelAgent(agentOptions);
+            this._proxyAgent = agent;
+        }
+        // if tunneling agent isn't assigned create a new agent
+        if (!agent) {
+            const options = { keepAlive: this._keepAlive, maxSockets };
+            agent = usingSsl ? new https.Agent(options) : new http.Agent(options);
+            this._agent = agent;
+        }
+        if (usingSsl && this._ignoreSslError) {
+            // we don't want to set NODE_TLS_REJECT_UNAUTHORIZED=0 since that will affect request for entire process
+            // http.RequestOptions doesn't expose a way to modify RequestOptions.agent.options
+            // we have to cast it to any and change it directly
+            agent.options = Object.assign(agent.options || {}, {
+                rejectUnauthorized: false
+            });
+        }
+        return agent;
+    }
+    _getProxyAgentDispatcher(parsedUrl, proxyUrl) {
+        let proxyAgent;
+        if (this._keepAlive) {
+            proxyAgent = this._proxyAgentDispatcher;
+        }
+        // if agent is already assigned use that agent.
+        if (proxyAgent) {
+            return proxyAgent;
+        }
+        const usingSsl = parsedUrl.protocol === 'https:';
+        proxyAgent = new undici_1.ProxyAgent(Object.assign({ uri: proxyUrl.href, pipelining: !this._keepAlive ? 0 : 1 }, ((proxyUrl.username || proxyUrl.password) && {
+            token: `${proxyUrl.username}:${proxyUrl.password}`
+        })));
+        this._proxyAgentDispatcher = proxyAgent;
+        if (usingSsl && this._ignoreSslError) {
+            // we don't want to set NODE_TLS_REJECT_UNAUTHORIZED=0 since that will affect request for entire process
+            // http.RequestOptions doesn't expose a way to modify RequestOptions.agent.options
+            // we have to cast it to any and change it directly
+            proxyAgent.options = Object.assign(proxyAgent.options.requestTls || {}, {
+                rejectUnauthorized: false
+            });
+        }
+        return proxyAgent;
+    }
+    _performExponentialBackoff(retryNumber) {
+        return __awaiter(this, void 0, void 0, function* () {
+            retryNumber = Math.min(ExponentialBackoffCeiling, retryNumber);
+            const ms = ExponentialBackoffTimeSlice * Math.pow(2, retryNumber);
+            return new Promise(resolve => setTimeout(() => resolve(), ms));
+        });
+    }
+    _processResponse(res, options) {
+        return __awaiter(this, void 0, void 0, function* () {
+            return new Promise((resolve, reject) => __awaiter(this, void 0, void 0, function* () {
+                const statusCode = res.message.statusCode || 0;
+                const response = {
+                    statusCode,
+                    result: null,
+                    headers: {}
+                };
+                // not found leads to null obj returned
+                if (statusCode === HttpCodes.NotFound) {
+                    resolve(response);
+                }
+                // get the result from the body
+                function dateTimeDeserializer(key, value) {
+                    if (typeof value === 'string') {
+                        const a = new Date(value);
+                        if (!isNaN(a.valueOf())) {
+                            return a;
+                        }
+                    }
+                    return value;
+                }
+                let obj;
+                let contents;
+                try {
+                    contents = yield res.readBody();
+                    if (contents && contents.length > 0) {
+                        if (options && options.deserializeDates) {
+                            obj = JSON.parse(contents, dateTimeDeserializer);
+                        }
+                        else {
+                            obj = JSON.parse(contents);
+                        }
+                        response.result = obj;
+                    }
+                    response.headers = res.message.headers;
+                }
+                catch (err) {
+                    // Invalid resource (contents not json);  leaving result obj null
+                }
+                // note that 3xx redirects are handled by the http layer.
+                if (statusCode > 299) {
+                    let msg;
+                    // if exception/error in body, attempt to get better error
+                    if (obj && obj.message) {
+                        msg = obj.message;
+                    }
+                    else if (contents && contents.length > 0) {
+                        // it may be the case that the exception is in the body message as string
+                        msg = contents;
+                    }
+                    else {
+                        msg = `Failed request: (${statusCode})`;
+                    }
+                    const err = new HttpClientError(msg, statusCode);
+                    err.result = response.result;
+                    reject(err);
+                }
+                else {
+                    resolve(response);
+                }
+            }));
+        });
+    }
+}
+exports.HttpClient = HttpClient;
+const lowercaseKeys = (obj) => Object.keys(obj).reduce((c, k) => ((c[k.toLowerCase()] = obj[k]), c), {});
+//# sourceMappingURL=index.js.map
+
+/***/ }),
+
+/***/ 1762:
+/***/ ((__unused_webpack_module, exports) => {
+
+"use strict";
+
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.checkBypass = exports.getProxyUrl = void 0;
+function getProxyUrl(reqUrl) {
+    const usingSsl = reqUrl.protocol === 'https:';
+    if (checkBypass(reqUrl)) {
+        return undefined;
+    }
+    const proxyVar = (() => {
+        if (usingSsl) {
+            return process.env['https_proxy'] || process.env['HTTPS_PROXY'];
+        }
+        else {
+            return process.env['http_proxy'] || process.env['HTTP_PROXY'];
+        }
+    })();
+    if (proxyVar) {
+        try {
+            return new URL(proxyVar);
+        }
+        catch (_a) {
+            if (!proxyVar.startsWith('http://') && !proxyVar.startsWith('https://'))
+                return new URL(`http://${proxyVar}`);
+        }
+    }
+    else {
+        return undefined;
+    }
+}
+exports.getProxyUrl = getProxyUrl;
+function checkBypass(reqUrl) {
+    if (!reqUrl.hostname) {
+        return false;
+    }
+    const reqHost = reqUrl.hostname;
+    if (isLoopbackAddress(reqHost)) {
+        return true;
+    }
+    const noProxy = process.env['no_proxy'] || process.env['NO_PROXY'] || '';
+    if (!noProxy) {
+        return false;
+    }
+    // Determine the request port
+    let reqPort;
+    if (reqUrl.port) {
+        reqPort = Number(reqUrl.port);
+    }
+    else if (reqUrl.protocol === 'http:') {
+        reqPort = 80;
+    }
+    else if (reqUrl.protocol === 'https:') {
+        reqPort = 443;
+    }
+    // Format the request hostname and hostname with port
+    const upperReqHosts = [reqUrl.hostname.toUpperCase()];
+    if (typeof reqPort === 'number') {
+        upperReqHosts.push(`${upperReqHosts[0]}:${reqPort}`);
+    }
+    // Compare request host against noproxy
+    for (const upperNoProxyItem of noProxy
+        .split(',')
+        .map(x => x.trim().toUpperCase())
+        .filter(x => x)) {
+        if (upperNoProxyItem === '*' ||
+            upperReqHosts.some(x => x === upperNoProxyItem ||
+                x.endsWith(`.${upperNoProxyItem}`) ||
+                (upperNoProxyItem.startsWith('.') &&
+                    x.endsWith(`${upperNoProxyItem}`)))) {
+            return true;
+        }
+    }
+    return false;
+}
+exports.checkBypass = checkBypass;
+function isLoopbackAddress(host) {
+    const hostLower = host.toLowerCase();
+    return (hostLower === 'localhost' ||
+        hostLower.startsWith('127.') ||
+        hostLower.startsWith('[::1]') ||
+        hostLower.startsWith('[0:0:0:0:0:0:0:1]'));
+}
+//# sourceMappingURL=proxy.js.map
 
 /***/ }),
 
@@ -58702,11 +59538,11 @@ if (typeof Math.imul === 'undefined') {
   var downloadTool = $module$_actions_tool_cache_bge9h1.downloadTool;
   var extractZip = $module$_actions_tool_cache_bge9h1.extractZip;
   var HttpClient = $module$_actions_http_client_ma87oy.HttpClient;
+  var isDebug = $module$_actions_core_fx0i1v.isDebug;
   var debug = $module$_actions_core_fx0i1v.debug;
   var info = $module$_actions_core_fx0i1v.info;
   var NullWritable = $module$null_writable_7iy9le.NullWritable;
   var getInput = $module$_actions_core_fx0i1v.getInput;
-  var isDebug = $module$_actions_core_fx0i1v.isDebug;
   var tmpdir = $module$node_os_4svwl4.tmpdir;
   var isFeatureAvailable = $module$_actions_cache_3s3lfo.isFeatureAvailable;
   var warning = $module$_actions_core_fx0i1v.warning;
@@ -59003,6 +59839,7 @@ if (typeof Math.imul === 'undefined') {
   setMetadataFor($updateCOROUTINE$1, '$updateCOROUTINE$1', classMeta, CoroutineImpl);
   setMetadataFor($installCOROUTINE$2, '$installCOROUTINE$2', classMeta, CoroutineImpl);
   setMetadataFor(AptGetBasedDistribution, 'AptGetBasedDistribution', classMeta, Distribution, VOID, VOID, VOID, [0, 1]);
+  setMetadataFor(Ubuntu2404, 'Ubuntu2404', objectMeta, AptGetBasedDistribution, VOID, VOID, VOID, [0, 1]);
   setMetadataFor(Ubuntu2204, 'Ubuntu2204', objectMeta, AptGetBasedDistribution, VOID, VOID, VOID, [0, 1]);
   setMetadataFor(Ubuntu2004, 'Ubuntu2004', objectMeta, AptGetBasedDistribution, VOID, VOID, VOID, [0, 1]);
   setMetadataFor(Ubuntu1804, 'Ubuntu1804', objectMeta, AptGetBasedDistribution, VOID, VOID, VOID, [0, 1]);
@@ -59036,7 +59873,7 @@ if (typeof Math.imul === 'undefined') {
   setMetadataFor(setAsDefault$slambda, 'setAsDefault$slambda', classMeta, CoroutineImpl, VOID, VOID, VOID, [1]);
   setMetadataFor(verifyWindowsEnvironment$ref, 'verifyWindowsEnvironment$ref', classMeta, VOID, VOID, VOID, VOID, [0]);
   setMetadataFor(installDistribution$ref, 'installDistribution$ref', classMeta, VOID, VOID, VOID, VOID, [0]);
-  setMetadataFor(createWslConf$ref, 'createWslConf$ref', classMeta, VOID, VOID, VOID, VOID, [0]);
+  setMetadataFor(adjustWslConf$ref, 'adjustWslConf$ref', classMeta, VOID, VOID, VOID, VOID, [0]);
   setMetadataFor(setDistributionAsDefault$ref, 'setDistributionAsDefault$ref', classMeta, VOID, VOID, VOID, VOID, [0]);
   setMetadataFor(Distribution$update$ref, 'Distribution$update$ref', classMeta, VOID, VOID, VOID, VOID, [0]);
   setMetadataFor(main$slambda, 'main$slambda', classMeta, CoroutineImpl, VOID, VOID, VOID, [0]);
@@ -59047,7 +59884,7 @@ if (typeof Math.imul === 'undefined') {
   setMetadataFor($groupCOROUTINE$14, '$groupCOROUTINE$14', classMeta, CoroutineImpl);
   setMetadataFor($verifyWindowsEnvironmentCOROUTINE$15, '$verifyWindowsEnvironmentCOROUTINE$15', classMeta, CoroutineImpl);
   setMetadataFor($installDistributionCOROUTINE$16, '$installDistributionCOROUTINE$16', classMeta, CoroutineImpl);
-  setMetadataFor($createWslConfCOROUTINE$17, '$createWslConfCOROUTINE$17', classMeta, CoroutineImpl);
+  setMetadataFor($adjustWslConfCOROUTINE$17, '$adjustWslConfCOROUTINE$17', classMeta, CoroutineImpl);
   setMetadataFor($setDistributionAsDefaultCOROUTINE$18, '$setDistributionAsDefaultCOROUTINE$18', classMeta, CoroutineImpl);
   setMetadataFor($writeWslShellWrapperCOROUTINE$19, '$writeWslShellWrapperCOROUTINE$19', classMeta, CoroutineImpl);
   //endregion
@@ -70423,14 +71260,14 @@ if (typeof Math.imul === 'undefined') {
     this.dq_1 = this$0;
     CoroutineImpl.call(this, resultContinuation);
   }
-  protoOf(Distribution$downloadUrl$slambda).nq = function ($this$async, $completion) {
-    var tmp = this.oq($this$async, $completion);
+  protoOf(Distribution$downloadUrl$slambda).ar = function ($this$async, $completion) {
+    var tmp = this.br($this$async, $completion);
     tmp.rb_1 = Unit_getInstance();
     tmp.sb_1 = null;
     return tmp.xb();
   };
   protoOf(Distribution$downloadUrl$slambda).jc = function (p1, $completion) {
-    return this.nq((!(p1 == null) ? isInterface(p1, CoroutineScope) : false) ? p1 : THROW_CCE(), $completion);
+    return this.ar((!(p1 == null) ? isInterface(p1, CoroutineScope) : false) ? p1 : THROW_CCE(), $completion);
   };
   protoOf(Distribution$downloadUrl$slambda).xb = function () {
     var suspendResult = this.rb_1;
@@ -70439,9 +71276,9 @@ if (typeof Math.imul === 'undefined') {
         var tmp = this.pb_1;
         switch (tmp) {
           case 0:
-            this.qb_1 = 9;
-            if (!(this.dq_1.sq_1 == null)) {
-              return this.dq_1.sq_1;
+            this.qb_1 = 15;
+            if (!(this.dq_1.fr_1 == null)) {
+              return this.dq_1.fr_1;
             }
 
             this.pb_1 = 1;
@@ -70456,16 +71293,16 @@ if (typeof Math.imul === 'undefined') {
             continue $sm;
           case 2:
             if (!this.iq_1.d()) {
-              this.pb_1 = 7;
+              this.pb_1 = 13;
               continue $sm;
             }
 
             this.jq_1 = this.iq_1.e();
-            this.qb_1 = 5;
+            this.qb_1 = 11;
             var tmp_2 = this;
             tmp_2.lq_1 = Companion_getInstance_4();
             this.pb_1 = 3;
-            suspendResult = await_0((new HttpClient()).post('https://store.rg-adguard.net/api/GetFiles', 'type=ProductId&url=' + this.dq_1.tq_1, recordOf([to('Content-Type', 'application/x-www-form-urlencoded')])), this);
+            suspendResult = await_0((new HttpClient()).post('https://store.rg-adguard.net/api/GetFiles', 'type=ProductId&url=' + this.dq_1.gr_1, recordOf([to('Content-Type', 'application/x-www-form-urlencoded'), to('User-Agent', 'Setup WSL GitHub Action')])), this);
             if (suspendResult === get_COROUTINE_SUSPENDED()) {
               return suspendResult;
             }
@@ -70474,50 +71311,124 @@ if (typeof Math.imul === 'undefined') {
           case 3:
             this.mq_1 = suspendResult;
             if (!equals_0(this.mq_1.message.statusCode, 200)) {
-              var tmp0_error = 'Could not determine download URL (statusCode: ' + toString_1(this.mq_1.message.statusCode) + ' / statusMessage: ' + this.mq_1.message.statusMessage + ')';
-              throw IllegalStateException_init_$Create$(toString_2(tmp0_error));
+              if (isDebug()) {
+                this.pb_1 = 6;
+                suspendResult = await_0((new HttpClient()).post('https://echo.free.beeceptor.com/api/GetFiles', 'type=ProductId&url=' + this.dq_1.gr_1, recordOf([to('Content-Type', 'application/x-www-form-urlencoded'), to('User-Agent', 'Setup WSL GitHub Action')])), this);
+                if (suspendResult === get_COROUTINE_SUSPENDED()) {
+                  return suspendResult;
+                }
+                continue $sm;
+              } else {
+                this.pb_1 = 10;
+                continue $sm;
+              }
+            } else {
+              this.pb_1 = 4;
+              continue $sm;
             }
 
-            this.pb_1 = 4;
+            break;
+          case 4:
+            this.pb_1 = 5;
             suspendResult = await_0(this.mq_1.readBody(), this);
             if (suspendResult === get_COROUTINE_SUSPENDED()) {
               return suspendResult;
             }
 
             continue $sm;
-          case 4:
-            var body = suspendResult;
-            var tmp0_elvis_lhs = Regex_init_$Create$('<a [^>]*href="(?<url>[^"]+)"[^>]*>[^<]*\\.appx(?:bundle)?<\/a>').g9(body);
-            var tmp_3;
-            if (tmp0_elvis_lhs == null) {
-              var tmp1_error = 'Could not determine download URL from:\n' + body;
+          case 5:
+            this.nq_1 = suspendResult;
+            var tmp_3 = this;
+            var tmp4_elvis_lhs = Regex_init_$Create$('<a [^>]*href="(?<url>[^"]+)"[^>]*>[^<]*\\.appx(?:bundle)?<\/a>').g9(this.nq_1);
+            var tmp_4;
+            if (tmp4_elvis_lhs == null) {
+              var tmp1_error = 'Could not determine download URL from:\n' + this.nq_1;
               throw IllegalStateException_init_$Create$(toString_2(tmp1_error));
             } else {
-              tmp_3 = tmp0_elvis_lhs;
+              tmp_4 = tmp4_elvis_lhs;
             }
 
-            var downloadLinkAnchorMatch = tmp_3;
-            this.fq_1 = new URL(ensureNotNull(downloadLinkAnchorMatch.o9().g(1)).n9_1);
-            this.qb_1 = 9;
+            tmp_3.oq_1 = tmp_4;
+            this.fq_1 = new URL(ensureNotNull(this.oq_1.o9().g(1)).n9_1);
+            this.qb_1 = 15;
+            this.pb_1 = 14;
+            var tmp_5 = this;
+            continue $sm;
+          case 6:
+            this.pq_1 = suspendResult;
+            if (equals_0(this.pq_1.message.statusCode, 200)) {
+              this.pb_1 = 7;
+              suspendResult = await_0(this.pq_1.readBody(), this);
+              if (suspendResult === get_COROUTINE_SUSPENDED()) {
+                return suspendResult;
+              }
+              continue $sm;
+            } else {
+              debug('Could not get echo response (statusCode: ' + toString_1(this.pq_1.message.statusCode) + ' / statusMessage: ' + this.pq_1.message.statusMessage + ')');
+              this.pb_1 = 8;
+              continue $sm;
+            }
+
+            break;
+          case 7:
+            this.qq_1 = suspendResult;
+            this.rq_1 = 'Request:\n' + this.qq_1;
+            debug(this.rq_1);
             this.pb_1 = 8;
             continue $sm;
-          case 5:
-            this.qb_1 = 9;
-            var tmp_4 = this.sb_1;
-            if (tmp_4 instanceof Error) {
+          case 8:
+            this.sq_1 = JSON;
+            this.tq_1 = to('httpVersion', this.mq_1.message.httpVersion);
+            this.uq_1 = to('headers', this.mq_1.message.headers);
+            this.vq_1 = to('trailers', this.mq_1.message.trailers);
+            var tmp_6 = this;
+            var tmp0_elvis_lhs = this.mq_1.message.method;
+            tmp_6.wq_1 = to('method', tmp0_elvis_lhs == null ? '<unknown>' : tmp0_elvis_lhs);
+            var tmp_7 = this;
+            var tmp1_elvis_lhs = this.mq_1.message.url;
+            tmp_7.xq_1 = to('url', tmp1_elvis_lhs == null ? '<unknown>' : tmp1_elvis_lhs);
+            var tmp_8 = this;
+            var tmp2_elvis_lhs = this.mq_1.message.statusCode;
+            tmp_8.yq_1 = to('statusCode', tmp2_elvis_lhs == null ? '<unknown>' : tmp2_elvis_lhs);
+            var tmp_9 = this;
+            var tmp3_elvis_lhs = this.mq_1.message.statusMessage;
+            tmp_9.zq_1 = to('statusMessage', tmp3_elvis_lhs == null ? '<unknown>' : tmp3_elvis_lhs);
+            this.pb_1 = 9;
+            suspendResult = await_0(this.mq_1.readBody(), this);
+            if (suspendResult === get_COROUTINE_SUSPENDED()) {
+              return suspendResult;
+            }
+
+            continue $sm;
+          case 9:
+            var ARGUMENT = suspendResult;
+            var ARGUMENT_0 = to('body', ARGUMENT);
+            var ARGUMENT_1 = [this.tq_1, this.uq_1, this.vq_1, this.wq_1, this.xq_1, this.yq_1, this.zq_1, ARGUMENT_0];
+            var ARGUMENT_2 = recordOf(ARGUMENT_1);
+            var responseMessage = this.sq_1.stringify(ARGUMENT_2, VOID, 2);
+            debug('Response:\n' + responseMessage);
+            this.pb_1 = 10;
+            continue $sm;
+          case 10:
+            var tmp0_error = 'Could not determine download URL (statusCode: ' + toString_1(this.mq_1.message.statusCode) + ' / statusMessage: ' + this.mq_1.message.statusMessage + ')';
+            throw IllegalStateException_init_$Create$(toString_2(tmp0_error));
+          case 11:
+            this.qb_1 = 15;
+            var tmp_10 = this.sb_1;
+            if (tmp_10 instanceof Error) {
               var e = this.sb_1;
-              var tmp_5 = this;
+              var tmp_11 = this;
               var tmp2_failure = Companion_getInstance_4();
-              tmp_5.kq_1 = _Result___init__impl__xyqfz8(createFailure(e));
-              this.pb_1 = 6;
+              tmp_11.kq_1 = _Result___init__impl__xyqfz8(createFailure(e));
+              this.pb_1 = 12;
               continue $sm;
             } else {
               throw this.sb_1;
             }
 
             break;
-          case 6:
-            this.qb_1 = 9;
+          case 12:
+            this.qb_1 = 15;
             var tmp3_onFailure = this.kq_1;
             var tmp0_safe_receiver = Result__exceptionOrNull_impl_p6xea9(tmp3_onFailure);
             if (tmp0_safe_receiver == null)
@@ -70531,32 +71442,32 @@ if (typeof Math.imul === 'undefined') {
             }
 
             ;
-            var ARGUMENT = tmp3_onFailure;
-            this.hq_1.a(new Result(ARGUMENT));
+            var ARGUMENT_3 = tmp3_onFailure;
+            this.hq_1.a(new Result(ARGUMENT_3));
             ;
             this.pb_1 = 2;
             continue $sm;
-          case 7:
-            var ARGUMENT_0 = this.hq_1;
-            var tmp2_getOrThrow = last(ARGUMENT_0).l4_1;
+          case 13:
+            var ARGUMENT_4 = this.hq_1;
+            var tmp2_getOrThrow = last(ARGUMENT_4).l4_1;
             throwOnFailure(tmp2_getOrThrow);
-            var tmp_6 = _Result___get_value__impl__bjfvqg(tmp2_getOrThrow);
-            if (tmp_6 == null ? true : isObject(tmp_6))
-              tmp_6;
+            var tmp_12 = _Result___get_value__impl__bjfvqg(tmp2_getOrThrow);
+            if (tmp_12 == null ? true : isObject(tmp_12))
+              tmp_12;
             else
               THROW_CCE();
             if (false) {}
 
-            this.pb_1 = 8;
+            this.pb_1 = 14;
             continue $sm;
-          case 8:
+          case 14:
             return this.fq_1;
-          case 9:
+          case 15:
             throw this.sb_1;
         }
       } catch ($p) {
         var e_0 = $p;
-        if (this.qb_1 === 9) {
+        if (this.qb_1 === 15) {
           throw e_0;
         } else {
           this.pb_1 = this.qb_1;
@@ -70565,7 +71476,7 @@ if (typeof Math.imul === 'undefined') {
       }
      while (true);
   };
-  protoOf(Distribution$downloadUrl$slambda).oq = function ($this$async, completion) {
+  protoOf(Distribution$downloadUrl$slambda).br = function ($this$async, completion) {
     var i = new Distribution$downloadUrl$slambda(this.dq_1, completion);
     i.eq_1 = $this$async;
     return i;
@@ -70573,24 +71484,24 @@ if (typeof Math.imul === 'undefined') {
   function Distribution$downloadUrl$slambda_0(this$0, resultContinuation) {
     var i = new Distribution$downloadUrl$slambda(this$0, resultContinuation);
     var l = function ($this$async, $completion) {
-      return i.nq($this$async, $completion);
+      return i.ar($this$async, $completion);
     };
     l.$arity = 1;
     return l;
   }
   function Distribution(wslId, distributionName, version, _downloadUrl, productId, installerFile, userId) {
     userId = userId === VOID ? wslId : userId;
-    this.pq_1 = wslId;
-    this.qq_1 = distributionName;
-    this.rq_1 = version;
-    this.sq_1 = _downloadUrl;
-    this.tq_1 = productId;
-    this.uq_1 = installerFile;
-    this.vq_1 = userId;
+    this.cr_1 = wslId;
+    this.dr_1 = distributionName;
+    this.er_1 = version;
+    this.fr_1 = _downloadUrl;
+    this.gr_1 = productId;
+    this.hr_1 = installerFile;
+    this.ir_1 = userId;
     var tmp = this;
     var tmp_0 = GlobalScope_getInstance();
     var tmp_1 = CoroutineStart_LAZY_getInstance();
-    tmp.wq_1 = async(tmp_0, VOID, tmp_1, Distribution$downloadUrl$slambda_0(this, null));
+    tmp.jr_1 = async(tmp_0, VOID, tmp_1, Distribution$downloadUrl$slambda_0(this, null));
   }
   function AptGetBasedDistribution_init_$Init$(wslId, distributionName, version, downloadUrl, installerFile, $this) {
     Distribution_init_$Init$(wslId, distributionName, version, downloadUrl, installerFile, $this);
@@ -70602,6 +71513,11 @@ if (typeof Math.imul === 'undefined') {
     AptGetBasedDistribution.call($this);
     return $this;
   }
+  function AptGetBasedDistribution_init_$Init$_1(wslId, distributionName, version, productId, installerFile, $this) {
+    Distribution_init_$Init$_1(wslId, distributionName, version, productId, installerFile, $this);
+    AptGetBasedDistribution.call($this);
+    return $this;
+  }
   function refresh($this, $completion) {
     var tmp = new $refreshCOROUTINE$0($this, $completion);
     tmp.rb_1 = Unit_getInstance();
@@ -70610,7 +71526,7 @@ if (typeof Math.imul === 'undefined') {
   }
   function $refreshCOROUTINE$0(_this__u8e3s4, resultContinuation) {
     CoroutineImpl.call(this, resultContinuation);
-    this.hr_1 = _this__u8e3s4;
+    this.ur_1 = _this__u8e3s4;
   }
   protoOf($refreshCOROUTINE$0).xb = function () {
     var suspendResult = this.rb_1;
@@ -70621,7 +71537,7 @@ if (typeof Math.imul === 'undefined') {
           case 0:
             this.qb_1 = 2;
             this.pb_1 = 1;
-            var tmp0_arrayOf = ['--distribution', this.hr_1.pq_1, 'apt-get', 'update'];
+            var tmp0_arrayOf = ['--distribution', this.ur_1.cr_1, 'apt-get', 'update'];
             var tmp1_apply = {};
             tmp1_apply.env = recordOf([to('DEBIAN_FRONTEND', 'noninteractive'), to('WSLENV', 'DEBIAN_FRONTEND/u')]);
             ;
@@ -70650,7 +71566,7 @@ if (typeof Math.imul === 'undefined') {
   };
   function $updateCOROUTINE$1(_this__u8e3s4, resultContinuation) {
     CoroutineImpl.call(this, resultContinuation);
-    this.qr_1 = _this__u8e3s4;
+    this.ds_1 = _this__u8e3s4;
   }
   protoOf($updateCOROUTINE$1).xb = function () {
     var suspendResult = this.rb_1;
@@ -70661,7 +71577,7 @@ if (typeof Math.imul === 'undefined') {
           case 0:
             this.qb_1 = 3;
             this.pb_1 = 1;
-            suspendResult = refresh(this.qr_1, this);
+            suspendResult = refresh(this.ds_1, this);
             if (suspendResult === get_COROUTINE_SUSPENDED()) {
               return suspendResult;
             }
@@ -70669,7 +71585,7 @@ if (typeof Math.imul === 'undefined') {
             continue $sm;
           case 1:
             this.pb_1 = 2;
-            var tmp0_arrayOf = ['--distribution', this.qr_1.pq_1, 'apt-get', 'upgrade', '--yes'];
+            var tmp0_arrayOf = ['--distribution', this.ds_1.cr_1, 'apt-get', 'upgrade', '--yes'];
             var tmp1_apply = {};
             tmp1_apply.env = recordOf([to('DEBIAN_FRONTEND', 'noninteractive'), to('WSLENV', 'DEBIAN_FRONTEND/u')]);
             ;
@@ -70698,8 +71614,8 @@ if (typeof Math.imul === 'undefined') {
   };
   function $installCOROUTINE$2(_this__u8e3s4, packages, resultContinuation) {
     CoroutineImpl.call(this, resultContinuation);
-    this.zr_1 = _this__u8e3s4;
-    this.as_1 = packages;
+    this.ms_1 = _this__u8e3s4;
+    this.ns_1 = packages;
   }
   protoOf($installCOROUTINE$2).xb = function () {
     var suspendResult = this.rb_1;
@@ -70710,7 +71626,7 @@ if (typeof Math.imul === 'undefined') {
           case 0:
             this.qb_1 = 3;
             this.pb_1 = 1;
-            suspendResult = refresh(this.zr_1, this);
+            suspendResult = refresh(this.ms_1, this);
             if (suspendResult === get_COROUTINE_SUSPENDED()) {
               return suspendResult;
             }
@@ -70718,7 +71634,7 @@ if (typeof Math.imul === 'undefined') {
             continue $sm;
           case 1:
             this.pb_1 = 2;
-            var tmp0_arrayOf = arrayConcat([['--distribution', this.zr_1.pq_1, 'apt-get', 'install', '--yes', '--no-install-recommends'], this.as_1]);
+            var tmp0_arrayOf = arrayConcat([['--distribution', this.ms_1.cr_1, 'apt-get', 'install', '--yes', '--no-install-recommends'], this.ns_1]);
             var tmp1_apply = {};
             tmp1_apply.env = recordOf([to('DEBIAN_FRONTEND', 'noninteractive'), to('WSLENV', 'DEBIAN_FRONTEND/u')]);
             ;
@@ -70745,19 +71661,32 @@ if (typeof Math.imul === 'undefined') {
       }
      while (true);
   };
-  protoOf(AptGetBasedDistribution).xq = function ($completion) {
+  protoOf(AptGetBasedDistribution).kr = function ($completion) {
     var tmp = new $updateCOROUTINE$1(this, $completion);
     tmp.rb_1 = Unit_getInstance();
     tmp.sb_1 = null;
     return tmp.xb();
   };
-  protoOf(AptGetBasedDistribution).yq = function (packages, $completion) {
+  protoOf(AptGetBasedDistribution).lr = function (packages, $completion) {
     var tmp = new $installCOROUTINE$2(this, packages, $completion);
     tmp.rb_1 = Unit_getInstance();
     tmp.sb_1 = null;
     return tmp.xb();
   };
   function AptGetBasedDistribution() {
+  }
+  function Ubuntu2404() {
+    Ubuntu2404_instance = this;
+    var tmp$ret$0;
+    // Inline function 'js.core.jso' call
+    tmp$ret$0 = {};
+    AptGetBasedDistribution_init_$Init$_1('Ubuntu-24.04', 'Ubuntu', new SemVer('24.4.0', tmp$ret$0), '9nz3klhxdjp5', 'ubuntu2404.exe', this);
+  }
+  var Ubuntu2404_instance;
+  function Ubuntu2404_getInstance() {
+    if (Ubuntu2404_instance == null)
+      new Ubuntu2404();
+    return Ubuntu2404_instance;
   }
   function Ubuntu2204() {
     Ubuntu2204_instance = this;
@@ -70844,7 +71773,7 @@ if (typeof Math.imul === 'undefined') {
   }
   function $refreshCOROUTINE$3(_this__u8e3s4, resultContinuation) {
     CoroutineImpl.call(this, resultContinuation);
-    this.rs_1 = _this__u8e3s4;
+    this.et_1 = _this__u8e3s4;
   }
   protoOf($refreshCOROUTINE$3).xb = function () {
     var suspendResult = this.rb_1;
@@ -70855,7 +71784,7 @@ if (typeof Math.imul === 'undefined') {
           case 0:
             this.qb_1 = 2;
             this.pb_1 = 1;
-            var tmp0_arrayOf = ['--distribution', this.rs_1.pq_1, 'zypper', '--non-interactive', 'refresh'];
+            var tmp0_arrayOf = ['--distribution', this.et_1.cr_1, 'zypper', '--non-interactive', 'refresh'];
             suspendResult = exec_1('wsl', tmp0_arrayOf, this);
             if (suspendResult === get_COROUTINE_SUSPENDED()) {
               return suspendResult;
@@ -70881,7 +71810,7 @@ if (typeof Math.imul === 'undefined') {
   };
   function $updateCOROUTINE$4(_this__u8e3s4, resultContinuation) {
     CoroutineImpl.call(this, resultContinuation);
-    this.at_1 = _this__u8e3s4;
+    this.nt_1 = _this__u8e3s4;
   }
   protoOf($updateCOROUTINE$4).xb = function () {
     var suspendResult = this.rb_1;
@@ -70892,7 +71821,7 @@ if (typeof Math.imul === 'undefined') {
           case 0:
             this.qb_1 = 3;
             this.pb_1 = 1;
-            suspendResult = this.at_1.jt(this);
+            suspendResult = this.nt_1.wt(this);
             if (suspendResult === get_COROUTINE_SUSPENDED()) {
               return suspendResult;
             }
@@ -70900,7 +71829,7 @@ if (typeof Math.imul === 'undefined') {
             continue $sm;
           case 1:
             this.pb_1 = 2;
-            var tmp0_arrayOf = ['--distribution', this.at_1.pq_1, 'zypper', '--non-interactive', 'update'];
+            var tmp0_arrayOf = ['--distribution', this.nt_1.cr_1, 'zypper', '--non-interactive', 'update'];
             suspendResult = exec_1('wsl', tmp0_arrayOf, this);
             if (suspendResult === get_COROUTINE_SUSPENDED()) {
               return suspendResult;
@@ -70926,8 +71855,8 @@ if (typeof Math.imul === 'undefined') {
   };
   function $installCOROUTINE$5(_this__u8e3s4, packages, resultContinuation) {
     CoroutineImpl.call(this, resultContinuation);
-    this.st_1 = _this__u8e3s4;
-    this.tt_1 = packages;
+    this.fu_1 = _this__u8e3s4;
+    this.gu_1 = packages;
   }
   protoOf($installCOROUTINE$5).xb = function () {
     var suspendResult = this.rb_1;
@@ -70938,7 +71867,7 @@ if (typeof Math.imul === 'undefined') {
           case 0:
             this.qb_1 = 3;
             this.pb_1 = 1;
-            suspendResult = this.st_1.jt(this);
+            suspendResult = this.fu_1.wt(this);
             if (suspendResult === get_COROUTINE_SUSPENDED()) {
               return suspendResult;
             }
@@ -70946,7 +71875,7 @@ if (typeof Math.imul === 'undefined') {
             continue $sm;
           case 1:
             this.pb_1 = 2;
-            var tmp0_arrayOf = arrayConcat([['--distribution', this.st_1.pq_1, 'zypper', '--non-interactive', 'install'], this.tt_1]);
+            var tmp0_arrayOf = arrayConcat([['--distribution', this.fu_1.cr_1, 'zypper', '--non-interactive', 'install'], this.gu_1]);
             suspendResult = exec_1('wsl', tmp0_arrayOf, this);
             if (suspendResult === get_COROUTINE_SUSPENDED()) {
               return suspendResult;
@@ -70970,19 +71899,19 @@ if (typeof Math.imul === 'undefined') {
       }
      while (true);
   };
-  protoOf(ZypperBasedDistribution).jt = function ($completion) {
+  protoOf(ZypperBasedDistribution).wt = function ($completion) {
     var tmp = new $refreshCOROUTINE$3(this, $completion);
     tmp.rb_1 = Unit_getInstance();
     tmp.sb_1 = null;
     return tmp.xb();
   };
-  protoOf(ZypperBasedDistribution).xq = function ($completion) {
+  protoOf(ZypperBasedDistribution).kr = function ($completion) {
     var tmp = new $updateCOROUTINE$4(this, $completion);
     tmp.rb_1 = Unit_getInstance();
     tmp.sb_1 = null;
     return tmp.xb();
   };
-  protoOf(ZypperBasedDistribution).yq = function (packages, $completion) {
+  protoOf(ZypperBasedDistribution).lr = function (packages, $completion) {
     var tmp = new $installCOROUTINE$5(this, packages, $completion);
     tmp.rb_1 = Unit_getInstance();
     tmp.sb_1 = null;
@@ -70992,7 +71921,7 @@ if (typeof Math.imul === 'undefined') {
   }
   function $refreshCOROUTINE$6(_this__u8e3s4, resultContinuation) {
     CoroutineImpl.call(this, resultContinuation);
-    this.cu_1 = _this__u8e3s4;
+    this.pu_1 = _this__u8e3s4;
   }
   protoOf($refreshCOROUTINE$6).xb = function () {
     var suspendResult = this.rb_1;
@@ -71006,31 +71935,31 @@ if (typeof Math.imul === 'undefined') {
             continue $sm;
           case 1:
             var tmp_0 = this;
-            tmp_0.eu_1 = numberRangeToNumber(1, 5);
+            tmp_0.ru_1 = numberRangeToNumber(1, 5);
             var tmp_1 = this;
-            tmp_1.fu_1 = ArrayList_init_$Create$_0(collectionSizeOrDefault(this.eu_1, 10));
-            this.gu_1 = this.eu_1.c();
+            tmp_1.su_1 = ArrayList_init_$Create$_0(collectionSizeOrDefault(this.ru_1, 10));
+            this.tu_1 = this.ru_1.c();
             this.pb_1 = 2;
             continue $sm;
           case 2:
-            if (!this.gu_1.d()) {
+            if (!this.tu_1.d()) {
               this.pb_1 = 6;
               continue $sm;
             }
 
-            this.hu_1 = this.gu_1.e();
+            this.uu_1 = this.tu_1.e();
             this.qb_1 = 4;
             var tmp_2 = this;
-            tmp_2.ju_1 = Companion_getInstance_4();
+            tmp_2.wu_1 = Companion_getInstance_4();
             this.pb_1 = 3;
-            suspendResult = protoOf(ZypperBasedDistribution).jt.call(this.cu_1, this);
+            suspendResult = protoOf(ZypperBasedDistribution).wt.call(this.pu_1, this);
             if (suspendResult === get_COROUTINE_SUSPENDED()) {
               return suspendResult;
             }
 
             continue $sm;
           case 3:
-            this.du_1 = suspendResult;
+            this.qu_1 = suspendResult;
             this.qb_1 = 8;
             this.pb_1 = 7;
             continue $sm;
@@ -71041,7 +71970,7 @@ if (typeof Math.imul === 'undefined') {
               var e = this.sb_1;
               var tmp_4 = this;
               var tmp2_failure = Companion_getInstance_4();
-              tmp_4.iu_1 = _Result___init__impl__xyqfz8(createFailure(e));
+              tmp_4.vu_1 = _Result___init__impl__xyqfz8(createFailure(e));
               this.pb_1 = 5;
               continue $sm;
             } else {
@@ -71051,12 +71980,12 @@ if (typeof Math.imul === 'undefined') {
             break;
           case 5:
             this.qb_1 = 8;
-            var tmp3_onFailure = this.iu_1;
+            var tmp3_onFailure = this.vu_1;
             var tmp0_safe_receiver = Result__exceptionOrNull_impl_p6xea9(tmp3_onFailure);
             if (tmp0_safe_receiver == null)
               null;
             else {
-              if (!(this.hu_1 === 5)) {
+              if (!(this.uu_1 === 5)) {
                 debug(stackTraceToString(tmp0_safe_receiver));
                 var tmp0_elvis_lhs = tmp0_safe_receiver.message;
                 info('Failure happened, retrying (' + toString_2(tmp0_elvis_lhs == null ? tmp0_safe_receiver : tmp0_elvis_lhs) + ')');
@@ -71065,12 +71994,12 @@ if (typeof Math.imul === 'undefined') {
 
             ;
             var ARGUMENT = tmp3_onFailure;
-            this.fu_1.a(new Result(ARGUMENT));
+            this.su_1.a(new Result(ARGUMENT));
             ;
             this.pb_1 = 2;
             continue $sm;
           case 6:
-            var ARGUMENT_0 = this.fu_1;
+            var ARGUMENT_0 = this.su_1;
             var tmp2_getOrThrow = last(ARGUMENT_0).l4_1;
             throwOnFailure(tmp2_getOrThrow);
             var tmp_5 = _Result___get_value__impl__bjfvqg(tmp2_getOrThrow);
@@ -71105,7 +72034,7 @@ if (typeof Math.imul === 'undefined') {
     tmp$ret$0 = {};
     ZypperBasedDistribution_init_$Init$('openSUSE-Leap-15.2', 'openSUSE Leap', new SemVer('15.2.0', tmp$ret$0), new URL('https://aka.ms/wsl-opensuseleap15-2'), 'openSUSE-Leap-15.2.exe', this);
   }
-  protoOf(OpenSuseLeap15_2).jt = function ($completion) {
+  protoOf(OpenSuseLeap15_2).wt = function ($completion) {
     var tmp = new $refreshCOROUTINE$6(this, $completion);
     tmp.rb_1 = Unit_getInstance();
     tmp.sb_1 = null;
@@ -71130,7 +72059,7 @@ if (typeof Math.imul === 'undefined') {
   }
   function $refreshCOROUTINE$7(_this__u8e3s4, resultContinuation) {
     CoroutineImpl.call(this, resultContinuation);
-    this.av_1 = _this__u8e3s4;
+    this.nv_1 = _this__u8e3s4;
   }
   protoOf($refreshCOROUTINE$7).xb = function () {
     var suspendResult = this.rb_1;
@@ -71141,7 +72070,7 @@ if (typeof Math.imul === 'undefined') {
           case 0:
             this.qb_1 = 2;
             this.pb_1 = 1;
-            var tmp0_arrayOf = ['--distribution', this.av_1.pq_1, 'apk', 'update'];
+            var tmp0_arrayOf = ['--distribution', this.nv_1.cr_1, 'apk', 'update'];
             suspendResult = exec_1('wsl', tmp0_arrayOf, this);
             if (suspendResult === get_COROUTINE_SUSPENDED()) {
               return suspendResult;
@@ -71167,7 +72096,7 @@ if (typeof Math.imul === 'undefined') {
   };
   function $updateCOROUTINE$8(_this__u8e3s4, resultContinuation) {
     CoroutineImpl.call(this, resultContinuation);
-    this.jv_1 = _this__u8e3s4;
+    this.wv_1 = _this__u8e3s4;
   }
   protoOf($updateCOROUTINE$8).xb = function () {
     var suspendResult = this.rb_1;
@@ -71178,7 +72107,7 @@ if (typeof Math.imul === 'undefined') {
           case 0:
             this.qb_1 = 3;
             this.pb_1 = 1;
-            suspendResult = refresh_0(this.jv_1, this);
+            suspendResult = refresh_0(this.wv_1, this);
             if (suspendResult === get_COROUTINE_SUSPENDED()) {
               return suspendResult;
             }
@@ -71186,7 +72115,7 @@ if (typeof Math.imul === 'undefined') {
             continue $sm;
           case 1:
             this.pb_1 = 2;
-            var tmp0_arrayOf = ['--distribution', this.jv_1.pq_1, 'apk', 'upgrade'];
+            var tmp0_arrayOf = ['--distribution', this.wv_1.cr_1, 'apk', 'upgrade'];
             suspendResult = exec_1('wsl', tmp0_arrayOf, this);
             if (suspendResult === get_COROUTINE_SUSPENDED()) {
               return suspendResult;
@@ -71212,8 +72141,8 @@ if (typeof Math.imul === 'undefined') {
   };
   function $installCOROUTINE$9(_this__u8e3s4, packages, resultContinuation) {
     CoroutineImpl.call(this, resultContinuation);
-    this.sv_1 = _this__u8e3s4;
-    this.tv_1 = packages;
+    this.fw_1 = _this__u8e3s4;
+    this.gw_1 = packages;
   }
   protoOf($installCOROUTINE$9).xb = function () {
     var suspendResult = this.rb_1;
@@ -71224,7 +72153,7 @@ if (typeof Math.imul === 'undefined') {
           case 0:
             this.qb_1 = 3;
             this.pb_1 = 1;
-            suspendResult = refresh_0(this.sv_1, this);
+            suspendResult = refresh_0(this.fw_1, this);
             if (suspendResult === get_COROUTINE_SUSPENDED()) {
               return suspendResult;
             }
@@ -71232,7 +72161,7 @@ if (typeof Math.imul === 'undefined') {
             continue $sm;
           case 1:
             this.pb_1 = 2;
-            var tmp0_arrayOf = arrayConcat([['--distribution', this.sv_1.pq_1, 'apk', 'add'], this.tv_1]);
+            var tmp0_arrayOf = arrayConcat([['--distribution', this.fw_1.cr_1, 'apk', 'add'], this.gw_1]);
             suspendResult = exec_1('wsl', tmp0_arrayOf, this);
             if (suspendResult === get_COROUTINE_SUSPENDED()) {
               return suspendResult;
@@ -71256,13 +72185,13 @@ if (typeof Math.imul === 'undefined') {
       }
      while (true);
   };
-  protoOf(ApkBasedDistribution).xq = function ($completion) {
+  protoOf(ApkBasedDistribution).kr = function ($completion) {
     var tmp = new $updateCOROUTINE$8(this, $completion);
     tmp.rb_1 = Unit_getInstance();
     tmp.sb_1 = null;
     return tmp.xb();
   };
-  protoOf(ApkBasedDistribution).yq = function (packages, $completion) {
+  protoOf(ApkBasedDistribution).lr = function (packages, $completion) {
     var tmp = new $installCOROUTINE$9(this, packages, $completion);
     tmp.rb_1 = Unit_getInstance();
     tmp.sb_1 = null;
@@ -71290,7 +72219,7 @@ if (typeof Math.imul === 'undefined') {
       properties_initialized_Distribution_kt_qdwpiy = true;
       var tmp$ret$2;
       // Inline function 'kotlin.collections.associateBy' call
-      var tmp1_associateBy = listOf([Alpine_getInstance(), Debian_getInstance(), Kali_getInstance(), OpenSuseLeap15_2_getInstance(), Ubuntu1604_getInstance(), Ubuntu1804_getInstance(), Ubuntu2004_getInstance(), Ubuntu2204_getInstance()]);
+      var tmp1_associateBy = listOf([Alpine_getInstance(), Debian_getInstance(), Kali_getInstance(), OpenSuseLeap15_2_getInstance(), Ubuntu1604_getInstance(), Ubuntu1804_getInstance(), Ubuntu2004_getInstance(), Ubuntu2204_getInstance(), Ubuntu2404_getInstance()]);
       var capacity = coerceAtLeast(mapCapacity(collectionSizeOrDefault(tmp1_associateBy, 10)), 16);
       var tmp$ret$1;
       // Inline function 'kotlin.collections.associateByTo' call
@@ -71300,7 +72229,7 @@ if (typeof Math.imul === 'undefined') {
         var element = tmp0_iterator.e();
         var tmp$ret$0;
         // Inline function 'net.kautler.github.action.setup_wsl.distributions.<anonymous>' call
-        tmp$ret$0 = element.vq_1;
+        tmp$ret$0 = element.ir_1;
         tmp0_associateByTo.o5(tmp$ret$0, element);
       }
       tmp$ret$1 = tmp0_associateByTo;
@@ -71470,8 +72399,8 @@ if (typeof Math.imul === 'undefined') {
     tmp.sb_1 = null;
     return tmp.xb();
   }
-  function createWslConf($completion) {
-    var tmp = new $createWslConfCOROUTINE$17($completion);
+  function adjustWslConf($completion) {
+    var tmp = new $adjustWslConfCOROUTINE$17($completion);
     tmp.rb_1 = Unit_getInstance();
     tmp.sb_1 = null;
     return tmp.xb();
@@ -71505,14 +72434,14 @@ if (typeof Math.imul === 'undefined') {
   function wslHelp$slambda(resultContinuation) {
     CoroutineImpl.call(this, resultContinuation);
   }
-  protoOf(wslHelp$slambda).r11 = function ($this$async, $completion) {
-    var tmp = this.oq($this$async, $completion);
+  protoOf(wslHelp$slambda).e12 = function ($this$async, $completion) {
+    var tmp = this.br($this$async, $completion);
     tmp.rb_1 = Unit_getInstance();
     tmp.sb_1 = null;
     return tmp.xb();
   };
   protoOf(wslHelp$slambda).jc = function (p1, $completion) {
-    return this.r11((!(p1 == null) ? isInterface(p1, CoroutineScope) : false) ? p1 : THROW_CCE(), $completion);
+    return this.e12((!(p1 == null) ? isInterface(p1, CoroutineScope) : false) ? p1 : THROW_CCE(), $completion);
   };
   protoOf(wslHelp$slambda).xb = function () {
     var suspendResult = this.rb_1;
@@ -71522,18 +72451,18 @@ if (typeof Math.imul === 'undefined') {
         switch (tmp) {
           case 0:
             this.qb_1 = 2;
-            this.n11_1 = StringBuilder_init_$Create$_0();
-            this.o11_1 = StringBuilder_init_$Create$_0();
-            this.p11_1 = StringBuilder_init_$Create$_0();
-            this.q11_1 = StringBuilder_init_$Create$_0();
+            this.a12_1 = StringBuilder_init_$Create$_0();
+            this.b12_1 = StringBuilder_init_$Create$_0();
+            this.c12_1 = StringBuilder_init_$Create$_0();
+            this.d12_1 = StringBuilder_init_$Create$_0();
             this.pb_1 = 1;
             var tmp0_apply = {};
             tmp0_apply.ignoreReturnCode = true;
             tmp0_apply.outStream = new NullWritable();
             tmp0_apply.errStream = new NullWritable();
             var tmp0_apply_0 = {};
-            tmp0_apply_0.stdout = wslHelp$slambda$lambda(this.n11_1, this.o11_1);
-            tmp0_apply_0.stderr = wslHelp$slambda$lambda_0(this.p11_1, this.q11_1);
+            tmp0_apply_0.stdout = wslHelp$slambda$lambda(this.a12_1, this.b12_1);
+            tmp0_apply_0.stderr = wslHelp$slambda$lambda_0(this.c12_1, this.d12_1);
             ;
             tmp0_apply.listeners = tmp0_apply_0;
             ;
@@ -71545,13 +72474,13 @@ if (typeof Math.imul === 'undefined') {
             continue $sm;
           case 1:
             ;
-            this.n11_1.b(this.o11_1);
+            this.a12_1.b(this.b12_1);
             ;
-            this.n11_1.b(this.p11_1);
+            this.a12_1.b(this.c12_1);
             ;
-            this.n11_1.b(this.q11_1);
+            this.a12_1.b(this.d12_1);
             ;
-            return this.n11_1.toString();
+            return this.a12_1.toString();
           case 2:
             throw this.sb_1;
         }
@@ -71566,15 +72495,15 @@ if (typeof Math.imul === 'undefined') {
       }
      while (true);
   };
-  protoOf(wslHelp$slambda).oq = function ($this$async, completion) {
+  protoOf(wslHelp$slambda).br = function ($this$async, completion) {
     var i = new wslHelp$slambda(completion);
-    i.m11_1 = $this$async;
+    i.z11_1 = $this$async;
     return i;
   };
   function wslHelp$slambda_0(resultContinuation) {
     var i = new wslHelp$slambda(resultContinuation);
     var l = function ($this$async, $completion) {
-      return i.r11($this$async, $completion);
+      return i.e12($this$async, $completion);
     };
     l.$arity = 1;
     return l;
@@ -71616,14 +72545,14 @@ if (typeof Math.imul === 'undefined') {
   function wslId$slambda(resultContinuation) {
     CoroutineImpl.call(this, resultContinuation);
   }
-  protoOf(wslId$slambda).r11 = function ($this$async, $completion) {
-    var tmp = this.oq($this$async, $completion);
+  protoOf(wslId$slambda).e12 = function ($this$async, $completion) {
+    var tmp = this.br($this$async, $completion);
     tmp.rb_1 = Unit_getInstance();
     tmp.sb_1 = null;
     return tmp.xb();
   };
   protoOf(wslId$slambda).jc = function (p1, $completion) {
-    return this.r11((!(p1 == null) ? isInterface(p1, CoroutineScope) : false) ? p1 : THROW_CCE(), $completion);
+    return this.e12((!(p1 == null) ? isInterface(p1, CoroutineScope) : false) ? p1 : THROW_CCE(), $completion);
   };
   protoOf(wslId$slambda).xb = function () {
     var suspendResult = this.rb_1;
@@ -71650,7 +72579,7 @@ if (typeof Math.imul === 'undefined') {
             this.pb_1 = 2;
             continue $sm;
           case 2:
-            return get_distribution().pq_1;
+            return get_distribution().cr_1;
           case 3:
             throw this.sb_1;
         }
@@ -71665,15 +72594,15 @@ if (typeof Math.imul === 'undefined') {
       }
      while (true);
   };
-  protoOf(wslId$slambda).oq = function ($this$async, completion) {
+  protoOf(wslId$slambda).br = function ($this$async, completion) {
     var i = new wslId$slambda(completion);
-    i.a12_1 = $this$async;
+    i.n12_1 = $this$async;
     return i;
   };
   function wslId$slambda_0(resultContinuation) {
     var i = new wslId$slambda(resultContinuation);
     var l = function ($this$async, $completion) {
-      return i.r11($this$async, $completion);
+      return i.e12($this$async, $completion);
     };
     l.$arity = 1;
     return l;
@@ -71681,14 +72610,14 @@ if (typeof Math.imul === 'undefined') {
   function installationNeeded$slambda(resultContinuation) {
     CoroutineImpl.call(this, resultContinuation);
   }
-  protoOf(installationNeeded$slambda).k12 = function ($this$async, $completion) {
-    var tmp = this.oq($this$async, $completion);
+  protoOf(installationNeeded$slambda).x12 = function ($this$async, $completion) {
+    var tmp = this.br($this$async, $completion);
     tmp.rb_1 = Unit_getInstance();
     tmp.sb_1 = null;
     return tmp.xb();
   };
   protoOf(installationNeeded$slambda).jc = function (p1, $completion) {
-    return this.k12((!(p1 == null) ? isInterface(p1, CoroutineScope) : false) ? p1 : THROW_CCE(), $completion);
+    return this.x12((!(p1 == null) ? isInterface(p1, CoroutineScope) : false) ? p1 : THROW_CCE(), $completion);
   };
   protoOf(installationNeeded$slambda).xb = function () {
     var suspendResult = this.rb_1;
@@ -71699,7 +72628,7 @@ if (typeof Math.imul === 'undefined') {
           case 0:
             this.qb_1 = 2;
             this.pb_1 = 1;
-            var tmp0_arrayOf = ['--distribution', get_distribution().pq_1, 'true'];
+            var tmp0_arrayOf = ['--distribution', get_distribution().cr_1, 'true'];
             var tmp1_apply = {};
             tmp1_apply.ignoreReturnCode = true;
             tmp1_apply.outStream = new NullWritable();
@@ -71729,15 +72658,15 @@ if (typeof Math.imul === 'undefined') {
       }
      while (true);
   };
-  protoOf(installationNeeded$slambda).oq = function ($this$async, completion) {
+  protoOf(installationNeeded$slambda).br = function ($this$async, completion) {
     var i = new installationNeeded$slambda(completion);
-    i.j12_1 = $this$async;
+    i.w12_1 = $this$async;
     return i;
   };
   function installationNeeded$slambda_0(resultContinuation) {
     var i = new installationNeeded$slambda(resultContinuation);
     var l = function ($this$async, $completion) {
-      return i.k12($this$async, $completion);
+      return i.x12($this$async, $completion);
     };
     l.$arity = 1;
     return l;
@@ -71745,14 +72674,14 @@ if (typeof Math.imul === 'undefined') {
   function toolCacheDir$slambda(resultContinuation) {
     CoroutineImpl.call(this, resultContinuation);
   }
-  protoOf(toolCacheDir$slambda).r11 = function ($this$async, $completion) {
-    var tmp = this.oq($this$async, $completion);
+  protoOf(toolCacheDir$slambda).e12 = function ($this$async, $completion) {
+    var tmp = this.br($this$async, $completion);
     tmp.rb_1 = Unit_getInstance();
     tmp.sb_1 = null;
     return tmp.xb();
   };
   protoOf(toolCacheDir$slambda).jc = function (p1, $completion) {
-    return this.r11((!(p1 == null) ? isInterface(p1, CoroutineScope) : false) ? p1 : THROW_CCE(), $completion);
+    return this.e12((!(p1 == null) ? isInterface(p1, CoroutineScope) : false) ? p1 : THROW_CCE(), $completion);
   };
   protoOf(toolCacheDir$slambda).xb = function () {
     var suspendResult = this.rb_1;
@@ -71770,9 +72699,9 @@ if (typeof Math.imul === 'undefined') {
 
             continue $sm;
           case 1:
-            this.u12_1 = suspendResult;
+            this.h13_1 = suspendResult;
             this.pb_1 = 2;
-            suspendResult = cacheDir_0(this.u12_1, get_distribution().qq_1, '' + get_distribution().rq_1, this);
+            suspendResult = cacheDir_0(this.h13_1, get_distribution().dr_1, '' + get_distribution().er_1, this);
             if (suspendResult === get_COROUTINE_SUSPENDED()) {
               return suspendResult;
             }
@@ -71794,15 +72723,15 @@ if (typeof Math.imul === 'undefined') {
       }
      while (true);
   };
-  protoOf(toolCacheDir$slambda).oq = function ($this$async, completion) {
+  protoOf(toolCacheDir$slambda).br = function ($this$async, completion) {
     var i = new toolCacheDir$slambda(completion);
-    i.t12_1 = $this$async;
+    i.g13_1 = $this$async;
     return i;
   };
   function toolCacheDir$slambda_0(resultContinuation) {
     var i = new toolCacheDir$slambda(resultContinuation);
     var l = function ($this$async, $completion) {
-      return i.r11($this$async, $completion);
+      return i.e12($this$async, $completion);
     };
     l.$arity = 1;
     return l;
@@ -71860,17 +72789,17 @@ if (typeof Math.imul === 'undefined') {
     return result;
   }
   function distributionDirectory$slambda$o$collect$slambda($collector, resultContinuation) {
-    this.d13_1 = $collector;
+    this.q13_1 = $collector;
     CoroutineImpl.call(this, resultContinuation);
   }
-  protoOf(distributionDirectory$slambda$o$collect$slambda).g13 = function (value, $completion) {
-    var tmp = this.h13(value, $completion);
+  protoOf(distributionDirectory$slambda$o$collect$slambda).t13 = function (value, $completion) {
+    var tmp = this.u13(value, $completion);
     tmp.rb_1 = Unit_getInstance();
     tmp.sb_1 = null;
     return tmp.xb();
   };
   protoOf(distributionDirectory$slambda$o$collect$slambda).jc = function (p1, $completion) {
-    return this.g13((!(p1 == null) ? typeof p1 === 'string' : false) ? p1 : THROW_CCE(), $completion);
+    return this.t13((!(p1 == null) ? typeof p1 === 'string' : false) ? p1 : THROW_CCE(), $completion);
   };
   protoOf(distributionDirectory$slambda$o$collect$slambda).xb = function () {
     var suspendResult = this.rb_1;
@@ -71884,9 +72813,9 @@ if (typeof Math.imul === 'undefined') {
             continue $sm;
           case 1:
             var tmp0_contains = Regex_init_$Create$('(?<!_(?:scale-(?:100|125|150|400)|ARM64))\\.appx$');
-            if (tmp0_contains.f9(this.e13_1)) {
+            if (tmp0_contains.f9(this.r13_1)) {
               this.pb_1 = 3;
-              suspendResult = this.d13_1.yl(this.e13_1, this);
+              suspendResult = this.q13_1.yl(this.r13_1, this);
               if (suspendResult === get_COROUTINE_SUSPENDED()) {
                 return suspendResult;
               }
@@ -71903,7 +72832,7 @@ if (typeof Math.imul === 'undefined') {
             this.pb_1 = 4;
             continue $sm;
           case 3:
-            this.f13_1 = suspendResult;
+            this.s13_1 = suspendResult;
             this.pb_1 = 4;
             continue $sm;
           case 4:
@@ -71922,23 +72851,23 @@ if (typeof Math.imul === 'undefined') {
       }
      while (true);
   };
-  protoOf(distributionDirectory$slambda$o$collect$slambda).h13 = function (value, completion) {
-    var i = new distributionDirectory$slambda$o$collect$slambda(this.d13_1, completion);
-    i.e13_1 = value;
+  protoOf(distributionDirectory$slambda$o$collect$slambda).u13 = function (value, completion) {
+    var i = new distributionDirectory$slambda$o$collect$slambda(this.q13_1, completion);
+    i.r13_1 = value;
     return i;
   };
   function distributionDirectory$slambda$o$collect$slambda_0($collector, resultContinuation) {
     var i = new distributionDirectory$slambda$o$collect$slambda($collector, resultContinuation);
     var l = function (value, $completion) {
-      return i.g13(value, $completion);
+      return i.t13(value, $completion);
     };
     l.$arity = 1;
     return l;
   }
   function $collectCOROUTINE$20(_this__u8e3s4, collector, resultContinuation) {
     CoroutineImpl.call(this, resultContinuation);
-    this.q13_1 = _this__u8e3s4;
-    this.r13_1 = collector;
+    this.d14_1 = _this__u8e3s4;
+    this.e14_1 = collector;
   }
   protoOf($collectCOROUTINE$20).xb = function () {
     var suspendResult = this.rb_1;
@@ -71949,8 +72878,8 @@ if (typeof Math.imul === 'undefined') {
           case 0:
             this.qb_1 = 2;
             this.pb_1 = 1;
-            var tmp_0 = distributionDirectory$slambda$o$collect$slambda_0(this.r13_1, null);
-            suspendResult = this.q13_1.s13_1.zl(new sam$kotlinx_coroutines_flow_FlowCollector$0(tmp_0), this);
+            var tmp_0 = distributionDirectory$slambda$o$collect$slambda_0(this.e14_1, null);
+            suspendResult = this.d14_1.f14_1.zl(new sam$kotlinx_coroutines_flow_FlowCollector$0(tmp_0), this);
             if (suspendResult === get_COROUTINE_SUSPENDED()) {
               return suspendResult;
             }
@@ -71973,18 +72902,18 @@ if (typeof Math.imul === 'undefined') {
      while (true);
   };
   function distributionDirectory$slambda$o$collect$slambda_1($collector, $extractedDistributionDirectory, resultContinuation) {
-    this.b14_1 = $collector;
-    this.c14_1 = $extractedDistributionDirectory;
+    this.o14_1 = $collector;
+    this.p14_1 = $extractedDistributionDirectory;
     CoroutineImpl.call(this, resultContinuation);
   }
-  protoOf(distributionDirectory$slambda$o$collect$slambda_1).g13 = function (value, $completion) {
-    var tmp = this.h13(value, $completion);
+  protoOf(distributionDirectory$slambda$o$collect$slambda_1).t13 = function (value, $completion) {
+    var tmp = this.u13(value, $completion);
     tmp.rb_1 = Unit_getInstance();
     tmp.sb_1 = null;
     return tmp.xb();
   };
   protoOf(distributionDirectory$slambda$o$collect$slambda_1).jc = function (p1, $completion) {
-    return this.g13((!(p1 == null) ? typeof p1 === 'string' : false) ? p1 : THROW_CCE(), $completion);
+    return this.t13((!(p1 == null) ? typeof p1 === 'string' : false) ? p1 : THROW_CCE(), $completion);
   };
   protoOf(distributionDirectory$slambda$o$collect$slambda_1).xb = function () {
     var suspendResult = this.rb_1;
@@ -71995,16 +72924,16 @@ if (typeof Math.imul === 'undefined') {
           case 0:
             this.qb_1 = 3;
             this.pb_1 = 1;
-            suspendResult = extractZip_1(path.join(this.c14_1._v, this.d14_1), this);
+            suspendResult = extractZip_1(path.join(this.p14_1._v, this.q14_1), this);
             if (suspendResult === get_COROUTINE_SUSPENDED()) {
               return suspendResult;
             }
 
             continue $sm;
           case 1:
-            this.e14_1 = suspendResult;
+            this.r14_1 = suspendResult;
             this.pb_1 = 2;
-            suspendResult = this.b14_1.yl(this.e14_1, this);
+            suspendResult = this.o14_1.yl(this.r14_1, this);
             if (suspendResult === get_COROUTINE_SUSPENDED()) {
               return suspendResult;
             }
@@ -72026,23 +72955,23 @@ if (typeof Math.imul === 'undefined') {
       }
      while (true);
   };
-  protoOf(distributionDirectory$slambda$o$collect$slambda_1).h13 = function (value, completion) {
-    var i = new distributionDirectory$slambda$o$collect$slambda_1(this.b14_1, this.c14_1, completion);
-    i.d14_1 = value;
+  protoOf(distributionDirectory$slambda$o$collect$slambda_1).u13 = function (value, completion) {
+    var i = new distributionDirectory$slambda$o$collect$slambda_1(this.o14_1, this.p14_1, completion);
+    i.q14_1 = value;
     return i;
   };
   function distributionDirectory$slambda$o$collect$slambda_2($collector, $extractedDistributionDirectory, resultContinuation) {
     var i = new distributionDirectory$slambda$o$collect$slambda_1($collector, $extractedDistributionDirectory, resultContinuation);
     var l = function (value, $completion) {
-      return i.g13(value, $completion);
+      return i.t13(value, $completion);
     };
     l.$arity = 1;
     return l;
   }
   function $collectCOROUTINE$21(_this__u8e3s4, collector, resultContinuation) {
     CoroutineImpl.call(this, resultContinuation);
-    this.n14_1 = _this__u8e3s4;
-    this.o14_1 = collector;
+    this.a15_1 = _this__u8e3s4;
+    this.b15_1 = collector;
   }
   protoOf($collectCOROUTINE$21).xb = function () {
     var suspendResult = this.rb_1;
@@ -72053,8 +72982,8 @@ if (typeof Math.imul === 'undefined') {
           case 0:
             this.qb_1 = 2;
             this.pb_1 = 1;
-            var tmp_0 = distributionDirectory$slambda$o$collect$slambda_2(this.o14_1, this.n14_1.q14_1, null);
-            suspendResult = this.n14_1.p14_1.zl(new sam$kotlinx_coroutines_flow_FlowCollector$0(tmp_0), this);
+            var tmp_0 = distributionDirectory$slambda$o$collect$slambda_2(this.b15_1, this.a15_1.d15_1, null);
+            suspendResult = this.a15_1.c15_1.zl(new sam$kotlinx_coroutines_flow_FlowCollector$0(tmp_0), this);
             if (suspendResult === get_COROUTINE_SUSPENDED()) {
               return suspendResult;
             }
@@ -72077,48 +73006,48 @@ if (typeof Math.imul === 'undefined') {
      while (true);
   };
   function sam$kotlinx_coroutines_flow_FlowCollector$0(function_0) {
-    this.r14_1 = function_0;
+    this.e15_1 = function_0;
   }
   protoOf(sam$kotlinx_coroutines_flow_FlowCollector$0).yl = function (value, $completion) {
-    var tmp0 = this.r14_1(value, $completion);
+    var tmp0 = this.e15_1(value, $completion);
     return tmp0;
   };
   function _no_name_provided__qut3iv_5($tmp2_filter) {
-    this.s13_1 = $tmp2_filter;
+    this.f14_1 = $tmp2_filter;
   }
-  protoOf(_no_name_provided__qut3iv_5).s14 = function (collector, $completion) {
+  protoOf(_no_name_provided__qut3iv_5).f15 = function (collector, $completion) {
     var tmp = new $collectCOROUTINE$20(this, collector, $completion);
     tmp.rb_1 = Unit_getInstance();
     tmp.sb_1 = null;
     return tmp.xb();
   };
   protoOf(_no_name_provided__qut3iv_5).zl = function (collector, $completion) {
-    return this.s14(collector, $completion);
+    return this.f15(collector, $completion);
   };
   function _no_name_provided__qut3iv_6($tmp3_map, $extractedDistributionDirectory) {
-    this.p14_1 = $tmp3_map;
-    this.q14_1 = $extractedDistributionDirectory;
+    this.c15_1 = $tmp3_map;
+    this.d15_1 = $extractedDistributionDirectory;
   }
-  protoOf(_no_name_provided__qut3iv_6).s14 = function (collector, $completion) {
+  protoOf(_no_name_provided__qut3iv_6).f15 = function (collector, $completion) {
     var tmp = new $collectCOROUTINE$21(this, collector, $completion);
     tmp.rb_1 = Unit_getInstance();
     tmp.sb_1 = null;
     return tmp.xb();
   };
   protoOf(_no_name_provided__qut3iv_6).zl = function (collector, $completion) {
-    return this.s14(collector, $completion);
+    return this.f15(collector, $completion);
   };
   function distributionDirectory$slambda$slambda(resultContinuation) {
     CoroutineImpl.call(this, resultContinuation);
   }
-  protoOf(distributionDirectory$slambda$slambda).c15 = function (it, $completion) {
-    var tmp = this.h13(it, $completion);
+  protoOf(distributionDirectory$slambda$slambda).p15 = function (it, $completion) {
+    var tmp = this.u13(it, $completion);
     tmp.rb_1 = Unit_getInstance();
     tmp.sb_1 = null;
     return tmp.xb();
   };
   protoOf(distributionDirectory$slambda$slambda).jc = function (p1, $completion) {
-    return this.c15((!(p1 == null) ? typeof p1 === 'string' : false) ? p1 : THROW_CCE(), $completion);
+    return this.p15((!(p1 == null) ? typeof p1 === 'string' : false) ? p1 : THROW_CCE(), $completion);
   };
   protoOf(distributionDirectory$slambda$slambda).xb = function () {
     var suspendResult = this.rb_1;
@@ -72129,7 +73058,7 @@ if (typeof Math.imul === 'undefined') {
           case 0:
             this.qb_1 = 2;
             this.pb_1 = 1;
-            suspendResult = exists(path.join(this.b15_1, get_distribution().uq_1), this);
+            suspendResult = exists(path.join(this.o15_1, get_distribution().hr_1), this);
             if (suspendResult === get_COROUTINE_SUSPENDED()) {
               return suspendResult;
             }
@@ -72151,15 +73080,15 @@ if (typeof Math.imul === 'undefined') {
       }
      while (true);
   };
-  protoOf(distributionDirectory$slambda$slambda).h13 = function (it, completion) {
+  protoOf(distributionDirectory$slambda$slambda).u13 = function (it, completion) {
     var i = new distributionDirectory$slambda$slambda(completion);
-    i.b15_1 = it;
+    i.o15_1 = it;
     return i;
   };
   function distributionDirectory$slambda$slambda_0(resultContinuation) {
     var i = new distributionDirectory$slambda$slambda(resultContinuation);
     var l = function (it, $completion) {
-      return i.c15(it, $completion);
+      return i.p15(it, $completion);
     };
     l.$arity = 1;
     return l;
@@ -72167,14 +73096,14 @@ if (typeof Math.imul === 'undefined') {
   function distributionDirectory$slambda(resultContinuation) {
     CoroutineImpl.call(this, resultContinuation);
   }
-  protoOf(distributionDirectory$slambda).r11 = function ($this$async, $completion) {
-    var tmp = this.oq($this$async, $completion);
+  protoOf(distributionDirectory$slambda).e12 = function ($this$async, $completion) {
+    var tmp = this.br($this$async, $completion);
     tmp.rb_1 = Unit_getInstance();
     tmp.sb_1 = null;
     return tmp.xb();
   };
   protoOf(distributionDirectory$slambda).jc = function (p1, $completion) {
-    return this.r11((!(p1 == null) ? isInterface(p1, CoroutineScope) : false) ? p1 : THROW_CCE(), $completion);
+    return this.e12((!(p1 == null) ? isInterface(p1, CoroutineScope) : false) ? p1 : THROW_CCE(), $completion);
   };
   protoOf(distributionDirectory$slambda).xb = function () {
     var suspendResult = this.rb_1;
@@ -72184,10 +73113,10 @@ if (typeof Math.imul === 'undefined') {
         switch (tmp) {
           case 0:
             this.qb_1 = 17;
-            this.m15_1 = find(get_distribution().qq_1, '' + get_distribution().rq_1);
-            var tmp0_isNotBlank = this.m15_1;
+            this.z15_1 = find(get_distribution().dr_1, '' + get_distribution().er_1);
+            var tmp0_isNotBlank = this.z15_1;
             if (!isBlank(tmp0_isNotBlank)) {
-              return this.m15_1;
+              return this.z15_1;
             }
 
             this.pb_1 = 1;
@@ -72198,32 +73127,32 @@ if (typeof Math.imul === 'undefined') {
 
             continue $sm;
           case 1:
-            this.m15_1 = suspendResult;
-            this.n15_1 = '2:distributionDirectory_' + get_distribution().qq_1 + '_' + get_distribution().rq_1;
+            this.z15_1 = suspendResult;
+            this.a16_1 = '2:distributionDirectory_' + get_distribution().dr_1 + '_' + get_distribution().er_1;
             if (get_useCache()) {
               this.pb_1 = 2;
-              var tmp1_arrayOf = [this.m15_1];
-              suspendResult = restoreCache_0(tmp1_arrayOf, this.n15_1, this);
+              var tmp1_arrayOf = [this.z15_1];
+              suspendResult = restoreCache_0(tmp1_arrayOf, this.a16_1, this);
               if (suspendResult === get_COROUTINE_SUSPENDED()) {
                 return suspendResult;
               }
               continue $sm;
             } else {
-              this.o15_1 = null;
+              this.b16_1 = null;
               this.pb_1 = 3;
               continue $sm;
             }
 
             break;
           case 2:
-            this.o15_1 = suspendResult;
+            this.b16_1 = suspendResult;
             this.pb_1 = 3;
             continue $sm;
           case 3:
-            this.p15_1 = this.o15_1;
-            if (!(this.p15_1 == null)) {
+            this.c16_1 = this.b16_1;
+            if (!(this.c16_1 == null)) {
               this.pb_1 = 4;
-              suspendResult = exists(path.join(this.m15_1, get_distribution().uq_1), this);
+              suspendResult = exists(path.join(this.z15_1, get_distribution().hr_1), this);
               if (suspendResult === get_COROUTINE_SUSPENDED()) {
                 return suspendResult;
               }
@@ -72237,7 +73166,7 @@ if (typeof Math.imul === 'undefined') {
             break;
           case 4:
             if (suspendResult) {
-              return this.m15_1;
+              return this.z15_1;
             } else {
               this.pb_1 = 5;
               continue $sm;
@@ -72249,46 +73178,46 @@ if (typeof Math.imul === 'undefined') {
             continue $sm;
           case 6:
             this.pb_1 = 7;
-            suspendResult = invoke(get_distribution().wq_1, this);
+            suspendResult = invoke(get_distribution().jr_1, this);
             if (suspendResult === get_COROUTINE_SUSPENDED()) {
               return suspendResult;
             }
 
             continue $sm;
           case 7:
-            this.q15_1 = suspendResult;
-            this.r15_1 = '' + this.q15_1;
+            this.d16_1 = suspendResult;
+            this.e16_1 = '' + this.d16_1;
             this.pb_1 = 8;
-            suspendResult = downloadTool_0(this.r15_1, this);
+            suspendResult = downloadTool_0(this.e16_1, this);
             if (suspendResult === get_COROUTINE_SUSPENDED()) {
               return suspendResult;
             }
 
             continue $sm;
           case 8:
-            this.s15_1 = suspendResult;
+            this.f16_1 = suspendResult;
             this.pb_1 = 9;
-            suspendResult = extractZip_1(this.s15_1, this);
+            suspendResult = extractZip_1(this.f16_1, this);
             if (suspendResult === get_COROUTINE_SUSPENDED()) {
               return suspendResult;
             }
 
             continue $sm;
           case 9:
-            this.t15_1 = suspendResult;
-            this.u15_1 = {_v: this.t15_1};
+            this.g16_1 = suspendResult;
+            this.h16_1 = {_v: this.g16_1};
             this.pb_1 = 10;
-            suspendResult = exists(path.join(this.u15_1._v, get_distribution().uq_1), this);
+            suspendResult = exists(path.join(this.h16_1._v, get_distribution().hr_1), this);
             if (suspendResult === get_COROUTINE_SUSPENDED()) {
               return suspendResult;
             }
 
             continue $sm;
           case 10:
-            this.v15_1 = suspendResult;
-            if (!this.v15_1) {
+            this.i16_1 = suspendResult;
+            if (!this.i16_1) {
               this.pb_1 = 11;
-              suspendResult = readdir_0(this.u15_1._v, this);
+              suspendResult = readdir_0(this.h16_1._v, this);
               if (suspendResult === get_COROUTINE_SUSPENDED()) {
                 return suspendResult;
               }
@@ -72300,48 +73229,48 @@ if (typeof Math.imul === 'undefined') {
 
             break;
           case 11:
-            this.w15_1 = suspendResult;
-            this.x15_1 = asFlow(this.w15_1);
+            this.j16_1 = suspendResult;
+            this.k16_1 = asFlow(this.j16_1);
             var tmp_0 = this;
-            tmp_0.y15_1 = new _no_name_provided__qut3iv_5(this.x15_1);
+            tmp_0.l16_1 = new _no_name_provided__qut3iv_5(this.k16_1);
             var tmp_1 = this;
-            tmp_1.z15_1 = new _no_name_provided__qut3iv_6(this.y15_1, this.u15_1);
+            tmp_1.m16_1 = new _no_name_provided__qut3iv_6(this.l16_1, this.h16_1);
             this.pb_1 = 12;
-            suspendResult = firstOrNull(this.z15_1, distributionDirectory$slambda$slambda_0(null), this);
+            suspendResult = firstOrNull(this.m16_1, distributionDirectory$slambda$slambda_0(null), this);
             if (suspendResult === get_COROUTINE_SUSPENDED()) {
               return suspendResult;
             }
 
             continue $sm;
           case 12:
-            this.a16_1 = suspendResult;
+            this.n16_1 = suspendResult;
             var tmp_2 = this;
             var tmp_3;
-            if (this.a16_1 == null) {
-              var tmp4_error = "'" + get_distribution().uq_1 + "' not found for distribution '" + get_distribution().vq_1 + "'";
+            if (this.n16_1 == null) {
+              var tmp4_error = "'" + get_distribution().hr_1 + "' not found for distribution '" + get_distribution().ir_1 + "'";
               throw IllegalStateException_init_$Create$(toString_2(tmp4_error));
             } else {
-              tmp_3 = this.a16_1;
+              tmp_3 = this.n16_1;
             }
 
-            tmp_2.b16_1 = tmp_3;
-            this.u15_1._v = this.b16_1;
+            tmp_2.o16_1 = tmp_3;
+            this.h16_1._v = this.o16_1;
             this.pb_1 = 13;
             continue $sm;
           case 13:
             this.pb_1 = 14;
-            suspendResult = cacheDir_0(this.u15_1._v, get_distribution().qq_1, '' + get_distribution().rq_1, this);
+            suspendResult = cacheDir_0(this.h16_1._v, get_distribution().dr_1, '' + get_distribution().er_1, this);
             if (suspendResult === get_COROUTINE_SUSPENDED()) {
               return suspendResult;
             }
 
             continue $sm;
           case 14:
-            this.m15_1 = suspendResult;
+            this.z15_1 = suspendResult;
             if (get_useCache()) {
               this.pb_1 = 15;
-              var tmp5_arrayOf = [this.m15_1];
-              suspendResult = saveCache_0(tmp5_arrayOf, this.n15_1, this);
+              var tmp5_arrayOf = [this.z15_1];
+              suspendResult = saveCache_0(tmp5_arrayOf, this.a16_1, this);
               if (suspendResult === get_COROUTINE_SUSPENDED()) {
                 return suspendResult;
               }
@@ -72357,7 +73286,7 @@ if (typeof Math.imul === 'undefined') {
             this.pb_1 = 16;
             continue $sm;
           case 16:
-            return this.m15_1;
+            return this.z15_1;
           case 17:
             throw this.sb_1;
         }
@@ -72372,15 +73301,15 @@ if (typeof Math.imul === 'undefined') {
       }
      while (true);
   };
-  protoOf(distributionDirectory$slambda).oq = function ($this$async, completion) {
+  protoOf(distributionDirectory$slambda).br = function ($this$async, completion) {
     var i = new distributionDirectory$slambda(completion);
-    i.l15_1 = $this$async;
+    i.y15_1 = $this$async;
     return i;
   };
   function distributionDirectory$slambda_0(resultContinuation) {
     var i = new distributionDirectory$slambda(resultContinuation);
     var l = function ($this$async, $completion) {
-      return i.r11($this$async, $completion);
+      return i.e12($this$async, $completion);
     };
     l.$arity = 1;
     return l;
@@ -72392,14 +73321,14 @@ if (typeof Math.imul === 'undefined') {
   function setAsDefault$slambda(resultContinuation) {
     CoroutineImpl.call(this, resultContinuation);
   }
-  protoOf(setAsDefault$slambda).k12 = function ($this$async, $completion) {
-    var tmp = this.oq($this$async, $completion);
+  protoOf(setAsDefault$slambda).x12 = function ($this$async, $completion) {
+    var tmp = this.br($this$async, $completion);
     tmp.rb_1 = Unit_getInstance();
     tmp.sb_1 = null;
     return tmp.xb();
   };
   protoOf(setAsDefault$slambda).jc = function (p1, $completion) {
-    return this.k12((!(p1 == null) ? isInterface(p1, CoroutineScope) : false) ? p1 : THROW_CCE(), $completion);
+    return this.x12((!(p1 == null) ? isInterface(p1, CoroutineScope) : false) ? p1 : THROW_CCE(), $completion);
   };
   protoOf(setAsDefault$slambda).xb = function () {
     var suspendResult = this.rb_1;
@@ -72413,19 +73342,19 @@ if (typeof Math.imul === 'undefined') {
             var tmp0_apply = {};
             tmp0_apply.required = true;
             ;
-            tmp_0.l16_1 = getInput('set-as-default', tmp0_apply);
-            this.m16_1 = this.l16_1;
-            if (this.m16_1 === 'true') {
-              this.n16_1 = true;
+            tmp_0.y16_1 = getInput('set-as-default', tmp0_apply);
+            this.z16_1 = this.y16_1;
+            if (this.z16_1 === 'true') {
+              this.a17_1 = true;
               this.pb_1 = 2;
               continue $sm;
             } else {
-              if (this.m16_1 === 'false') {
-                this.n16_1 = false;
+              if (this.z16_1 === 'false') {
+                this.a17_1 = false;
                 this.pb_1 = 2;
                 continue $sm;
               } else {
-                if (this.m16_1 === 'true | false') {
+                if (this.z16_1 === 'true | false') {
                   this.pb_1 = 1;
                   suspendResult = invoke(get_installationNeeded(), this);
                   if (suspendResult === get_COROUTINE_SUSPENDED()) {
@@ -72434,7 +73363,7 @@ if (typeof Math.imul === 'undefined') {
                   continue $sm;
                 } else {
                   var tmp_1 = this;
-                  var tmp1_error = "'" + this.l16_1 + "' is not a valid boolean for 'set-as-default'. Valid values: true, false";
+                  var tmp1_error = "'" + this.y16_1 + "' is not a valid boolean for 'set-as-default'. Valid values: true, false";
                   throw IllegalStateException_init_$Create$(toString_2(tmp1_error));
                 }
               }
@@ -72442,11 +73371,11 @@ if (typeof Math.imul === 'undefined') {
 
             break;
           case 1:
-            this.n16_1 = suspendResult;
+            this.a17_1 = suspendResult;
             this.pb_1 = 2;
             continue $sm;
           case 2:
-            return this.n16_1;
+            return this.a17_1;
           case 3:
             throw this.sb_1;
         }
@@ -72461,15 +73390,15 @@ if (typeof Math.imul === 'undefined') {
       }
      while (true);
   };
-  protoOf(setAsDefault$slambda).oq = function ($this$async, completion) {
+  protoOf(setAsDefault$slambda).br = function ($this$async, completion) {
     var i = new setAsDefault$slambda(completion);
-    i.k16_1 = $this$async;
+    i.x16_1 = $this$async;
     return i;
   };
   function setAsDefault$slambda_0(resultContinuation) {
     var i = new setAsDefault$slambda(resultContinuation);
     var l = function ($this$async, $completion) {
-      return i.k12($this$async, $completion);
+      return i.x12($this$async, $completion);
     };
     l.$arity = 1;
     return l;
@@ -72568,7 +73497,7 @@ if (typeof Math.imul === 'undefined') {
     var tmp_1 = get_wslShellName();
     var tmp$ret$1;
     // Inline function 'kotlin.text.replace' call
-    var tmp0_replace = get_distribution().vq_1;
+    var tmp0_replace = get_distribution().ir_1;
     var tmp$ret$0;
     // Inline function 'kotlin.text.toRegex' call
     tmp$ret$0 = Regex_init_$Create$('[^a-zA-Z0-9.-]+');
@@ -72578,17 +73507,17 @@ if (typeof Math.imul === 'undefined') {
   }
   function verifyWindowsEnvironment$ref() {
   }
-  protoOf(verifyWindowsEnvironment$ref).o16 = function ($completion) {
+  protoOf(verifyWindowsEnvironment$ref).b17 = function ($completion) {
     var tmp0 = verifyWindowsEnvironment($completion);
     return tmp0;
   };
-  protoOf(verifyWindowsEnvironment$ref).p16 = function ($completion) {
-    return this.o16($completion);
+  protoOf(verifyWindowsEnvironment$ref).c17 = function ($completion) {
+    return this.b17($completion);
   };
   function verifyWindowsEnvironment$ref_0() {
     var i = new verifyWindowsEnvironment$ref();
     var l = function ($completion) {
-      return i.o16($completion);
+      return i.b17($completion);
     };
     l.callableName = 'verifyWindowsEnvironment';
     l.$arity = 0;
@@ -72596,72 +73525,72 @@ if (typeof Math.imul === 'undefined') {
   }
   function installDistribution$ref() {
   }
-  protoOf(installDistribution$ref).o16 = function ($completion) {
+  protoOf(installDistribution$ref).b17 = function ($completion) {
     var tmp0 = installDistribution($completion);
     return tmp0;
   };
-  protoOf(installDistribution$ref).p16 = function ($completion) {
-    return this.o16($completion);
+  protoOf(installDistribution$ref).c17 = function ($completion) {
+    return this.b17($completion);
   };
   function installDistribution$ref_0() {
     var i = new installDistribution$ref();
     var l = function ($completion) {
-      return i.o16($completion);
+      return i.b17($completion);
     };
     l.callableName = 'installDistribution';
     l.$arity = 0;
     return l;
   }
-  function createWslConf$ref() {
+  function adjustWslConf$ref() {
   }
-  protoOf(createWslConf$ref).o16 = function ($completion) {
-    var tmp0 = createWslConf($completion);
+  protoOf(adjustWslConf$ref).b17 = function ($completion) {
+    var tmp0 = adjustWslConf($completion);
     return tmp0;
   };
-  protoOf(createWslConf$ref).p16 = function ($completion) {
-    return this.o16($completion);
+  protoOf(adjustWslConf$ref).c17 = function ($completion) {
+    return this.b17($completion);
   };
-  function createWslConf$ref_0() {
-    var i = new createWslConf$ref();
+  function adjustWslConf$ref_0() {
+    var i = new adjustWslConf$ref();
     var l = function ($completion) {
-      return i.o16($completion);
+      return i.b17($completion);
     };
-    l.callableName = 'createWslConf';
+    l.callableName = 'adjustWslConf';
     l.$arity = 0;
     return l;
   }
   function setDistributionAsDefault$ref() {
   }
-  protoOf(setDistributionAsDefault$ref).o16 = function ($completion) {
+  protoOf(setDistributionAsDefault$ref).b17 = function ($completion) {
     var tmp0 = setDistributionAsDefault($completion);
     return tmp0;
   };
-  protoOf(setDistributionAsDefault$ref).p16 = function ($completion) {
-    return this.o16($completion);
+  protoOf(setDistributionAsDefault$ref).c17 = function ($completion) {
+    return this.b17($completion);
   };
   function setDistributionAsDefault$ref_0() {
     var i = new setDistributionAsDefault$ref();
     var l = function ($completion) {
-      return i.o16($completion);
+      return i.b17($completion);
     };
     l.callableName = 'setDistributionAsDefault';
     l.$arity = 0;
     return l;
   }
   function Distribution$update$ref($boundThis) {
-    this.q16_1 = $boundThis;
+    this.d17_1 = $boundThis;
   }
-  protoOf(Distribution$update$ref).o16 = function ($completion) {
-    var tmp0 = this.q16_1.xq($completion);
+  protoOf(Distribution$update$ref).b17 = function ($completion) {
+    var tmp0 = this.d17_1.kr($completion);
     return tmp0;
   };
-  protoOf(Distribution$update$ref).p16 = function ($completion) {
-    return this.o16($completion);
+  protoOf(Distribution$update$ref).c17 = function ($completion) {
+    return this.b17($completion);
   };
   function Distribution$update$ref_0($boundThis) {
     var i = new Distribution$update$ref($boundThis);
     var l = function ($completion) {
-      return i.o16($completion);
+      return i.b17($completion);
     };
     l.callableName = 'update';
     l.$arity = 0;
@@ -72670,14 +73599,14 @@ if (typeof Math.imul === 'undefined') {
   function main$slambda(resultContinuation) {
     CoroutineImpl.call(this, resultContinuation);
   }
-  protoOf(main$slambda).o16 = function ($completion) {
-    var tmp = this.z16($completion);
+  protoOf(main$slambda).b17 = function ($completion) {
+    var tmp = this.m17($completion);
     tmp.rb_1 = Unit_getInstance();
     tmp.sb_1 = null;
     return tmp.xb();
   };
-  protoOf(main$slambda).p16 = function ($completion) {
-    return this.o16($completion);
+  protoOf(main$slambda).c17 = function ($completion) {
+    return this.b17($completion);
   };
   protoOf(main$slambda).xb = function () {
     var suspendResult = this.rb_1;
@@ -72688,7 +73617,7 @@ if (typeof Math.imul === 'undefined') {
           case 0:
             this.qb_1 = 2;
             this.pb_1 = 1;
-            suspendResult = get_distribution().yq(get_additionalPackages().slice(), this);
+            suspendResult = get_distribution().lr(get_additionalPackages().slice(), this);
             if (suspendResult === get_COROUTINE_SUSPENDED()) {
               return suspendResult;
             }
@@ -72710,31 +73639,31 @@ if (typeof Math.imul === 'undefined') {
       }
      while (true);
   };
-  protoOf(main$slambda).z16 = function (completion) {
+  protoOf(main$slambda).m17 = function (completion) {
     var i = new main$slambda(completion);
     return i;
   };
   function main$slambda_0(resultContinuation) {
     var i = new main$slambda(resultContinuation);
     var l = function ($completion) {
-      return i.o16($completion);
+      return i.b17($completion);
     };
     l.$arity = 0;
     return l;
   }
   function writeWslShellWrapper$ref() {
   }
-  protoOf(writeWslShellWrapper$ref).o16 = function ($completion) {
+  protoOf(writeWslShellWrapper$ref).b17 = function ($completion) {
     var tmp0 = writeWslShellWrapper($completion);
     return tmp0;
   };
-  protoOf(writeWslShellWrapper$ref).p16 = function ($completion) {
-    return this.o16($completion);
+  protoOf(writeWslShellWrapper$ref).c17 = function ($completion) {
+    return this.b17($completion);
   };
   function writeWslShellWrapper$ref_0() {
     var i = new writeWslShellWrapper$ref();
     var l = function ($completion) {
-      return i.o16($completion);
+      return i.b17($completion);
     };
     l.callableName = 'writeWslShellWrapper';
     l.$arity = 0;
@@ -72753,7 +73682,7 @@ if (typeof Math.imul === 'undefined') {
             this.qb_1 = 22;
             this.qb_1 = 21;
             var tmp_0 = this;
-            tmp_0.lw_1 = Companion_getInstance_4();
+            tmp_0.yw_1 = Companion_getInstance_4();
             this.pb_1 = 1;
             suspendResult = group('Verify Windows Environment', verifyWindowsEnvironment$ref_0(), this);
             if (suspendResult === get_COROUTINE_SUSPENDED()) {
@@ -72804,7 +73733,7 @@ if (typeof Math.imul === 'undefined') {
             var tmp1_isNotEmpty = get_wslConf();
             if (charSequenceLength(tmp1_isNotEmpty) > 0) {
               this.pb_1 = 5;
-              suspendResult = group('Create /etc/wsl.conf', createWslConf$ref_0(), this);
+              suspendResult = group('Create or overwrite /etc/wsl.conf', adjustWslConf$ref_0(), this);
               if (suspendResult === get_COROUTINE_SUSPENDED()) {
                 return suspendResult;
               }
@@ -72882,7 +73811,7 @@ if (typeof Math.imul === 'undefined') {
           case 13:
             var tmp4_isNotEmpty = get_wslShellCommand();
             if (charSequenceLength(tmp4_isNotEmpty) > 0) {
-              this.nw_1 = true;
+              this.ax_1 = true;
               this.pb_1 = 15;
               continue $sm;
             } else {
@@ -72896,13 +73825,13 @@ if (typeof Math.imul === 'undefined') {
 
             break;
           case 14:
-            this.ow_1 = suspendResult;
-            this.nw_1 = !this.ow_1;
+            this.bx_1 = suspendResult;
+            this.ax_1 = !this.bx_1;
             this.pb_1 = 15;
             continue $sm;
           case 15:
-            if (this.nw_1) {
-              this.mw_1 = true;
+            if (this.ax_1) {
+              this.zw_1 = true;
               this.pb_1 = 17;
               continue $sm;
             } else {
@@ -72917,12 +73846,12 @@ if (typeof Math.imul === 'undefined') {
             ;
             break;
           case 16:
-            this.pw_1 = suspendResult;
-            this.mw_1 = !this.pw_1;
+            this.cx_1 = suspendResult;
+            this.zw_1 = !this.cx_1;
             this.pb_1 = 17;
             continue $sm;
           case 17:
-            if (this.mw_1) {
+            if (this.zw_1) {
               this.pb_1 = 18;
               suspendResult = group('Write WSL Shell Wrapper', writeWslShellWrapper$ref_0(), this);
               if (suspendResult === get_COROUTINE_SUSPENDED()) {
@@ -72947,7 +73876,7 @@ if (typeof Math.imul === 'undefined') {
             setOutput('wsl-shell-distribution-wrapper-path', get_wslShellDistributionWrapperPath());
             var tmp1_success = Unit_getInstance();
             var tmp_2 = this;
-            tmp_2.kw_1 = _Result___init__impl__xyqfz8(Unit_getInstance());
+            tmp_2.xw_1 = _Result___init__impl__xyqfz8(Unit_getInstance());
             this.qb_1 = 22;
             this.pb_1 = 23;
             continue $sm;
@@ -72958,7 +73887,7 @@ if (typeof Math.imul === 'undefined') {
               var e = this.sb_1;
               var tmp_4 = this;
               var tmp2_failure = Companion_getInstance_4();
-              tmp_4.kw_1 = _Result___init__impl__xyqfz8(createFailure(e));
+              tmp_4.xw_1 = _Result___init__impl__xyqfz8(createFailure(e));
               this.pb_1 = 23;
               continue $sm;
             } else {
@@ -72970,7 +73899,7 @@ if (typeof Math.imul === 'undefined') {
             throw this.sb_1;
           case 23:
             this.qb_1 = 22;
-            var tmp3_onFailure = this.kw_1;
+            var tmp3_onFailure = this.xw_1;
             var tmp0_safe_receiver = Result__exceptionOrNull_impl_p6xea9(tmp3_onFailure);
             if (tmp0_safe_receiver == null)
               null;
@@ -72997,7 +73926,7 @@ if (typeof Math.imul === 'undefined') {
   };
   function $extractZipCOROUTINE$12(archive, resultContinuation) {
     CoroutineImpl.call(this, resultContinuation);
-    this.yw_1 = archive;
+    this.lx_1 = archive;
   }
   protoOf($extractZipCOROUTINE$12).xb = function () {
     var suspendResult = this.rb_1;
@@ -73007,9 +73936,9 @@ if (typeof Math.imul === 'undefined') {
         switch (tmp) {
           case 0:
             this.qb_1 = 3;
-            this.zw_1 = this.yw_1 + '.zip';
+            this.mx_1 = this.lx_1 + '.zip';
             this.pb_1 = 1;
-            suspendResult = mv_0(this.yw_1, this.zw_1, this);
+            suspendResult = mv_0(this.lx_1, this.mx_1, this);
             if (suspendResult === get_COROUTINE_SUSPENDED()) {
               return suspendResult;
             }
@@ -73017,7 +73946,7 @@ if (typeof Math.imul === 'undefined') {
             continue $sm;
           case 1:
             this.pb_1 = 2;
-            suspendResult = extractZip_0(this.zw_1, this);
+            suspendResult = extractZip_0(this.mx_1, this);
             if (suspendResult === get_COROUTINE_SUSPENDED()) {
               return suspendResult;
             }
@@ -73041,8 +73970,8 @@ if (typeof Math.imul === 'undefined') {
   };
   function $executeWslCommandCOROUTINE$13(wslArguments, wslconfigArguments, resultContinuation) {
     CoroutineImpl.call(this, resultContinuation);
-    this.ix_1 = wslArguments;
-    this.jx_1 = wslconfigArguments;
+    this.vx_1 = wslArguments;
+    this.wx_1 = wslconfigArguments;
   }
   protoOf($executeWslCommandCOROUTINE$13).xb = function () {
     var suspendResult = this.rb_1;
@@ -73060,18 +73989,18 @@ if (typeof Math.imul === 'undefined') {
 
             continue $sm;
           case 1:
-            this.kx_1 = suspendResult;
-            if (contains_1(this.kx_1, first(this.ix_1))) {
+            this.xx_1 = suspendResult;
+            if (contains_1(this.xx_1, first(this.vx_1))) {
               this.pb_1 = 3;
-              suspendResult = exec_1('wsl', this.ix_1, this);
+              suspendResult = exec_1('wsl', this.vx_1, this);
               if (suspendResult === get_COROUTINE_SUSPENDED()) {
                 return suspendResult;
               }
               continue $sm;
             } else {
-              if (!(this.jx_1 == null)) {
+              if (!(this.wx_1 == null)) {
                 this.pb_1 = 2;
-                suspendResult = exec_1('wslconfig', this.jx_1, this);
+                suspendResult = exec_1('wslconfig', this.wx_1, this);
                 if (suspendResult === get_COROUTINE_SUSPENDED()) {
                   return suspendResult;
                 }
@@ -73109,8 +74038,8 @@ if (typeof Math.imul === 'undefined') {
   };
   function $groupCOROUTINE$14(name, fn, resultContinuation) {
     CoroutineImpl.call(this, resultContinuation);
-    this.tx_1 = name;
-    this.ux_1 = fn;
+    this.gy_1 = name;
+    this.hy_1 = fn;
   }
   protoOf($groupCOROUTINE$14).xb = function () {
     var suspendResult = this.rb_1;
@@ -73120,7 +74049,7 @@ if (typeof Math.imul === 'undefined') {
         switch (tmp) {
           case 0:
             this.qb_1 = 7;
-            startGroup(this.tx_1);
+            startGroup(this.gy_1);
             this.pb_1 = 1;
             continue $sm;
           case 1:
@@ -73129,20 +74058,20 @@ if (typeof Math.imul === 'undefined') {
           case 2:
             this.qb_1 = 6;
             this.pb_1 = 3;
-            suspendResult = this.ux_1(this);
+            suspendResult = this.hy_1(this);
             if (suspendResult === get_COROUTINE_SUSPENDED()) {
               return suspendResult;
             }
 
             continue $sm;
           case 3:
-            this.vx_1 = suspendResult;
+            this.iy_1 = suspendResult;
             this.qb_1 = 7;
             this.pb_1 = 4;
             var tmp_0 = this;
             continue $sm;
           case 4:
-            var tmp_1 = this.vx_1;
+            var tmp_1 = this.iy_1;
             endGroup();
             ;
             return tmp_1;
@@ -73195,9 +74124,9 @@ if (typeof Math.imul === 'undefined') {
 
             continue $sm;
           case 1:
-            this.fy_1 = suspendResult;
-            if (!isBlank(this.fy_1)) {
-              this.ey_1 = true;
+            this.sy_1 = suspendResult;
+            if (!isBlank(this.sy_1)) {
+              this.ry_1 = true;
               this.pb_1 = 3;
               continue $sm;
             } else {
@@ -73212,11 +74141,11 @@ if (typeof Math.imul === 'undefined') {
             break;
           case 2:
             var tmp2_isNotBlank = suspendResult;
-            this.ey_1 = !isBlank(tmp2_isNotBlank);
+            this.ry_1 = !isBlank(tmp2_isNotBlank);
             this.pb_1 = 3;
             continue $sm;
           case 3:
-            var tmp3_check = this.ey_1;
+            var tmp3_check = this.ry_1;
             if (!tmp3_check) {
               var message_0 = "This Windows environment does not have WSL enabled, please verify your 'runs-on' setting";
               throw IllegalStateException_init_$Create$(toString_2(message_0));
@@ -73256,7 +74185,7 @@ if (typeof Math.imul === 'undefined') {
 
             continue $sm;
           case 1:
-            this.oy_1 = path;
+            this.bz_1 = path;
             this.pb_1 = 2;
             suspendResult = invoke(get_distributionDirectory(), this);
             if (suspendResult === get_COROUTINE_SUSPENDED()) {
@@ -73265,18 +74194,18 @@ if (typeof Math.imul === 'undefined') {
 
             continue $sm;
           case 2:
-            this.py_1 = suspendResult;
-            this.qy_1 = [this.py_1, get_distribution().uq_1];
-            this.ry_1 = function () {
-              var $externalVarargReceiverTmp = this.oy_1;
-              return $externalVarargReceiverTmp.join.apply($externalVarargReceiverTmp, [].slice.call(this.qy_1));
+            this.cz_1 = suspendResult;
+            this.dz_1 = [this.cz_1, get_distribution().hr_1];
+            this.ez_1 = function () {
+              var $externalVarargReceiverTmp = this.bz_1;
+              return $externalVarargReceiverTmp.join.apply($externalVarargReceiverTmp, [].slice.call(this.dz_1));
             }.call(this);
-            this.sy_1 = '"' + this.ry_1 + '"';
+            this.fz_1 = '"' + this.ez_1 + '"';
             this.pb_1 = 3;
             var tmp0_apply = {};
             tmp0_apply.input = Buffer.from('');
             ;
-            suspendResult = exec_0(this.sy_1, ['install', '--root'], tmp0_apply, this);
+            suspendResult = exec_0(this.fz_1, ['install', '--root'], tmp0_apply, this);
             if (suspendResult === get_COROUTINE_SUSPENDED()) {
               return suspendResult;
             }
@@ -73299,10 +74228,10 @@ if (typeof Math.imul === 'undefined') {
       }
      while (true);
   };
-  function $createWslConfCOROUTINE$17(resultContinuation) {
+  function $adjustWslConfCOROUTINE$17(resultContinuation) {
     CoroutineImpl.call(this, resultContinuation);
   }
-  protoOf($createWslConfCOROUTINE$17).xb = function () {
+  protoOf($adjustWslConfCOROUTINE$17).xb = function () {
     var suspendResult = this.rb_1;
     $sm: do
       try {
@@ -73318,12 +74247,12 @@ if (typeof Math.imul === 'undefined') {
 
             continue $sm;
           case 1:
-            this.bz_1 = suspendResult;
-            this.cz_1 = ['--distribution', this.bz_1, 'sh', '-c', "echo '" + get_wslConf() + "' >/etc/wsl.conf"];
+            this.oz_1 = suspendResult;
+            this.pz_1 = ['--distribution', this.oz_1, 'sh', '-c', "echo '" + get_wslConf() + "' >/etc/wsl.conf"];
             var tmp_0 = this;
-            tmp_0.dz_1 = this.cz_1;
+            tmp_0.qz_1 = this.pz_1;
             this.pb_1 = 2;
-            suspendResult = exec_1('wsl', this.dz_1, this);
+            suspendResult = exec_1('wsl', this.qz_1, this);
             if (suspendResult === get_COROUTINE_SUSPENDED()) {
               return suspendResult;
             }
@@ -73339,10 +74268,10 @@ if (typeof Math.imul === 'undefined') {
 
             continue $sm;
           case 3:
-            this.ez_1 = suspendResult;
-            this.fz_1 = ['--terminate', this.ez_1];
+            this.rz_1 = suspendResult;
+            this.sz_1 = ['--terminate', this.rz_1];
             var tmp_1 = this;
-            tmp_1.gz_1 = this.fz_1;
+            tmp_1.tz_1 = this.sz_1;
             this.pb_1 = 4;
             suspendResult = invoke(get_wslId(), this);
             if (suspendResult === get_COROUTINE_SUSPENDED()) {
@@ -73351,12 +74280,12 @@ if (typeof Math.imul === 'undefined') {
 
             continue $sm;
           case 4:
-            this.hz_1 = suspendResult;
-            this.iz_1 = ['/terminate', this.hz_1];
+            this.uz_1 = suspendResult;
+            this.vz_1 = ['/terminate', this.uz_1];
             var tmp_2 = this;
-            tmp_2.jz_1 = this.iz_1;
+            tmp_2.wz_1 = this.vz_1;
             this.pb_1 = 5;
-            suspendResult = executeWslCommand(this.gz_1, this.jz_1, this);
+            suspendResult = executeWslCommand(this.tz_1, this.wz_1, this);
             if (suspendResult === get_COROUTINE_SUSPENDED()) {
               return suspendResult;
             }
@@ -73397,10 +74326,10 @@ if (typeof Math.imul === 'undefined') {
 
             continue $sm;
           case 1:
-            this.sz_1 = suspendResult;
-            this.tz_1 = ['--set-default', this.sz_1];
+            this.f10_1 = suspendResult;
+            this.g10_1 = ['--set-default', this.f10_1];
             var tmp_0 = this;
-            tmp_0.uz_1 = this.tz_1;
+            tmp_0.h10_1 = this.g10_1;
             this.pb_1 = 2;
             suspendResult = invoke(get_wslId(), this);
             if (suspendResult === get_COROUTINE_SUSPENDED()) {
@@ -73409,12 +74338,12 @@ if (typeof Math.imul === 'undefined') {
 
             continue $sm;
           case 2:
-            this.vz_1 = suspendResult;
-            this.wz_1 = ['/setdefault', this.vz_1];
+            this.i10_1 = suspendResult;
+            this.j10_1 = ['/setdefault', this.i10_1];
             var tmp_1 = this;
-            tmp_1.xz_1 = this.wz_1;
+            tmp_1.k10_1 = this.j10_1;
             this.pb_1 = 3;
-            suspendResult = executeWslCommand(this.uz_1, this.xz_1, this);
+            suspendResult = executeWslCommand(this.h10_1, this.k10_1, this);
             if (suspendResult === get_COROUTINE_SUSPENDED()) {
               return suspendResult;
             }
@@ -73464,35 +74393,35 @@ if (typeof Math.imul === 'undefined') {
               }
               continue $sm;
             } else {
-              this.g10_1 = false;
+              this.t10_1 = false;
               this.pb_1 = 4;
               continue $sm;
             }
 
             break;
           case 2:
-            this.h10_1 = suspendResult;
-            this.i10_1 = ['--distribution', this.h10_1, 'bash', '-c', 'true'];
+            this.u10_1 = suspendResult;
+            this.v10_1 = ['--distribution', this.u10_1, 'bash', '-c', 'true'];
             var tmp_0 = this;
-            tmp_0.j10_1 = this.i10_1;
+            tmp_0.w10_1 = this.v10_1;
             this.pb_1 = 3;
             var tmp2_apply = {};
             tmp2_apply.ignoreReturnCode = true;
             ;
-            suspendResult = exec_0('wsl', this.j10_1, tmp2_apply, this);
+            suspendResult = exec_0('wsl', this.w10_1, tmp2_apply, this);
             if (suspendResult === get_COROUTINE_SUSPENDED()) {
               return suspendResult;
             }
 
             continue $sm;
           case 3:
-            this.k10_1 = suspendResult;
-            this.l10_1 = equals_0(this.k10_1, 0);
-            this.g10_1 = !this.l10_1;
+            this.x10_1 = suspendResult;
+            this.y10_1 = equals_0(this.x10_1, 0);
+            this.t10_1 = !this.y10_1;
             this.pb_1 = 4;
             continue $sm;
           case 4:
-            this.m10_1 = this.g10_1;
+            this.z10_1 = this.t10_1;
             var tmp3_isNotEmpty = get_wslShellUser();
             if (charSequenceLength(tmp3_isNotEmpty) > 0) {
               this.pb_1 = 5;
@@ -73509,24 +74438,24 @@ if (typeof Math.imul === 'undefined') {
             ;
             break;
           case 5:
-            this.n10_1 = suspendResult;
-            this.o10_1 = ['--distribution', this.n10_1, 'id', '-u', get_wslShellUser()];
+            this.a11_1 = suspendResult;
+            this.b11_1 = ['--distribution', this.a11_1, 'id', '-u', get_wslShellUser()];
             var tmp_1 = this;
-            tmp_1.p10_1 = this.o10_1;
+            tmp_1.c11_1 = this.b11_1;
             this.pb_1 = 6;
             var tmp5_apply = {};
             tmp5_apply.ignoreReturnCode = true;
             ;
-            suspendResult = exec_0('wsl', this.p10_1, tmp5_apply, this);
+            suspendResult = exec_0('wsl', this.c11_1, tmp5_apply, this);
             if (suspendResult === get_COROUTINE_SUSPENDED()) {
               return suspendResult;
             }
 
             continue $sm;
           case 6:
-            this.q10_1 = suspendResult;
-            this.r10_1 = equals_0(this.q10_1, 0);
-            if (!this.r10_1) {
+            this.d11_1 = suspendResult;
+            this.e11_1 = equals_0(this.d11_1, 0);
+            if (!this.e11_1) {
               this.pb_1 = 7;
               suspendResult = invoke(get_wslId(), this);
               if (suspendResult === get_COROUTINE_SUSPENDED()) {
@@ -73540,12 +74469,12 @@ if (typeof Math.imul === 'undefined') {
 
             break;
           case 7:
-            this.s10_1 = suspendResult;
-            this.t10_1 = ['--distribution', this.s10_1, 'useradd', '-m', '-p', '4qBD5NWD3IkbU', get_wslShellUser()];
+            this.f11_1 = suspendResult;
+            this.g11_1 = ['--distribution', this.f11_1, 'useradd', '-m', '-p', '4qBD5NWD3IkbU', get_wslShellUser()];
             var tmp_2 = this;
-            tmp_2.u10_1 = this.t10_1;
+            tmp_2.h11_1 = this.g11_1;
             this.pb_1 = 8;
-            suspendResult = exec_1('wsl', this.u10_1, this);
+            suspendResult = exec_1('wsl', this.h11_1, this);
             if (suspendResult === get_COROUTINE_SUSPENDED()) {
               return suspendResult;
             }
@@ -73561,8 +74490,8 @@ if (typeof Math.imul === 'undefined') {
           case 10:
             var tmp_3 = this;
             var tmp_4;
-            if (this.m10_1) {
-              tmp_4 = '\n        @ECHO ' + (isDebug() ? 'ON' : 'OFF') + "\n\n        ECHO Bash is not available by default in '" + get_distribution().vq_1 + "', please either add it to 'additional-packages' input or configure a different 'wsl-shell-command' >&2\n        EXIT /B 1\n    ";
+            if (this.z10_1) {
+              tmp_4 = '\n        @ECHO ' + (isDebug() ? 'ON' : 'OFF') + "\n\n        ECHO Bash is not available by default in '" + get_distribution().ir_1 + "', please either add it to 'additional-packages' input or configure a different 'wsl-shell-command' >&2\n        EXIT /B 1\n    ";
             } else {
               var tmp_5 = isDebug() ? 'ON' : 'OFF';
               var tmp_6;
@@ -73587,10 +74516,10 @@ if (typeof Math.imul === 'undefined') {
               tmp_4 = '\n        @ECHO ' + tmp_5 + "\n\n        SETLOCAL\n\n        IF '%1' EQU '' (\n            REM wsl-shell\n            GOTO INVALID_ARGUMENTS\n        ) ELSE IF '%2' EQU '' (\n            REM wsl-shell scriptFile\n            " + tmp_7 + "\n            SET scriptFile=%~1\n        ) ELSE IF '%1' NEQ '-u' (\n            REM wsl-shell user scriptFile\n            GOTO INVALID_ARGUMENTS\n        ) ELSE IF '%3' EQU '' (\n            REM wsl-shell -u user\n            GOTO INVALID_ARGUMENTS\n        ) ELSE IF '%4' NEQ '' (\n            REM wsl-shell -u user scriptFile foo\n            GOTO INVALID_ARGUMENTS\n        ) ELSE (\n            REM wsl-shell -u user scriptFile\n            SET wslShellUser=-u %~2\n            SET scriptFile=%~3\n        )\n\n        IF NOT EXIST %scriptFile% GOTO INVALID_SCRIPT_FILE\n        GOTO START\n\n        :INVALID_ARGUMENTS\n        ECHO Invalid arguments >&2\n        GOTO USAGE\n\n        :INVALID_SCRIPT_FILE\n        ECHO Invalid script file \"%scriptFile%\" >&2\n        GOTO USAGE\n\n        :USAGE\n        ECHO Usage: %~n0 [-u ^<user^>] ^<script file a.k.a. {0}^> >&2\n        EXIT /B 1\n\n        :START\n        FOR /F \"usebackq tokens=*\" %%F IN (\n            `wsl <wsl distribution parameter> -u root wslpath '%scriptFile%'`\n        ) DO SET wslScriptFile=%%F\n        wsl <wsl distribution parameter> -u root sed -i 's/\\r$//' '%wslScriptFile%'\n\n        wsl <wsl distribution parameter> %wslShellUser% " + tmp_8 + '\n    ';
             }
 
-            tmp_3.v10_1 = joinToString_0(lines(trimIndent(tmp_4)), '\r\n');
+            tmp_3.i11_1 = joinToString_0(lines(trimIndent(tmp_4)), '\r\n');
             var tmp9_isNotEmpty = get_wslShellCommand();
             if (charSequenceLength(tmp9_isNotEmpty) > 0) {
-              this.w10_1 = true;
+              this.j11_1 = true;
               this.pb_1 = 12;
               continue $sm;
             } else {
@@ -73604,14 +74533,14 @@ if (typeof Math.imul === 'undefined') {
 
             break;
           case 11:
-            this.x10_1 = suspendResult;
-            this.w10_1 = !this.x10_1;
+            this.k11_1 = suspendResult;
+            this.j11_1 = !this.k11_1;
             this.pb_1 = 12;
             continue $sm;
           case 12:
-            if (this.w10_1) {
+            if (this.j11_1) {
               this.pb_1 = 13;
-              suspendResult = writeFile_0(get_wslShellWrapperPath(), replace(this.v10_1, '<wsl distribution parameter> ', ''), this);
+              suspendResult = writeFile_0(get_wslShellWrapperPath(), replace(this.i11_1, '<wsl distribution parameter> ', ''), this);
               if (suspendResult === get_COROUTINE_SUSPENDED()) {
                 return suspendResult;
               }
@@ -73629,7 +74558,7 @@ if (typeof Math.imul === 'undefined') {
           case 14:
             var tmp10_isNotEmpty = get_wslShellCommand();
             if (charSequenceLength(tmp10_isNotEmpty) > 0) {
-              this.y10_1 = true;
+              this.l11_1 = true;
               this.pb_1 = 16;
               continue $sm;
             } else {
@@ -73643,13 +74572,13 @@ if (typeof Math.imul === 'undefined') {
 
             break;
           case 15:
-            this.z10_1 = suspendResult;
-            this.y10_1 = !this.z10_1;
+            this.m11_1 = suspendResult;
+            this.l11_1 = !this.m11_1;
             this.pb_1 = 16;
             continue $sm;
           case 16:
-            if (this.y10_1) {
-              this.a11_1 = get_wslShellDistributionWrapperPath();
+            if (this.l11_1) {
+              this.n11_1 = get_wslShellDistributionWrapperPath();
               this.pb_1 = 17;
               suspendResult = invoke(get_wslId(), this);
               if (suspendResult === get_COROUTINE_SUSPENDED()) {
@@ -73664,11 +74593,11 @@ if (typeof Math.imul === 'undefined') {
             ;
             break;
           case 17:
-            this.b11_1 = suspendResult;
-            this.c11_1 = '--distribution ' + this.b11_1;
-            this.d11_1 = replace(this.v10_1, '<wsl distribution parameter>', this.c11_1);
+            this.o11_1 = suspendResult;
+            this.p11_1 = '--distribution ' + this.o11_1;
+            this.q11_1 = replace(this.i11_1, '<wsl distribution parameter>', this.p11_1);
             this.pb_1 = 18;
-            suspendResult = writeFile_0(this.a11_1, this.d11_1, this);
+            suspendResult = writeFile_0(this.n11_1, this.q11_1, this);
             if (suspendResult === get_COROUTINE_SUSPENDED()) {
               return suspendResult;
             }
@@ -75631,6 +76560,14 @@ createToken('GTE0PRE', '^\\s*>=\\s*0\\.0\\.0-0\\s*$')
 /***/ ((module) => {
 
 module.exports = eval("require")("encoding");
+
+
+/***/ }),
+
+/***/ 2009:
+/***/ ((module) => {
+
+module.exports = eval("require")("undici");
 
 
 /***/ }),

@@ -18,13 +18,13 @@
 
 @file:Import("workflow-with-copyright.main.kts")
 
-import it.krzeminski.githubactions.actions.actions.CheckoutV3
-import it.krzeminski.githubactions.actions.actions.SetupJavaV3
-import it.krzeminski.githubactions.actions.actions.SetupJavaV3.Distribution.Temurin
-import it.krzeminski.githubactions.actions.burrunan.GradleCacheActionV1
-import it.krzeminski.githubactions.domain.RunnerType.WindowsLatest
-import it.krzeminski.githubactions.domain.triggers.Cron
-import it.krzeminski.githubactions.domain.triggers.Schedule
+import io.github.typesafegithub.workflows.actions.actions.CheckoutV3
+import io.github.typesafegithub.workflows.actions.actions.SetupJavaV3
+import io.github.typesafegithub.workflows.actions.actions.SetupJavaV3.Distribution.Temurin
+import io.github.typesafegithub.workflows.actions.burrunan.GradleCacheActionV1
+import io.github.typesafegithub.workflows.domain.RunnerType.WindowsLatest
+import io.github.typesafegithub.workflows.domain.triggers.Cron
+import io.github.typesafegithub.workflows.domain.triggers.Schedule
 
 workflowWithCopyright(
     name = "Check Dependency Versions",
