@@ -270,7 +270,7 @@ suspend fun main() {
             }
 
             if (wslConf.isNotEmpty()) {
-                group("Create /etc/wsl.conf", ::createWslConf)
+                group("Create or overwrite /etc/wsl.conf", ::adjustWslConf)
             }
 
             if (setAsDefault()) {
@@ -356,7 +356,7 @@ suspend fun installDistribution() {
     )
 }
 
-suspend fun createWslConf() {
+suspend fun adjustWslConf() {
     exec(
         commandLine = "wsl",
         args = arrayOf(
