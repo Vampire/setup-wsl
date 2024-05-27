@@ -554,7 +554,7 @@ workflowWithCopyright(
         )
         runAfterSuccess(
             name = "Test - /etc/wsl.conf should not exist",
-            command = "[ ! -f /etc/wsl.conf ]"
+            command = "[ ! -f /etc/wsl.conf ] || { cat /etc/wsl.conf; false; }"
         )
         runAfterSuccess(
             name = "Test - C: should be mounted at /mnt/c",

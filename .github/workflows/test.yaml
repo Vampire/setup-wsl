@@ -992,7 +992,7 @@ jobs:
     - id: 'step-4'
       name: 'Test - /etc/wsl.conf should not exist'
       shell: 'wsl-bash {0}'
-      run: '[ ! -f /etc/wsl.conf ]'
+      run: '[ ! -f /etc/wsl.conf ] || { cat /etc/wsl.conf; false; }'
       if: |-
         always()
         && (steps.step-1.outcome == 'success')
