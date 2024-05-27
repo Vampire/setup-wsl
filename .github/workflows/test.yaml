@@ -1501,7 +1501,7 @@ jobs:
         always()
         && (steps.step-9.outcome == 'success')
   test_distribution_specific_wsl_bash_scripts:
-    name: 'Test distribution specific wsl-bash scripts on ${{ matrix.environment }}'
+    name: 'Test distribution specific wsl-bash scripts on ${{ matrix.environment }} (without ${{ matrix.distributions.incompatibleUbuntu }})'
     runs-on: '${{ matrix.environment }}'
     needs:
     - 'build'
@@ -1514,7 +1514,8 @@ jobs:
         - 'windows-2022'
         - 'windows-latest'
         distributions:
-        - distribution1:
+        - incompatibleUbuntu: 'Ubuntu-22.04'
+          distribution1:
             wsl-id: 'Debian'
             user-id: 'Debian'
             match-pattern: '*Debian*'
@@ -1554,7 +1555,8 @@ jobs:
             user-id: 'Ubuntu-16.04'
             match-pattern: '*Ubuntu*16.04*'
             default-absent-tool: 'dos2unix'
-        - distribution1:
+        - incompatibleUbuntu: 'Ubuntu-20.04'
+          distribution1:
             wsl-id: 'Debian'
             user-id: 'Debian'
             match-pattern: '*Debian*'

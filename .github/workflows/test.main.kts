@@ -808,7 +808,7 @@ workflowWithCopyright(
 
     testJob(
         id = "test_distribution_specific_wsl_bash_scripts",
-        name = "Test distribution specific wsl-bash scripts on ${expr("matrix.environment")}",
+        name = "Test distribution specific wsl-bash scripts on ${expr("matrix.environment")} (without ${expr("matrix.distributions.incompatibleUbuntu")})",
         _customArguments = mapOf(
             "strategy" to mapOf(
                 "fail-fast" to false,
@@ -821,8 +821,12 @@ workflowWithCopyright(
                         .map { incompatibleUbuntu ->
                             distributions
                                 .filter { it != incompatibleUbuntu }
-                                .mapIndexed { i, distribution ->
+                                .mapIndexed<Map<String, String>, Pair<String, Any>> { i, distribution ->
                                     "distribution${i + 1}" to distribution
+                                }
+                                .toMutableList()
+                                .apply {
+                                    add(0, "incompatibleUbuntu" to incompatibleUbuntu["user-id"]!!)
                                 }
                                 .toMap()
                         }
