@@ -1,5 +1,5 @@
 /*
- * Copyright 2020-2023 Björn Kautler
+ * Copyright 2020-2024 Björn Kautler
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,7 +14,8 @@
  * limitations under the License.
  */
 
-@file:DependsOn("io.github.typesafegithub:github-workflows-kt:2.0.0")
+@file:Repository("https://repo.maven.apache.org/maven2/")
+@file:DependsOn("io.github.typesafegithub:github-workflows-kt:2.3.0")
 
 import io.github.typesafegithub.workflows.domain.Concurrency
 import io.github.typesafegithub.workflows.domain.triggers.Trigger
@@ -39,7 +40,7 @@ fun workflowWithCopyright(
         concurrency = concurrency,
         preamble = WithOriginalAfter(
             """
-                Copyright 2020-2023 Björn Kautler
+                Copyright 2020-2024 Björn Kautler
 
                 Licensed under the Apache License, Version 2.0 (the "License");
                 you may not use this file except in compliance with the License.

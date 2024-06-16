@@ -1,4 +1,4 @@
-# Copyright 2020-2023 Björn Kautler
+# Copyright 2020-2024 Björn Kautler
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -45,7 +45,7 @@ jobs:
       run: 'git config --global core.autocrlf input'
     - id: 'step-1'
       name: 'Checkout'
-      uses: 'actions/checkout@v3'
+      uses: 'actions/checkout@v4'
     - id: 'step-2'
       name: 'Check Action Typing'
       uses: 'typesafegithub/github-actions-typing@v1'

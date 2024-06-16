@@ -1,7 +1,7 @@
 #!/usr/bin/env kotlin
 
 /*
- * Copyright 2020-2023 Björn Kautler
+ * Copyright 2020-2024 Björn Kautler
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,15 +17,22 @@
  */
 
 @file:Import("workflow-with-copyright.main.kts")
+@file:Repository("https://bindings.krzeminski.it/")
+@file:DependsOn("actions:cache__restore:v4")
+@file:DependsOn("actions:cache__save:v4")
+@file:DependsOn("actions:checkout:v4")
+@file:DependsOn("actions:setup-java:v4")
+@file:DependsOn("burrunan:gradle-cache-action:v1")
+@file:DependsOn("Vampire:setup-wsl:v3")
 
-import io.github.typesafegithub.workflows.actions.actions.CacheRestoreV4
-import io.github.typesafegithub.workflows.actions.actions.CacheSaveV4
-import io.github.typesafegithub.workflows.actions.actions.CheckoutV4
-import io.github.typesafegithub.workflows.actions.actions.SetupJavaV4
-import io.github.typesafegithub.workflows.actions.actions.SetupJavaV4.Distribution.Temurin
-import io.github.typesafegithub.workflows.actions.burrunan.GradleCacheActionV1
-import io.github.typesafegithub.workflows.actions.vampire.SetupWslV3
-import io.github.typesafegithub.workflows.actions.vampire.SetupWslV3.Distribution
+import io.github.typesafegithub.workflows.actions.actions.CacheRestore
+import io.github.typesafegithub.workflows.actions.actions.CacheSave
+import io.github.typesafegithub.workflows.actions.actions.Checkout
+import io.github.typesafegithub.workflows.actions.actions.SetupJava
+import io.github.typesafegithub.workflows.actions.actions.SetupJava.Distribution.Temurin
+import io.github.typesafegithub.workflows.actions.burrunan.GradleCacheAction
+import io.github.typesafegithub.workflows.actions.vampire.SetupWsl
+import io.github.typesafegithub.workflows.actions.vampire.SetupWsl.Distribution
 import io.github.typesafegithub.workflows.domain.CommandStep
 import io.github.typesafegithub.workflows.domain.ActionStep
 import io.github.typesafegithub.workflows.domain.JobOutputs.EMPTY
@@ -129,7 +136,7 @@ val wslBash = Shell.Custom("wsl-bash {0}")
 
 val wslSh = Shell.Custom("wsl-sh {0}")
 
-lateinit var executeActionStep: ActionStep<SetupWslV3.Outputs>
+lateinit var executeActionStep: ActionStep<SetupWsl.Outputs>
 
 workflowWithCopyright(
     name = "Build and Test",
@@ -145,7 +152,7 @@ workflowWithCopyright(
         "build/distributions/"
     )
 
-    val executeAction = SetupWslV3(
+    val executeAction = SetupWsl(
         distribution = Distribution.Custom(expr("matrix.distribution.user-id"))
     )
 
@@ -160,18 +167,18 @@ workflowWithCopyright(
         )
         uses(
             name = "Checkout",
-            action = CheckoutV4()
+            action = Checkout()
         )
         uses(
             name = "Setup Java 11",
-            action = SetupJavaV4(
+            action = SetupJava(
                 javaVersion = "11",
                 distribution = Temurin
             )
         )
         uses(
             name = "Build",
-            action = GradleCacheActionV1(
+            action = GradleCacheAction(
                 arguments = listOf(
                     "--show-version",
                     "build",
@@ -185,7 +192,7 @@ workflowWithCopyright(
         )
         uses(
             name = "Save built artifacts to cache",
-            action = CacheSaveV4(
+            action = CacheSave(
                 path = builtArtifacts,
                 key = expr { github.run_id }
             )
@@ -206,7 +213,7 @@ workflowWithCopyright(
     ) {
         uses(
             name = "Restore built artifacts from cache",
-            action = CacheRestoreV4(
+            action = CacheRestore(
                 path = builtArtifacts,
                 key = expr { github.run_id },
                 failOnCacheMiss = true
@@ -266,7 +273,7 @@ workflowWithCopyright(
         )
     ) {
         executeActionStep = usesSelf(
-            action = SetupWslV3(
+            action = SetupWsl(
                 update = true
             )
         )
@@ -686,26 +693,26 @@ workflowWithCopyright(
     ) {
         usesSelf(
             name = "Execute action for ${expr("matrix.distributions.distribution1.user-id")}",
-            action = SetupWslV3(
+            action = SetupWsl(
                 distribution = Distribution.Custom(expr("matrix.distributions.distribution1.user-id"))
             )
         )
         usesSelf(
             name = "Execute action for ${expr("matrix.distributions.distribution2.user-id")}",
-            action = SetupWslV3(
+            action = SetupWsl(
                 distribution = Distribution.Custom(expr("matrix.distributions.distribution2.user-id"))
             )
         )
         usesSelf(
             name = "Execute action for ${expr("matrix.distributions.distribution3.user-id")}",
-            action = SetupWslV3(
+            action = SetupWsl(
                 distribution = Distribution.Custom(expr("matrix.distributions.distribution3.user-id")),
                 setAsDefault = false
             )
         )
         executeActionStep = usesSelf(
             name = "Execute action for ${expr("matrix.distributions.distribution1.user-id")} again",
-            action = SetupWslV3(
+            action = SetupWsl(
                 distribution = Distribution.Custom(expr("matrix.distributions.distribution1.user-id"))
             )
         )
@@ -783,7 +790,7 @@ workflowWithCopyright(
         )
         executeActionStep = usesSelfAfterSuccess(
             name = "Execute action for ${expr("matrix.distribution2.user-id")}",
-            action = SetupWslV3(
+            action = SetupWsl(
                 distribution = Distribution.Custom(expr("matrix.distribution2.user-id"))
             )
         )
@@ -842,7 +849,7 @@ workflowWithCopyright(
             .associateWith {
                 usesSelf(
                     name = "Execute action for ${expr("matrix.distributions.distribution$it.user-id")}",
-                    action = SetupWslV3(
+                    action = SetupWsl(
                         distribution = Distribution.Custom(expr("matrix.distributions.distribution$it.user-id")),
                         additionalPackages = if (it == 2) listOf("bash") else null,
                         setAsDefault = if (it >= 3) false else null
@@ -934,7 +941,7 @@ fun JobBuilder<*>.commonTests() {
 
 fun JobBuilder<*>.usesSelfAfterSuccess(
     name: String = "Execute action",
-    action: SetupWslV3
+    action: SetupWsl
 ) = usesSelf(
     name = name,
     action = action,
@@ -943,7 +950,7 @@ fun JobBuilder<*>.usesSelfAfterSuccess(
 
 fun JobBuilder<*>.usesSelf(
     name: String = "Execute action",
-    action: SetupWslV3,
+    action: SetupWsl,
     condition: String? = null,
     continueOnError: Boolean? = null
 ) = uses(

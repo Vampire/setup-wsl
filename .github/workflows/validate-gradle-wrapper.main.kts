@@ -1,7 +1,7 @@
 #!/usr/bin/env kotlin
 
 /*
- * Copyright 2020-2023 Björn Kautler
+ * Copyright 2020-2024 Björn Kautler
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,9 +17,12 @@
  */
 
 @file:Import("workflow-with-copyright.main.kts")
+@file:Repository("https://bindings.krzeminski.it/")
+@file:DependsOn("actions:checkout:v4")
+@file:DependsOn("gradle:wrapper-validation-action:v1")
 
-import io.github.typesafegithub.workflows.actions.actions.CheckoutV3
-import io.github.typesafegithub.workflows.actions.gradle.WrapperValidationActionV1
+import io.github.typesafegithub.workflows.actions.actions.Checkout
+import io.github.typesafegithub.workflows.actions.gradle.WrapperValidationAction
 import io.github.typesafegithub.workflows.domain.RunnerType.UbuntuLatest
 import io.github.typesafegithub.workflows.domain.triggers.PullRequest
 import io.github.typesafegithub.workflows.domain.triggers.Push
@@ -43,11 +46,11 @@ workflowWithCopyright(
         )
         uses(
             name = "Checkout",
-            action = CheckoutV3()
+            action = Checkout()
         )
         uses(
             name = "Validate Gradle Wrapper",
-            action = WrapperValidationActionV1()
+            action = WrapperValidationAction()
         )
     }
 }
