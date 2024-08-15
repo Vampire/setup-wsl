@@ -22,9 +22,8 @@ runner with a sufficient setup for this action to use or need changes for suppor
 With a proper test environment (self-hosted runner) that will stay available, I would also add proper official support
 where you can select the WSL version in your workflow files.
 
-This action is natively supported by https://github.com/krzema12/github-actions-kotlin-dsl which allows writing
-workflow files using a type-safe Kotlin DSL. There is a built-in wrapper for this action that you can use to
-conveniently configure it.
+Thanks to the provided [typings](action-types.yml), it is possible to use this action in a type-safe way using
+https://github.com/typesafegithub/github-workflows-kt which allows writing workflow files using a type-safe Kotlin DSL.
 
 Table of Contents
 -----------------

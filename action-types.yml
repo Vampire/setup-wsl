@@ -12,7 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-# See https://github.com/krzema12/github-actions-typing/
+# See https://github.com/typesafegithub/github-actions-typing/
 inputs:
     distribution:
         type: enum
