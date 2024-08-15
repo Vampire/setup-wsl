@@ -1434,7 +1434,9 @@ jobs:
       with:
         distribution: '${{ matrix.distribution.user-id }}'
         update: 'true'
-      if: 'matrix.distribution.user-id != ''kali-linux'''
+      if: |-
+        (matrix.distribution.user-id != 'kali-linux')
+        && (matrix.distribution.user-id != 'Ubuntu-24.04')
     - id: 'step-3'
       name: 'Install default absent tool'
       uses: './'

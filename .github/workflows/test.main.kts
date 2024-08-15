@@ -765,7 +765,11 @@ workflowWithCopyright(
                 update = true
             ),
             // work-around for https://bugs.kali.org/view.php?id=6672
-            condition = "matrix.distribution.user-id != 'kali-linux'"
+            // and https://bugs.launchpad.net/ubuntu/+source/systemd/+bug/2069555
+            condition = """
+                (matrix.distribution.user-id != 'kali-linux')
+                && (matrix.distribution.user-id != 'Ubuntu-24.04')
+            """.trimIndent()
         )
         executeActionStep = usesSelf(
             name = "Install default absent tool",
