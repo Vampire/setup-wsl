@@ -15,7 +15,7 @@
  */
 
 @file:Repository("https://repo.maven.apache.org/maven2/")
-@file:DependsOn("io.github.typesafegithub:github-workflows-kt:2.3.0")
+@file:DependsOn("io.github.typesafegithub:github-workflows-kt:3.0.0")
 
 import io.github.typesafegithub.workflows.domain.Concurrency
 import io.github.typesafegithub.workflows.domain.triggers.Trigger

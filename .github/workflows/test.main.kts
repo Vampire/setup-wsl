@@ -1068,27 +1068,27 @@ fun JobBuilder<*>.verifyCommandResult(
     )
 }
 
-val Step.successCondition
+val Step<*>.successCondition
     get() = """
         always()
         && (${outcome.eq(Success)})
     """.trimIndent()
 
-val Step.successOnAlpineCondition
+val Step<*>.successOnAlpineCondition
     get() = """
         always()
         && (${outcome.eq(Success)})
         && (matrix.distribution.user-id == 'Alpine')
     """.trimIndent()
 
-val Step.successNotOnUbuntu2404Condition
+val Step<*>.successNotOnUbuntu2404Condition
     get() = """
         always()
         && (${outcome.eq(Success)})
         && (matrix.distribution.user-id != 'Ubuntu-24.04')
     """.trimIndent()
 
-fun Step.getSuccessNotOnDistributionCondition(i: Int, distribution: String) = """
+fun Step<*>.getSuccessNotOnDistributionCondition(i: Int, distribution: String) = """
     always()
     && (${outcome.eq(Success)})
     && (matrix.distributions.distribution$i.user-id != '$distribution')
