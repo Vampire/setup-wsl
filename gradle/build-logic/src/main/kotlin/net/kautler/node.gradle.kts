@@ -95,6 +95,49 @@ configure<NodeJsRootExtension> {
     version = libs.versions.build.node.get()
 }
 
+val executable by configurations.registering {
+    isCanBeConsumed = true
+    isCanBeResolved = false
+    isVisible = false
+}
+
+artifacts {
+    val jsProductionExecutableCompileSync by tasks.existing(IncrementalSyncTask::class)
+    add(
+        executable.name,
+        jsProductionExecutableCompileSync.map {
+            it
+                .destinationDirectory
+                .get()
+                .resolve("${project.name}.js")
+        }
+    )
+}
+
+// work-around for missing feature in dependencies block added in Gradle 8.3
+//val setupWsl by configurations.registering {
+val setupWslDistribution by configurations.creating {
+    isCanBeConsumed = false
+    isCanBeResolved = false
+    isVisible = false
+}
+
+val setupWslDistributionFiles by configurations.registering {
+    isCanBeConsumed = false
+    isCanBeResolved = true
+    isVisible = false
+    extendsFrom(setupWslDistribution)
+}
+
+dependencies {
+    setupWslDistribution(project(path = ":ncc-packer", configuration = "setupWslDistribution"))
+}
+
+val syncDistribution by tasks.registering(Sync::class) {
+    from(setupWslDistributionFiles)
+    into(layout.buildDirectory.dir("distributions"))
+}
+
 tasks.assemble {
-    dependsOn(project(":ncc-packer").tasks.named("jsNodeProductionRun"))
+    dependsOn(syncDistribution)
 }

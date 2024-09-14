@@ -54,39 +54,80 @@ tasks.withType<IncrementalSyncTask>().configureEach {
     }
 }
 
+// work-around for missing feature in dependencies block added in Gradle 8.3
+//val setupWsl by configurations.registering {
+val setupWslExecutable by configurations.creating {
+    isCanBeConsumed = false
+    isCanBeResolved = false
+    isVisible = false
+}
+
+val setupWslExecutableFile by configurations.registering {
+    isCanBeConsumed = false
+    isCanBeResolved = true
+    isVisible = false
+    extendsFrom(setupWslExecutable)
+}
+
+dependencies {
+    setupWslExecutable(project(path = ":", configuration = "executable"))
+}
+
 // work-around for https://youtrack.jetbrains.com/issue/KT-56305
 tasks.withType<NodeJsExec>().configureEach {
-    abstract class ArgumentProvider @Inject constructor(rootProject: Project) : CommandLineArgumentProvider {
+    val output by extra {
+        layout.buildDirectory.dir("distributions/$name")
+    }
+
+    abstract class ArgumentProvider @Inject constructor(
+        setupWslExecutableFile: Provider<File>,
+        destinationDirectory: Provider<Directory>
+    ) : CommandLineArgumentProvider {
         @get:InputFile
-        @get:SkipWhenEmpty
         abstract val input: RegularFileProperty
 
         @get:OutputDirectory
-        abstract val output: DirectoryProperty
+        abstract val destinationDirectory: DirectoryProperty
 
         init {
-            input.fileProvider(
-                rootProject
-                    .tasks
-                    .named<IncrementalSyncTask>("jsProductionExecutableCompileSync")
-                    .map {
-                        it
-                            .outputs
-                            .files
-                            .asFileTree
-                            .matching { include("${rootProject.name}.js") }
-                            .singleFile
-                    }
-            )
-
-            output.set(rootProject.layout.buildDirectory.dir("distributions"))
+            input.fileProvider(setupWslExecutableFile)
+            this.destinationDirectory.set(destinationDirectory)
         }
 
-        override fun asArguments(): MutableIterable<String> =
-            mutableListOf(
+        override fun asArguments(): Iterable<String> =
+            listOf(
                 input.get().asFile.absolutePath,
-                output.get().asFile.absolutePath
+                destinationDirectory.get().asFile.absolutePath
             )
     }
-    argumentProviders.add(objects.newInstance<ArgumentProvider>(rootProject))
+
+    argumentProviders.add(
+        objects.newInstance<ArgumentProvider>(
+            setupWslExecutableFile
+                .flatMap { it.elements }
+                .map { it.single().asFile },
+            output
+        )
+    )
+
+    doFirst {
+        output.get().asFile.deleteRecursively()
+    }
+}
+
+val setupWslDistribution by configurations.registering {
+    isCanBeConsumed = true
+    isCanBeResolved = false
+    isVisible = false
+}
+
+artifacts {
+    val jsNodeProductionRun by tasks.existing
+    add(
+        setupWslDistribution.name,
+        jsNodeProductionRun.map {
+            val output: Provider<Directory> by it.extra
+            output.get()
+        }
+    )
 }
