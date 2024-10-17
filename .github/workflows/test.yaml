@@ -664,6 +664,7 @@ jobs:
       if: |-
         always()
         && (steps.step-31.outcome == 'success')
+        && (matrix.distribution.user-id != 'kali-linux')
     - id: 'step-37'
       name: 'Test - wsl-bash should use test as default user'
       shell: 'wsl-bash {0}'
@@ -673,6 +674,7 @@ jobs:
       if: |-
         always()
         && (steps.step-36.outcome == 'success')
+        && (matrix.distribution.user-id != 'kali-linux')
     - id: 'step-38'
       name: 'Set wsl-bash wrapper to use user test by default with inline script usage'
       uses: './'
@@ -682,6 +684,7 @@ jobs:
       if: |-
         always()
         && (steps.step-36.outcome == 'success')
+        && (matrix.distribution.user-id != 'kali-linux')
     - id: 'step-39'
       name: 'Test - wsl-bash should use test as default user with inline script usage'
       shell: 'wsl-bash {0}'

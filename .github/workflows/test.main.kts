@@ -412,6 +412,8 @@ workflowWithCopyright(
         )
         executeActionStep = usesSelfAfterSuccess(
             name = "Set wsl-bash wrapper to use user test by default",
+            // part of work-around for https://bugs.kali.org/view.php?id=8921
+            conditionTransformer = { executeActionStep.successNotOnKaliCondition },
             action = executeAction.copy(
                 additionalPackages = listOf("sudo"),
                 wslShellCommand = """bash -c "sudo -u test bash --noprofile --norc -euo pipefail "\"""
@@ -419,11 +421,15 @@ workflowWithCopyright(
         )
         verifyCommandResult(
             name = "Test - wsl-bash should use test as default user",
+            // part of work-around for https://bugs.kali.org/view.php?id=8921
+            conditionTransformer = { executeActionStep.successNotOnKaliCondition },
             actualCommand = "whoami",
             expected = "test"
         )
         executeActionStep = usesSelfAfterSuccess(
             name = "Set wsl-bash wrapper to use user test by default with inline script usage",
+            // part of work-around for https://bugs.kali.org/view.php?id=8921
+            conditionTransformer = { executeActionStep.successNotOnKaliCondition },
             action = executeAction.copy(
                 wslShellCommand = """bash -c "sudo -u test bash --noprofile --norc -euo pipefail '{0}'""""
             )
@@ -774,8 +780,8 @@ workflowWithCopyright(
             // work-around for https://bugs.kali.org/view.php?id=6672
             // and https://bugs.launchpad.net/ubuntu/+source/systemd/+bug/2069555
             condition = """
-                (matrix.distribution.user-id != 'kali-linux')
-                && (matrix.distribution.user-id != 'Ubuntu-24.04')
+                (matrix.distribution.user-id != '${kali["user-id"]}')
+                && (matrix.distribution.user-id != '${ubuntu2404["user-id"]}')
             """.trimIndent()
         )
         executeActionStep = usesSelf(
@@ -861,7 +867,7 @@ workflowWithCopyright(
                 verifyInstalledDistribution(
                     name = "Test - wsl-bash_${expr("matrix.distributions.distribution$i.user-id")} should use the correct distribution",
                     conditionTransformer = if (distributions[i] == ubuntu2004) {
-                        { executeActionStep.getSuccessNotOnDistributionCondition(i, "Ubuntu-20.04") }
+                        { executeActionStep.getSuccessNotOnDistributionCondition(i, ubuntu2004["user-id"]!!) }
                     } else {
                         { it }
                     },
@@ -873,7 +879,7 @@ workflowWithCopyright(
                 if (distributions[i] == ubuntu2004) {
                     verifyInstalledDistribution(
                         name = "Test - wsl-bash_${expr("matrix.distributions.distribution$i.user-id")} should use the correct distribution",
-                        conditionTransformer = { executeActionStep.getSuccessNotOnDistributionCondition(i, "Ubuntu-22.04") },
+                        conditionTransformer = { executeActionStep.getSuccessNotOnDistributionCondition(i, ubuntu2204["user-id"]!!) },
                         shell = Shell.Custom("wsl-bash_${distributions[i]["user-id"]} {0}"),
                         expectedPatternExpression = "matrix.distributions.distribution$i.match-pattern"
                     )
@@ -941,11 +947,12 @@ fun JobBuilder<*>.commonTests() {
 
 fun JobBuilder<*>.usesSelfAfterSuccess(
     name: String = "Execute action",
+    conditionTransformer: (String) -> String = { it },
     action: SetupWsl
 ) = usesSelf(
     name = name,
     action = action,
-    condition = executeActionStep.successCondition
+    condition = conditionTransformer(executeActionStep.successCondition).trimIndent()
 )
 
 fun JobBuilder<*>.usesSelf(
@@ -1078,14 +1085,21 @@ val Step<*>.successOnAlpineCondition
     get() = """
         always()
         && (${outcome.eq(Success)})
-        && (matrix.distribution.user-id == 'Alpine')
+        && (matrix.distribution.user-id == '${alpine["user-id"]}')
+    """.trimIndent()
+
+val Step<*>.successNotOnKaliCondition
+    get() = """
+        always()
+        && (${outcome.eq(Success)})
+        && (matrix.distribution.user-id != '${kali["user-id"]}')
     """.trimIndent()
 
 val Step<*>.successNotOnUbuntu2404Condition
     get() = """
         always()
         && (${outcome.eq(Success)})
-        && (matrix.distribution.user-id != 'Ubuntu-24.04')
+        && (matrix.distribution.user-id != '${ubuntu2404["user-id"]}')
     """.trimIndent()
 
 fun Step<*>.getSuccessNotOnDistributionCondition(i: Int, distribution: String) = """
