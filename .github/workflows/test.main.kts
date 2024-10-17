@@ -624,7 +624,11 @@ workflowWithCopyright(
                 "fail-fast" to false,
                 "matrix" to mapOf(
                     "environment" to environments,
-                    "distribution" to distributions
+                    "distribution" to (
+                            distributions
+                                    // part of work-around for https://bugs.kali.org/view.php?id=8921
+                                    - kali
+                    )
                 )
             )
         )
@@ -770,7 +774,14 @@ workflowWithCopyright(
         usesSelf(
             action = executeAction.copy(
                 additionalPackages = listOf("bash")
-            )
+            ),
+            // part of work-around for https://bugs.kali.org/view.php?id=8921
+            condition = "matrix.distribution.user-id != '${kali["user-id"]}'"
+        )
+        // part of work-around for https://bugs.kali.org/view.php?id=8921
+        usesSelf(
+            action = executeAction,
+            condition = "matrix.distribution.user-id == '${kali["user-id"]}'"
         )
         usesSelf(
             name = "Update distribution",
@@ -788,11 +799,15 @@ workflowWithCopyright(
             name = "Install default absent tool",
             action = executeAction.copy(
                 additionalPackages = listOf(expr("matrix.distribution.default-absent-tool"))
-            )
+            ),
+            // part of work-around for https://bugs.kali.org/view.php?id=8921
+            condition = "matrix.distribution.user-id != '${kali["user-id"]}'"
         )
         runAfterSuccess(
             name = "Test - ${expr("matrix.distribution.default-absent-tool")} should be installed",
-            command = "${expr("matrix.distribution.default-absent-tool")} --version"
+            command = "${expr("matrix.distribution.default-absent-tool")} --version",
+            // part of work-around for https://bugs.kali.org/view.php?id=8921
+            conditionTransformer = { executeActionStep.successNotOnKaliCondition }
         )
         executeActionStep = usesSelfAfterSuccess(
             name = "Execute action for ${expr("matrix.distribution2.user-id")}",

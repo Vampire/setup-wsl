@@ -1081,10 +1081,6 @@ jobs:
           user-id: 'Alpine'
           match-pattern: '*Alpine*'
           default-absent-tool: 'dos2unix'
-        - wsl-id: 'kali-linux'
-          user-id: 'kali-linux'
-          match-pattern: '*Kali*'
-          default-absent-tool: 'dos2unix'
         - wsl-id: 'openSUSE-Leap-15.2'
           user-id: 'openSUSE-Leap-15.2'
           match-pattern: '*openSUSE*Leap*15.2*'
@@ -1431,7 +1427,14 @@ jobs:
       with:
         distribution: '${{ matrix.distribution.user-id }}'
         additional-packages: 'bash'
+      if: 'matrix.distribution.user-id != ''kali-linux'''
     - id: 'step-2'
+      name: 'Execute action'
+      uses: './'
+      with:
+        distribution: '${{ matrix.distribution.user-id }}'
+      if: 'matrix.distribution.user-id == ''kali-linux'''
+    - id: 'step-3'
       name: 'Update distribution'
       uses: './'
       with:
@@ -1440,28 +1443,30 @@ jobs:
       if: |-
         (matrix.distribution.user-id != 'kali-linux')
         && (matrix.distribution.user-id != 'Ubuntu-24.04')
-    - id: 'step-3'
+    - id: 'step-4'
       name: 'Install default absent tool'
       uses: './'
       with:
         distribution: '${{ matrix.distribution.user-id }}'
         additional-packages: '${{ matrix.distribution.default-absent-tool }}'
-    - id: 'step-4'
+      if: 'matrix.distribution.user-id != ''kali-linux'''
+    - id: 'step-5'
       name: 'Test - ${{ matrix.distribution.default-absent-tool }} should be installed'
       shell: 'wsl-bash {0}'
       run: '${{ matrix.distribution.default-absent-tool }} --version'
       if: |-
         always()
-        && (steps.step-3.outcome == 'success')
-    - id: 'step-5'
+        && (steps.step-4.outcome == 'success')
+        && (matrix.distribution.user-id != 'kali-linux')
+    - id: 'step-6'
       name: 'Execute action for ${{ matrix.distribution2.user-id }}'
       uses: './'
       with:
         distribution: '${{ matrix.distribution2.user-id }}'
       if: |-
         always()
-        && (steps.step-3.outcome == 'success')
-    - id: 'step-6'
+        && (steps.step-4.outcome == 'success')
+    - id: 'step-7'
       name: 'Test - "${{ matrix.distribution2.user-id }}" should be the default distribution after installation'
       shell: 'wsl-bash {0}'
       run: |-
@@ -1469,16 +1474,16 @@ jobs:
         [[ "$(cat <(lsb_release -a || true) <(uname -a || true) <([ -d /etc ] && find /etc -maxdepth 1 -type f \( -name '*release' -or -name 'issue*' \) -exec cat {} + || true) <([ -d /etc/products.d ] && find /etc/products.d -maxdepth 1 -type f -name '*.prod' -exec cat {} + || true) <([ -f /proc/version ] && cat /proc/version || true))" == ${{ matrix.distribution2.match-pattern }} ]]
       if: |-
         always()
-        && (steps.step-5.outcome == 'success')
-    - id: 'step-7'
+        && (steps.step-6.outcome == 'success')
+    - id: 'step-8'
       name: 'Re-execute action'
       uses: './'
       with:
         distribution: '${{ matrix.distribution.user-id }}'
       if: |-
         always()
-        && (steps.step-5.outcome == 'success')
-    - id: 'step-8'
+        && (steps.step-6.outcome == 'success')
+    - id: 'step-9'
       name: 'Test - "${{ matrix.distribution2.user-id }}" should still be the default distribution after re-running for "${{ matrix.distribution.user-id }}"'
       shell: 'wsl-bash {0}'
       run: |-
@@ -1486,8 +1491,8 @@ jobs:
         [[ "$(cat <(lsb_release -a || true) <(uname -a || true) <([ -d /etc ] && find /etc -maxdepth 1 -type f \( -name '*release' -or -name 'issue*' \) -exec cat {} + || true) <([ -d /etc/products.d ] && find /etc/products.d -maxdepth 1 -type f -name '*.prod' -exec cat {} + || true) <([ -f /proc/version ] && cat /proc/version || true))" == ${{ matrix.distribution2.match-pattern }} ]]
       if: |-
         always()
-        && (steps.step-7.outcome == 'success')
-    - id: 'step-9'
+        && (steps.step-8.outcome == 'success')
+    - id: 'step-10'
       name: 'Set as default'
       uses: './'
       with:
@@ -1495,8 +1500,8 @@ jobs:
         set-as-default: 'true'
       if: |-
         always()
-        && (steps.step-7.outcome == 'success')
-    - id: 'step-10'
+        && (steps.step-8.outcome == 'success')
+    - id: 'step-11'
       name: 'Test - "${{ matrix.distribution.user-id }}" should be the default distribution after re-running with set-as-default true'
       shell: 'wsl-bash {0}'
       run: |-
@@ -1504,7 +1509,7 @@ jobs:
         [[ "$(cat <(lsb_release -a || true) <(uname -a || true) <([ -d /etc ] && find /etc -maxdepth 1 -type f \( -name '*release' -or -name 'issue*' \) -exec cat {} + || true) <([ -d /etc/products.d ] && find /etc/products.d -maxdepth 1 -type f -name '*.prod' -exec cat {} + || true) <([ -f /proc/version ] && cat /proc/version || true))" == ${{ matrix.distribution.match-pattern }} ]]
       if: |-
         always()
-        && (steps.step-9.outcome == 'success')
+        && (steps.step-10.outcome == 'success')
   test_distribution_specific_wsl_bash_scripts:
     name: 'Test distribution specific wsl-bash scripts on ${{ matrix.environment }} (without ${{ matrix.distributions.incompatibleUbuntu }})'
     runs-on: '${{ matrix.environment }}'
