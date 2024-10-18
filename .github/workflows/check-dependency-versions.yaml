@@ -1,4 +1,4 @@
-# Copyright 2020-2023 Björn Kautler
+# Copyright 2020-2024 Björn Kautler
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -45,10 +45,10 @@ jobs:
       run: 'git config --global core.autocrlf input'
     - id: 'step-1'
       name: 'Checkout'
-      uses: 'actions/checkout@v3'
+      uses: 'actions/checkout@v4'
     - id: 'step-2'
       name: 'Setup Java 11'
-      uses: 'actions/setup-java@v3'
+      uses: 'actions/setup-java@v4'
       with:
         java-version: '11'
         distribution: 'temurin'

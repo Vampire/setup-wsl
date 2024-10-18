@@ -1,7 +1,7 @@
 #!/usr/bin/env kotlin
 
 /*
- * Copyright 2020-2023 Björn Kautler
+ * Copyright 2020-2024 Björn Kautler
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,15 +17,22 @@
  */
 
 @file:Import("workflow-with-copyright.main.kts")
+@file:Repository("https://bindings.krzeminski.it/")
+@file:DependsOn("actions:cache__restore:v4")
+@file:DependsOn("actions:cache__save:v4")
+@file:DependsOn("actions:checkout:v4")
+@file:DependsOn("actions:setup-java:v4")
+@file:DependsOn("burrunan:gradle-cache-action:v1")
+@file:DependsOn("Vampire:setup-wsl:v3")
 
-import io.github.typesafegithub.workflows.actions.actions.CacheRestoreV4
-import io.github.typesafegithub.workflows.actions.actions.CacheSaveV4
-import io.github.typesafegithub.workflows.actions.actions.CheckoutV4
-import io.github.typesafegithub.workflows.actions.actions.SetupJavaV4
-import io.github.typesafegithub.workflows.actions.actions.SetupJavaV4.Distribution.Temurin
-import io.github.typesafegithub.workflows.actions.burrunan.GradleCacheActionV1
-import io.github.typesafegithub.workflows.actions.vampire.SetupWslV3
-import io.github.typesafegithub.workflows.actions.vampire.SetupWslV3.Distribution
+import io.github.typesafegithub.workflows.actions.actions.CacheRestore
+import io.github.typesafegithub.workflows.actions.actions.CacheSave
+import io.github.typesafegithub.workflows.actions.actions.Checkout
+import io.github.typesafegithub.workflows.actions.actions.SetupJava
+import io.github.typesafegithub.workflows.actions.actions.SetupJava.Distribution.Temurin
+import io.github.typesafegithub.workflows.actions.burrunan.GradleCacheAction
+import io.github.typesafegithub.workflows.actions.vampire.SetupWsl
+import io.github.typesafegithub.workflows.actions.vampire.SetupWsl.Distribution
 import io.github.typesafegithub.workflows.domain.CommandStep
 import io.github.typesafegithub.workflows.domain.ActionStep
 import io.github.typesafegithub.workflows.domain.JobOutputs.EMPTY
@@ -129,7 +136,7 @@ val wslBash = Shell.Custom("wsl-bash {0}")
 
 val wslSh = Shell.Custom("wsl-sh {0}")
 
-lateinit var executeActionStep: ActionStep<SetupWslV3.Outputs>
+lateinit var executeActionStep: ActionStep<SetupWsl.Outputs>
 
 workflowWithCopyright(
     name = "Build and Test",
@@ -145,7 +152,7 @@ workflowWithCopyright(
         "build/distributions/"
     )
 
-    val executeAction = SetupWslV3(
+    val executeAction = SetupWsl(
         distribution = Distribution.Custom(expr("matrix.distribution.user-id"))
     )
 
@@ -160,18 +167,18 @@ workflowWithCopyright(
         )
         uses(
             name = "Checkout",
-            action = CheckoutV4()
+            action = Checkout()
         )
         uses(
             name = "Setup Java 11",
-            action = SetupJavaV4(
+            action = SetupJava(
                 javaVersion = "11",
                 distribution = Temurin
             )
         )
         uses(
             name = "Build",
-            action = GradleCacheActionV1(
+            action = GradleCacheAction(
                 arguments = listOf(
                     "--show-version",
                     "build",
@@ -185,7 +192,7 @@ workflowWithCopyright(
         )
         uses(
             name = "Save built artifacts to cache",
-            action = CacheSaveV4(
+            action = CacheSave(
                 path = builtArtifacts,
                 key = expr { github.run_id }
             )
@@ -206,7 +213,7 @@ workflowWithCopyright(
     ) {
         uses(
             name = "Restore built artifacts from cache",
-            action = CacheRestoreV4(
+            action = CacheRestore(
                 path = builtArtifacts,
                 key = expr { github.run_id },
                 failOnCacheMiss = true
@@ -266,7 +273,7 @@ workflowWithCopyright(
         )
     ) {
         executeActionStep = usesSelf(
-            action = SetupWslV3(
+            action = SetupWsl(
                 update = true
             )
         )
@@ -405,6 +412,8 @@ workflowWithCopyright(
         )
         executeActionStep = usesSelfAfterSuccess(
             name = "Set wsl-bash wrapper to use user test by default",
+            // part of work-around for https://bugs.kali.org/view.php?id=8921
+            conditionTransformer = { executeActionStep.successNotOnKaliCondition },
             action = executeAction.copy(
                 additionalPackages = listOf("sudo"),
                 wslShellCommand = """bash -c "sudo -u test bash --noprofile --norc -euo pipefail "\"""
@@ -412,11 +421,15 @@ workflowWithCopyright(
         )
         verifyCommandResult(
             name = "Test - wsl-bash should use test as default user",
+            // part of work-around for https://bugs.kali.org/view.php?id=8921
+            conditionTransformer = { executeActionStep.successNotOnKaliCondition },
             actualCommand = "whoami",
             expected = "test"
         )
         executeActionStep = usesSelfAfterSuccess(
             name = "Set wsl-bash wrapper to use user test by default with inline script usage",
+            // part of work-around for https://bugs.kali.org/view.php?id=8921
+            conditionTransformer = { executeActionStep.successNotOnKaliCondition },
             action = executeAction.copy(
                 wslShellCommand = """bash -c "sudo -u test bash --noprofile --norc -euo pipefail '{0}'""""
             )
@@ -611,7 +624,11 @@ workflowWithCopyright(
                 "fail-fast" to false,
                 "matrix" to mapOf(
                     "environment" to environments,
-                    "distribution" to distributions
+                    "distribution" to (
+                            distributions
+                                    // part of work-around for https://bugs.kali.org/view.php?id=8921
+                                    - kali
+                    )
                 )
             )
         )
@@ -686,26 +703,26 @@ workflowWithCopyright(
     ) {
         usesSelf(
             name = "Execute action for ${expr("matrix.distributions.distribution1.user-id")}",
-            action = SetupWslV3(
+            action = SetupWsl(
                 distribution = Distribution.Custom(expr("matrix.distributions.distribution1.user-id"))
             )
         )
         usesSelf(
             name = "Execute action for ${expr("matrix.distributions.distribution2.user-id")}",
-            action = SetupWslV3(
+            action = SetupWsl(
                 distribution = Distribution.Custom(expr("matrix.distributions.distribution2.user-id"))
             )
         )
         usesSelf(
             name = "Execute action for ${expr("matrix.distributions.distribution3.user-id")}",
-            action = SetupWslV3(
+            action = SetupWsl(
                 distribution = Distribution.Custom(expr("matrix.distributions.distribution3.user-id")),
                 setAsDefault = false
             )
         )
         executeActionStep = usesSelf(
             name = "Execute action for ${expr("matrix.distributions.distribution1.user-id")} again",
-            action = SetupWslV3(
+            action = SetupWsl(
                 distribution = Distribution.Custom(expr("matrix.distributions.distribution1.user-id"))
             )
         )
@@ -757,7 +774,14 @@ workflowWithCopyright(
         usesSelf(
             action = executeAction.copy(
                 additionalPackages = listOf("bash")
-            )
+            ),
+            // part of work-around for https://bugs.kali.org/view.php?id=8921
+            condition = "matrix.distribution.user-id != '${kali["user-id"]}'"
+        )
+        // part of work-around for https://bugs.kali.org/view.php?id=8921
+        usesSelf(
+            action = executeAction,
+            condition = "matrix.distribution.user-id == '${kali["user-id"]}'"
         )
         usesSelf(
             name = "Update distribution",
@@ -765,21 +789,29 @@ workflowWithCopyright(
                 update = true
             ),
             // work-around for https://bugs.kali.org/view.php?id=6672
-            condition = "matrix.distribution.user-id != 'kali-linux'"
+            // and https://bugs.launchpad.net/ubuntu/+source/systemd/+bug/2069555
+            condition = """
+                (matrix.distribution.user-id != '${kali["user-id"]}')
+                && (matrix.distribution.user-id != '${ubuntu2404["user-id"]}')
+            """.trimIndent()
         )
         executeActionStep = usesSelf(
             name = "Install default absent tool",
             action = executeAction.copy(
                 additionalPackages = listOf(expr("matrix.distribution.default-absent-tool"))
-            )
+            ),
+            // part of work-around for https://bugs.kali.org/view.php?id=8921
+            condition = "matrix.distribution.user-id != '${kali["user-id"]}'"
         )
         runAfterSuccess(
             name = "Test - ${expr("matrix.distribution.default-absent-tool")} should be installed",
-            command = "${expr("matrix.distribution.default-absent-tool")} --version"
+            command = "${expr("matrix.distribution.default-absent-tool")} --version",
+            // part of work-around for https://bugs.kali.org/view.php?id=8921
+            conditionTransformer = { executeActionStep.successNotOnKaliCondition }
         )
         executeActionStep = usesSelfAfterSuccess(
             name = "Execute action for ${expr("matrix.distribution2.user-id")}",
-            action = SetupWslV3(
+            action = SetupWsl(
                 distribution = Distribution.Custom(expr("matrix.distribution2.user-id"))
             )
         )
@@ -838,7 +870,7 @@ workflowWithCopyright(
             .associateWith {
                 usesSelf(
                     name = "Execute action for ${expr("matrix.distributions.distribution$it.user-id")}",
-                    action = SetupWslV3(
+                    action = SetupWsl(
                         distribution = Distribution.Custom(expr("matrix.distributions.distribution$it.user-id")),
                         additionalPackages = if (it == 2) listOf("bash") else null,
                         setAsDefault = if (it >= 3) false else null
@@ -850,7 +882,7 @@ workflowWithCopyright(
                 verifyInstalledDistribution(
                     name = "Test - wsl-bash_${expr("matrix.distributions.distribution$i.user-id")} should use the correct distribution",
                     conditionTransformer = if (distributions[i] == ubuntu2004) {
-                        { executeActionStep.getSuccessNotOnDistributionCondition(i, "Ubuntu-20.04") }
+                        { executeActionStep.getSuccessNotOnDistributionCondition(i, ubuntu2004["user-id"]!!) }
                     } else {
                         { it }
                     },
@@ -862,7 +894,7 @@ workflowWithCopyright(
                 if (distributions[i] == ubuntu2004) {
                     verifyInstalledDistribution(
                         name = "Test - wsl-bash_${expr("matrix.distributions.distribution$i.user-id")} should use the correct distribution",
-                        conditionTransformer = { executeActionStep.getSuccessNotOnDistributionCondition(i, "Ubuntu-22.04") },
+                        conditionTransformer = { executeActionStep.getSuccessNotOnDistributionCondition(i, ubuntu2204["user-id"]!!) },
                         shell = Shell.Custom("wsl-bash_${distributions[i]["user-id"]} {0}"),
                         expectedPatternExpression = "matrix.distributions.distribution$i.match-pattern"
                     )
@@ -930,16 +962,17 @@ fun JobBuilder<*>.commonTests() {
 
 fun JobBuilder<*>.usesSelfAfterSuccess(
     name: String = "Execute action",
-    action: SetupWslV3
+    conditionTransformer: (String) -> String = { it },
+    action: SetupWsl
 ) = usesSelf(
     name = name,
     action = action,
-    condition = executeActionStep.successCondition
+    condition = conditionTransformer(executeActionStep.successCondition).trimIndent()
 )
 
 fun JobBuilder<*>.usesSelf(
     name: String = "Execute action",
-    action: SetupWslV3,
+    action: SetupWsl,
     condition: String? = null,
     continueOnError: Boolean? = null
 ) = uses(
@@ -1057,27 +1090,34 @@ fun JobBuilder<*>.verifyCommandResult(
     )
 }
 
-val Step.successCondition
+val Step<*>.successCondition
     get() = """
         always()
         && (${outcome.eq(Success)})
     """.trimIndent()
 
-val Step.successOnAlpineCondition
+val Step<*>.successOnAlpineCondition
     get() = """
         always()
         && (${outcome.eq(Success)})
-        && (matrix.distribution.user-id == 'Alpine')
+        && (matrix.distribution.user-id == '${alpine["user-id"]}')
     """.trimIndent()
 
-val Step.successNotOnUbuntu2404Condition
+val Step<*>.successNotOnKaliCondition
     get() = """
         always()
         && (${outcome.eq(Success)})
-        && (matrix.distribution.user-id != 'Ubuntu-24.04')
+        && (matrix.distribution.user-id != '${kali["user-id"]}')
     """.trimIndent()
 
-fun Step.getSuccessNotOnDistributionCondition(i: Int, distribution: String) = """
+val Step<*>.successNotOnUbuntu2404Condition
+    get() = """
+        always()
+        && (${outcome.eq(Success)})
+        && (matrix.distribution.user-id != '${ubuntu2404["user-id"]}')
+    """.trimIndent()
+
+fun Step<*>.getSuccessNotOnDistributionCondition(i: Int, distribution: String) = """
     always()
     && (${outcome.eq(Success)})
     && (matrix.distributions.distribution$i.user-id != '$distribution')
