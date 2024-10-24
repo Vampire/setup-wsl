@@ -16,8 +16,8 @@
 
 package net.kautler
 
-import net.kautler.util.npm
 import org.gradle.accessors.dm.LibrariesForLibs
+import org.gradle.accessors.dm.LibrariesForKotlinWrappers
 import org.jetbrains.kotlin.gradle.targets.js.nodejs.NodeJsExec
 import org.jetbrains.kotlin.gradle.tasks.IncrementalSyncTask
 
@@ -26,10 +26,11 @@ plugins {
 }
 
 val libs = the<LibrariesForLibs>()
+val kotlinWrappers = the<LibrariesForKotlinWrappers>()
 
 kotlin {
     js {
-        useCommonJs()
+        useEsModules()
         binaries.executable()
         nodejs()
     }
@@ -38,10 +39,9 @@ kotlin {
         jsMain {
             dependencies {
                 implementation(libs.kotlinx.coroutines.core)
-                implementation(dependencies.platform(libs.kotlin.wrappers.bom))
-                implementation(libs.kotlin.wrapper.js)
-                implementation(libs.kotlin.wrapper.node)
-                implementation(npm(libs.build.vercel.ncc))
+                implementation(kotlinWrappers.js)
+                implementation(kotlinWrappers.node)
+                implementation(kotlinWrappers.vercel.ncc)
             }
         }
     }

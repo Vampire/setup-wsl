@@ -16,40 +16,44 @@
 
 package net.kautler.nccpacker
 
-import js.core.jso
-import kotlinx.coroutines.await
+import js.buffer.ArrayBufferView
+import js.objects.Object
+import js.reflect.upcast
 import node.fs.MakeDirectoryOptions
-import node.fs.WriteFileOptions
+import node.fs.WriteFileAsyncOptions
 import node.fs.mkdir
 import node.fs.writeFile
 import node.path.path
 import node.process.process
+import vercel.ncc.NccBuildOptions
+import vercel.ncc.ncc
 
 suspend fun main() {
     runCatching {
         val (input, output) = process.argv.filterIndexed { i, _ -> i > 1 }
-        val result = ncc(input, jso {
-            sourceMap = true
-            license = "LICENSES"
-        }).await()
+        val result = ncc(
+            input,
+            NccBuildOptions(
+                sourceMap = true,
+                license = "LICENSES"
+            )
+        )
 
-        mkdir(output, jso<MakeDirectoryOptions> {
-            recursive = true
-        })
-        writeFile(path.join(output, "index.js"), result.code)
-        result.map?.also { writeFile(path.join(output, "index.js.map"), it) }
+        mkdir(output, MakeDirectoryOptions(recursive = true))
+        writeFile(path.join(output, "index.mjs"), result.code)
+        result.map?.also { writeFile(path.join(output, "index.mjs.map"), it) }
 
-        result.assets?.forEach { (assetFileName, asset) ->
+        result.assets?.let(Object::entries)?.forEach { (assetFileName, asset) ->
             val assetFilePath = path.join(output, assetFileName)
-            mkdir(path.dirname(assetFilePath), jso<MakeDirectoryOptions> {
-                recursive = true
-            })
-            writeFile(assetFilePath, asset.source, jso<WriteFileOptions> {
-                mode = asset.permissions
-            })
+            mkdir(path.dirname(assetFilePath), MakeDirectoryOptions(recursive = true))
+            writeFile(
+                assetFilePath,
+                asset.source.upcast<ArrayBufferView>(),
+                WriteFileAsyncOptions(mode = asset.permissions)
+            )
         }
     }.onFailure {
         console.error(it)
-        process.exit(1)
+        process.exitCode = 1
     }
 }

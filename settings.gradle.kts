@@ -98,6 +98,12 @@ dependencyResolutionManagement {
     // work-around for https://youtrack.jetbrains.com/issue/KT-56300
     //repositoriesMode.set(FAIL_ON_PROJECT_REPOS)
     repositoriesMode.set(PREFER_SETTINGS)
+
+    versionCatalogs {
+        val kotlinWrappers by registering {
+            from("org.jetbrains.kotlin-wrappers:kotlin-wrappers-catalog:0.0.1-pre.819")
+        }
+    }
 }
 
 gradleEnterprise {

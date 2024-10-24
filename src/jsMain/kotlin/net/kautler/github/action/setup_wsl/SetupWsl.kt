@@ -18,10 +18,10 @@
 
 package net.kautler.github.action.setup_wsl
 
-import NullWritable
 import actions.cache.isFeatureAvailable
 import actions.cache.restoreCache
 import actions.cache.saveCache
+import actions.core.InputOptions
 import actions.core.addPath
 import actions.core.debug
 import actions.core.endGroup
@@ -32,6 +32,8 @@ import actions.core.setFailed
 import actions.core.setOutput
 import actions.core.startGroup
 import actions.core.warning
+import actions.exec.ExecListeners
+import actions.exec.ExecOptions
 import actions.exec.exec
 import actions.io.mkdirP
 import actions.io.mv
@@ -39,7 +41,6 @@ import actions.io.which
 import actions.tool.cache.cacheDir
 import actions.tool.cache.downloadTool
 import actions.tool.cache.find
-import js.core.jso
 import kotlinx.coroutines.CoroutineStart.LAZY
 import kotlinx.coroutines.DelicateCoroutinesApi
 import kotlinx.coroutines.GlobalScope
@@ -58,7 +59,8 @@ import node.os.tmpdir
 import node.path.path
 import node.process.Platform
 import node.process.process
-import node.url.URL
+import nullwritable.NullWritable
+import org.w3c.dom.url.URL
 import actions.tool.cache.extractZip as toolCacheExtractZip
 
 val wslHelp = GlobalScope.async(start = LAZY) {
@@ -69,21 +71,21 @@ val wslHelp = GlobalScope.async(start = LAZY) {
     exec(
         commandLine = "wsl",
         args = arrayOf("--help"),
-        options = jso {
-            ignoreReturnCode = true
-            outStream = NullWritable()
-            errStream = NullWritable()
-            listeners = jso {
+        options = ExecOptions(
+            ignoreReturnCode = true,
+            outStream = NullWritable(),
+            errStream = NullWritable(),
+            listeners = ExecListeners(
                 stdout = {
                     stdoutBuilder.append(it)
                     stdoutBuilderUtf16Le.append(it.toString(BufferEncoding.utf16le))
-                }
+                },
                 stderr = {
                     stderrBuilder.append(it)
                     stderrBuilderUtf16Le.append(it.toString(BufferEncoding.utf16le))
                 }
-            }
-        }
+            )
+        )
     )
     stdoutBuilder.append(stdoutBuilderUtf16Le)
     stdoutBuilder.append(stderrBuilder)
@@ -92,9 +94,7 @@ val wslHelp = GlobalScope.async(start = LAZY) {
 }
 
 val distribution by lazy {
-    val distributionId = getInput("distribution", jso {
-        required = true
-    })
+    val distributionId = getInput("distribution", InputOptions(required = true))
 
     return@lazy requireNotNull(distributions[distributionId]) {
         "'${distributionId}' is not a valid distribution. Valid values: ${
@@ -121,11 +121,11 @@ val installationNeeded = GlobalScope.async(start = LAZY) {
             distribution.wslId,
             "true"
         ),
-        options = jso {
-            ignoreReturnCode = true
-            outStream = NullWritable()
+        options = ExecOptions(
+            ignoreReturnCode = true,
+            outStream = NullWritable(),
             errStream = NullWritable()
-        }
+        )
     ) != 0
 }
 
@@ -135,11 +135,7 @@ val toolCacheDir = GlobalScope.async(start = LAZY) {
 }
 
 val useCache by lazy {
-    val input = getInput("use-cache", jso {
-        required = true
-    })
-
-    val result = when (input) {
+    val result = when (val input = getInput("use-cache", InputOptions(required = true))) {
         "true" -> true
         "false" -> false
         "true | false" -> isFeatureAvailable()
@@ -207,11 +203,7 @@ val wslConf by lazy {
 }
 
 val setAsDefault = GlobalScope.async(start = LAZY) {
-    val input = getInput("set-as-default", jso {
-        required = true
-    })
-
-    when (input) {
+    when (val input = getInput("set-as-default", InputOptions(required = true))) {
         "true" -> true
         "false" -> false
         "true | false" -> installationNeeded()
@@ -220,9 +212,7 @@ val setAsDefault = GlobalScope.async(start = LAZY) {
 }
 
 val update by lazy {
-    getBooleanInput("update", jso {
-        required = true
-    })
+    getBooleanInput("update", InputOptions(required = true))
 }
 
 val additionalPackages by lazy {
@@ -255,7 +245,10 @@ val wslShellWrapperPath by lazy {
 }
 
 val wslShellDistributionWrapperPath by lazy {
-    path.join(wslShellWrapperDirectory, "wsl-${wslShellName}_${distribution.userId.replace("[^a-zA-Z0-9.-]+".toRegex(), "_")}.bat")
+    path.join(
+        wslShellWrapperDirectory,
+        "wsl-${wslShellName}_${distribution.userId.replace("[^a-zA-Z0-9.-]+".toRegex(), "_")}.bat"
+    )
 }
 
 suspend fun main() {
@@ -350,9 +343,7 @@ suspend fun installDistribution() {
     exec(
         commandLine = """"${path.join(distributionDirectory(), distribution.installerFile)}"""",
         args = arrayOf("install", "--root"),
-        options = jso {
-            input = Buffer.from("")
-        }
+        options = ExecOptions(input = Buffer.from(""))
     )
 }
 
@@ -390,9 +381,7 @@ suspend fun writeWslShellWrapper() {
             "-c",
             "true"
         ),
-        options = jso {
-            ignoreReturnCode = true
-        }
+        options = ExecOptions(ignoreReturnCode = true)
     ) != 0)
 
     if (wslShellUser.isNotEmpty()) {
@@ -405,9 +394,7 @@ suspend fun writeWslShellWrapper() {
                 "-u",
                 wslShellUser
             ),
-            options = jso {
-                ignoreReturnCode = true
-            }
+            options = ExecOptions(ignoreReturnCode = true)
         ) == 0
         if (!wslShellUserExists) {
             exec(

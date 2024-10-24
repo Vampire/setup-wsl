@@ -24,6 +24,7 @@ plugins {
 
 dependencies {
     implementation(files(libs.javaClass.superclass.protectionDomain.codeSource.location))
+    implementation(files(kotlinWrappers.javaClass.superclass.protectionDomain.codeSource.location))
     implementation(plugin(libs.plugins.versions))
     implementation(plugin(libs.plugins.dependency.analysis))
     implementation(plugin(libs.plugins.release))

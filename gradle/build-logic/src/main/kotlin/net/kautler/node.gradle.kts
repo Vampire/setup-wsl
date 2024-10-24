@@ -19,6 +19,7 @@ package net.kautler
 import net.kautler.dao.action.GitHubAction
 import net.kautler.util.npm
 import org.gradle.accessors.dm.LibrariesForLibs
+import org.gradle.accessors.dm.LibrariesForKotlinWrappers
 import org.jetbrains.kotlin.gradle.targets.js.nodejs.NodeJsExec
 import org.jetbrains.kotlin.gradle.targets.js.nodejs.NodeJsRootExtension
 import org.jetbrains.kotlin.gradle.tasks.IncrementalSyncTask
@@ -29,10 +30,11 @@ plugins {
 }
 
 val libs = the<LibrariesForLibs>()
+val kotlinWrappers = the<LibrariesForKotlinWrappers>()
 
 kotlin {
     js {
-        useCommonJs()
+        useEsModules()
         binaries.executable()
         nodejs()
     }
@@ -41,21 +43,39 @@ kotlin {
         jsMain {
             dependencies {
                 implementation(libs.kotlinx.coroutines.core)
-                implementation(dependencies.platform(libs.kotlin.wrappers.bom))
-                implementation(libs.kotlin.wrapper.actions.toolkit)
-                implementation(libs.kotlin.wrapper.js)
-                implementation(libs.kotlin.wrapper.node)
-                implementation(npm(libs.semver))
-                implementation(npm(libs.nullWritable))
+                implementation(libs.ktor.client.core)
+                implementation(libs.ktor.client.js)
+                implementation(kotlinWrappers.actions.toolkit)
+                implementation(kotlinWrappers.js)
+                implementation(kotlinWrappers.node)
+                implementation(kotlinWrappers.semver)
+                implementation(kotlinWrappers.nullWritable)
             }
         }
     }
 }
 
-// work-around for https://youtrack.jetbrains.com/issue/KT-56305
 tasks.withType<IncrementalSyncTask>().configureEach {
+    // work-around for https://youtrack.jetbrains.com/issue/KT-56305
     doFirst {
         outputs.files.forEach { it.deleteRecursively() }
+    }
+
+    // work-around for https://youtrack.jetbrains.com/issue/KTOR-6158
+    doLast {
+        outputs
+            .files
+            .asFileTree
+            .filter { it.name == "setup-wsl.mjs" }
+            .forEach {
+                it
+                    .readText()
+                    .replace("eval('require')('abort-controller')", "globalThis.AbortController")
+                    .replace("eval('require')('node-fetch')", "globalThis.fetch")
+                    .replace("function readBodyNode(", "function _readBodyNode(")
+                    .replace(" readBodyNode(", " readBodyBrowser(")
+                    .apply(it::writeText)
+            }
     }
 }
 
@@ -109,7 +129,7 @@ artifacts {
             it
                 .destinationDirectory
                 .get()
-                .resolve("${project.name}.js")
+                .resolve("${project.name}.mjs")
         }
     )
 }

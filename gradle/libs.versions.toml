@@ -24,12 +24,9 @@ build-inject = "1"
 build-kotlinx-serialization = "1.5.0"
 build-node = "20.11.0"
 build-snakeyaml = "2.0"
-build-vercel-ncc = "0.36.1"
 kotlin = "2.0.20"
-kotlin-wrappers = "1.0.0-pre.529"
 kotlinx-coroutines = "1.6.4"
-nullWritable = "1.0.5"
-semver = "7.3.8"
+ktor = "3.0.0"
 workflows-kotlin = "2.0.20"
 
 [libraries]
@@ -39,14 +36,9 @@ build-kotlinx-serialization-bom = { module = "org.jetbrains.kotlinx:kotlinx-seri
 build-kotlinx-serialization-core = { module = "org.jetbrains.kotlinx:kotlinx-serialization-core" }
 build-kotlinx-serialization-json = { module = "org.jetbrains.kotlinx:kotlinx-serialization-json" }
 build-snakeyaml = { module = "org.yaml:snakeyaml", version.ref = "build-snakeyaml" }
-build-vercel-ncc = { module = "vercel:ncc", version.ref = "build-vercel-ncc" }
-kotlin-wrapper-actions-toolkit = { module = "org.jetbrains.kotlin-wrappers:kotlin-actions-toolkit" }
-kotlin-wrapper-js = { module = "org.jetbrains.kotlin-wrappers:kotlin-js" }
-kotlin-wrapper-node = { module = "org.jetbrains.kotlin-wrappers:kotlin-node" }
-kotlin-wrappers-bom = { module = "org.jetbrains.kotlin-wrappers:kotlin-wrappers-bom", version.ref = "kotlin-wrappers" }
 kotlinx-coroutines-core = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-core", version.ref = "kotlinx-coroutines" }
-nullWritable = { module = "<unscoped>:null-writable", version.ref = "nullWritable" }
-semver = { module = "<unscoped>:semver", version.ref = "semver" }
+ktor-client-core = { module = "io.ktor:ktor-client-core", version.ref = "ktor" }
+ktor-client-js = { module = "io.ktor:ktor-client-js", version.ref = "ktor" }
 workflows-kotlin-compiler = { module = "org.jetbrains.kotlin:kotlin-compiler", version.ref = "workflows-kotlin" }
 workflows-kotlin-main-kts = { module = "org.jetbrains.kotlin:kotlin-main-kts", version.ref = "workflows-kotlin" }
 workflows-kotlin-scripting-compiler = { module = "org.jetbrains.kotlin:kotlin-scripting-compiler", version.ref = "workflows-kotlin" }

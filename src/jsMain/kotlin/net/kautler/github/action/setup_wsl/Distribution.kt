@@ -16,21 +16,25 @@
 
 package net.kautler.github.action.setup_wsl
 
-import SemVer
 import actions.core.debug
 import actions.core.info
 import actions.core.isDebug
+import actions.exec.ExecOptions
 import actions.exec.exec
-import actions.http.client.HttpClient
-import js.core.jso
-import js.core.recordOf
+import io.ktor.client.HttpClient
+import io.ktor.client.engine.js.Js
+import io.ktor.client.plugins.UserAgent
+import io.ktor.client.request.forms.submitForm
+import io.ktor.client.statement.bodyAsText
+import io.ktor.http.HttpStatusCode.Companion.OK
+import io.ktor.http.parameters
+import js.objects.recordOf
 import kotlinx.coroutines.CoroutineStart.LAZY
 import kotlinx.coroutines.DelicateCoroutinesApi
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.async
-import kotlinx.coroutines.await
 import org.w3c.dom.url.URL
-import RangeOptions as SemVerRangeOptions
+import semver.SemVer
 
 val distributions = listOf(
     Alpine,
@@ -59,51 +63,53 @@ sealed class Distribution(
             return@async _downloadUrl
         }
 
-        return@async retry(5) {
-            val response = HttpClient().post(
-                requestUrl = "https://store.rg-adguard.net/api/GetFiles",
-                data = "type=ProductId&url=$productId",
-                additionalHeaders = recordOf(
-                    "Content-Type" to "application/x-www-form-urlencoded",
-                    "User-Agent" to "Setup WSL GitHub Action"
-                )
-            ).await()
+        val client = HttpClient(Js) {
+            install(UserAgent) {
+                agent = "Setup WSL GitHub Action"
+            }
+        }
 
-            if (response.message.statusCode != 200) {
+        val parameters = parameters {
+            append("type", "ProductId")
+            append("url", productId!!)
+        }
+
+        return@async retry(5) {
+            val response = client.submitForm(
+                url = "https://store.rg-adguard.net/api/GetFiles",
+                formParameters = parameters
+            )
+
+            if (response.status != OK) {
                 if (isDebug()) {
-                    val echoResponse = HttpClient().post(
-                        requestUrl = "https://echo.free.beeceptor.com/api/GetFiles",
-                        data = "type=ProductId&url=$productId",
-                        additionalHeaders = recordOf(
-                            "Content-Type" to "application/x-www-form-urlencoded",
-                            "User-Agent" to "Setup WSL GitHub Action"
-                        )
-                    ).await()
-                    if (echoResponse.message.statusCode == 200) {
-                        debug("Request:\n${echoResponse.readBody().await()}")
+                    val echoResponse = client.submitForm(
+                        url = "https://echo.free.beeceptor.com/api/GetFiles",
+                        formParameters = parameters
+                    )
+                    if (echoResponse.status == OK) {
+                        debug("Request:\n${echoResponse.bodyAsText()}")
                     } else {
-                        debug("Could not get echo response (statusCode: ${echoResponse.message.statusCode} / statusMessage: ${echoResponse.message.statusMessage})")
+                        debug("Could not get echo response (statusCode: ${echoResponse.status.value} / statusMessage: ${echoResponse.status.description})")
                     }
 
                     val responseMessage = JSON.stringify(
                         recordOf(
-                            "httpVersion" to response.message.httpVersion,
-                            "headers" to response.message.headers,
-                            "trailers" to response.message.trailers,
-                            "method" to (response.message.method ?: "<unknown>"),
-                            "url" to (response.message.url ?: "<unknown>"),
-                            "statusCode" to (response.message.statusCode ?: "<unknown>"),
-                            "statusMessage" to (response.message.statusMessage ?: "<unknown>"),
-                            "body" to response.readBody().await()
+                            "httpVersion" to "${response.version}",
+                            "headers" to "${response.headers}",
+                            "method" to "${response.call.request.method}",
+                            "url" to "${response.call.request.url}",
+                            "statusCode" to response.status.value,
+                            "statusMessage" to response.status.description,
+                            "body" to response.bodyAsText()
                         ),
                         space = 2
                     )
                     debug("Response:\n$responseMessage")
                 }
-                error("Could not determine download URL (statusCode: ${response.message.statusCode} / statusMessage: ${response.message.statusMessage})")
+                error("Could not determine download URL (statusCode: ${response.status.value} / statusMessage: ${response.status.description})")
             }
 
-            val body = response.readBody().await()
+            val body = response.bodyAsText()
             val downloadLinkAnchorMatch =
                 """<a [^>]*href="(?<url>[^"]+)"[^>]*>[^<]*\.appx(?:bundle)?</a>""".toRegex().find(body)
                     ?: error("Could not determine download URL from:\n$body")
@@ -195,12 +201,12 @@ abstract class AptGetBasedDistribution : Distribution {
                 "apt-get",
                 "update"
             ),
-            options = jso {
+            options = ExecOptions(
                 env = recordOf(
                     "DEBIAN_FRONTEND" to "noninteractive",
                     "WSLENV" to "DEBIAN_FRONTEND/u"
                 )
-            }
+            )
         )
     }
 
@@ -215,12 +221,12 @@ abstract class AptGetBasedDistribution : Distribution {
                 "upgrade",
                 "--yes"
             ),
-            options = jso {
+            options = ExecOptions(
                 env = recordOf(
                     "DEBIAN_FRONTEND" to "noninteractive",
                     "WSLENV" to "DEBIAN_FRONTEND/u"
                 )
-            }
+            )
         )
     }
 
@@ -237,12 +243,12 @@ abstract class AptGetBasedDistribution : Distribution {
                 "--no-install-recommends",
                 *packages
             ),
-            options = jso {
+            options = ExecOptions(
                 env = recordOf(
                     "DEBIAN_FRONTEND" to "noninteractive",
                     "WSLENV" to "DEBIAN_FRONTEND/u"
                 )
-            }
+            )
         )
     }
 }
@@ -250,7 +256,7 @@ abstract class AptGetBasedDistribution : Distribution {
 object Ubuntu2404 : AptGetBasedDistribution(
     wslId = "Ubuntu-24.04",
     distributionName = "Ubuntu",
-    version = SemVer("24.4.0", jso<SemVerRangeOptions>()),
+    version = SemVer("24.4.0"),
     // work-around for missing shortlink on https://learn.microsoft.com/en-us/windows/wsl/install-manual#downloading-distributions
     //downloadUrl = URL("https://aka.ms/wslubuntu2404"),
     downloadUrl = URL("https://wslstorestorage.blob.core.windows.net/wslblob/Ubuntu2404-240425.AppxBundle"),
@@ -261,7 +267,7 @@ object Ubuntu2204 : AptGetBasedDistribution(
     wslId = "Ubuntu",
     userId = "Ubuntu-22.04",
     distributionName = "Ubuntu",
-    version = SemVer("22.4.0", jso<SemVerRangeOptions>()),
+    version = SemVer("22.4.0"),
     downloadUrl = URL("https://aka.ms/wslubuntu2204"),
     installerFile = "ubuntu.exe"
 )
@@ -270,7 +276,7 @@ object Ubuntu2004 : AptGetBasedDistribution(
     wslId = "Ubuntu",
     userId = "Ubuntu-20.04",
     distributionName = "Ubuntu",
-    version = SemVer("20.4.0", jso<SemVerRangeOptions>()),
+    version = SemVer("20.4.0"),
     downloadUrl = URL("https://aka.ms/wslubuntu2004"),
     installerFile = "ubuntu.exe"
 )
@@ -278,7 +284,7 @@ object Ubuntu2004 : AptGetBasedDistribution(
 object Ubuntu1804 : AptGetBasedDistribution(
     wslId = "Ubuntu-18.04",
     distributionName = "Ubuntu",
-    version = SemVer("18.4.0", jso<SemVerRangeOptions>()),
+    version = SemVer("18.4.0"),
     downloadUrl = URL("https://aka.ms/wsl-ubuntu-1804"),
     installerFile = "ubuntu1804.exe"
 )
@@ -286,7 +292,7 @@ object Ubuntu1804 : AptGetBasedDistribution(
 object Ubuntu1604 : AptGetBasedDistribution(
     wslId = "Ubuntu-16.04",
     distributionName = "Ubuntu",
-    version = SemVer("16.4.0", jso<SemVerRangeOptions>()),
+    version = SemVer("16.4.0"),
     downloadUrl = URL("https://aka.ms/wsl-ubuntu-1604"),
     installerFile = "ubuntu1604.exe"
 )
@@ -294,7 +300,7 @@ object Ubuntu1604 : AptGetBasedDistribution(
 object Debian : AptGetBasedDistribution(
     wslId = "Debian",
     distributionName = "Debian",
-    version = SemVer("1.0.0", jso<SemVerRangeOptions>()),
+    version = SemVer("1.0.0"),
     downloadUrl = URL("https://aka.ms/wsl-debian-gnulinux"),
     installerFile = "debian.exe"
 )
@@ -302,7 +308,7 @@ object Debian : AptGetBasedDistribution(
 object Kali : AptGetBasedDistribution(
     wslId = "kali-linux",
     distributionName = "Kali",
-    version = SemVer("1.0.0", jso<SemVerRangeOptions>()),
+    version = SemVer("1.0.0"),
     downloadUrl = URL("https://aka.ms/wsl-kali-linux-new"),
     installerFile = "kali.exe"
 )
@@ -388,7 +394,7 @@ abstract class ZypperBasedDistribution : Distribution {
 object OpenSuseLeap15_2 : ZypperBasedDistribution(
     wslId = "openSUSE-Leap-15.2",
     distributionName = "openSUSE Leap",
-    version = SemVer("15.2.0", jso<SemVerRangeOptions>()),
+    version = SemVer("15.2.0"),
     downloadUrl = URL("https://aka.ms/wsl-opensuseleap15-2"),
     installerFile = "openSUSE-Leap-15.2.exe"
 ) {
@@ -477,7 +483,7 @@ abstract class ApkBasedDistribution : Distribution {
 object Alpine : ApkBasedDistribution(
     wslId = "Alpine",
     distributionName = "Alpine",
-    version = SemVer("1.0.3", jso<SemVerRangeOptions>()),
+    version = SemVer("1.0.3"),
     productId = "9p804crf0395",
     installerFile = "Alpine.exe"
 )

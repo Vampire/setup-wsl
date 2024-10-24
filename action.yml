@@ -109,4 +109,4 @@ outputs:
 
 runs:
     using: node20
-    main: build/distributions/index.js
+    main: build/distributions/index.mjs
