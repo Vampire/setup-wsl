@@ -1,5 +1,5 @@
 /*
- * Copyright 2020-2023 Björn Kautler
+ * Copyright 2020-2024 Björn Kautler
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -30,6 +30,7 @@ import org.jetbrains.kotlin.config.CompilerConfiguration
 import org.jetbrains.kotlin.psi.KtFile
 import org.jetbrains.kotlin.psi.KtLiteralStringTemplateEntry
 import org.jetbrains.kotlin.psi.KtStringTemplateExpression
+import java.nio.file.Path
 
 plugins {
     `java-base`
@@ -110,14 +111,18 @@ val File.importedFiles: List<File>
                     .project
             )
             .findFile(
-                CoreLocalVirtualFile(
-                    CoreLocalFileSystem(),
-                    this
-                )
+                // work-around for API change between version we compile against and version we run against
+                // after upgrading Gradle to a version that contains Kotlin 1.9 the embeddable compiler can
+                // be upgraded to v2 also for compilation and then this can be removed
+                CoreLocalVirtualFile::class
+                    .java
+                    .getConstructor(CoreLocalFileSystem::class.java, Path::class.java)
+                    .newInstance(CoreLocalFileSystem(), toPath())
             )
             .let { it as KtFile }
             .fileAnnotationList
             ?.annotationEntries
+            ?.asSequence()
             ?.filter { it.shortName?.asString() == "Import" }
             ?.flatMap { it.valueArgumentList?.arguments ?: emptyList() }
             ?.mapNotNull { it.getArgumentExpression() as? KtStringTemplateExpression }
@@ -125,5 +130,6 @@ val File.importedFiles: List<File>
             ?.mapNotNull { it as? KtLiteralStringTemplateEntry }
             ?.map { resolveSibling(it.text) }
             ?.flatMap { it.importedFiles + it }
+            ?.toList()
             ?: emptyList()
     }

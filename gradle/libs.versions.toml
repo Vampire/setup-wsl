@@ -1,4 +1,4 @@
-# Copyright 2020-2023 Björn Kautler
+# Copyright 2020-2024 Björn Kautler
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -24,13 +24,10 @@ build-inject = "1"
 build-kotlinx-serialization = "1.5.0"
 build-node = "20.11.0"
 build-snakeyaml = "2.0"
-build-vercel-ncc = "0.36.1"
-kotlin = "1.8.20"
-kotlin-wrappers = "1.0.0-pre.529"
+kotlin = "2.0.20"
 kotlinx-coroutines = "1.6.4"
-nullWritable = "1.0.5"
-semver = "7.3.8"
-workflows-kotlin = "1.8.20"
+ktor = "3.0.0"
+workflows-kotlin = "2.0.20"
 
 [libraries]
 build-github-api = { module = "org.kohsuke:github-api", version.ref = "build-github-api" }
@@ -39,14 +36,9 @@ build-kotlinx-serialization-bom = { module = "org.jetbrains.kotlinx:kotlinx-seri
 build-kotlinx-serialization-core = { module = "org.jetbrains.kotlinx:kotlinx-serialization-core" }
 build-kotlinx-serialization-json = { module = "org.jetbrains.kotlinx:kotlinx-serialization-json" }
 build-snakeyaml = { module = "org.yaml:snakeyaml", version.ref = "build-snakeyaml" }
-build-vercel-ncc = { module = "vercel:ncc", version.ref = "build-vercel-ncc" }
-kotlin-wrapper-actions-toolkit = { module = "org.jetbrains.kotlin-wrappers:kotlin-actions-toolkit" }
-kotlin-wrapper-js = { module = "org.jetbrains.kotlin-wrappers:kotlin-js" }
-kotlin-wrapper-node = { module = "org.jetbrains.kotlin-wrappers:kotlin-node" }
-kotlin-wrappers-bom = { module = "org.jetbrains.kotlin-wrappers:kotlin-wrappers-bom", version.ref = "kotlin-wrappers" }
 kotlinx-coroutines-core = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-core", version.ref = "kotlinx-coroutines" }
-nullWritable = { module = "<unscoped>:null-writable", version.ref = "nullWritable" }
-semver = { module = "<unscoped>:semver", version.ref = "semver" }
+ktor-client-core = { module = "io.ktor:ktor-client-core", version.ref = "ktor" }
+ktor-client-js = { module = "io.ktor:ktor-client-js", version.ref = "ktor" }
 workflows-kotlin-compiler = { module = "org.jetbrains.kotlin:kotlin-compiler", version.ref = "workflows-kotlin" }
 workflows-kotlin-main-kts = { module = "org.jetbrains.kotlin:kotlin-main-kts", version.ref = "workflows-kotlin" }
 workflows-kotlin-scripting-compiler = { module = "org.jetbrains.kotlin:kotlin-scripting-compiler", version.ref = "workflows-kotlin" }
@@ -62,7 +54,7 @@ convention-readme = { id = "net.kautler.readme", version = "?" }
 dependency-analysis = { id = "com.autonomousapps.dependency-analysis", version.ref = "build-gradle-plugin-dependency-analysis" }
 github = { id = "net.wooga.github", version.ref = "build-gradle-plugin-github" }
 grgit = { id = "org.ajoberstar.grgit.service", version.ref = "build-gradle-plugin-grgit" }
-kotlin-js = { id = "org.jetbrains.kotlin.js", version.ref = "kotlin" }
+kotlin-multiplatform = { id = "org.jetbrains.kotlin.multiplatform", version.ref = "kotlin" }
 refresh-versions = { id = "de.fayard.refreshVersions", version.ref = "build-gradle-plugin-refresh-versions" }
 release = { id = "net.researchgate.release", version.ref = "build-gradle-plugin-release" }
 versions = { id = "com.github.ben-manes.versions", version.ref = "build-gradle-plugin-versions" }

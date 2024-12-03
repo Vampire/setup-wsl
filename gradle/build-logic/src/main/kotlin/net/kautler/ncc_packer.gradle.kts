@@ -1,5 +1,5 @@
 /*
- * Copyright 2020-2023 Björn Kautler
+ * Copyright 2020-2024 Björn Kautler
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,74 +16,118 @@
 
 package net.kautler
 
-import net.kautler.util.npm
 import org.gradle.accessors.dm.LibrariesForLibs
+import org.gradle.accessors.dm.LibrariesForKotlinWrappers
 import org.jetbrains.kotlin.gradle.targets.js.nodejs.NodeJsExec
+import org.jetbrains.kotlin.gradle.tasks.IncrementalSyncTask
 
 plugins {
-    kotlin("js")
+    kotlin("multiplatform")
 }
 
+val libs = the<LibrariesForLibs>()
+val kotlinWrappers = the<LibrariesForKotlinWrappers>()
+
 kotlin {
-    js(IR) {
-        useCommonJs()
+    js {
+        useEsModules()
         binaries.executable()
         nodejs()
+    }
+
+    sourceSets {
+        jsMain {
+            dependencies {
+                implementation(libs.kotlinx.coroutines.core)
+                implementation(kotlinWrappers.js)
+                implementation(kotlinWrappers.node)
+                implementation(kotlinWrappers.vercel.ncc)
+            }
+        }
     }
 }
 
 // work-around for https://youtrack.jetbrains.com/issue/KT-56305
-tasks.withType<Copy>().configureEach {
-    if (name.endsWith("ExecutableCompileSync")) {
-        doFirst {
-            outputs.files.forEach { it.deleteRecursively() }
-        }
+tasks.withType<IncrementalSyncTask>().configureEach {
+    doFirst {
+        outputs.files.forEach { it.deleteRecursively() }
     }
+}
+
+// work-around for missing feature in dependencies block added in Gradle 8.3
+//val setupWsl by configurations.registering {
+val setupWslExecutable by configurations.creating {
+    isCanBeConsumed = false
+    isCanBeResolved = false
+    isVisible = false
+}
+
+val setupWslExecutableFile by configurations.registering {
+    isCanBeConsumed = false
+    isCanBeResolved = true
+    isVisible = false
+    extendsFrom(setupWslExecutable)
+}
+
+dependencies {
+    setupWslExecutable(project(path = ":", configuration = "executable"))
 }
 
 // work-around for https://youtrack.jetbrains.com/issue/KT-56305
 tasks.withType<NodeJsExec>().configureEach {
-    abstract class ArgumentProvider @Inject constructor(rootProject: Project) : CommandLineArgumentProvider {
+    val output by extra {
+        layout.buildDirectory.dir("distributions/$name")
+    }
+
+    abstract class ArgumentProvider @Inject constructor(
+        setupWslExecutableFile: Provider<File>,
+        destinationDirectory: Provider<Directory>
+    ) : CommandLineArgumentProvider {
         @get:InputFile
-        @get:SkipWhenEmpty
         abstract val input: RegularFileProperty
 
         @get:OutputDirectory
-        abstract val output: DirectoryProperty
+        abstract val destinationDirectory: DirectoryProperty
 
         init {
-            input.fileProvider(
-                rootProject
-                    .tasks
-                    .named<Copy>("productionExecutableCompileSync")
-                    .map {
-                        it
-                            .outputs
-                            .files
-                            .asFileTree
-                            .matching { include("${rootProject.name}.js") }
-                            .singleFile
-                    }
-            )
-
-            output.set(rootProject.layout.buildDirectory.dir("distributions"))
+            input.fileProvider(setupWslExecutableFile)
+            this.destinationDirectory.set(destinationDirectory)
         }
 
-        override fun asArguments(): MutableIterable<String> =
-            mutableListOf(
+        override fun asArguments(): Iterable<String> =
+            listOf(
                 input.get().asFile.absolutePath,
-                output.get().asFile.absolutePath
+                destinationDirectory.get().asFile.absolutePath
             )
     }
-    argumentProviders.add(objects.newInstance<ArgumentProvider>(rootProject))
+
+    argumentProviders.add(
+        objects.newInstance<ArgumentProvider>(
+            setupWslExecutableFile
+                .flatMap { it.elements }
+                .map { it.single().asFile },
+            output
+        )
+    )
+
+    doFirst {
+        output.get().asFile.deleteRecursively()
+    }
 }
 
-val libs = the<LibrariesForLibs>()
+val setupWslDistribution by configurations.registering {
+    isCanBeConsumed = true
+    isCanBeResolved = false
+    isVisible = false
+}
 
-dependencies {
-    implementation(libs.kotlinx.coroutines.core)
-    implementation(platform(libs.kotlin.wrappers.bom))
-    implementation(libs.kotlin.wrapper.js)
-    implementation(libs.kotlin.wrapper.node)
-    implementation(npm(libs.build.vercel.ncc))
+artifacts {
+    val jsNodeProductionRun by tasks.existing
+    add(
+        setupWslDistribution.name,
+        jsNodeProductionRun.map {
+            val output: Provider<Directory> by it.extra
+            output.get()
+        }
+    )
 }

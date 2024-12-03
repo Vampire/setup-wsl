@@ -82,8 +82,12 @@ dependencyResolutionManagement {
     repositoriesMode.set(FAIL_ON_PROJECT_REPOS)
 
     versionCatalogs {
-        create("libs") {
+        val libs by registering {
             from(files("../libs.versions.toml"))
+        }
+
+        val kotlinWrappers by registering {
+            from("org.jetbrains.kotlin-wrappers:kotlin-wrappers-catalog:0.0.1-pre.819")
         }
     }
 }

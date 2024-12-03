@@ -1,5 +1,5 @@
 /*
- * Copyright 2020-2023 Björn Kautler
+ * Copyright 2020-2024 Björn Kautler
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,12 +24,13 @@ plugins {
 
 dependencies {
     implementation(files(libs.javaClass.superclass.protectionDomain.codeSource.location))
+    implementation(files(kotlinWrappers.javaClass.superclass.protectionDomain.codeSource.location))
     implementation(plugin(libs.plugins.versions))
     implementation(plugin(libs.plugins.dependency.analysis))
     implementation(plugin(libs.plugins.release))
     implementation(plugin(libs.plugins.grgit))
     implementation(plugin(libs.plugins.github))
-    implementation(plugin(libs.plugins.kotlin.js))
+    implementation(plugin(libs.plugins.kotlin.multiplatform))
     implementation(":dependency-updates-report-aggregation")
     implementation(libs.build.inject)
     implementation(libs.build.github.api)

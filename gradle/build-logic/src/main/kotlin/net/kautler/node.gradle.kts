@@ -19,28 +19,63 @@ package net.kautler
 import net.kautler.dao.action.GitHubAction
 import net.kautler.util.npm
 import org.gradle.accessors.dm.LibrariesForLibs
+import org.gradle.accessors.dm.LibrariesForKotlinWrappers
 import org.jetbrains.kotlin.gradle.targets.js.nodejs.NodeJsExec
 import org.jetbrains.kotlin.gradle.targets.js.nodejs.NodeJsRootExtension
+import org.jetbrains.kotlin.gradle.tasks.IncrementalSyncTask
 import org.yaml.snakeyaml.Yaml
 
 plugins {
-    kotlin("js")
+    kotlin("multiplatform")
 }
 
+val libs = the<LibrariesForLibs>()
+val kotlinWrappers = the<LibrariesForKotlinWrappers>()
+
 kotlin {
-    js(IR) {
-        useCommonJs()
+    js {
+        useEsModules()
         binaries.executable()
         nodejs()
     }
+
+    sourceSets {
+        jsMain {
+            dependencies {
+                implementation(libs.kotlinx.coroutines.core)
+                implementation(libs.ktor.client.core)
+                implementation(libs.ktor.client.js)
+                implementation(kotlinWrappers.actions.toolkit)
+                implementation(kotlinWrappers.js)
+                implementation(kotlinWrappers.node)
+                implementation(kotlinWrappers.semver)
+                implementation(kotlinWrappers.nullWritable)
+            }
+        }
+    }
 }
 
-// work-around for https://youtrack.jetbrains.com/issue/KT-56305
-tasks.withType<Copy>().configureEach {
-    if (name.endsWith("ExecutableCompileSync")) {
-        doFirst {
-            outputs.files.forEach { it.deleteRecursively() }
-        }
+tasks.withType<IncrementalSyncTask>().configureEach {
+    // work-around for https://youtrack.jetbrains.com/issue/KT-56305
+    doFirst {
+        outputs.files.forEach { it.deleteRecursively() }
+    }
+
+    // work-around for https://youtrack.jetbrains.com/issue/KTOR-6158
+    doLast {
+        outputs
+            .files
+            .asFileTree
+            .filter { it.name == "setup-wsl.mjs" }
+            .forEach {
+                it
+                    .readText()
+                    .replace("eval('require')('abort-controller')", "globalThis.AbortController")
+                    .replace("eval('require')('node-fetch')", "globalThis.fetch")
+                    .replace("function readBodyNode(", "function _readBodyNode(")
+                    .replace(" readBodyNode(", " readBodyBrowser(")
+                    .apply(it::writeText)
+            }
     }
 }
 
@@ -76,26 +111,53 @@ tasks.withType<NodeJsExec>().configureEach {
     }
 }
 
-val libs = the<LibrariesForLibs>()
-
 configure<NodeJsRootExtension> {
-    nodeVersion = libs.versions.build.node.get()
+    version = libs.versions.build.node.get()
+}
+
+val executable by configurations.registering {
+    isCanBeConsumed = true
+    isCanBeResolved = false
+    isVisible = false
+}
+
+artifacts {
+    val jsProductionExecutableCompileSync by tasks.existing(IncrementalSyncTask::class)
+    add(
+        executable.name,
+        jsProductionExecutableCompileSync.map {
+            it
+                .destinationDirectory
+                .get()
+                .resolve("${project.name}.mjs")
+        }
+    )
+}
+
+// work-around for missing feature in dependencies block added in Gradle 8.3
+//val setupWsl by configurations.registering {
+val setupWslDistribution by configurations.creating {
+    isCanBeConsumed = false
+    isCanBeResolved = false
+    isVisible = false
+}
+
+val setupWslDistributionFiles by configurations.registering {
+    isCanBeConsumed = false
+    isCanBeResolved = true
+    isVisible = false
+    extendsFrom(setupWslDistribution)
 }
 
 dependencies {
-    implementation(libs.kotlinx.coroutines.core)
-    implementation(platform(libs.kotlin.wrappers.bom))
-    implementation(libs.kotlin.wrapper.actions.toolkit)
-    implementation(libs.kotlin.wrapper.js)
-    implementation(libs.kotlin.wrapper.node)
-    implementation(npm(libs.semver))
-    implementation(npm(libs.nullWritable))
+    setupWslDistribution(project(path = ":ncc-packer", configuration = "setupWslDistribution"))
+}
+
+val syncDistribution by tasks.registering(Sync::class) {
+    from(setupWslDistributionFiles)
+    into(layout.buildDirectory.dir("distributions"))
 }
 
 tasks.assemble {
-    dependsOn(project(":ncc-packer").tasks.named("nodeProductionRun"))
-}
-
-fun plugin(plugin: Provider<PluginDependency>) = plugin.map {
-    "${it.pluginId}:${it.pluginId}.gradle.plugin:${it.version.requiredVersion}"
+    dependsOn(syncDistribution)
 }
