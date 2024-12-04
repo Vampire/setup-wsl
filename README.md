@@ -33,6 +33,7 @@ Table of Contents
     * [additional-packages](#additional-packages)
     * [wsl-shell-user](#wsl-shell-user)
     * [wsl-shell-command](#wsl-shell-command)
+    * [wsl-version](#wsl-version)
   * [Outputs](#outputs)
     * [wsl-shell-wrapper-path](#wsl-shell-wrapper-path)
     * [wsl-shell-distribution-wrapper-path](#wsl-shell-distribution-wrapper-path)
@@ -332,12 +333,10 @@ The WSL version that should be used. This can be set to any positive integer. Us
 work or break, so issues a warning for the action run. Currently, WSLv1 and WSLv2 are tested and do not
 issue a warning. If a new WSL version is available and your workflow works with it, please report an issue
 so that proper tests can be added and the warning for that version removed.
-Default is '1' if running on 'windows-2019' virtual environment as this is not yet supporting WSLv2.
-Default is '2' if not running on 'windows-2019' virtual environment.
 
 **Default value:**
-* `1` if running on 'windows-2019' virtual environment as this is not yet supporting WSLv2
-* `2` if not running on 'windows-2019' virtual environment
+* `1` if running on `windows-2019` virtual environment as this is not yet supporting WSLv2
+* `2` if not running on `windows-2019` virtual environment
 
 _**Example:**_
 ```yaml
