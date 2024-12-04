@@ -7,20 +7,13 @@ Setup WSL
 A GitHub action to install and setup a Linux distribution for the Windows Subsystem for Linux (WSL).
 
 Beginning with `windows-2019` virtual environment for GitHub actions, WSLv1 is enabled.
+Beginning with later `windows-2022` virtual environment version for GitHub actions, WSLv2 is also available.
 However, there is no Linux distribution installed by default and there is also no easy shell for
 `run` steps that executes commands within a WSL distribution.
 
 This action provides an easy way to install Linux distributions for WSL, update those to the latest packages and
 install additional packages in them. It also provides a comfortable shell for `run` steps that uses the default
 WSL distribution and distribution-specific shells if you set up multiple distributions.
-
-WSLv2 is not explicitly supported, because as of this writing neither the Windows version running on GitHub hosted
-runners supports WSLv2, nor is Hyper-V enabled which is also necessary to enable WSLv2. If you use a self-hosted
-runner on a Windows OS that is new enough with enabled Hyper-V and default WSL version set to 2, this action will
-probably run just fine, but this setup is untested and not explicitly supported. If you want to provide a self-hosted
-runner with a sufficient setup for this action to use or need changes for supporting WSLv2 I will happily accept this.
-With a proper test environment (self-hosted runner) that will stay available, I would also add proper official support
-where you can select the WSL version in your workflow files.
 
 Thanks to the provided [typings](action-types.yml), it is possible to use this action in a type-safe way using
 https://github.com/typesafegithub/github-workflows-kt which allows writing workflow files using a type-safe Kotlin DSL.
@@ -58,7 +51,7 @@ To use this action with all inputs set to their default value, just use its name
 _**Example:**_
 
 ```yaml
-- uses: Vampire/setup-wsl@v3
+- uses: Vampire/setup-wsl@v4
 ```
 
 This will first check whether the distribution is installed already. If not, it will be installed and also
@@ -121,7 +114,7 @@ defaults:
         shell: wsl-bash {0}
 
 steps:
-    - uses: Vampire/setup-wsl@v3
+    - uses: Vampire/setup-wsl@v4
 
     - run: |
           npm ci
@@ -163,7 +156,7 @@ The values currently supported by this action are:
 
 _**Example:**_
 ```yaml
-- uses: Vampire/setup-wsl@v3
+- uses: Vampire/setup-wsl@v4
   with:
       distribution: Ubuntu-18.04
 ```
@@ -180,7 +173,7 @@ space of the repository. Refer to [`actions/cache` documentation][actions/cache 
 
 _**Example:**_
 ```yaml
-- uses: Vampire/setup-wsl@v3
+- uses: Vampire/setup-wsl@v4
   with:
       use-cache: 'false'
 ```
@@ -201,7 +194,7 @@ its contents in your configured value.
 
 _**Example:**_
 ```yaml
-- uses: Vampire/setup-wsl@v3
+- uses: Vampire/setup-wsl@v4
   with:
       wsl-conf: |
           [automount]
@@ -220,7 +213,7 @@ This can also be used if the distribution is installed already.
 
 _**Example:**_
 ```yaml
-- uses: Vampire/setup-wsl@v3
+- uses: Vampire/setup-wsl@v4
   with:
       set-as-default: 'false'
 ```
@@ -234,7 +227,7 @@ This can also be used if the distribution is installed already.
 
 _**Example:**_
 ```yaml
-- uses: Vampire/setup-wsl@v3
+- uses: Vampire/setup-wsl@v4
   with:
       update: 'true'
 ```
@@ -248,7 +241,7 @@ This can also be used if the distribution is installed already.
 
 _**Example:**_
 ```yaml
-- uses: Vampire/setup-wsl@v3
+- uses: Vampire/setup-wsl@v4
   with:
       additional-packages:
           dos2unix
@@ -266,7 +259,7 @@ it is automatically added.
 
 _**Example:**_
 ```yaml
-- uses: Vampire/setup-wsl@v3
+- uses: Vampire/setup-wsl@v4
   with:
       wsl-shell-user: test
 ```
@@ -297,7 +290,7 @@ scripts, the [`wsl-shell-wrapper-path` output](#wsl-shell-wrapper-path) and
 
 _**Examples:**_
 ```yaml
-- uses: Vampire/setup-wsl@v3
+- uses: Vampire/setup-wsl@v4
   with:
       wsl-shell-command: ash -eu
 
@@ -308,21 +301,21 @@ _**Examples:**_
   run: |
       useradd -m -p 4qBD5NWD3IkbU test
 
-- uses: Vampire/setup-wsl@v3
+- uses: Vampire/setup-wsl@v4
   with:
       wsl-shell-command: bash -c "sudo -u test bash --noprofile --norc -euo pipefail "\
 
 - shell: wsl-bash {0}
   run: id
 
-- uses: Vampire/setup-wsl@v3
+- uses: Vampire/setup-wsl@v4
   with:
       wsl-shell-command: bash -c "sudo -u test bash --noprofile --norc -euo pipefail '{0}'"
 
 - shell: wsl-bash {0}
   run: id
 
-- uses: Vampire/setup-wsl@v3
+- uses: Vampire/setup-wsl@v4
   with:
     wsl-shell-command: bash -c "cd && bash --noprofile --norc -euo pipefail '{0}'"
 
@@ -331,6 +324,26 @@ _**Examples:**_
 
 - shell: cmd
   run: DEL /F "${{ steps.execute_action.outputs.wsl-shell-wrapper-path }}"
+```
+
+#### wsl-version
+
+The WSL version that should be used. This can be set to any positive integer. Using an untested one might
+work or break, so issues a warning for the action run. Currently, WSLv1 and WSLv2 are tested and do not
+issue a warning. If a new WSL version is available and your workflow works with it, please report an issue
+so that proper tests can be added and the warning for that version removed.
+Default is '1' if running on 'windows-2019' virtual environment as this is not yet supporting WSLv2.
+Default is '2' if not running on 'windows-2019' virtual environment.
+
+**Default value:**
+* `1` if running on 'windows-2019' virtual environment as this is not yet supporting WSLv2
+* `2` if not running on 'windows-2019' virtual environment
+
+_**Example:**_
+```yaml
+- uses: Vampire/setup-wsl@v3
+  with:
+    wsl-version: 1
 ```
 
 
