@@ -32,7 +32,9 @@ import io.github.typesafegithub.workflows.actions.actions.SetupJava
 import io.github.typesafegithub.workflows.actions.actions.SetupJava.Distribution.Temurin
 import io.github.typesafegithub.workflows.actions.burrunan.GradleCacheAction
 import io.github.typesafegithub.workflows.actions.vampire.SetupWsl
-import io.github.typesafegithub.workflows.actions.vampire.SetupWsl.Distribution
+import io.github.typesafegithub.workflows.actions.vampire.SetupWsl.Distribution.Debian
+import io.github.typesafegithub.workflows.actions.vampire.SetupWsl.Distribution.Ubuntu1604
+import io.github.typesafegithub.workflows.actions.vampire.SetupWsl.Distribution.Ubuntu1804
 import io.github.typesafegithub.workflows.domain.CommandStep
 import io.github.typesafegithub.workflows.domain.ActionStep
 import io.github.typesafegithub.workflows.domain.JobOutputs.EMPTY
@@ -57,67 +59,67 @@ val environments = listOf(
     "windows-latest"
 )
 
-val debian = mapOf(
-    "wsl-id" to "Debian",
-    "user-id" to "Debian",
-    "match-pattern" to "*Debian*",
-    "default-absent-tool" to "dos2unix"
+val debian = Distribution(
+    wslId = "Debian",
+    userId = "Debian",
+    matchPattern = "*Debian*",
+    defaultAbsentTool = "dos2unix"
 )
 
-val alpine = mapOf(
-    "wsl-id" to "Alpine",
-    "user-id" to "Alpine",
-    "match-pattern" to "*Alpine*",
-    "default-absent-tool" to "dos2unix"
+val alpine = Distribution(
+    wslId = "Alpine",
+    userId = "Alpine",
+    matchPattern = "*Alpine*",
+    defaultAbsentTool = "dos2unix"
 )
 
-val kali = mapOf(
-    "wsl-id" to "kali-linux",
-    "user-id" to "kali-linux",
-    "match-pattern" to "*Kali*",
-    "default-absent-tool" to "dos2unix"
+val kali = Distribution(
+    wslId = "kali-linux",
+    userId = "kali-linux",
+    matchPattern = "*Kali*",
+    defaultAbsentTool = "dos2unix"
 )
 
-val openSuseLeap15_2 = mapOf(
-    "wsl-id" to "openSUSE-Leap-15.2",
-    "user-id" to "openSUSE-Leap-15.2",
-    "match-pattern" to "*openSUSE*Leap*15.2*",
-    "default-absent-tool" to "which"
+val openSuseLeap15_2 = Distribution(
+    wslId = "openSUSE-Leap-15.2",
+    userId = "openSUSE-Leap-15.2",
+    matchPattern = "*openSUSE*Leap*15.2*",
+    defaultAbsentTool = "which"
 )
 
-val ubuntu2404 = mapOf(
-    "wsl-id" to "Ubuntu-24.04",
-    "user-id" to "Ubuntu-24.04",
-    "match-pattern" to "*Ubuntu*24.04*",
-    "default-absent-tool" to "dos2unix"
+val ubuntu2404 = Distribution(
+    wslId = "Ubuntu-24.04",
+    userId = "Ubuntu-24.04",
+    matchPattern = "*Ubuntu*24.04*",
+    defaultAbsentTool = "dos2unix"
 )
 
-val ubuntu2204 = mapOf(
-    "wsl-id" to "Ubuntu",
-    "user-id" to "Ubuntu-22.04",
-    "match-pattern" to "*Ubuntu*22.04*",
-    "default-absent-tool" to "dos2unix"
+val ubuntu2204 = Distribution(
+    wslId = "Ubuntu",
+    userId = "Ubuntu-22.04",
+    matchPattern = "*Ubuntu*22.04*",
+    defaultAbsentTool = "dos2unix"
 )
 
-val ubuntu2004 = mapOf(
-    "wsl-id" to "Ubuntu",
-    "user-id" to "Ubuntu-20.04",
-    "match-pattern" to "*Ubuntu*20.04*",
-    "default-absent-tool" to "dos2unix"
+val ubuntu2004 = Distribution(
+    wslId = "Ubuntu",
+    userId = "Ubuntu-20.04",
+    matchPattern = "*Ubuntu*20.04*",
+    defaultAbsentTool = "dos2unix"
 )
 
-val ubuntu1804 = mapOf(
-    "wsl-id" to "Ubuntu-18.04",
-    "user-id" to "Ubuntu-18.04",
-    "match-pattern" to "*Ubuntu*18.04*",
-    "default-absent-tool" to "dos2unix"
+val ubuntu1804 = Distribution(
+    wslId = "Ubuntu-18.04",
+    userId = "Ubuntu-18.04",
+    matchPattern = "*Ubuntu*18.04*",
+    defaultAbsentTool = "dos2unix"
 )
 
-val ubuntu1604 = mapOf(
-    "wsl-id" to "Ubuntu-16.04",
-    "user-id" to "Ubuntu-16.04",
-    "match-pattern" to "*Ubuntu*16.04*",
-    "default-absent-tool" to "dos2unix"
+val ubuntu1604 = Distribution(
+    wslId = "Ubuntu-16.04",
+    userId = "Ubuntu-16.04",
+    matchPattern = "*Ubuntu*16.04*",
+    defaultAbsentTool = "dos2unix"
 )
 
 val distributions = listOf(
@@ -130,7 +132,7 @@ val distributions = listOf(
     ubuntu2004,
     ubuntu1804,
     ubuntu1604
-)
+).map { it.asMap }
 
 val wslBash = Shell.Custom("wsl-bash {0}")
 
@@ -153,7 +155,10 @@ workflowWithCopyright(
     )
 
     val executeAction = SetupWsl(
-        distribution = Distribution.Custom(expr("matrix.distribution.user-id"))
+        distribution = SetupWsl.Distribution.Custom(expr("matrix.distribution.user-id")),
+        _customInputs = mapOf(
+            "wsl-version" to "1"
+        )
     )
 
     val build = job(
@@ -202,12 +207,14 @@ workflowWithCopyright(
     fun WorkflowBuilder.testJob(
         id: String,
         name: String,
+        condition: String? = null,
         _customArguments: Map<String, Any?> = mapOf(),
         block: JobBuilder<EMPTY>.() -> Unit,
     ) = job(
         id = id,
         name = name,
         needs = listOf(build),
+        condition = condition,
         runsOn = RunnerType.Custom(expr("matrix.environment")),
         _customArguments = _customArguments
     ) {
@@ -260,6 +267,41 @@ workflowWithCopyright(
     }
 
     testJob(
+        id = "test_invalid_wsl_version",
+        name = """Test requesting WSL version ${expr("matrix.wsl-version")} on ${expr("matrix.environment")}""",
+        _customArguments = mapOf(
+            "strategy" to mapOf(
+                "fail-fast" to false,
+                "matrix" to mapOf(
+                    "environment" to environments,
+                    "wsl-version" to listOf("-1", "0"),
+                    "include" to listOf(
+                        mapOf(
+                            "environment" to "windows-2019",
+                            "wsl-version" to "2"
+                        )
+                    )
+                )
+            )
+        )
+    ) {
+        executeActionStep = usesSelf(
+            action = executeAction.copy(
+                distribution = Debian,
+                _customInputs = mapOf(
+                    "wsl-version" to expr("matrix.wsl-version")
+                )
+            ),
+            continueOnError = true
+        )
+        run(
+            name = "Test - action should fail if an invalid WSL version is given",
+            shell = Cmd,
+            command = "if '${expr("${executeActionStep.outcome}")}' NEQ 'failure' exit 1"
+        )
+    }
+
+    testJob(
         id = "test_default_distribution",
         name = "Test default distribution on ${expr("matrix.environment")}",
         _customArguments = mapOf(
@@ -267,14 +309,17 @@ workflowWithCopyright(
                 "fail-fast" to false,
                 "matrix" to mapOf(
                     "environment" to environments,
-                    "distribution" to listOf(debian)
+                    "distribution" to listOf(debian).map { it.asMap }
                 )
             )
         )
     ) {
         executeActionStep = usesSelf(
             action = SetupWsl(
-                update = true
+                update = true,
+                _customInputs = mapOf(
+                    "wsl-version" to "1"
+                )
             )
         )
         commonTests()
@@ -315,12 +360,16 @@ workflowWithCopyright(
     ) {
         executeActionStep = usesSelf(
             action = executeAction.copy(
-                useCache = false
+                useCache = false,
+                _customInputs = mapOf(
+                    // part of work-around for https://bugs.kali.org/view.php?id=8921
+                    "wsl-version" to expr(getWslVersionExpression(kali))
+                )
             )
         )
         verifyFailure(
             name = "Test - wsl-bash should fail if bash is not present by default",
-            conditionTransformer = { executeActionStep.successOnAlpineCondition },
+            conditionTransformer = { executeActionStep.getSuccessOnDistributionCondition(alpine) },
             verificationShell = null,
             verificationTransformer = { _, command ->
                 """wsl sh -euc "${command.replace("==", "=")}""""
@@ -330,9 +379,10 @@ workflowWithCopyright(
         usesSelf(
             name = "Install Bash on Alpine",
             action = executeAction.copy(
-                additionalPackages = listOf("bash")
+                additionalPackages = listOf("bash"),
+                _customInputs = emptyMap()
             ),
-            condition = executeActionStep.successOnAlpineCondition
+            condition = executeActionStep.getSuccessOnDistributionCondition(alpine)
         )
         commonTests()
         verifyFailure(
@@ -355,7 +405,8 @@ workflowWithCopyright(
         executeActionStep = usesSelfAfterSuccess(
             name = "Add wsl-sh wrapper",
             action = executeAction.copy(
-                wslShellCommand = "sh -eu"
+                wslShellCommand = "sh -eu",
+                _customInputs = emptyMap()
             )
         )
         runAfterSuccess(
@@ -389,7 +440,9 @@ workflowWithCopyright(
         )
         executeActionStep = usesSelfAfterSuccess(
             name = "Re-add wsl-bash wrapper",
-            action = executeAction
+            action = executeAction.copy(
+                _customInputs = emptyMap()
+            )
         )
         runAfterSuccess(
             name = "Test - wsl-bash should be present"
@@ -413,25 +466,69 @@ workflowWithCopyright(
         executeActionStep = usesSelfAfterSuccess(
             name = "Set wsl-bash wrapper to use user test by default",
             // part of work-around for https://bugs.kali.org/view.php?id=8921
-            conditionTransformer = { executeActionStep.successNotOnKaliCondition },
+            conditionTransformer = {
+                """
+                    |(
+                        ${it.prependIndent("|    ")}
+                    |)
+                    |&& (
+                    |    (matrix.distribution.user-id != '${kali.userId}')
+                    |    || (
+                    |        (
+                                 ${getWslVersionExpression(kali).prependIndent("|            ")}
+                    |        ) == '2'
+                    |    )
+                    |)
+                """.trimMargin()
+            },
             action = executeAction.copy(
                 additionalPackages = listOf("sudo"),
-                wslShellCommand = """bash -c "sudo -u test bash --noprofile --norc -euo pipefail "\"""
+                wslShellCommand = """bash -c "sudo -u test bash --noprofile --norc -euo pipefail "\""",
+                _customInputs = emptyMap()
             )
         )
         verifyCommandResult(
             name = "Test - wsl-bash should use test as default user",
             // part of work-around for https://bugs.kali.org/view.php?id=8921
-            conditionTransformer = { executeActionStep.successNotOnKaliCondition },
+            conditionTransformer = {
+                """
+                    |(
+                        ${it.prependIndent("|    ")}
+                    |)
+                    |&& (
+                    |    (matrix.distribution.user-id != '${kali.userId}')
+                    |    || (
+                    |        (
+                                 ${getWslVersionExpression(kali).prependIndent("|            ")}
+                    |        ) == '2'
+                    |    )
+                    |)
+                """.trimMargin()
+            },
             actualCommand = "whoami",
             expected = "test"
         )
         executeActionStep = usesSelfAfterSuccess(
             name = "Set wsl-bash wrapper to use user test by default with inline script usage",
             // part of work-around for https://bugs.kali.org/view.php?id=8921
-            conditionTransformer = { executeActionStep.successNotOnKaliCondition },
+            conditionTransformer = {
+                """
+                    |(
+                        ${it.prependIndent("|    ")}
+                    |)
+                    |&& (
+                    |    (matrix.distribution.user-id != '${kali.userId}')
+                    |    || (
+                    |        (
+                                 ${getWslVersionExpression(kali).prependIndent("|            ")}
+                    |        ) == '2'
+                    |    )
+                    |)
+                """.trimMargin()
+            },
             action = executeAction.copy(
-                wslShellCommand = """bash -c "sudo -u test bash --noprofile --norc -euo pipefail '{0}'""""
+                wslShellCommand = """bash -c "sudo -u test bash --noprofile --norc -euo pipefail '{0}'"""",
+                _customInputs = emptyMap()
             )
         )
         verifyCommandResult(
@@ -442,7 +539,9 @@ workflowWithCopyright(
         deleteWslBash()
         executeActionStep = usesSelfAfterSuccess(
             name = "Set wsl-bash wrapper to use default user by default",
-            action = executeAction
+            action = executeAction.copy(
+                _customInputs = emptyMap()
+            )
         )
         verifyCommandResult(
             name = "Test - wsl-bash should use root as default user",
@@ -457,7 +556,8 @@ workflowWithCopyright(
         executeActionStep = usesSelfAfterSuccess(
             name = "Set wsl-bash wrapper to use existing user test by default with extra parameter",
             action = executeAction.copy(
-                wslShellUser = "test"
+                wslShellUser = "test",
+                _customInputs = emptyMap()
             )
         )
         verifyCommandResult(
@@ -473,7 +573,8 @@ workflowWithCopyright(
         executeActionStep = usesSelfAfterSuccess(
             name = "Set wsl-bash wrapper to use non-existing user test2 by default with extra parameter",
             action = executeAction.copy(
-                wslShellUser = "test2"
+                wslShellUser = "test2",
+                _customInputs = emptyMap()
             )
         )
         verifyCommandResult(
@@ -495,7 +596,9 @@ workflowWithCopyright(
         )
         executeActionStep = usesSelfAfterSuccess(
             name = "Make a no-op execution of the action",
-            action = executeAction
+            action = executeAction.copy(
+                _customInputs = emptyMap()
+            )
         )
         verifyCommandResult(
             name = "Test - wsl-bash should still use test2 as default user",
@@ -529,9 +632,10 @@ workflowWithCopyright(
         usesSelf(
             name = "Install Bash on Alpine",
             action = executeAction.copy(
-                additionalPackages = listOf("bash")
+                additionalPackages = listOf("bash"),
+                _customInputs = emptyMap()
             ),
-            condition = executeActionStep.successOnAlpineCondition
+            condition = executeActionStep.getSuccessOnDistributionCondition(alpine)
         )
         runAfterSuccess(
             name = "Test - /etc/wsl.conf should exist",
@@ -569,14 +673,15 @@ workflowWithCopyright(
         usesSelf(
             name = "Install Bash on Alpine",
             action = executeAction.copy(
-                additionalPackages = listOf("bash")
+                additionalPackages = listOf("bash"),
+                _customInputs = emptyMap()
             ),
-            condition = executeActionStep.successOnAlpineCondition
+            condition = executeActionStep.getSuccessOnDistributionCondition(alpine)
         )
         runAfterSuccess(
             name = "Test - /etc/wsl.conf should not exist",
             command = "[ ! -f /etc/wsl.conf ] || { cat /etc/wsl.conf; false; }",
-            conditionTransformer = { executeActionStep.successNotOnUbuntu2404Condition }
+            conditionTransformer = { executeActionStep.getSuccessNotOnDistributionCondition(ubuntu2404) }
         )
         runAfterSuccess(
             name = "Test - C: should be mounted at /mnt/c",
@@ -597,7 +702,8 @@ workflowWithCopyright(
                 wslConf = """
                     [automount]
                     root = /
-                """.trimIndent()
+                """.trimIndent(),
+                _customInputs = emptyMap()
             )
         )
         runAfterSuccess(
@@ -624,11 +730,7 @@ workflowWithCopyright(
                 "fail-fast" to false,
                 "matrix" to mapOf(
                     "environment" to environments,
-                    "distribution" to (
-                            distributions
-                                    // part of work-around for https://bugs.kali.org/view.php?id=8921
-                                    - kali
-                    )
+                    "distribution" to distributions
                 )
             )
         )
@@ -638,16 +740,198 @@ workflowWithCopyright(
                 additionalPackages = listOf(
                     expr("matrix.distribution.default-absent-tool"),
                     "bash"
+                ),
+                _customInputs = mapOf(
+                    // part of work-around for https://bugs.kali.org/view.php?id=8921
+                    "wsl-version" to expr(getWslVersionExpression(kali))
                 )
-            )
+            ),
+            // part of work-around for https://bugs.kali.org/view.php?id=8921
+            condition = """
+                |(matrix.distribution.user-id != '${kali.userId}')
+                ||| (
+                |    (
+                         ${getWslVersionExpression(kali).prependIndent("|        ")}
+                |    ) == '2'
+                |)
+            """.trimMargin()
         )
         runAfterSuccess(
             name = "Test - ${expr("matrix.distribution.default-absent-tool")} should be installed",
-            command = "${expr("matrix.distribution.default-absent-tool")} --version"
+            command = "${expr("matrix.distribution.default-absent-tool")} --version",
+            // part of work-around for https://bugs.kali.org/view.php?id=8921
+            conditionTransformer = {
+                """
+                    |(
+                        ${it.prependIndent("|    ")}
+                    |)
+                    |&& (
+                    |    (matrix.distribution.user-id != '${kali.userId}')
+                    |    || (
+                    |        (
+                                 ${getWslVersionExpression(kali).prependIndent("|            ")}
+                    |        ) == '2'
+                    |    )
+                    |)
+                """.trimMargin()
+            }
         )
         runAfterSuccess(
             name = "Test - bash should be installed",
-            command = "bash -c true"
+            command = "bash -c true",
+            // part of work-around for https://bugs.kali.org/view.php?id=8921
+            conditionTransformer = {
+                """
+                    |(
+                        ${it.prependIndent("|    ")}
+                    |)
+                    |&& (
+                    |    (matrix.distribution.user-id != '${kali.userId}')
+                    |    || (
+                    |        (
+                                 ${getWslVersionExpression(kali).prependIndent("|            ")}
+                    |        ) == '2'
+                    |    )
+                    |)
+                """.trimMargin()
+            }
+        )
+    }
+
+    testJob(
+        id = "test_installation_on_wsl_version",
+        name = """Test installation on WSLv${expr("matrix.wsl-version")} for "${expr("matrix.distribution.user-id")}" distribution on ${expr("matrix.environment")}""",
+        _customArguments = mapOf(
+            "strategy" to mapOf(
+                "fail-fast" to false,
+                "matrix" to mapOf(
+                    "environment" to (environments - "windows-2019"),
+                    "distribution" to distributions,
+                    "wsl-version" to (1..2).toList()
+                )
+            )
+        )
+    ) {
+        executeActionStep = usesSelf(
+            action = executeAction.copy(
+                additionalPackages = listOf(
+                    expr(
+                        """
+                        (matrix.distribution.user-id == '${alpine.userId}')
+                        && 'bash'
+                        || ''
+                    """.trimIndent()
+                    )
+                ),
+                _customInputs = mapOf(
+                    "wsl-version" to expr("matrix.wsl-version")
+                )
+            )
+        )
+        verifyCommandResult(
+            name = "Test - distribution should be running on WSLv${expr("matrix.wsl-version")}",
+            actualCommand = """
+                cat
+                <(wsl.exe --list --verbose || true)
+                <(wsl.exe --list --verbose || true | iconv -f UTF-16LE -t UTF-8)
+            """.trimIndent().replace("\n", " "),
+            expectedPattern = """*${expr("matrix.distribution.wsl-id")}*\ ${expr("matrix.wsl-version")}*"""
+        )
+    }
+
+    testJob(
+        id = "test_switching_wsl_version_for_different_distributions",
+        name = """Test switching WSL version for different distributions on ${expr("matrix.environment")}""",
+        _customArguments = mapOf(
+            "strategy" to mapOf(
+                "fail-fast" to false,
+                "matrix" to mapOf(
+                    "environment" to (environments - "windows-2019")
+                )
+            )
+        )
+    ) {
+        usesSelf(
+            action = executeAction.copy(
+                distribution = Debian,
+                _customInputs = mapOf(
+                    "wsl-version" to "1"
+                )
+            )
+        )
+        usesSelf(
+            action = executeAction.copy(
+                distribution = Ubuntu1604,
+                _customInputs = mapOf(
+                    "wsl-version" to "2"
+                )
+            )
+        )
+        executeActionStep = usesSelf(
+            action = executeAction.copy(
+                distribution = Ubuntu1804,
+                _customInputs = mapOf(
+                    "wsl-version" to "1"
+                )
+            )
+        )
+        verifyCommandResult(
+            name = "Test - distributions should be running on their respective WSL version",
+            actualCommand = """
+                cat
+                <(wsl.exe --list --verbose || true)
+                <(wsl.exe --list --verbose || true | iconv -f UTF-16LE -t UTF-8)
+                | sort -u
+            """.trimIndent().replace("\n", " "),
+            expectedPattern = """*${debian.wslId}*\ 1*${ubuntu1604.wslId}*\ 2*${ubuntu1804.wslId}*\ 1*"""
+        )
+    }
+
+    testJob(
+        id = "test_default_wsl_version",
+        name = """Test default WSL version for "${expr("matrix.distribution.user-id")}" distribution on ${expr("matrix.environment")}""",
+        _customArguments = mapOf(
+            "strategy" to mapOf(
+                "fail-fast" to false,
+                "matrix" to mapOf(
+                    "environment" to environments,
+                    "distribution" to distributions
+                )
+            )
+        )
+    ) {
+        executeActionStep = usesSelf(
+            action = executeAction.copy(
+                additionalPackages = listOf(
+                    expr(
+                        """
+                        (matrix.distribution.user-id == '${alpine.userId}')
+                        && 'bash'
+                        || ''
+                    """.trimIndent()
+                    )
+                ),
+                _customInputs = emptyMap()
+            )
+        )
+        verifyCommandResult(
+            name = "Test - default WSL version should be WSLv2",
+            // on windows-2019 the version is not printed but the wrong
+            // default (anything but WSLv1) would already make the action execution fail
+            conditionTransformer = {
+                """
+                    |(
+                        ${it.prependIndent("|    ")}
+                    |)
+                    |&& (matrix.environment != 'windows-2019')
+                """.trimMargin()
+            },
+            actualCommand = """
+                cat
+                <(wsl.exe --list --verbose || true)
+                <(wsl.exe --list --verbose || true | iconv -f UTF-16LE -t UTF-8)
+            """.trimIndent().replace("\n", " "),
+            expectedPattern = """*${expr("matrix.distribution.wsl-id")}*\ 2*"""
         )
     }
 
@@ -696,7 +980,9 @@ workflowWithCopyright(
                             "distribution2" to ubuntu2004,
                             "distribution3" to debian
                         )
-                    )
+                    ).map {
+                        it.mapValues { (_, distribution) -> distribution.asMap }
+                    }
                 )
             )
         )
@@ -704,26 +990,35 @@ workflowWithCopyright(
         usesSelf(
             name = "Execute action for ${expr("matrix.distributions.distribution1.user-id")}",
             action = SetupWsl(
-                distribution = Distribution.Custom(expr("matrix.distributions.distribution1.user-id"))
+                distribution = SetupWsl.Distribution.Custom(expr("matrix.distributions.distribution1.user-id")),
+                _customInputs = mapOf(
+                    "wsl-version" to "1"
+                )
             )
         )
         usesSelf(
             name = "Execute action for ${expr("matrix.distributions.distribution2.user-id")}",
             action = SetupWsl(
-                distribution = Distribution.Custom(expr("matrix.distributions.distribution2.user-id"))
+                distribution = SetupWsl.Distribution.Custom(expr("matrix.distributions.distribution2.user-id")),
+                _customInputs = mapOf(
+                    "wsl-version" to "1"
+                )
             )
         )
         usesSelf(
             name = "Execute action for ${expr("matrix.distributions.distribution3.user-id")}",
             action = SetupWsl(
-                distribution = Distribution.Custom(expr("matrix.distributions.distribution3.user-id")),
-                setAsDefault = false
+                distribution = SetupWsl.Distribution.Custom(expr("matrix.distributions.distribution3.user-id")),
+                setAsDefault = false,
+                _customInputs = mapOf(
+                    "wsl-version" to "1"
+                )
             )
         )
         executeActionStep = usesSelf(
             name = "Execute action for ${expr("matrix.distributions.distribution1.user-id")} again",
             action = SetupWsl(
-                distribution = Distribution.Custom(expr("matrix.distributions.distribution1.user-id"))
+                distribution = SetupWsl.Distribution.Custom(expr("matrix.distributions.distribution1.user-id"))
             )
         )
         verifyCommandResult(
@@ -752,19 +1047,19 @@ workflowWithCopyright(
                 "matrix" to mapOf(
                     "environment" to environments,
                     "distribution" to distributions,
-                    "distribution2" to listOf(debian),
+                    "distribution2" to listOf(debian).map { it.asMap },
                     "exclude" to environments.map {
                         mapOf(
                             "environment" to it,
-                            "distribution" to debian,
-                            "distribution2" to debian
+                            "distribution" to debian.asMap,
+                            "distribution2" to debian.asMap
                         )
                     },
                     "include" to environments.map {
                         mapOf(
                             "environment" to it,
-                            "distribution" to debian,
-                            "distribution2" to ubuntu2004
+                            "distribution" to debian.asMap,
+                            "distribution2" to ubuntu2004.asMap
                         )
                     }
                 )
@@ -773,46 +1068,95 @@ workflowWithCopyright(
     ) {
         usesSelf(
             action = executeAction.copy(
-                additionalPackages = listOf("bash")
-            ),
-            // part of work-around for https://bugs.kali.org/view.php?id=8921
-            condition = "matrix.distribution.user-id != '${kali["user-id"]}'"
-        )
-        // part of work-around for https://bugs.kali.org/view.php?id=8921
-        usesSelf(
-            action = executeAction,
-            condition = "matrix.distribution.user-id == '${kali["user-id"]}'"
+                // part of work-around for https://bugs.kali.org/view.php?id=8921
+                //additionalPackages = listOf("bash")
+                additionalPackages = listOf(
+                    expr(
+                        """
+                            |(
+                            |    (matrix.distribution.user-id != '${kali.userId}')
+                            |    || (
+                            |        (
+                                         ${getWslVersionExpression(kali).prependIndent("|            ")}
+                            |        ) == '2'
+                            |    )
+                            |)
+                            |&& 'bash'
+                            ||| ''
+                        """.trimMargin()
+                    )
+                ),
+                _customInputs = mapOf(
+                    // part of work-around for https://bugs.kali.org/view.php?id=8921
+                    // and https://bugs.kali.org/view.php?id=6672
+                    // and https://bugs.launchpad.net/ubuntu/+source/systemd/+bug/2069555
+                    "wsl-version" to expr(getWslVersionExpression(kali, ubuntu2404))
+                )
+            )
         )
         usesSelf(
             name = "Update distribution",
             action = executeAction.copy(
-                update = true
+                update = true,
+                _customInputs = emptyMap()
             ),
-            // work-around for https://bugs.kali.org/view.php?id=6672
+            // part of work-around for https://bugs.kali.org/view.php?id=6672
             // and https://bugs.launchpad.net/ubuntu/+source/systemd/+bug/2069555
             condition = """
-                (matrix.distribution.user-id != '${kali["user-id"]}')
-                && (matrix.distribution.user-id != '${ubuntu2404["user-id"]}')
-            """.trimIndent()
+                |(
+                |    (matrix.distribution.user-id != '${kali.userId}')
+                |    && (matrix.distribution.user-id != '${ubuntu2404.userId}')
+                |)
+                ||| (
+                |    (
+                         ${getWslVersionExpression(kali, ubuntu2404).prependIndent("|        ")}
+                |    ) == '2'
+                |)
+            """.trimMargin()
         )
         executeActionStep = usesSelf(
             name = "Install default absent tool",
             action = executeAction.copy(
-                additionalPackages = listOf(expr("matrix.distribution.default-absent-tool"))
+                additionalPackages = listOf(expr("matrix.distribution.default-absent-tool")),
+                _customInputs = emptyMap()
             ),
             // part of work-around for https://bugs.kali.org/view.php?id=8921
-            condition = "matrix.distribution.user-id != '${kali["user-id"]}'"
+            condition = """
+                |(matrix.distribution.user-id != '${kali.userId}')
+                ||| (
+                |    (
+                         ${getWslVersionExpression(kali).prependIndent("|        ")}
+                |    ) == '2'
+                |)
+            """.trimMargin()
         )
         runAfterSuccess(
             name = "Test - ${expr("matrix.distribution.default-absent-tool")} should be installed",
             command = "${expr("matrix.distribution.default-absent-tool")} --version",
             // part of work-around for https://bugs.kali.org/view.php?id=8921
-            conditionTransformer = { executeActionStep.successNotOnKaliCondition }
+            conditionTransformer = {
+                """
+                    |(
+                        ${it.prependIndent("|    ")}
+                    |)
+                    |&& (
+                    |    (matrix.distribution.user-id != '${kali.userId}')
+                    |    || (
+                    |       (
+                                ${getWslVersionExpression(kali).prependIndent("|           ")}
+                    |       ) == '2'
+                    |   )
+                    |)
+                """.trimMargin()
+            }
         )
         executeActionStep = usesSelfAfterSuccess(
             name = "Execute action for ${expr("matrix.distribution2.user-id")}",
             action = SetupWsl(
-                distribution = Distribution.Custom(expr("matrix.distribution2.user-id"))
+                distribution = SetupWsl.Distribution.Custom(expr("matrix.distribution2.user-id")),
+                _customInputs = mapOf(
+                    "wsl-version" to "1"
+                )
             )
         )
         verifyInstalledDistribution(
@@ -821,7 +1165,9 @@ workflowWithCopyright(
         )
         executeActionStep = usesSelfAfterSuccess(
             name = "Re-execute action",
-            action = executeAction
+            action = executeAction.copy(
+                _customInputs = emptyMap()
+            )
         )
         verifyInstalledDistribution(
             name = """Test - "${expr("matrix.distribution2.user-id")}" should still be the default distribution after re-running for "${expr("matrix.distribution.user-id")}"""",
@@ -830,7 +1176,8 @@ workflowWithCopyright(
         executeActionStep = usesSelfAfterSuccess(
             name = "Set as default",
             action = executeAction.copy(
-                setAsDefault = true
+                setAsDefault = true,
+                _customInputs = emptyMap()
             )
         )
         verifyInstalledDistribution(
@@ -852,13 +1199,13 @@ workflowWithCopyright(
                     "distributions" to listOf(ubuntu2204, ubuntu2004)
                         .map { incompatibleUbuntu ->
                             distributions
-                                .filter { it != incompatibleUbuntu }
+                                .filter { it != incompatibleUbuntu.asMap }
                                 .mapIndexed<Map<String, String>, Pair<String, Any>> { i, distribution ->
                                     "distribution${i + 1}" to distribution
                                 }
                                 .toMutableList()
                                 .apply {
-                                    add(0, "incompatibleUbuntu" to incompatibleUbuntu["user-id"]!!)
+                                    add(0, "incompatibleUbuntu" to incompatibleUbuntu.userId)
                                 }
                                 .toMap()
                         }
@@ -871,9 +1218,12 @@ workflowWithCopyright(
                 usesSelf(
                     name = "Execute action for ${expr("matrix.distributions.distribution$it.user-id")}",
                     action = SetupWsl(
-                        distribution = Distribution.Custom(expr("matrix.distributions.distribution$it.user-id")),
+                        distribution = SetupWsl.Distribution.Custom(expr("matrix.distributions.distribution$it.user-id")),
                         additionalPackages = if (it == 2) listOf("bash") else null,
-                        setAsDefault = if (it >= 3) false else null
+                        setAsDefault = if (it >= 3) false else null,
+                        _customInputs = mapOf(
+                            "wsl-version" to "1"
+                        )
                     )
                 )
             }
@@ -881,26 +1231,25 @@ workflowWithCopyright(
                 executeActionStep = localExecuteActionStep
                 verifyInstalledDistribution(
                     name = "Test - wsl-bash_${expr("matrix.distributions.distribution$i.user-id")} should use the correct distribution",
-                    conditionTransformer = if (distributions[i] == ubuntu2004) {
-                        { executeActionStep.getSuccessNotOnDistributionCondition(i, ubuntu2004["user-id"]!!) }
+                    conditionTransformer = if (distributions[i] == ubuntu2004.asMap) {
+                        { executeActionStep.getSuccessNotOnDistributionCondition(ubuntu2004, i) }
                     } else {
                         { it }
                     },
                     // the formula adds 1 to the indices from ubuntu2004 on
                     // to mitigate the double entry for the previous index
-                    shell = Shell.Custom("wsl-bash_${distributions[min(1, i / (distributions.indexOf(ubuntu2004) + 1)) + i - 1]["user-id"]} {0}"),
+                    shell = Shell.Custom("wsl-bash_${distributions[min(1, i / (distributions.indexOf(ubuntu2004.asMap) + 1)) + i - 1]["user-id"]} {0}"),
                     expectedPatternExpression = "matrix.distributions.distribution$i.match-pattern"
                 )
-                if (distributions[i] == ubuntu2004) {
+                if (distributions[i] == ubuntu2004.asMap) {
                     verifyInstalledDistribution(
                         name = "Test - wsl-bash_${expr("matrix.distributions.distribution$i.user-id")} should use the correct distribution",
-                        conditionTransformer = { executeActionStep.getSuccessNotOnDistributionCondition(i, ubuntu2204["user-id"]!!) },
+                        conditionTransformer = { executeActionStep.getSuccessNotOnDistributionCondition(ubuntu2204, i) },
                         shell = Shell.Custom("wsl-bash_${distributions[i]["user-id"]} {0}"),
                         expectedPatternExpression = "matrix.distributions.distribution$i.match-pattern"
                     )
                 }
             }
-
     }
 }
 
@@ -986,7 +1335,7 @@ fun JobBuilder<*>.usesSelf(
 )
 
 fun JobBuilder<*>.deleteWslBashOnAlpine() = deleteWslBash(
-    conditionTransformer = { executeActionStep.successOnAlpineCondition }
+    conditionTransformer = { executeActionStep.getSuccessOnDistributionCondition(alpine)}
 )
 
 fun JobBuilder<*>.deleteWslBash(
@@ -1096,29 +1445,48 @@ val Step<*>.successCondition
         && (${outcome.eq(Success)})
     """.trimIndent()
 
-val Step<*>.successOnAlpineCondition
-    get() = """
-        always()
-        && (${outcome.eq(Success)})
-        && (matrix.distribution.user-id == '${alpine["user-id"]}')
-    """.trimIndent()
+fun Step<*>.getSuccessOnDistributionCondition(distribution: Distribution, i: Int? = null) =
+    getSuccessOnOrNotOnDistributionCondition(distribution, true, i)
 
-val Step<*>.successNotOnKaliCondition
-    get() = """
-        always()
-        && (${outcome.eq(Success)})
-        && (matrix.distribution.user-id != '${kali["user-id"]}')
-    """.trimIndent()
+fun Step<*>.getSuccessNotOnDistributionCondition(distribution: Distribution, i: Int? = null) =
+    getSuccessOnOrNotOnDistributionCondition(distribution, false, i)
 
-val Step<*>.successNotOnUbuntu2404Condition
-    get() = """
-        always()
-        && (${outcome.eq(Success)})
-        && (matrix.distribution.user-id != '${ubuntu2404["user-id"]}')
-    """.trimIndent()
+fun Step<*>.getSuccessOnOrNotOnDistributionCondition(distribution: Distribution, on: Boolean = true, i: Int? = null) = """
+    |(
+        ${successCondition.prependIndent("|    ")}
+    |)
+    |&& (matrix.${i?.let { "distributions.distribution$it" } ?: "distribution"}.user-id ${if (on) "==" else "!="} '${distribution.userId}')
+""".trimMargin()
 
-fun Step<*>.getSuccessNotOnDistributionCondition(i: Int, distribution: String) = """
-    always()
-    && (${outcome.eq(Success)})
-    && (matrix.distributions.distribution$i.user-id != '$distribution')
-""".trimIndent()
+// part of work-around for https://bugs.kali.org/view.php?id=8921
+// and https://bugs.kali.org/view.php?id=6672
+// and https://bugs.launchpad.net/ubuntu/+source/systemd/+bug/2069555
+fun getWslVersionExpression(vararg wsl2Distributions: Distribution) = """
+    |(
+    |    (
+             ${
+                 wsl2Distributions.joinToString(
+                     separator = "\n|        || ",
+                     prefix = "|        "
+                 ) { "(matrix.distribution.user-id == '${it.userId}')" }
+             }
+    |    )
+    |    && (matrix.environment != 'windows-2019')
+    |)
+    |&& '2'
+    ||| '1'
+""".trimMargin()
+
+data class Distribution(
+    val wslId: String,
+    val userId: String,
+    val matchPattern: String,
+    val defaultAbsentTool: String
+) {
+    val asMap = mapOf(
+        "wsl-id" to wslId,
+        "user-id" to userId,
+        "match-pattern" to matchPattern,
+        "default-absent-tool" to defaultAbsentTool
+    )
+}

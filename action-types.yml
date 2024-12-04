@@ -51,6 +51,9 @@ inputs:
     wsl-shell-command:
         type: string
 
+    wsl-version:
+        type: integer
+
 outputs:
     wsl-shell-wrapper-path:
         type: string

@@ -94,6 +94,17 @@ inputs:
             additional ones for other shells.
         required: false
 
+    wsl-version:
+        description: |
+            The WSL version that should be used. This can be set to any positive integer. Using an untested one might
+            work or break, so issues a warning for the action run. Currently, WSLv1 and WSLv2 are tested and do not
+            issue a warning. If a new WSL version is available and your workflow works with it, please report an issue
+            so that proper tests can be added and the warning for that version removed.
+            Default is '1' if running on 'windows-2019' virtual environment as this is not yet supporting WSLv2.
+            Default is '2' if not running on 'windows-2019' virtual environment.
+        required: false
+        default: 1 | 2
+
 outputs:
     wsl-shell-wrapper-path:
         description: |

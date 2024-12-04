@@ -45,10 +45,13 @@ import kotlinx.coroutines.CoroutineStart.LAZY
 import kotlinx.coroutines.DelicateCoroutinesApi
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.async
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.asFlow
 import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.onEach
+import kotlinx.coroutines.flow.onStart
 import node.buffer.Buffer
 import node.buffer.BufferEncoding
 import node.fs.exists
@@ -61,16 +64,17 @@ import node.process.Platform
 import node.process.process
 import nullwritable.NullWritable
 import org.w3c.dom.url.URL
+import kotlin.time.Duration.Companion.seconds
 import actions.tool.cache.extractZip as toolCacheExtractZip
 
-val wslHelp = GlobalScope.async(start = LAZY) {
+suspend fun wslOutput(vararg args: String): String {
     val stdoutBuilder = StringBuilder()
     val stdoutBuilderUtf16Le = StringBuilder()
     val stderrBuilder = StringBuilder()
     val stderrBuilderUtf16Le = StringBuilder()
     exec(
         commandLine = "wsl",
-        args = arrayOf("--help"),
+        args = args,
         options = ExecOptions(
             ignoreReturnCode = true,
             outStream = NullWritable(),
@@ -90,7 +94,15 @@ val wslHelp = GlobalScope.async(start = LAZY) {
     stdoutBuilder.append(stdoutBuilderUtf16Le)
     stdoutBuilder.append(stderrBuilder)
     stdoutBuilder.append(stderrBuilderUtf16Le)
-    stdoutBuilder.toString()
+    return stdoutBuilder.toString()
+}
+
+val wslHelp = GlobalScope.async(start = LAZY) {
+    wslOutput("--help")
+}
+
+val wslStatus = GlobalScope.async(start = LAZY) {
+    wslOutput("--status")
 }
 
 val distribution by lazy {
@@ -230,6 +242,28 @@ val wslShellCommand by lazy {
     getInput("wsl-shell-command")
 }
 
+val wslVersion = GlobalScope.async(start = LAZY) {
+    when (val input = getInput("wsl-version", InputOptions(required = true))) {
+        "1 | 2" -> if (wslHelp().contains("--set-default-version")) 2u else 1u
+        else -> {
+            input.toUIntOrNull().also { wslVersion ->
+                when (wslVersion) {
+                    null, 0u -> error("'$input' is not a valid positive integer for 'wsl-version'.")
+                    1u -> Unit
+                    else -> {
+                        check(wslHelp().contains("--set-default-version")) {
+                            "This Windows environment only has WSLv1 available but WSLv$wslVersion was requested, please verify your 'runs-on' and 'wsl-version' settings"
+                        }
+                        if (wslVersion > 2u) {
+                            warning("WSLv$wslVersion is untested, if it works with your workflow please open an issue to get the version tested and this warning removed")
+                        }
+                    }
+                }
+            }
+        }
+    }
+}
+
 val wslShellName by lazy {
     wslShellCommand
         .takeIf { it.isNotEmpty() }
@@ -338,8 +372,20 @@ suspend fun verifyWindowsEnvironment() {
 
 suspend fun installDistribution() {
     executeWslCommand(
-        wslArguments = arrayOf("--set-default-version", "1")
+        wslArguments = arrayOf("--set-default-version", "${wslVersion()}")
     )
+    if (wslVersion() != 1u) {
+        executeWslCommand(
+            wslArguments = arrayOf("--update")
+        )
+
+        (2..30)
+            .asFlow()
+            .onEach { delay(1.seconds) }
+            .onStart { emit(1) }
+            .map { wslStatus() }
+            .firstOrNull { !it.contains("WSL is finishing an upgrade...") }
+    }
     exec(
         commandLine = """"${path.join(distributionDirectory(), distribution.installerFile)}"""",
         args = arrayOf("install", "--root"),
