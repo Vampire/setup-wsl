@@ -293,9 +293,7 @@ object Ubuntu1604 : AptGetBasedDistribution(
     wslId = "Ubuntu-16.04",
     distributionName = "Ubuntu",
     version = SemVer("16.4.0"),
-    // work-around for https://github.com/microsoft/WSL/issues/12336
-    //downloadUrl = URL("https://aka.ms/wsl-ubuntu-1604"),
-    downloadUrl = URL("https://wslstorestorage.blob.core.windows.net/wslblob/Ubuntu_1604.2019.523.0_x64.appx"),
+    downloadUrl = URL("https://aka.ms/wsl-ubuntu-1604"),
     installerFile = "ubuntu1604.exe"
 )
 
