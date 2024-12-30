@@ -375,9 +375,11 @@ suspend fun installDistribution() {
         wslArguments = arrayOf("--set-default-version", "${wslVersion()}")
     )
     if (wslVersion() != 1u) {
-        executeWslCommand(
-            wslArguments = arrayOf("--update")
-        )
+        retry(5) {
+            executeWslCommand(
+                wslArguments = arrayOf("--update")
+            )
+        }
 
         (2..30)
             .asFlow()
