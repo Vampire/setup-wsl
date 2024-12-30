@@ -86,6 +86,7 @@ jobs:
         environment:
         - 'windows-2019'
         - 'windows-2022'
+        - 'windows-2025'
         - 'windows-latest'
         distribution:
         - user-id: 'invalid'
@@ -127,6 +128,7 @@ jobs:
         environment:
         - 'windows-2019'
         - 'windows-2022'
+        - 'windows-2025'
         - 'windows-latest'
         wsl-version:
         - '-1'
@@ -167,6 +169,7 @@ jobs:
         environment:
         - 'windows-2019'
         - 'windows-2022'
+        - 'windows-2025'
         - 'windows-latest'
         distribution:
         - wsl-id: 'Debian'
@@ -372,6 +375,7 @@ jobs:
         environment:
         - 'windows-2019'
         - 'windows-2022'
+        - 'windows-2025'
         - 'windows-latest'
         distribution:
         - wsl-id: 'Debian'
@@ -936,6 +940,7 @@ jobs:
         environment:
         - 'windows-2019'
         - 'windows-2022'
+        - 'windows-2025'
         - 'windows-latest'
         distribution:
         - wsl-id: 'Debian'
@@ -1045,6 +1050,7 @@ jobs:
         environment:
         - 'windows-2019'
         - 'windows-2022'
+        - 'windows-2025'
         - 'windows-latest'
         distribution:
         - wsl-id: 'Debian'
@@ -1190,6 +1196,7 @@ jobs:
         environment:
         - 'windows-2019'
         - 'windows-2022'
+        - 'windows-2025'
         - 'windows-latest'
         distribution:
         - wsl-id: 'Debian'
@@ -1326,6 +1333,7 @@ jobs:
       matrix:
         environment:
         - 'windows-2022'
+        - 'windows-2025'
         - 'windows-latest'
         distribution:
         - wsl-id: 'Debian'
@@ -1407,6 +1415,7 @@ jobs:
       matrix:
         environment:
         - 'windows-2022'
+        - 'windows-2025'
         - 'windows-latest'
     steps:
     - id: 'step-0'
@@ -1457,6 +1466,7 @@ jobs:
         environment:
         - 'windows-2019'
         - 'windows-2022'
+        - 'windows-2025'
         - 'windows-latest'
         distribution:
         - wsl-id: 'Debian'
@@ -1538,6 +1548,7 @@ jobs:
         environment:
         - 'windows-2019'
         - 'windows-2022'
+        - 'windows-2025'
         - 'windows-latest'
         distributions:
         - distribution1:
@@ -1694,6 +1705,7 @@ jobs:
         environment:
         - 'windows-2019'
         - 'windows-2022'
+        - 'windows-2025'
         - 'windows-latest'
         distribution:
         - wsl-id: 'Debian'
@@ -1760,6 +1772,17 @@ jobs:
             user-id: 'Debian'
             match-pattern: '*Debian*'
             default-absent-tool: 'dos2unix'
+        - environment: 'windows-2025'
+          distribution:
+            wsl-id: 'Debian'
+            user-id: 'Debian'
+            match-pattern: '*Debian*'
+            default-absent-tool: 'dos2unix'
+          distribution2:
+            wsl-id: 'Debian'
+            user-id: 'Debian'
+            match-pattern: '*Debian*'
+            default-absent-tool: 'dos2unix'
         - environment: 'windows-latest'
           distribution:
             wsl-id: 'Debian'
@@ -1784,6 +1807,17 @@ jobs:
             match-pattern: '*Ubuntu*20.04*'
             default-absent-tool: 'dos2unix'
         - environment: 'windows-2022'
+          distribution:
+            wsl-id: 'Debian'
+            user-id: 'Debian'
+            match-pattern: '*Debian*'
+            default-absent-tool: 'dos2unix'
+          distribution2:
+            wsl-id: 'Ubuntu'
+            user-id: 'Ubuntu-20.04'
+            match-pattern: '*Ubuntu*20.04*'
+            default-absent-tool: 'dos2unix'
+        - environment: 'windows-2025'
           distribution:
             wsl-id: 'Debian'
             user-id: 'Debian'
@@ -1981,6 +2015,7 @@ jobs:
         environment:
         - 'windows-2019'
         - 'windows-2022'
+        - 'windows-2025'
         - 'windows-latest'
         distributions:
         - incompatibleUbuntu: 'Ubuntu-22.04'
