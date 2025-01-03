@@ -37,6 +37,7 @@ import actions.exec.ExecOptions
 import actions.exec.exec
 import actions.io.mkdirP
 import actions.io.mv
+import actions.io.rmRF
 import actions.io.which
 import actions.tool.cache.cacheDir
 import actions.tool.cache.downloadTool
@@ -57,6 +58,7 @@ import node.buffer.BufferEncoding
 import node.fs.exists
 import node.fs.mkdtemp
 import node.fs.readdir
+import node.fs.stat
 import node.fs.writeFile
 import node.os.tmpdir
 import node.path.path
@@ -64,8 +66,16 @@ import node.process.Platform
 import node.process.process
 import nullwritable.NullWritable
 import org.w3c.dom.url.URL
+import kotlin.time.Duration
+import kotlin.time.Duration.Companion.minutes
 import kotlin.time.Duration.Companion.seconds
 import actions.tool.cache.extractZip as toolCacheExtractZip
+
+private const val BAD_WSL_EXE_PATH =
+    "C:\\Users\\runneradmin\\AppData\\Local\\Microsoft\\WindowsApps\\wsl.exe"
+
+private const val BAD_WSLCONFIG_EXE_PATH =
+    "C:\\Users\\runneradmin\\AppData\\Local\\Microsoft\\WindowsApps\\wslconfig.exe"
 
 suspend fun wslOutput(vararg args: String): String {
     val stdoutBuilder = StringBuilder()
@@ -101,10 +111,6 @@ val wslHelp = GlobalScope.async(start = LAZY) {
     wslOutput("--help")
 }
 
-val wslStatus = GlobalScope.async(start = LAZY) {
-    wslOutput("--status")
-}
-
 val distribution by lazy {
     val distributionId = getInput("distribution", InputOptions(required = true))
 
@@ -123,6 +129,10 @@ val wslId = GlobalScope.async(start = LAZY) {
         )
     }
     distribution.wslId
+}
+
+val wslInstallationNeeded = GlobalScope.async(start = LAZY) {
+    wslOutput("--status").contains("is not installed")
 }
 
 val installationNeeded = GlobalScope.async(start = LAZY) {
@@ -292,6 +302,12 @@ suspend fun main() {
         if (getInput("only safe actions").isEmpty()
             || !getBooleanInput("only safe actions")
         ) {
+            // on windows-2025 WSL is not installed at all currently, so install it without distribution
+            // work-around for https://github.com/actions/runner-images/issues/11265
+            if (wslInstallationNeeded()) {
+                group("Install WSL", ::installWsl)
+            }
+
             if (installationNeeded()) {
                 group("Install Distribution", ::installDistribution)
             }
@@ -370,27 +386,88 @@ suspend fun verifyWindowsEnvironment() {
     }
 }
 
+suspend fun installWsl() {
+    // part of work-around for https://github.com/actions/toolkit/issues/1925
+    val deleteWslExe =
+        runCatching { stat(BAD_WSL_EXE_PATH).isFile() }
+            .getOrDefault(false)
+            .not()
+    val deleteWslConfigExe =
+        runCatching { stat(BAD_WSLCONFIG_EXE_PATH).isFile() }
+            .getOrDefault(false)
+            .not()
+
+    exec(
+        commandLine = "pwsh",
+        args = arrayOf("-Command", """Start-Process wsl "--install --no-distribution""""),
+        options = ExecOptions(ignoreReturnCode = true)
+    )
+
+    waitForWslStatusNotContaining("is not installed", 5.minutes) {
+        // part of work-around for https://github.com/actions/toolkit/issues/1925
+        if (deleteWslExe) {
+            rmRF(BAD_WSL_EXE_PATH)
+        }
+        if (deleteWslConfigExe) {
+            rmRF(BAD_WSLCONFIG_EXE_PATH)
+        }
+    }
+}
+
 suspend fun installDistribution() {
     executeWslCommand(
         wslArguments = arrayOf("--set-default-version", "${wslVersion()}")
     )
-    if (wslVersion() != 1u) {
-        executeWslCommand(
-            wslArguments = arrayOf("--update")
-        )
 
-        (2..30)
-            .asFlow()
-            .onEach { delay(1.seconds) }
-            .onStart { emit(1) }
-            .map { wslStatus() }
-            .firstOrNull { !it.contains("WSL is finishing an upgrade...") }
+    if (wslVersion() != 1u) {
+        // part of work-around for https://github.com/actions/toolkit/issues/1925
+        val deleteWslExe =
+            runCatching { stat(BAD_WSL_EXE_PATH).isFile() }
+                .getOrDefault(false)
+                .not()
+        val deleteWslConfigExe =
+            runCatching { stat(BAD_WSLCONFIG_EXE_PATH).isFile() }
+                .getOrDefault(false)
+                .not()
+
+        retry(10) {
+            executeWslCommand(
+                wslArguments = arrayOf("--update")
+            )
+        }
+
+        // part of work-around for https://github.com/actions/toolkit/issues/1925
+        waitForWslStatusNotContaining("WSL is finishing an upgrade...") {
+            if (deleteWslExe) {
+                rmRF(BAD_WSL_EXE_PATH)
+            }
+            if (deleteWslConfigExe) {
+                rmRF(BAD_WSLCONFIG_EXE_PATH)
+            }
+        }
     }
+
     exec(
         commandLine = """"${path.join(distributionDirectory(), distribution.installerFile)}"""",
         args = arrayOf("install", "--root"),
         options = ExecOptions(input = Buffer.from(""))
     )
+}
+
+suspend fun waitForWslStatusNotContaining(
+    text: String,
+    duration: Duration = 30.seconds,
+    preAction: suspend () -> Unit = {}
+) {
+    (2..duration.inWholeSeconds)
+        .asFlow()
+        .onEach { delay(1.seconds) }
+        .onStart { emit(1) }
+        .map {
+            preAction()
+            wslOutput("--status")
+        }
+        .firstOrNull { !it.contains(text) }
 }
 
 suspend fun adjustWslConf() {

@@ -56,6 +56,7 @@ import kotlin.math.min
 val environments = listOf(
     "windows-2019",
     "windows-2022",
+    "windows-2025",
     "windows-latest"
 )
 

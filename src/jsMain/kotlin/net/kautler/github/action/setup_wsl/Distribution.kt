@@ -17,7 +17,6 @@
 package net.kautler.github.action.setup_wsl
 
 import actions.core.debug
-import actions.core.info
 import actions.core.isDebug
 import actions.exec.ExecOptions
 import actions.exec.exec
@@ -293,9 +292,7 @@ object Ubuntu1604 : AptGetBasedDistribution(
     wslId = "Ubuntu-16.04",
     distributionName = "Ubuntu",
     version = SemVer("16.4.0"),
-    // work-around for https://github.com/microsoft/WSL/issues/12336
-    //downloadUrl = URL("https://aka.ms/wsl-ubuntu-1604"),
-    downloadUrl = URL("https://wslstorestorage.blob.core.windows.net/wslblob/Ubuntu_1604.2019.523.0_x64.appx"),
+    downloadUrl = URL("https://aka.ms/wsl-ubuntu-1604"),
     installerFile = "ubuntu1604.exe"
 )
 
@@ -489,16 +486,3 @@ object Alpine : ApkBasedDistribution(
     productId = "9p804crf0395",
     installerFile = "Alpine.exe"
 )
-
-private suspend inline fun <T> retry(amount: Int, crossinline block: suspend () -> T): T {
-    (1..amount).map { i ->
-        runCatching {
-            return block()
-        }.onFailure {
-            if (i != 5) {
-                debug(it.stackTraceToString())
-                info("Failure happened, retrying (${it.message ?: it})")
-            }
-        }
-    }.last().getOrThrow<Nothing>()
-}
