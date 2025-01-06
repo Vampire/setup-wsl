@@ -39,7 +39,7 @@ workflowWithCopyright(
         runsOn = WindowsLatest
     ) {
         uses(
-            name = "Check for Modifications",
+            name = "Execute action",
             action = SetupWsl()
         )
     }

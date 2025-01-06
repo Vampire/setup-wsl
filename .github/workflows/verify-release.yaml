@@ -43,5 +43,5 @@ jobs:
     - 'check_yaml_consistency'
     steps:
     - id: 'step-0'
-      name: 'Check for Modifications'
+      name: 'Execute action'
       uses: 'Vampire/setup-wsl@v4'
