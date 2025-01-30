@@ -1,7 +1,7 @@
 #!/usr/bin/env kotlin
 
 /*
- * Copyright 2020-2024 Björn Kautler
+ * Copyright 2020-2025 Björn Kautler
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,6 +18,11 @@
 
 @file:Import("workflow-with-copyright.main.kts")
 @file:Repository("https://bindings.krzeminski.it/")
+
+@file:Repository("https://repo.maven.apache.org/maven2/")
+// work-around for https://youtrack.jetbrains.com/issue/KT-69145
+@file:DependsOn("io.github.typesafegithub:github-workflows-kt:3.2.0")
+
 @file:DependsOn("actions:checkout:v4")
 @file:DependsOn("typesafegithub:github-actions-typing:v1")
 
