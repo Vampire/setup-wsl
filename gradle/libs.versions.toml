@@ -1,4 +1,4 @@
-# Copyright 2020-2024 Björn Kautler
+# Copyright 2020-2025 Björn Kautler
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -27,7 +27,7 @@ build-snakeyaml = "2.0"
 kotlin = "2.0.20"
 kotlinx-coroutines = "1.6.4"
 ktor = "3.0.0"
-workflows-kotlin = "2.0.20"
+workflows-kotlin = "2.1.10"
 
 [libraries]
 build-github-api = { module = "org.kohsuke:github-api", version.ref = "build-github-api" }
@@ -40,6 +40,7 @@ kotlinx-coroutines-core = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-c
 ktor-client-core = { module = "io.ktor:ktor-client-core", version.ref = "ktor" }
 ktor-client-js = { module = "io.ktor:ktor-client-js", version.ref = "ktor" }
 workflows-kotlin-compiler = { module = "org.jetbrains.kotlin:kotlin-compiler", version.ref = "workflows-kotlin" }
+workflows-kotlin-compiler-embeddable = { module = "org.jetbrains.kotlin:kotlin-compiler-embeddable", version.ref = "workflows-kotlin" }
 workflows-kotlin-main-kts = { module = "org.jetbrains.kotlin:kotlin-main-kts", version.ref = "workflows-kotlin" }
 workflows-kotlin-scripting-compiler = { module = "org.jetbrains.kotlin:kotlin-scripting-compiler", version.ref = "workflows-kotlin" }
 
