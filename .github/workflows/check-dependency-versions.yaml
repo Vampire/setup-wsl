@@ -20,6 +20,9 @@ name: 'Check Dependency Versions'
 on:
   schedule:
   - cron: '0 0 * * FRI'
+concurrency:
+  group: '${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}'
+  cancel-in-progress: true
 jobs:
   check_yaml_consistency:
     name: 'Check YAML consistency'

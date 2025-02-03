@@ -20,6 +20,8 @@
 import io.github.typesafegithub.workflows.domain.Concurrency
 import io.github.typesafegithub.workflows.domain.triggers.Trigger
 import io.github.typesafegithub.workflows.dsl.WorkflowBuilder
+import io.github.typesafegithub.workflows.dsl.expressions.Contexts.github
+import io.github.typesafegithub.workflows.dsl.expressions.expr
 import io.github.typesafegithub.workflows.dsl.workflow
 import io.github.typesafegithub.workflows.yaml.Preamble.WithOriginalAfter
 import java.io.File
@@ -29,7 +31,6 @@ fun workflowWithCopyright(
     on: List<Trigger>,
     env: Map<String, String> = mapOf(),
     sourceFile: File,
-    concurrency: Concurrency? = null,
     block: WorkflowBuilder.() -> Unit
 ) {
     workflow(
@@ -37,7 +38,10 @@ fun workflowWithCopyright(
         on = on,
         env = env,
         sourceFile = sourceFile,
-        concurrency = concurrency,
+        concurrency = Concurrency(
+            group = "${expr { github.workflow }}-${expr("${github.eventPullRequest.pull_request.number} || ${github.ref}")}",
+            cancelInProgress = true
+        ),
         preamble = WithOriginalAfter(
             """
                 Copyright 2020-2025 Björn Kautler
