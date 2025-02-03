@@ -191,7 +191,7 @@ abstract class AptGetBasedDistribution : Distribution {
         installerFile: String
     ) : super(wslId, userId, distributionName, version, productId, installerFile)
 
-    private suspend fun refresh() {
+    protected open suspend fun refresh() {
         exec(
             commandLine = "wsl",
             args = arrayOf(
@@ -305,12 +305,34 @@ object Debian : AptGetBasedDistribution(
 )
 
 object Kali : AptGetBasedDistribution(
-    wslId = "kali-linux",
+    wslId = "MyDistribution",
+    userId = "kali-linux",
     distributionName = "Kali",
     version = SemVer("1.0.0"),
     downloadUrl = URL("https://aka.ms/wsl-kali-linux-new"),
     installerFile = "kali.exe"
-)
+) {
+    override suspend fun refresh() {
+        exec(
+            commandLine = "wsl",
+            args = arrayOf(
+                "--distribution",
+                wslId,
+                "wget",
+                "https://archive.kali.org/archive-key.asc",
+                "-O",
+                "/etc/apt/trusted.gpg.d/kali-archive-keyring.asc"
+            ),
+            options = ExecOptions(
+                env = recordOf(
+                    "DEBIAN_FRONTEND" to "noninteractive",
+                    "WSLENV" to "DEBIAN_FRONTEND/u"
+                )
+            )
+        )
+        super.refresh()
+    }
+}
 
 abstract class ZypperBasedDistribution : Distribution {
     constructor(

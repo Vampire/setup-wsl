@@ -80,7 +80,7 @@ val alpine = Distribution(
 )
 
 val kali = Distribution(
-    wslId = "kali-linux",
+    wslId = "MyDistribution",
     userId = "kali-linux",
     matchPattern = "*Kali*",
     defaultAbsentTool = "dos2unix"
@@ -471,14 +471,7 @@ workflowWithCopyright(
                     |(
                         ${it.prependIndent("|    ")}
                     |)
-                    |&& (
-                    |    (matrix.distribution.user-id != '${kali.userId}')
-                    |    || (
-                    |        (
-                                 ${getWslVersionExpression(kali).prependIndent("|            ")}
-                    |        ) == '2'
-                    |    )
-                    |)
+                    |&& (matrix.distribution.user-id != '${kali.userId}')
                 """.trimMargin()
             },
             action = executeAction.copy(
@@ -495,14 +488,7 @@ workflowWithCopyright(
                     |(
                         ${it.prependIndent("|    ")}
                     |)
-                    |&& (
-                    |    (matrix.distribution.user-id != '${kali.userId}')
-                    |    || (
-                    |        (
-                                 ${getWslVersionExpression(kali).prependIndent("|            ")}
-                    |        ) == '2'
-                    |    )
-                    |)
+                    |&& (matrix.distribution.user-id != '${kali.userId}')
                 """.trimMargin()
             },
             actualCommand = "whoami",
@@ -516,14 +502,7 @@ workflowWithCopyright(
                     |(
                         ${it.prependIndent("|    ")}
                     |)
-                    |&& (
-                    |    (matrix.distribution.user-id != '${kali.userId}')
-                    |    || (
-                    |        (
-                                 ${getWslVersionExpression(kali).prependIndent("|            ")}
-                    |        ) == '2'
-                    |    )
-                    |)
+                    |&& (matrix.distribution.user-id != '${kali.userId}')
                 """.trimMargin()
             },
             action = executeAction.copy(
@@ -746,14 +725,7 @@ workflowWithCopyright(
                 wslVersion_Untyped = expr(getWslVersionExpression(kali))
             ),
             // part of work-around for https://bugs.kali.org/view.php?id=8921
-            condition = """
-                |(matrix.distribution.user-id != '${kali.userId}')
-                ||| (
-                |    (
-                         ${getWslVersionExpression(kali).prependIndent("|        ")}
-                |    ) == '2'
-                |)
-            """.trimMargin()
+            condition = "matrix.distribution.user-id != '${kali.userId}'"
         )
         runAfterSuccess(
             name = "Test - ${expr("matrix.distribution.default-absent-tool")} should be installed",
@@ -764,14 +736,7 @@ workflowWithCopyright(
                     |(
                         ${it.prependIndent("|    ")}
                     |)
-                    |&& (
-                    |    (matrix.distribution.user-id != '${kali.userId}')
-                    |    || (
-                    |        (
-                                 ${getWslVersionExpression(kali).prependIndent("|            ")}
-                    |        ) == '2'
-                    |    )
-                    |)
+                    |&& (matrix.distribution.user-id != '${kali.userId}')
                 """.trimMargin()
             }
         )
@@ -784,14 +749,7 @@ workflowWithCopyright(
                     |(
                         ${it.prependIndent("|    ")}
                     |)
-                    |&& (
-                    |    (matrix.distribution.user-id != '${kali.userId}')
-                    |    || (
-                    |        (
-                                 ${getWslVersionExpression(kali).prependIndent("|            ")}
-                    |        ) == '2'
-                    |    )
-                    |)
+                    |&& (matrix.distribution.user-id != '${kali.userId}')
                 """.trimMargin()
             }
         )
@@ -1059,14 +1017,7 @@ workflowWithCopyright(
                 additionalPackages = listOf(
                     expr(
                         """
-                            |(
-                            |    (matrix.distribution.user-id != '${kali.userId}')
-                            |    || (
-                            |        (
-                                         ${getWslVersionExpression(kali).prependIndent("|            ")}
-                            |        ) == '2'
-                            |    )
-                            |)
+                            |(matrix.distribution.user-id != '${kali.userId}')
                             |&& 'bash'
                             ||| ''
                         """.trimMargin()
@@ -1076,7 +1027,7 @@ workflowWithCopyright(
                 // and https://bugs.kali.org/view.php?id=6672
                 // and https://bugs.launchpad.net/ubuntu/+source/systemd/+bug/2069555
                 wslVersion = null,
-                wslVersion_Untyped = expr(getWslVersionExpression(kali, ubuntu2404))
+                wslVersion_Untyped = expr(getWslVersionExpression(ubuntu2404))
             )
         )
         usesSelf(
@@ -1088,14 +1039,14 @@ workflowWithCopyright(
             // part of work-around for https://bugs.kali.org/view.php?id=6672
             // and https://bugs.launchpad.net/ubuntu/+source/systemd/+bug/2069555
             condition = """
-                |(
-                |    (matrix.distribution.user-id != '${kali.userId}')
-                |    && (matrix.distribution.user-id != '${ubuntu2404.userId}')
-                |)
-                ||| (
-                |    (
-                         ${getWslVersionExpression(kali, ubuntu2404).prependIndent("|        ")}
-                |    ) == '2'
+                |(matrix.distribution.user-id != '${kali.userId}')
+                |&& (
+                |    (matrix.distribution.user-id != '${ubuntu2404.userId}')
+                |    || (
+                |        (
+                             ${getWslVersionExpression(ubuntu2404).prependIndent("|        ")}
+                |        ) == '2'
+                |    )
                 |)
             """.trimMargin()
         )
@@ -1106,14 +1057,7 @@ workflowWithCopyright(
                 wslVersion = null
             ),
             // part of work-around for https://bugs.kali.org/view.php?id=8921
-            condition = """
-                |(matrix.distribution.user-id != '${kali.userId}')
-                ||| (
-                |    (
-                         ${getWslVersionExpression(kali).prependIndent("|        ")}
-                |    ) == '2'
-                |)
-            """.trimMargin()
+            condition = "(matrix.distribution.user-id != '${kali.userId}')"
         )
         runAfterSuccess(
             name = "Test - ${expr("matrix.distribution.default-absent-tool")} should be installed",
@@ -1124,14 +1068,7 @@ workflowWithCopyright(
                     |(
                         ${it.prependIndent("|    ")}
                     |)
-                    |&& (
-                    |    (matrix.distribution.user-id != '${kali.userId}')
-                    |    || (
-                    |       (
-                                ${getWslVersionExpression(kali).prependIndent("|           ")}
-                    |       ) == '2'
-                    |   )
-                    |)
+                    |&& (matrix.distribution.user-id != '${kali.userId}')
                 """.trimMargin()
             }
         )

@@ -389,7 +389,7 @@ jobs:
           user-id: 'Alpine'
           match-pattern: '*Alpine*'
           default-absent-tool: 'dos2unix'
-        - wsl-id: 'kali-linux'
+        - wsl-id: 'MyDistribution'
           user-id: 'kali-linux'
           match-pattern: '*Kali*'
           default-absent-tool: 'dos2unix'
@@ -732,21 +732,7 @@ jobs:
             always()
             && (steps.step-31.outcome == 'success')
         )
-        && (
-            (matrix.distribution.user-id != 'kali-linux')
-            || (
-                (
-                    (
-                        (
-                            (matrix.distribution.user-id == 'kali-linux')
-                        )
-                        && (matrix.environment != 'windows-2019')
-                    )
-                    && '2'
-                    || '1'
-                ) == '2'
-            )
-        )
+        && (matrix.distribution.user-id != 'kali-linux')
     - id: 'step-37'
       name: 'Test - wsl-bash should use test as default user'
       shell: 'wsl-bash {0}'
@@ -758,21 +744,7 @@ jobs:
             always()
             && (steps.step-36.outcome == 'success')
         )
-        && (
-            (matrix.distribution.user-id != 'kali-linux')
-            || (
-                (
-                    (
-                        (
-                            (matrix.distribution.user-id == 'kali-linux')
-                        )
-                        && (matrix.environment != 'windows-2019')
-                    )
-                    && '2'
-                    || '1'
-                ) == '2'
-            )
-        )
+        && (matrix.distribution.user-id != 'kali-linux')
     - id: 'step-38'
       name: 'Set wsl-bash wrapper to use user test by default with inline script usage'
       uses: './'
@@ -784,21 +756,7 @@ jobs:
             always()
             && (steps.step-36.outcome == 'success')
         )
-        && (
-            (matrix.distribution.user-id != 'kali-linux')
-            || (
-                (
-                    (
-                        (
-                            (matrix.distribution.user-id == 'kali-linux')
-                        )
-                        && (matrix.environment != 'windows-2019')
-                    )
-                    && '2'
-                    || '1'
-                ) == '2'
-            )
-        )
+        && (matrix.distribution.user-id != 'kali-linux')
     - id: 'step-39'
       name: 'Test - wsl-bash should use test as default user with inline script usage'
       shell: 'wsl-bash {0}'
@@ -954,7 +912,7 @@ jobs:
           user-id: 'Alpine'
           match-pattern: '*Alpine*'
           default-absent-tool: 'dos2unix'
-        - wsl-id: 'kali-linux'
+        - wsl-id: 'MyDistribution'
           user-id: 'kali-linux'
           match-pattern: '*Kali*'
           default-absent-tool: 'dos2unix'
@@ -1064,7 +1022,7 @@ jobs:
           user-id: 'Alpine'
           match-pattern: '*Alpine*'
           default-absent-tool: 'dos2unix'
-        - wsl-id: 'kali-linux'
+        - wsl-id: 'MyDistribution'
           user-id: 'kali-linux'
           match-pattern: '*Kali*'
           default-absent-tool: 'dos2unix'
@@ -1210,7 +1168,7 @@ jobs:
           user-id: 'Alpine'
           match-pattern: '*Alpine*'
           default-absent-tool: 'dos2unix'
-        - wsl-id: 'kali-linux'
+        - wsl-id: 'MyDistribution'
           user-id: 'kali-linux'
           match-pattern: '*Kali*'
           default-absent-tool: 'dos2unix'
@@ -1263,20 +1221,7 @@ jobs:
           )
           && '2'
           || '1' }}
-      if: |-
-        (matrix.distribution.user-id != 'kali-linux')
-        || (
-            (
-                (
-                    (
-                        (matrix.distribution.user-id == 'kali-linux')
-                    )
-                    && (matrix.environment != 'windows-2019')
-                )
-                && '2'
-                || '1'
-            ) == '2'
-        )
+      if: 'matrix.distribution.user-id != ''kali-linux'''
     - id: 'step-2'
       name: 'Test - ${{ matrix.distribution.default-absent-tool }} should be installed'
       shell: 'wsl-bash {0}'
@@ -1286,21 +1231,7 @@ jobs:
             always()
             && (steps.step-1.outcome == 'success')
         )
-        && (
-            (matrix.distribution.user-id != 'kali-linux')
-            || (
-                (
-                    (
-                        (
-                            (matrix.distribution.user-id == 'kali-linux')
-                        )
-                        && (matrix.environment != 'windows-2019')
-                    )
-                    && '2'
-                    || '1'
-                ) == '2'
-            )
-        )
+        && (matrix.distribution.user-id != 'kali-linux')
     - id: 'step-3'
       name: 'Test - bash should be installed'
       shell: 'wsl-bash {0}'
@@ -1310,21 +1241,7 @@ jobs:
             always()
             && (steps.step-1.outcome == 'success')
         )
-        && (
-            (matrix.distribution.user-id != 'kali-linux')
-            || (
-                (
-                    (
-                        (
-                            (matrix.distribution.user-id == 'kali-linux')
-                        )
-                        && (matrix.environment != 'windows-2019')
-                    )
-                    && '2'
-                    || '1'
-                ) == '2'
-            )
-        )
+        && (matrix.distribution.user-id != 'kali-linux')
   test_installation_on_wsl_version:
     name: 'Test installation on WSLv${{ matrix.wsl-version }} for "${{ matrix.distribution.user-id }}" distribution on ${{ matrix.environment }}'
     runs-on: '${{ matrix.environment }}'
@@ -1347,7 +1264,7 @@ jobs:
           user-id: 'Alpine'
           match-pattern: '*Alpine*'
           default-absent-tool: 'dos2unix'
-        - wsl-id: 'kali-linux'
+        - wsl-id: 'MyDistribution'
           user-id: 'kali-linux'
           match-pattern: '*Kali*'
           default-absent-tool: 'dos2unix'
@@ -1480,7 +1397,7 @@ jobs:
           user-id: 'Alpine'
           match-pattern: '*Alpine*'
           default-absent-tool: 'dos2unix'
-        - wsl-id: 'kali-linux'
+        - wsl-id: 'MyDistribution'
           user-id: 'kali-linux'
           match-pattern: '*Kali*'
           default-absent-tool: 'dos2unix'
@@ -1719,7 +1636,7 @@ jobs:
           user-id: 'Alpine'
           match-pattern: '*Alpine*'
           default-absent-tool: 'dos2unix'
-        - wsl-id: 'kali-linux'
+        - wsl-id: 'MyDistribution'
           user-id: 'kali-linux'
           match-pattern: '*Kali*'
           default-absent-tool: 'dos2unix'
@@ -1858,28 +1775,13 @@ jobs:
       with:
         distribution: '${{ matrix.distribution.user-id }}'
         additional-packages: |-
-          ${{ (
-              (matrix.distribution.user-id != 'kali-linux')
-              || (
-                  (
-                      (
-                          (
-                              (matrix.distribution.user-id == 'kali-linux')
-                          )
-                          && (matrix.environment != 'windows-2019')
-                      )
-                      && '2'
-                      || '1'
-                  ) == '2'
-              )
-          )
+          ${{ (matrix.distribution.user-id != 'kali-linux')
           && 'bash'
           || '' }}
         wsl-version: |-
           ${{ (
               (
-                  (matrix.distribution.user-id == 'kali-linux')
-                  || (matrix.distribution.user-id == 'Ubuntu-24.04')
+                  (matrix.distribution.user-id == 'Ubuntu-24.04')
               )
               && (matrix.environment != 'windows-2019')
           )
@@ -1892,22 +1794,21 @@ jobs:
         distribution: '${{ matrix.distribution.user-id }}'
         update: 'true'
       if: |-
-        (
-            (matrix.distribution.user-id != 'kali-linux')
-            && (matrix.distribution.user-id != 'Ubuntu-24.04')
-        )
-        || (
-            (
+        (matrix.distribution.user-id != 'kali-linux')
+        && (
+            (matrix.distribution.user-id != 'Ubuntu-24.04')
+            || (
+                (
                 (
                     (
-                        (matrix.distribution.user-id == 'kali-linux')
-                        || (matrix.distribution.user-id == 'Ubuntu-24.04')
+                        (matrix.distribution.user-id == 'Ubuntu-24.04')
                     )
                     && (matrix.environment != 'windows-2019')
                 )
                 && '2'
                 || '1'
-            ) == '2'
+                ) == '2'
+            )
         )
     - id: 'step-3'
       name: 'Install default absent tool'
@@ -1915,20 +1816,7 @@ jobs:
       with:
         distribution: '${{ matrix.distribution.user-id }}'
         additional-packages: '${{ matrix.distribution.default-absent-tool }}'
-      if: |-
-        (matrix.distribution.user-id != 'kali-linux')
-        || (
-            (
-                (
-                    (
-                        (matrix.distribution.user-id == 'kali-linux')
-                    )
-                    && (matrix.environment != 'windows-2019')
-                )
-                && '2'
-                || '1'
-            ) == '2'
-        )
+      if: '(matrix.distribution.user-id != ''kali-linux'')'
     - id: 'step-4'
       name: 'Test - ${{ matrix.distribution.default-absent-tool }} should be installed'
       shell: 'wsl-bash {0}'
@@ -1938,21 +1826,7 @@ jobs:
             always()
             && (steps.step-3.outcome == 'success')
         )
-        && (
-            (matrix.distribution.user-id != 'kali-linux')
-            || (
-               (
-                   (
-                       (
-                           (matrix.distribution.user-id == 'kali-linux')
-                       )
-                       && (matrix.environment != 'windows-2019')
-                   )
-                   && '2'
-                   || '1'
-               ) == '2'
-           )
-        )
+        && (matrix.distribution.user-id != 'kali-linux')
     - id: 'step-5'
       name: 'Execute action for ${{ matrix.distribution2.user-id }}'
       uses: './'
@@ -2033,7 +1907,7 @@ jobs:
             match-pattern: '*Alpine*'
             default-absent-tool: 'dos2unix'
           distribution3:
-            wsl-id: 'kali-linux'
+            wsl-id: 'MyDistribution'
             user-id: 'kali-linux'
             match-pattern: '*Kali*'
             default-absent-tool: 'dos2unix'
@@ -2074,7 +1948,7 @@ jobs:
             match-pattern: '*Alpine*'
             default-absent-tool: 'dos2unix'
           distribution3:
-            wsl-id: 'kali-linux'
+            wsl-id: 'MyDistribution'
             user-id: 'kali-linux'
             match-pattern: '*Kali*'
             default-absent-tool: 'dos2unix'
