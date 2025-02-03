@@ -24,7 +24,7 @@
 @file:DependsOn("io.github.typesafegithub:github-workflows-kt:3.2.0")
 
 @file:DependsOn("actions:checkout:v4")
-@file:DependsOn("typesafegithub:github-actions-typing:v1")
+@file:DependsOn("typesafegithub:github-actions-typing:v2")
 
 import io.github.typesafegithub.workflows.actions.actions.Checkout
 import io.github.typesafegithub.workflows.actions.typesafegithub.GithubActionsTyping

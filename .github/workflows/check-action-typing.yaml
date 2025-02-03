@@ -51,4 +51,4 @@ jobs:
       uses: 'actions/checkout@v4'
     - id: 'step-2'
       name: 'Check Action Typing'
-      uses: 'typesafegithub/github-actions-typing@v1'
+      uses: 'typesafegithub/github-actions-typing@v2'
