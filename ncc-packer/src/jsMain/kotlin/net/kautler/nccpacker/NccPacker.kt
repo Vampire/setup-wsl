@@ -28,9 +28,9 @@ import node.process.process
 import vercel.ncc.NccBuildOptions
 import vercel.ncc.ncc
 
-suspend fun main() {
+suspend fun main(vararg args: String) {
     runCatching {
-        val (input, output) = process.argv.filterIndexed { i, _ -> i > 1 }
+        val (input, output) = args
         val result = ncc(
             input,
             NccBuildOptions(

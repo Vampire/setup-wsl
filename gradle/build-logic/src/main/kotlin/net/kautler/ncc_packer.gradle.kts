@@ -18,6 +18,7 @@ package net.kautler
 
 import org.gradle.accessors.dm.LibrariesForLibs
 import org.gradle.accessors.dm.LibrariesForKotlinWrappers
+import org.jetbrains.kotlin.gradle.targets.js.dsl.ExperimentalMainFunctionArgumentsDsl
 import org.jetbrains.kotlin.gradle.targets.js.nodejs.NodeJsExec
 import org.jetbrains.kotlin.gradle.tasks.IncrementalSyncTask
 
@@ -33,6 +34,8 @@ kotlin {
         useEsModules()
         binaries.executable()
         nodejs()
+        @OptIn(ExperimentalMainFunctionArgumentsDsl::class)
+        passAsArgumentToMainFunction("process.argv.slice(2)")
     }
 
     sourceSets {
