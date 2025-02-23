@@ -14,6 +14,7 @@
 
 /.idea/
 /.gradle/
+/.kotlin/
 /build/
 /gradle/build-logic/.gradle/
 /gradle/build-logic/build/
