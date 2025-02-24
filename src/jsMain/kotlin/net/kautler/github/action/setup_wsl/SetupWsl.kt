@@ -1,5 +1,5 @@
 /*
- * Copyright 2020-2024 Björn Kautler
+ * Copyright 2020-2025 Björn Kautler
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -37,7 +37,6 @@ import actions.exec.ExecOptions
 import actions.exec.exec
 import actions.io.mkdirP
 import actions.io.mv
-import actions.io.rmRF
 import actions.io.which
 import actions.tool.cache.cacheDir
 import actions.tool.cache.downloadTool
@@ -58,7 +57,6 @@ import node.buffer.BufferEncoding
 import node.fs.exists
 import node.fs.mkdtemp
 import node.fs.readdir
-import node.fs.stat
 import node.fs.writeFile
 import node.os.tmpdir
 import node.path.path
@@ -70,12 +68,6 @@ import kotlin.time.Duration
 import kotlin.time.Duration.Companion.minutes
 import kotlin.time.Duration.Companion.seconds
 import actions.tool.cache.extractZip as toolCacheExtractZip
-
-private const val BAD_WSL_EXE_PATH =
-    "C:\\Users\\runneradmin\\AppData\\Local\\Microsoft\\WindowsApps\\wsl.exe"
-
-private const val BAD_WSLCONFIG_EXE_PATH =
-    "C:\\Users\\runneradmin\\AppData\\Local\\Microsoft\\WindowsApps\\wslconfig.exe"
 
 suspend fun wslOutput(vararg args: String): String {
     val stdoutBuilder = StringBuilder()
@@ -387,31 +379,12 @@ suspend fun verifyWindowsEnvironment() {
 }
 
 suspend fun installWsl() {
-    // part of work-around for https://github.com/actions/toolkit/issues/1925
-    val deleteWslExe =
-        runCatching { stat(BAD_WSL_EXE_PATH).isFile() }
-            .getOrDefault(false)
-            .not()
-    val deleteWslConfigExe =
-        runCatching { stat(BAD_WSLCONFIG_EXE_PATH).isFile() }
-            .getOrDefault(false)
-            .not()
-
     exec(
         commandLine = "pwsh",
         args = arrayOf("-Command", """Start-Process wsl "--install --no-distribution""""),
         options = ExecOptions(ignoreReturnCode = true)
     )
-
-    waitForWslStatusNotContaining("is not installed", 5.minutes) {
-        // part of work-around for https://github.com/actions/toolkit/issues/1925
-        if (deleteWslExe) {
-            rmRF(BAD_WSL_EXE_PATH)
-        }
-        if (deleteWslConfigExe) {
-            rmRF(BAD_WSLCONFIG_EXE_PATH)
-        }
-    }
+    waitForWslStatusNotContaining("is not installed", 5.minutes)
 }
 
 suspend fun installDistribution() {
@@ -420,31 +393,12 @@ suspend fun installDistribution() {
     )
 
     if (wslVersion() != 1u) {
-        // part of work-around for https://github.com/actions/toolkit/issues/1925
-        val deleteWslExe =
-            runCatching { stat(BAD_WSL_EXE_PATH).isFile() }
-                .getOrDefault(false)
-                .not()
-        val deleteWslConfigExe =
-            runCatching { stat(BAD_WSLCONFIG_EXE_PATH).isFile() }
-                .getOrDefault(false)
-                .not()
-
         retry(10) {
             executeWslCommand(
                 wslArguments = arrayOf("--update")
             )
         }
-
-        // part of work-around for https://github.com/actions/toolkit/issues/1925
-        waitForWslStatusNotContaining("WSL is finishing an upgrade...") {
-            if (deleteWslExe) {
-                rmRF(BAD_WSL_EXE_PATH)
-            }
-            if (deleteWslConfigExe) {
-                rmRF(BAD_WSLCONFIG_EXE_PATH)
-            }
-        }
+        waitForWslStatusNotContaining("WSL is finishing an upgrade...")
     }
 
     exec(
@@ -456,17 +410,13 @@ suspend fun installDistribution() {
 
 suspend fun waitForWslStatusNotContaining(
     text: String,
-    duration: Duration = 30.seconds,
-    preAction: suspend () -> Unit = {}
+    duration: Duration = 30.seconds
 ) {
     (2..duration.inWholeSeconds)
         .asFlow()
         .onEach { delay(1.seconds) }
         .onStart { emit(1) }
-        .map {
-            preAction()
-            wslOutput("--status")
-        }
+        .map { wslOutput("--status") }
         .firstOrNull { !it.contains(text) }
 }
 

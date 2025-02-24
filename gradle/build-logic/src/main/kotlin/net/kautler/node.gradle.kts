@@ -17,7 +17,6 @@
 package net.kautler
 
 import net.kautler.dao.action.GitHubAction
-import net.kautler.util.npm
 import org.gradle.accessors.dm.LibrariesForLibs
 import org.gradle.accessors.dm.LibrariesForKotlinWrappers
 import org.jetbrains.kotlin.gradle.targets.js.nodejs.NodeJsExec
@@ -156,6 +155,12 @@ dependencies {
 val syncDistribution by tasks.registering(Sync::class) {
     from(setupWslDistributionFiles)
     into(layout.buildDirectory.dir("distributions"))
+    // work-around for https://github.com/actions/toolkit/issues/1925
+    filesMatching("index.mjs") {
+        filter {
+            it.replace("stats = yield exports.stat", "stats = yield exports.lstat")
+        }
+    }
 }
 
 tasks.assemble {

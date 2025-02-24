@@ -1,7 +1,7 @@
 #!/usr/bin/env kotlin
 
 /*
- * Copyright 2020-2024 Björn Kautler
+ * Copyright 2020-2025 Björn Kautler
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,13 +17,18 @@
  */
 
 @file:Import("workflow-with-copyright.main.kts")
+
+@file:Repository("https://repo.maven.apache.org/maven2/")
+// work-around for https://youtrack.jetbrains.com/issue/KT-69145
+@file:DependsOn("io.github.typesafegithub:github-workflows-kt:3.2.0")
+
 @file:Repository("https://bindings.krzeminski.it/")
 @file:DependsOn("actions:cache__restore:v4")
 @file:DependsOn("actions:cache__save:v4")
 @file:DependsOn("actions:checkout:v4")
 @file:DependsOn("actions:setup-java:v4")
 @file:DependsOn("burrunan:gradle-cache-action:v1")
-@file:DependsOn("Vampire:setup-wsl:v3")
+@file:DependsOn("Vampire:setup-wsl:RELEASE")
 
 import io.github.typesafegithub.workflows.actions.actions.CacheRestore
 import io.github.typesafegithub.workflows.actions.actions.CacheSave
@@ -75,7 +80,7 @@ val alpine = Distribution(
 )
 
 val kali = Distribution(
-    wslId = "kali-linux",
+    wslId = "MyDistribution",
     userId = "kali-linux",
     matchPattern = "*Kali*",
     defaultAbsentTool = "dos2unix"
@@ -157,9 +162,7 @@ workflowWithCopyright(
 
     val executeAction = SetupWsl(
         distribution = SetupWsl.Distribution.Custom(expr("matrix.distribution.user-id")),
-        _customInputs = mapOf(
-            "wsl-version" to "1"
-        )
+        wslVersion = 1
     )
 
     val build = job(
@@ -289,9 +292,8 @@ workflowWithCopyright(
         executeActionStep = usesSelf(
             action = executeAction.copy(
                 distribution = Debian,
-                _customInputs = mapOf(
-                    "wsl-version" to expr("matrix.wsl-version")
-                )
+                wslVersion = null,
+                wslVersion_Untyped = expr("matrix.wsl-version")
             ),
             continueOnError = true
         )
@@ -318,9 +320,7 @@ workflowWithCopyright(
         executeActionStep = usesSelf(
             action = SetupWsl(
                 update = true,
-                _customInputs = mapOf(
-                    "wsl-version" to "1"
-                )
+                wslVersion = 1
             )
         )
         commonTests()
@@ -362,10 +362,9 @@ workflowWithCopyright(
         executeActionStep = usesSelf(
             action = executeAction.copy(
                 useCache = false,
-                _customInputs = mapOf(
-                    // part of work-around for https://bugs.kali.org/view.php?id=8921
-                    "wsl-version" to expr(getWslVersionExpression(kali))
-                )
+                // part of work-around for https://bugs.kali.org/view.php?id=8921
+                wslVersion = null,
+                wslVersion_Untyped = expr(getWslVersionExpression(kali))
             )
         )
         verifyFailure(
@@ -381,7 +380,7 @@ workflowWithCopyright(
             name = "Install Bash on Alpine",
             action = executeAction.copy(
                 additionalPackages = listOf("bash"),
-                _customInputs = emptyMap()
+                wslVersion = null
             ),
             condition = executeActionStep.getSuccessOnDistributionCondition(alpine)
         )
@@ -407,7 +406,7 @@ workflowWithCopyright(
             name = "Add wsl-sh wrapper",
             action = executeAction.copy(
                 wslShellCommand = "sh -eu",
-                _customInputs = emptyMap()
+                wslVersion = null
             )
         )
         runAfterSuccess(
@@ -442,7 +441,7 @@ workflowWithCopyright(
         executeActionStep = usesSelfAfterSuccess(
             name = "Re-add wsl-bash wrapper",
             action = executeAction.copy(
-                _customInputs = emptyMap()
+                wslVersion = null
             )
         )
         runAfterSuccess(
@@ -472,20 +471,13 @@ workflowWithCopyright(
                     |(
                         ${it.prependIndent("|    ")}
                     |)
-                    |&& (
-                    |    (matrix.distribution.user-id != '${kali.userId}')
-                    |    || (
-                    |        (
-                                 ${getWslVersionExpression(kali).prependIndent("|            ")}
-                    |        ) == '2'
-                    |    )
-                    |)
+                    |&& (matrix.distribution.user-id != '${kali.userId}')
                 """.trimMargin()
             },
             action = executeAction.copy(
                 additionalPackages = listOf("sudo"),
                 wslShellCommand = """bash -c "sudo -u test bash --noprofile --norc -euo pipefail "\""",
-                _customInputs = emptyMap()
+                wslVersion = null
             )
         )
         verifyCommandResult(
@@ -496,14 +488,7 @@ workflowWithCopyright(
                     |(
                         ${it.prependIndent("|    ")}
                     |)
-                    |&& (
-                    |    (matrix.distribution.user-id != '${kali.userId}')
-                    |    || (
-                    |        (
-                                 ${getWslVersionExpression(kali).prependIndent("|            ")}
-                    |        ) == '2'
-                    |    )
-                    |)
+                    |&& (matrix.distribution.user-id != '${kali.userId}')
                 """.trimMargin()
             },
             actualCommand = "whoami",
@@ -517,19 +502,12 @@ workflowWithCopyright(
                     |(
                         ${it.prependIndent("|    ")}
                     |)
-                    |&& (
-                    |    (matrix.distribution.user-id != '${kali.userId}')
-                    |    || (
-                    |        (
-                                 ${getWslVersionExpression(kali).prependIndent("|            ")}
-                    |        ) == '2'
-                    |    )
-                    |)
+                    |&& (matrix.distribution.user-id != '${kali.userId}')
                 """.trimMargin()
             },
             action = executeAction.copy(
                 wslShellCommand = """bash -c "sudo -u test bash --noprofile --norc -euo pipefail '{0}'"""",
-                _customInputs = emptyMap()
+                wslVersion = null
             )
         )
         verifyCommandResult(
@@ -541,7 +519,7 @@ workflowWithCopyright(
         executeActionStep = usesSelfAfterSuccess(
             name = "Set wsl-bash wrapper to use default user by default",
             action = executeAction.copy(
-                _customInputs = emptyMap()
+                wslVersion = null
             )
         )
         verifyCommandResult(
@@ -558,7 +536,7 @@ workflowWithCopyright(
             name = "Set wsl-bash wrapper to use existing user test by default with extra parameter",
             action = executeAction.copy(
                 wslShellUser = "test",
-                _customInputs = emptyMap()
+                wslVersion = null
             )
         )
         verifyCommandResult(
@@ -575,7 +553,7 @@ workflowWithCopyright(
             name = "Set wsl-bash wrapper to use non-existing user test2 by default with extra parameter",
             action = executeAction.copy(
                 wslShellUser = "test2",
-                _customInputs = emptyMap()
+                wslVersion = null
             )
         )
         verifyCommandResult(
@@ -598,7 +576,7 @@ workflowWithCopyright(
         executeActionStep = usesSelfAfterSuccess(
             name = "Make a no-op execution of the action",
             action = executeAction.copy(
-                _customInputs = emptyMap()
+                wslVersion = null
             )
         )
         verifyCommandResult(
@@ -634,7 +612,7 @@ workflowWithCopyright(
             name = "Install Bash on Alpine",
             action = executeAction.copy(
                 additionalPackages = listOf("bash"),
-                _customInputs = emptyMap()
+                wslVersion = null
             ),
             condition = executeActionStep.getSuccessOnDistributionCondition(alpine)
         )
@@ -675,7 +653,7 @@ workflowWithCopyright(
             name = "Install Bash on Alpine",
             action = executeAction.copy(
                 additionalPackages = listOf("bash"),
-                _customInputs = emptyMap()
+                wslVersion = null
             ),
             condition = executeActionStep.getSuccessOnDistributionCondition(alpine)
         )
@@ -704,7 +682,7 @@ workflowWithCopyright(
                     [automount]
                     root = /
                 """.trimIndent(),
-                _customInputs = emptyMap()
+                wslVersion = null
             )
         )
         runAfterSuccess(
@@ -742,20 +720,12 @@ workflowWithCopyright(
                     expr("matrix.distribution.default-absent-tool"),
                     "bash"
                 ),
-                _customInputs = mapOf(
-                    // part of work-around for https://bugs.kali.org/view.php?id=8921
-                    "wsl-version" to expr(getWslVersionExpression(kali))
-                )
+                // part of work-around for https://bugs.kali.org/view.php?id=8921
+                wslVersion = null,
+                wslVersion_Untyped = expr(getWslVersionExpression(kali))
             ),
             // part of work-around for https://bugs.kali.org/view.php?id=8921
-            condition = """
-                |(matrix.distribution.user-id != '${kali.userId}')
-                ||| (
-                |    (
-                         ${getWslVersionExpression(kali).prependIndent("|        ")}
-                |    ) == '2'
-                |)
-            """.trimMargin()
+            condition = "matrix.distribution.user-id != '${kali.userId}'"
         )
         runAfterSuccess(
             name = "Test - ${expr("matrix.distribution.default-absent-tool")} should be installed",
@@ -766,14 +736,7 @@ workflowWithCopyright(
                     |(
                         ${it.prependIndent("|    ")}
                     |)
-                    |&& (
-                    |    (matrix.distribution.user-id != '${kali.userId}')
-                    |    || (
-                    |        (
-                                 ${getWslVersionExpression(kali).prependIndent("|            ")}
-                    |        ) == '2'
-                    |    )
-                    |)
+                    |&& (matrix.distribution.user-id != '${kali.userId}')
                 """.trimMargin()
             }
         )
@@ -786,14 +749,7 @@ workflowWithCopyright(
                     |(
                         ${it.prependIndent("|    ")}
                     |)
-                    |&& (
-                    |    (matrix.distribution.user-id != '${kali.userId}')
-                    |    || (
-                    |        (
-                                 ${getWslVersionExpression(kali).prependIndent("|            ")}
-                    |        ) == '2'
-                    |    )
-                    |)
+                    |&& (matrix.distribution.user-id != '${kali.userId}')
                 """.trimMargin()
             }
         )
@@ -824,9 +780,8 @@ workflowWithCopyright(
                     """.trimIndent()
                     )
                 ),
-                _customInputs = mapOf(
-                    "wsl-version" to expr("matrix.wsl-version")
-                )
+                wslVersion = null,
+                wslVersion_Untyped = expr("matrix.wsl-version")
             )
         )
         verifyCommandResult(
@@ -855,25 +810,19 @@ workflowWithCopyright(
         usesSelf(
             action = executeAction.copy(
                 distribution = Debian,
-                _customInputs = mapOf(
-                    "wsl-version" to "1"
-                )
+                wslVersion = 1
             )
         )
         usesSelf(
             action = executeAction.copy(
                 distribution = Ubuntu1604,
-                _customInputs = mapOf(
-                    "wsl-version" to "2"
-                )
+                wslVersion = 2
             )
         )
         executeActionStep = usesSelf(
             action = executeAction.copy(
                 distribution = Ubuntu1804,
-                _customInputs = mapOf(
-                    "wsl-version" to "1"
-                )
+                wslVersion = 1
             )
         )
         verifyCommandResult(
@@ -912,7 +861,7 @@ workflowWithCopyright(
                     """.trimIndent()
                     )
                 ),
-                _customInputs = emptyMap()
+                wslVersion = null
             )
         )
         verifyCommandResult(
@@ -992,18 +941,14 @@ workflowWithCopyright(
             name = "Execute action for ${expr("matrix.distributions.distribution1.user-id")}",
             action = SetupWsl(
                 distribution = SetupWsl.Distribution.Custom(expr("matrix.distributions.distribution1.user-id")),
-                _customInputs = mapOf(
-                    "wsl-version" to "1"
-                )
+                wslVersion = 1
             )
         )
         usesSelf(
             name = "Execute action for ${expr("matrix.distributions.distribution2.user-id")}",
             action = SetupWsl(
                 distribution = SetupWsl.Distribution.Custom(expr("matrix.distributions.distribution2.user-id")),
-                _customInputs = mapOf(
-                    "wsl-version" to "1"
-                )
+                wslVersion = 1
             )
         )
         usesSelf(
@@ -1011,9 +956,7 @@ workflowWithCopyright(
             action = SetupWsl(
                 distribution = SetupWsl.Distribution.Custom(expr("matrix.distributions.distribution3.user-id")),
                 setAsDefault = false,
-                _customInputs = mapOf(
-                    "wsl-version" to "1"
-                )
+                wslVersion = 1
             )
         )
         executeActionStep = usesSelf(
@@ -1074,44 +1017,36 @@ workflowWithCopyright(
                 additionalPackages = listOf(
                     expr(
                         """
-                            |(
-                            |    (matrix.distribution.user-id != '${kali.userId}')
-                            |    || (
-                            |        (
-                                         ${getWslVersionExpression(kali).prependIndent("|            ")}
-                            |        ) == '2'
-                            |    )
-                            |)
+                            |(matrix.distribution.user-id != '${kali.userId}')
                             |&& 'bash'
                             ||| ''
                         """.trimMargin()
                     )
                 ),
-                _customInputs = mapOf(
-                    // part of work-around for https://bugs.kali.org/view.php?id=8921
-                    // and https://bugs.kali.org/view.php?id=6672
-                    // and https://bugs.launchpad.net/ubuntu/+source/systemd/+bug/2069555
-                    "wsl-version" to expr(getWslVersionExpression(kali, ubuntu2404))
-                )
+                // part of work-around for https://bugs.kali.org/view.php?id=8921
+                // and https://bugs.kali.org/view.php?id=6672
+                // and https://bugs.launchpad.net/ubuntu/+source/systemd/+bug/2069555
+                wslVersion = null,
+                wslVersion_Untyped = expr(getWslVersionExpression(ubuntu2404))
             )
         )
         usesSelf(
             name = "Update distribution",
             action = executeAction.copy(
                 update = true,
-                _customInputs = emptyMap()
+                wslVersion = null
             ),
             // part of work-around for https://bugs.kali.org/view.php?id=6672
             // and https://bugs.launchpad.net/ubuntu/+source/systemd/+bug/2069555
             condition = """
-                |(
-                |    (matrix.distribution.user-id != '${kali.userId}')
-                |    && (matrix.distribution.user-id != '${ubuntu2404.userId}')
-                |)
-                ||| (
-                |    (
-                         ${getWslVersionExpression(kali, ubuntu2404).prependIndent("|        ")}
-                |    ) == '2'
+                |(matrix.distribution.user-id != '${kali.userId}')
+                |&& (
+                |    (matrix.distribution.user-id != '${ubuntu2404.userId}')
+                |    || (
+                |        (
+                             ${getWslVersionExpression(ubuntu2404).prependIndent("|        ")}
+                |        ) == '2'
+                |    )
                 |)
             """.trimMargin()
         )
@@ -1119,17 +1054,10 @@ workflowWithCopyright(
             name = "Install default absent tool",
             action = executeAction.copy(
                 additionalPackages = listOf(expr("matrix.distribution.default-absent-tool")),
-                _customInputs = emptyMap()
+                wslVersion = null
             ),
             // part of work-around for https://bugs.kali.org/view.php?id=8921
-            condition = """
-                |(matrix.distribution.user-id != '${kali.userId}')
-                ||| (
-                |    (
-                         ${getWslVersionExpression(kali).prependIndent("|        ")}
-                |    ) == '2'
-                |)
-            """.trimMargin()
+            condition = "(matrix.distribution.user-id != '${kali.userId}')"
         )
         runAfterSuccess(
             name = "Test - ${expr("matrix.distribution.default-absent-tool")} should be installed",
@@ -1140,14 +1068,7 @@ workflowWithCopyright(
                     |(
                         ${it.prependIndent("|    ")}
                     |)
-                    |&& (
-                    |    (matrix.distribution.user-id != '${kali.userId}')
-                    |    || (
-                    |       (
-                                ${getWslVersionExpression(kali).prependIndent("|           ")}
-                    |       ) == '2'
-                    |   )
-                    |)
+                    |&& (matrix.distribution.user-id != '${kali.userId}')
                 """.trimMargin()
             }
         )
@@ -1155,9 +1076,7 @@ workflowWithCopyright(
             name = "Execute action for ${expr("matrix.distribution2.user-id")}",
             action = SetupWsl(
                 distribution = SetupWsl.Distribution.Custom(expr("matrix.distribution2.user-id")),
-                _customInputs = mapOf(
-                    "wsl-version" to "1"
-                )
+                wslVersion = 1
             )
         )
         verifyInstalledDistribution(
@@ -1167,7 +1086,7 @@ workflowWithCopyright(
         executeActionStep = usesSelfAfterSuccess(
             name = "Re-execute action",
             action = executeAction.copy(
-                _customInputs = emptyMap()
+                wslVersion = null
             )
         )
         verifyInstalledDistribution(
@@ -1178,7 +1097,7 @@ workflowWithCopyright(
             name = "Set as default",
             action = executeAction.copy(
                 setAsDefault = true,
-                _customInputs = emptyMap()
+                wslVersion = null
             )
         )
         verifyInstalledDistribution(
@@ -1222,9 +1141,7 @@ workflowWithCopyright(
                         distribution = SetupWsl.Distribution.Custom(expr("matrix.distributions.distribution$it.user-id")),
                         additionalPackages = if (it == 2) listOf("bash") else null,
                         setAsDefault = if (it >= 3) false else null,
-                        _customInputs = mapOf(
-                            "wsl-version" to "1"
-                        )
+                        wslVersion = 1
                     )
                 )
             }
