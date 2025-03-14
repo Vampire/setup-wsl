@@ -23,11 +23,11 @@
 @file:DependsOn("io.github.typesafegithub:github-workflows-kt:3.2.0")
 
 @file:Repository("https://bindings.krzeminski.it/")
-@file:DependsOn("actions:cache__restore:v4")
-@file:DependsOn("actions:cache__save:v4")
-@file:DependsOn("actions:checkout:v4")
-@file:DependsOn("actions:setup-java:v4")
-@file:DependsOn("burrunan:gradle-cache-action:v1")
+@file:DependsOn("actions:cache__restore___major:[v4,v5-alpha)")
+@file:DependsOn("actions:cache__save___major:[v4,v5-alpha)")
+@file:DependsOn("actions:checkout___major:[v4,v5-alpha)")
+@file:DependsOn("actions:setup-java___major:[v4,v5-alpha)")
+@file:DependsOn("burrunan:gradle-cache-action___major:[v1,v2-alpha)")
 @file:DependsOn("Vampire:setup-wsl:RELEASE")
 
 import io.github.typesafegithub.workflows.actions.actions.CacheRestore

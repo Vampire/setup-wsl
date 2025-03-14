@@ -23,8 +23,8 @@
 @file:DependsOn("io.github.typesafegithub:github-workflows-kt:3.2.0")
 
 @file:Repository("https://bindings.krzeminski.it/")
-@file:DependsOn("actions:checkout:v4")
-@file:DependsOn("gradle:wrapper-validation-action:v1")
+@file:DependsOn("actions:checkout___major:[v4,v5-alpha)")
+@file:DependsOn("gradle:wrapper-validation-action___major:[v1,v2-alpha)")
 
 import io.github.typesafegithub.workflows.actions.actions.Checkout
 import io.github.typesafegithub.workflows.actions.gradle.WrapperValidationAction

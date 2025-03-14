@@ -23,8 +23,8 @@
 // work-around for https://youtrack.jetbrains.com/issue/KT-69145
 @file:DependsOn("io.github.typesafegithub:github-workflows-kt:3.2.0")
 
-@file:DependsOn("actions:checkout:v4")
-@file:DependsOn("typesafegithub:github-actions-typing:v2")
+@file:DependsOn("actions:checkout___major:[v4,v5-alpha)")
+@file:DependsOn("typesafegithub:github-actions-typing___major:[v2,v3-alpha)")
 
 import io.github.typesafegithub.workflows.actions.actions.Checkout
 import io.github.typesafegithub.workflows.actions.typesafegithub.GithubActionsTyping
