@@ -1,5 +1,5 @@
 /*
- * Copyright 2020-2024 Björn Kautler
+ * Copyright 2020-2025 Björn Kautler
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -27,6 +27,7 @@ import io.ktor.client.request.forms.submitForm
 import io.ktor.client.statement.bodyAsText
 import io.ktor.http.HttpStatusCode.Companion.OK
 import io.ktor.http.parameters
+import io.ktor.utils.io.core.use
 import js.objects.recordOf
 import kotlinx.coroutines.CoroutineStart.LAZY
 import kotlinx.coroutines.DelicateCoroutinesApi
@@ -62,58 +63,58 @@ sealed class Distribution(
             return@async _downloadUrl
         }
 
-        val client = HttpClient(Js) {
-            install(UserAgent) {
-                agent = "Setup WSL GitHub Action"
-            }
-        }
-
         val parameters = parameters {
             append("type", "ProductId")
             append("url", productId!!)
         }
 
-        return@async retry(5) {
-            val response = client.submitForm(
-                url = "https://store.rg-adguard.net/api/GetFiles",
-                formParameters = parameters
-            )
-
-            if (response.status != OK) {
-                if (isDebug()) {
-                    val echoResponse = client.submitForm(
-                        url = "https://echo.free.beeceptor.com/api/GetFiles",
-                        formParameters = parameters
-                    )
-                    if (echoResponse.status == OK) {
-                        debug("Request:\n${echoResponse.bodyAsText()}")
-                    } else {
-                        debug("Could not get echo response (statusCode: ${echoResponse.status.value} / statusMessage: ${echoResponse.status.description})")
-                    }
-
-                    val responseMessage = JSON.stringify(
-                        recordOf(
-                            "httpVersion" to "${response.version}",
-                            "headers" to "${response.headers}",
-                            "method" to "${response.call.request.method}",
-                            "url" to "${response.call.request.url}",
-                            "statusCode" to response.status.value,
-                            "statusMessage" to response.status.description,
-                            "body" to response.bodyAsText()
-                        ),
-                        space = 2
-                    )
-                    debug("Response:\n$responseMessage")
-                }
-                error("Could not determine download URL (statusCode: ${response.status.value} / statusMessage: ${response.status.description})")
+        return@async HttpClient(Js) {
+            install(UserAgent) {
+                agent = "Setup WSL GitHub Action"
             }
+        }.use { client ->
+            retry(5) {
+                val response = client.submitForm(
+                    url = "https://store.rg-adguard.net/api/GetFiles",
+                    formParameters = parameters
+                )
 
-            val body = response.bodyAsText()
-            val downloadLinkAnchorMatch =
-                """<a [^>]*href="(?<url>[^"]+)"[^>]*>[^<]*\.appx(?:bundle)?</a>""".toRegex().find(body)
-                    ?: error("Could not determine download URL from:\n$body")
+                if (response.status != OK) {
+                    if (isDebug()) {
+                        val echoResponse = client.submitForm(
+                            url = "https://echo.free.beeceptor.com/api/GetFiles",
+                            formParameters = parameters
+                        )
+                        if (echoResponse.status == OK) {
+                            debug("Request:\n${echoResponse.bodyAsText()}")
+                        } else {
+                            debug("Could not get echo response (statusCode: ${echoResponse.status.value} / statusMessage: ${echoResponse.status.description})")
+                        }
 
-            return@retry URL(downloadLinkAnchorMatch.groups[1]!!.value)
+                        val responseMessage = JSON.stringify(
+                            recordOf(
+                                "httpVersion" to "${response.version}",
+                                "headers" to "${response.headers}",
+                                "method" to "${response.call.request.method}",
+                                "url" to "${response.call.request.url}",
+                                "statusCode" to response.status.value,
+                                "statusMessage" to response.status.description,
+                                "body" to response.bodyAsText()
+                            ),
+                            space = 2
+                        )
+                        debug("Response:\n$responseMessage")
+                    }
+                    error("Could not determine download URL (statusCode: ${response.status.value} / statusMessage: ${response.status.description})")
+                }
+
+                val body = response.bodyAsText()
+                val downloadLinkAnchorMatch =
+                    """<a [^>]*href="(?<url>[^"]+)"[^>]*>[^<]*\.appx(?:bundle)?</a>""".toRegex().find(body)
+                        ?: error("Could not determine download URL from:\n$body")
+
+                return@retry URL(downloadLinkAnchorMatch.groups[1]!!.value)
+            }
         }
     }
 
