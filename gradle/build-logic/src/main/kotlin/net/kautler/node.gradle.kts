@@ -1,5 +1,5 @@
 /*
- * Copyright 2020-2023 Björn Kautler
+ * Copyright 2020-2025 Björn Kautler
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,6 +17,7 @@
 package net.kautler
 
 import net.kautler.dao.action.GitHubAction
+import net.kautler.util.npm
 import org.gradle.accessors.dm.LibrariesForLibs
 import org.gradle.accessors.dm.LibrariesForKotlinWrappers
 import org.jetbrains.kotlin.gradle.targets.js.nodejs.NodeJsExec
@@ -45,6 +46,7 @@ kotlin {
                 implementation(libs.ktor.client.core)
                 implementation(libs.ktor.client.js)
                 implementation(kotlinWrappers.actions.toolkit)
+                implementation(npm(libs.actions.cache))
                 implementation(kotlinWrappers.js)
                 implementation(kotlinWrappers.node)
                 implementation(kotlinWrappers.semver)

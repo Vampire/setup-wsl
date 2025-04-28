@@ -13,6 +13,7 @@
 # limitations under the License.
 
 [versions]
+actions-cache = "4.0.3"
 build-github-api = "1.314"
 build-gradle-plugin-dependency-analysis = "1.19.0"
 build-gradle-plugin-github = "3.0.0"
@@ -30,6 +31,7 @@ ktor = "3.0.0"
 workflows-kotlin = "2.1.10"
 
 [libraries]
+actions-cache = { module = "actions:cache", version.ref = "actions-cache" }
 build-github-api = { module = "org.kohsuke:github-api", version.ref = "build-github-api" }
 build-inject = { module = "javax.inject:javax.inject", version.ref = "build-inject" }
 build-kotlinx-serialization-bom = { module = "org.jetbrains.kotlinx:kotlinx-serialization-bom", version.ref = "build-kotlinx-serialization" }
