@@ -1,5 +1,5 @@
 /*
- * Copyright 2020-2023 Björn Kautler
+ * Copyright 2020-2025 Björn Kautler
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -33,7 +33,7 @@ pluginManagement {
 
 plugins {
     id("net.kautler.conditional-refresh-versions")
-    id("com.gradle.enterprise") version "3.12.6"
+    id("com.gradle.develocity") version "4.0.1"
 }
 
 conditionalRefreshVersions {
@@ -106,10 +106,10 @@ dependencyResolutionManagement {
     }
 }
 
-gradleEnterprise {
+develocity {
     buildScan {
-        termsOfServiceUrl = "https://gradle.com/terms-of-service"
-        termsOfServiceAgree = "yes"
+        termsOfUseUrl.set("https://gradle.com/terms-of-service")
+        termsOfUseAgree.set("yes")
     }
 }
 
