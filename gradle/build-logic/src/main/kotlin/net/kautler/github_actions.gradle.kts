@@ -73,6 +73,12 @@ file(".github/workflows")
                     languageVersion.set(JavaLanguageVersion.of(17))
                 })
             }
+        val deleteWorkflowYaml = tasks.register<Delete>("delete${pascalCasedWorkflowName}WorkflowYaml") {
+            delete(preprocessWorkflow.flatMap { it.workflowFile })
+        }
+        preprocessWorkflow {
+            dependsOn(deleteWorkflowYaml)
+        }
         preprocessWorkflows {
             dependsOn(preprocessWorkflow)
         }

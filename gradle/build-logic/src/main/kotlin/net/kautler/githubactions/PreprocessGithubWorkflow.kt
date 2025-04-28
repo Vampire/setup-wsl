@@ -21,28 +21,38 @@ import org.gradle.api.file.ConfigurableFileCollection
 import org.gradle.api.file.RegularFileProperty
 import org.gradle.api.provider.Property
 import org.gradle.api.provider.Provider
+import org.gradle.api.tasks.CacheableTask
+import org.gradle.api.tasks.Classpath
 import org.gradle.api.tasks.InputFile
 import org.gradle.api.tasks.InputFiles
 import org.gradle.api.tasks.Nested
 import org.gradle.api.tasks.OutputFile
+import org.gradle.api.tasks.PathSensitive
+import org.gradle.api.tasks.PathSensitivity.RELATIVE
 import org.gradle.api.tasks.TaskAction
 import org.gradle.jvm.toolchain.JavaLauncher
 import org.gradle.kotlin.dsl.submit
+import org.gradle.work.NormalizeLineEndings
 import org.gradle.workers.WorkerExecutor
 import java.io.File
 import javax.inject.Inject
 
+@CacheableTask
 abstract class PreprocessGithubWorkflow : DefaultTask() {
     @get:InputFile
+    @get:NormalizeLineEndings
+    @get:PathSensitive(RELATIVE)
     abstract val workflowScript: RegularFileProperty
 
     @get:InputFiles
+    @get:NormalizeLineEndings
+    @get:PathSensitive(RELATIVE)
     abstract val importedFiles: ConfigurableFileCollection
 
-    @get:InputFiles
+    @get:Classpath
     abstract val kotlinCompilerClasspath: ConfigurableFileCollection
 
-    @get:InputFiles
+    @get:Classpath
     abstract val mainKtsClasspath: ConfigurableFileCollection
 
     @get:Nested
