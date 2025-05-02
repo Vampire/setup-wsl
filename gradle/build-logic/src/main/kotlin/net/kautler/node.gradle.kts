@@ -22,6 +22,7 @@ import org.gradle.accessors.dm.LibrariesForLibs
 import org.gradle.accessors.dm.LibrariesForKotlinWrappers
 import org.jetbrains.kotlin.gradle.targets.js.nodejs.NodeJsExec
 import org.jetbrains.kotlin.gradle.targets.js.nodejs.NodeJsRootExtension
+import org.jetbrains.kotlin.gradle.targets.js.yarn.YarnRootExtension
 import org.jetbrains.kotlin.gradle.tasks.IncrementalSyncTask
 import org.yaml.snakeyaml.Yaml
 
@@ -114,6 +115,11 @@ tasks.withType<NodeJsExec>().configureEach {
 
 configure<NodeJsRootExtension> {
     version = libs.versions.build.node.get()
+    downloadBaseUrl = null
+}
+
+configure<YarnRootExtension> {
+    downloadBaseUrl = null
 }
 
 val executable by configurations.registering {
