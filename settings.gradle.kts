@@ -34,6 +34,7 @@ pluginManagement {
 plugins {
     id("net.kautler.conditional-refresh-versions")
     id("com.gradle.develocity") version "4.0.1"
+    id("com.gradle.common-custom-user-data-gradle-plugin") version "2.2.1"
 }
 
 conditionalRefreshVersions {
