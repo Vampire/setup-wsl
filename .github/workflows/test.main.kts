@@ -58,6 +58,14 @@ import io.github.typesafegithub.workflows.dsl.WorkflowBuilder
 import io.github.typesafegithub.workflows.dsl.expressions.expr
 import kotlin.math.min
 
+// comment in for editability with IntelliSense
+//fun workflowWithCopyright(
+//    name: String,
+//    on: List<io.github.typesafegithub.workflows.domain.triggers.Trigger>,
+//    sourceFile: java.io.File,
+//    block: io.github.typesafegithub.workflows.dsl.WorkflowBuilder.() -> Unit
+//) = Unit
+
 val environments = listOf(
     "windows-2019",
     "windows-2022",

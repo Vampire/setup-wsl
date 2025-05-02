@@ -35,6 +35,14 @@ import io.github.typesafegithub.workflows.domain.RunnerType.WindowsLatest
 import io.github.typesafegithub.workflows.domain.triggers.Cron
 import io.github.typesafegithub.workflows.domain.triggers.Schedule
 
+// comment in for editability with IntelliSense
+//fun workflowWithCopyright(
+//    name: String,
+//    on: List<io.github.typesafegithub.workflows.domain.triggers.Trigger>,
+//    sourceFile: java.io.File,
+//    block: io.github.typesafegithub.workflows.dsl.WorkflowBuilder.() -> Unit
+//) = Unit
+
 workflowWithCopyright(
     name = "Check Dependency Versions",
     on = listOf(

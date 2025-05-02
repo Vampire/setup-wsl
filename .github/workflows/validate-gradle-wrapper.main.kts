@@ -32,6 +32,14 @@ import io.github.typesafegithub.workflows.domain.RunnerType.UbuntuLatest
 import io.github.typesafegithub.workflows.domain.triggers.PullRequest
 import io.github.typesafegithub.workflows.domain.triggers.Push
 
+// comment in for editability with IntelliSense
+//fun workflowWithCopyright(
+//    name: String,
+//    on: List<io.github.typesafegithub.workflows.domain.triggers.Trigger>,
+//    sourceFile: java.io.File,
+//    block: io.github.typesafegithub.workflows.dsl.WorkflowBuilder.() -> Unit
+//) = Unit
+
 workflowWithCopyright(
     name = "Validate Gradle Wrapper",
     on = listOf(
