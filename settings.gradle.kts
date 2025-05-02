@@ -108,8 +108,11 @@ dependencyResolutionManagement {
 
 develocity {
     buildScan {
-        termsOfUseUrl.set("https://gradle.com/terms-of-service")
-        termsOfUseAgree.set("yes")
+        publishing {
+            onlyIf {
+                System.getenv("DEVELOCITY_INJECTION_ENABLED").toBoolean()
+            }
+        }
     }
 }
 
