@@ -24,10 +24,10 @@
 
 @file:Repository("https://bindings.krzeminski.it/")
 @file:DependsOn("actions:checkout___major:[v4,v5-alpha)")
-@file:DependsOn("gradle:wrapper-validation-action___major:[v1,v2-alpha)")
+@file:DependsOn("gradle:actions__wrapper-validation___major:[v4,v5-alpha)")
 
 import io.github.typesafegithub.workflows.actions.actions.Checkout
-import io.github.typesafegithub.workflows.actions.gradle.WrapperValidationAction
+import io.github.typesafegithub.workflows.actions.gradle.ActionsWrapperValidation
 import io.github.typesafegithub.workflows.domain.RunnerType.UbuntuLatest
 import io.github.typesafegithub.workflows.domain.triggers.PullRequest
 import io.github.typesafegithub.workflows.domain.triggers.Push
@@ -63,7 +63,7 @@ workflowWithCopyright(
         )
         uses(
             name = "Validate Gradle Wrapper",
-            action = WrapperValidationAction()
+            action = ActionsWrapperValidation()
         )
     }
 }
