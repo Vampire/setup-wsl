@@ -27,7 +27,7 @@
 @file:DependsOn("actions:cache__save___major:[v4,v5-alpha)")
 @file:DependsOn("actions:checkout___major:[v4,v5-alpha)")
 @file:DependsOn("actions:setup-java___major:[v4,v5-alpha)")
-@file:DependsOn("burrunan:gradle-cache-action___major:[v1,v2-alpha)")
+@file:DependsOn("gradle:actions__setup-gradle___major:[v4,v5-alpha)")
 @file:DependsOn("Vampire:setup-wsl:RELEASE")
 
 import io.github.typesafegithub.workflows.actions.actions.CacheRestore
@@ -35,7 +35,9 @@ import io.github.typesafegithub.workflows.actions.actions.CacheSave
 import io.github.typesafegithub.workflows.actions.actions.Checkout
 import io.github.typesafegithub.workflows.actions.actions.SetupJava
 import io.github.typesafegithub.workflows.actions.actions.SetupJava.Distribution.Temurin
-import io.github.typesafegithub.workflows.actions.burrunan.GradleCacheAction
+import io.github.typesafegithub.workflows.actions.gradle.ActionsSetupGradle
+import io.github.typesafegithub.workflows.actions.gradle.ActionsSetupGradle.BuildScanTermsOfUseAgree.Yes
+import io.github.typesafegithub.workflows.actions.gradle.ActionsSetupGradle.BuildScanTermsOfUseUrl.HttpsGradleComHelpLegalTermsOfUse
 import io.github.typesafegithub.workflows.actions.vampire.SetupWsl
 import io.github.typesafegithub.workflows.actions.vampire.SetupWsl.Distribution.Debian
 import io.github.typesafegithub.workflows.actions.vampire.SetupWsl.Distribution.Ubuntu1604
@@ -194,18 +196,23 @@ workflowWithCopyright(
             )
         )
         uses(
-            name = "Build",
-            action = GradleCacheAction(
-                arguments = listOf(
-                    "--show-version",
-                    "build",
-                    "--info",
-                    "--stacktrace",
-                    "--scan"
-                ),
-                debug = false,
-                concurrent = true
+            name = "Setup Gradle",
+            action = ActionsSetupGradle(
+                validateWrappers = false,
+                buildScanPublish = true,
+                buildScanTermsOfUseUrl = HttpsGradleComHelpLegalTermsOfUse,
+                buildScanTermsOfUseAgree = Yes
             )
+        )
+        run(
+            name = "Build",
+            command = listOf(
+                "./gradlew",
+                "--info",
+                "--stacktrace",
+                "--show-version",
+                "build"
+            ).joinToString(" ")
         )
         uses(
             name = "Save built artifacts to cache",
