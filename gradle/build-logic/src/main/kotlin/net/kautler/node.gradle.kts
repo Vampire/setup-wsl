@@ -24,6 +24,7 @@ import org.jetbrains.kotlin.gradle.targets.js.nodejs.NodeJsEnvSpec
 import org.jetbrains.kotlin.gradle.targets.js.nodejs.NodeJsExec
 import org.jetbrains.kotlin.gradle.targets.js.yarn.YarnRootEnvSpec
 import org.jetbrains.kotlin.gradle.tasks.IncrementalSyncTask
+import org.jetbrains.kotlin.gradle.tasks.KotlinCompilationTask
 import org.yaml.snakeyaml.Yaml
 
 plugins {
@@ -54,6 +55,12 @@ kotlin {
                 implementation(kotlinWrappers.nullWritable)
             }
         }
+    }
+}
+
+tasks.withType<KotlinCompilationTask<*>>().configureEach {
+    compilerOptions {
+        allWarningsAsErrors.set(true)
     }
 }
 
