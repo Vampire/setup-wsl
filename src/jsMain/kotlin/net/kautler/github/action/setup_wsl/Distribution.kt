@@ -27,7 +27,6 @@ import io.ktor.client.request.forms.submitForm
 import io.ktor.client.statement.bodyAsText
 import io.ktor.http.HttpStatusCode.Companion.OK
 import io.ktor.http.parameters
-import io.ktor.utils.io.core.use
 import js.objects.recordOf
 import kotlinx.coroutines.CoroutineStart.LAZY
 import kotlinx.coroutines.DelicateCoroutinesApi
