@@ -1,5 +1,5 @@
 /*
- * Copyright 2020-2024 Björn Kautler
+ * Copyright 2020-2025 Björn Kautler
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,7 +18,9 @@ package net.kautler
 
 import org.gradle.accessors.dm.LibrariesForLibs
 import org.gradle.accessors.dm.LibrariesForKotlinWrappers
+import org.gradle.kotlin.dsl.configure
 import org.jetbrains.kotlin.gradle.targets.js.dsl.ExperimentalMainFunctionArgumentsDsl
+import org.jetbrains.kotlin.gradle.targets.js.nodejs.NodeJsEnvSpec
 import org.jetbrains.kotlin.gradle.targets.js.nodejs.NodeJsExec
 import org.jetbrains.kotlin.gradle.tasks.IncrementalSyncTask
 
@@ -55,6 +57,10 @@ tasks.withType<IncrementalSyncTask>().configureEach {
     doFirst {
         outputs.files.forEach { it.deleteRecursively() }
     }
+}
+
+configure<NodeJsEnvSpec> {
+    downloadBaseUrl.set(provider { null })
 }
 
 // work-around for missing feature in dependencies block added in Gradle 8.3

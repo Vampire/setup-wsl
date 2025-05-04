@@ -20,9 +20,9 @@ import net.kautler.dao.action.GitHubAction
 import net.kautler.util.npm
 import org.gradle.accessors.dm.LibrariesForLibs
 import org.gradle.accessors.dm.LibrariesForKotlinWrappers
+import org.jetbrains.kotlin.gradle.targets.js.nodejs.NodeJsEnvSpec
 import org.jetbrains.kotlin.gradle.targets.js.nodejs.NodeJsExec
-import org.jetbrains.kotlin.gradle.targets.js.nodejs.NodeJsRootExtension
-import org.jetbrains.kotlin.gradle.targets.js.yarn.YarnRootExtension
+import org.jetbrains.kotlin.gradle.targets.js.yarn.YarnRootEnvSpec
 import org.jetbrains.kotlin.gradle.tasks.IncrementalSyncTask
 import org.yaml.snakeyaml.Yaml
 
@@ -113,13 +113,13 @@ tasks.withType<NodeJsExec>().configureEach {
     }
 }
 
-configure<NodeJsRootExtension> {
-    version = libs.versions.build.node.get()
-    downloadBaseUrl = null
+configure<NodeJsEnvSpec> {
+    version.set(libs.versions.build.node.get())
+    downloadBaseUrl.set(provider { null })
 }
 
-configure<YarnRootExtension> {
-    downloadBaseUrl = null
+configure<YarnRootEnvSpec> {
+    downloadBaseUrl.set(provider { null })
 }
 
 val executable by configurations.registering {
