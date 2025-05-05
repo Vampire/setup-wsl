@@ -1,5 +1,5 @@
 /*
- * Copyright 2020-2023 Björn Kautler
+ * Copyright 2020-2025 Björn Kautler
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -87,7 +87,7 @@ dependencyResolutionManagement {
         }
 
         val kotlinWrappers by registering {
-            from("org.jetbrains.kotlin-wrappers:kotlin-wrappers-catalog:0.0.1-pre.819")
+            from("org.jetbrains.kotlin-wrappers:kotlin-wrappers-catalog:2025.5.2")
         }
     }
 }

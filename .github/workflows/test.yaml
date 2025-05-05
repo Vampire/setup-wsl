@@ -58,18 +58,17 @@ jobs:
         java-version: '11'
         distribution: 'temurin'
     - id: 'step-3'
-      name: 'Build'
-      uses: 'burrunan/gradle-cache-action@v1'
+      name: 'Setup Gradle'
+      uses: 'gradle/actions/setup-gradle@v4'
       with:
-        debug: 'false'
-        concurrent: 'true'
-        arguments: |-
-          --show-version
-          build
-          --info
-          --stacktrace
-          --scan
+        build-scan-publish: 'true'
+        build-scan-terms-of-use-url: 'https://gradle.com/help/legal-terms-of-use'
+        build-scan-terms-of-use-agree: 'yes'
+        validate-wrappers: 'false'
     - id: 'step-4'
+      name: 'Build'
+      run: './gradlew --info --stacktrace --show-version build'
+    - id: 'step-5'
       name: 'Save built artifacts to cache'
       uses: 'actions/cache/save@v4'
       with:

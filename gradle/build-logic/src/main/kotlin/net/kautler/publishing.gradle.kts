@@ -27,6 +27,7 @@ import net.kautler.util.release
 import net.kautler.util.runBuildTasks
 import net.kautler.util.updateVersion
 import net.researchgate.release.ReleasePlugin
+import org.ajoberstar.grgit.operation.BranchListOp.Mode.ALL
 import org.gradle.tooling.GradleConnector
 import org.kohsuke.github.GHIssueState.OPEN
 import wooga.gradle.github.base.tasks.Github
@@ -278,8 +279,41 @@ listOf(finishMilestone).forEach {
     }
 }
 
+val createMajorBranch by tasks.registering {
+    doLast {
+        val grgit = grgitService
+            .service
+            .get()
+            .grgit
+
+        val (maxMajorVersion, maxMajorVersionBranch) = grgit
+            .branch
+            .list { mode = ALL }
+            .filter {
+                it.name.matches("""(origin/)?v\d+""".toRegex())
+            }
+            .map { it.name.substringAfter('/').drop(1).toInt() to it }
+            .maxBy { it.first }
+
+        if (maxMajorVersion < majorVersion.toInt()) {
+            grgit.push { refsOrSpecs = listOf("${maxMajorVersionBranch.name}:refs/heads/v$majorVersion") }
+        }
+    }
+}
+
+val checkoutMergeToReleaseBranch by tasks.existing {
+    dependsOn(createMajorBranch)
+}
+
+val preprocessVerifyReleaseWorkflow by tasks.existing {
+    mustRunAfter(createMajorBranch)
+}
+
 tasks.preTagCommit {
-    dependsOn(tasks.named("updateReadme"))
+    val updateReadme by tasks.existing
+    dependsOn(updateReadme)
+    dependsOn(createMajorBranch)
+    dependsOn(preprocessVerifyReleaseWorkflow)
 }
 
 undraftGithubRelease {

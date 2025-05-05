@@ -24,10 +24,10 @@ build-inject = "1"
 build-kotlinx-serialization = "1.5.0"
 build-node = "20.11.0"
 build-snakeyaml = "2.0"
-kotlin = "2.0.20"
-kotlinx-coroutines = "1.6.4"
-ktor = "3.0.0"
-workflows-kotlin = "2.1.10"
+kotlin = "2.1.20"
+kotlinx-coroutines = "1.10.2"
+ktor = "3.1.2"
+workflows-kotlin = "2.1.20"
 
 [libraries]
 build-github-api = { module = "org.kohsuke:github-api", version.ref = "build-github-api" }

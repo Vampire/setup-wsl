@@ -1,5 +1,5 @@
 /*
- * Copyright 2020-2023 Björn Kautler
+ * Copyright 2020-2025 Björn Kautler
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,7 +16,7 @@
 
 import de.fayard.refreshVersions.core.FeatureFlag.GRADLE_UPDATES
 import net.kautler.conditionalRefreshVersions
-import org.gradle.api.initialization.resolve.RepositoriesMode.PREFER_SETTINGS
+import org.gradle.api.initialization.resolve.RepositoriesMode.FAIL_ON_PROJECT_REPOS
 
 pluginManagement {
     require(JavaVersion.current().isJava11Compatible) {
@@ -33,7 +33,8 @@ pluginManagement {
 
 plugins {
     id("net.kautler.conditional-refresh-versions")
-    id("com.gradle.enterprise") version "3.12.6"
+    id("com.gradle.develocity") version "4.0.1"
+    id("com.gradle.common-custom-user-data-gradle-plugin") version "2.2.1"
 }
 
 conditionalRefreshVersions {
@@ -95,21 +96,22 @@ dependencyResolutionManagement {
         }
         mavenCentral()
     }
-    // work-around for https://youtrack.jetbrains.com/issue/KT-56300
-    //repositoriesMode.set(FAIL_ON_PROJECT_REPOS)
-    repositoriesMode.set(PREFER_SETTINGS)
+    repositoriesMode.set(FAIL_ON_PROJECT_REPOS)
 
     versionCatalogs {
         val kotlinWrappers by registering {
-            from("org.jetbrains.kotlin-wrappers:kotlin-wrappers-catalog:0.0.1-pre.819")
+            from("org.jetbrains.kotlin-wrappers:kotlin-wrappers-catalog:2025.5.2")
         }
     }
 }
 
-gradleEnterprise {
+develocity {
     buildScan {
-        termsOfServiceUrl = "https://gradle.com/terms-of-service"
-        termsOfServiceAgree = "yes"
+        publishing {
+            onlyIf {
+                System.getenv("DEVELOCITY_INJECTION_ENABLED").toBoolean()
+            }
+        }
     }
 }
 

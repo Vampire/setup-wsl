@@ -56,11 +56,13 @@ jobs:
         java-version: '11'
         distribution: 'temurin'
     - id: 'step-3'
-      name: 'Check Dependency Versions'
-      uses: 'burrunan/gradle-cache-action@v1'
+      name: 'Setup Gradle'
+      uses: 'gradle/actions/setup-gradle@v4'
       with:
-        debug: 'false'
-        concurrent: 'true'
-        arguments: |-
-          --show-version
-          dependencyUpdates
+        build-scan-publish: 'true'
+        build-scan-terms-of-use-url: 'https://gradle.com/help/legal-terms-of-use'
+        build-scan-terms-of-use-agree: 'yes'
+        validate-wrappers: 'false'
+    - id: 'step-4'
+      name: 'Check Dependency Versions'
+      run: './gradlew --info --stacktrace --show-version dependencyUpdates'

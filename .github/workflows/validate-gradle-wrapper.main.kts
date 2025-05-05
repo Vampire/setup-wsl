@@ -23,14 +23,22 @@
 @file:DependsOn("io.github.typesafegithub:github-workflows-kt:3.2.0")
 
 @file:Repository("https://bindings.krzeminski.it/")
-@file:DependsOn("actions:checkout:v4")
-@file:DependsOn("gradle:wrapper-validation-action:v1")
+@file:DependsOn("actions:checkout___major:[v4,v5-alpha)")
+@file:DependsOn("gradle:actions__wrapper-validation___major:[v4,v5-alpha)")
 
 import io.github.typesafegithub.workflows.actions.actions.Checkout
-import io.github.typesafegithub.workflows.actions.gradle.WrapperValidationAction
+import io.github.typesafegithub.workflows.actions.gradle.ActionsWrapperValidation
 import io.github.typesafegithub.workflows.domain.RunnerType.UbuntuLatest
 import io.github.typesafegithub.workflows.domain.triggers.PullRequest
 import io.github.typesafegithub.workflows.domain.triggers.Push
+
+// comment in for editability with IntelliSense
+//fun workflowWithCopyright(
+//    name: String,
+//    on: List<io.github.typesafegithub.workflows.domain.triggers.Trigger>,
+//    sourceFile: java.io.File,
+//    block: io.github.typesafegithub.workflows.dsl.WorkflowBuilder.() -> Unit
+//) = Unit
 
 workflowWithCopyright(
     name = "Validate Gradle Wrapper",
@@ -55,7 +63,7 @@ workflowWithCopyright(
         )
         uses(
             name = "Validate Gradle Wrapper",
-            action = WrapperValidationAction()
+            action = ActionsWrapperValidation()
         )
     }
 }
