@@ -245,25 +245,23 @@ val wslShellCommand by lazy {
 }
 
 val wslVersion = GlobalScope.async(start = LAZY) {
-    when (val input = getInput("wsl-version", InputOptions(required = true))) {
-        "1 | 2" -> if (wslHelp().contains("--set-default-version")) 2u else 1u
-        else -> {
-            input.toUIntOrNull().also { wslVersion ->
-                when (wslVersion) {
-                    null, 0u -> error("'$input' is not a valid positive integer for 'wsl-version'.")
-                    1u -> Unit
-                    else -> {
-                        check(wslHelp().contains("--set-default-version")) {
-                            "This Windows environment only has WSLv1 available but WSLv$wslVersion was requested, please verify your 'runs-on' and 'wsl-version' settings"
-                        }
-                        if (wslVersion > 2u) {
-                            warning("WSLv$wslVersion is untested, if it works with your workflow please open an issue to get the version tested and this warning removed")
-                        }
+    val input = getInput("wsl-version", InputOptions(required = true))
+    input
+        .toUIntOrNull()
+        .also { wslVersion ->
+            when (wslVersion) {
+                null, 0u -> error("'$input' is not a valid positive integer for 'wsl-version'.")
+                1u -> Unit
+                else -> {
+                    check(wslHelp().contains("--set-default-version")) {
+                        "This Windows environment only has WSLv1 available but WSLv$wslVersion was requested, please verify your 'runs-on' and 'wsl-version' settings"
+                    }
+                    if (wslVersion > 2u) {
+                        warning("WSLv$wslVersion is untested, if it works with your workflow please open an issue to get the version tested and this warning removed")
                     }
                 }
             }
         }
-    }
 }
 
 val wslShellName by lazy {
