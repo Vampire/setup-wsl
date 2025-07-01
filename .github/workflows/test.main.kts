@@ -69,7 +69,6 @@ import kotlin.math.min
 //) = Unit
 
 val environments = listOf(
-    "windows-2019",
     "windows-2022",
     "windows-2025",
     "windows-latest"
@@ -293,13 +292,7 @@ workflowWithCopyright(
                 "fail-fast" to false,
                 "matrix" to mapOf(
                     "environment" to environments,
-                    "wsl-version" to listOf("-1", "0"),
-                    "include" to listOf(
-                        mapOf(
-                            "environment" to "windows-2019",
-                            "wsl-version" to "2"
-                        )
-                    )
+                    "wsl-version" to listOf("-1", "0")
                 )
             )
         )
@@ -777,7 +770,7 @@ workflowWithCopyright(
             "strategy" to mapOf(
                 "fail-fast" to false,
                 "matrix" to mapOf(
-                    "environment" to (environments - "windows-2019"),
+                    "environment" to environments,
                     "distribution" to distributions,
                     "wsl-version" to (1..2).toList()
                 )
@@ -817,7 +810,7 @@ workflowWithCopyright(
             "strategy" to mapOf(
                 "fail-fast" to false,
                 "matrix" to mapOf(
-                    "environment" to (environments - "windows-2019")
+                    "environment" to environments
                 )
             )
         )
@@ -881,16 +874,6 @@ workflowWithCopyright(
         )
         verifyCommandResult(
             name = "Test - default WSL version should be WSLv2",
-            // on windows-2019 the version is not printed but the wrong
-            // default (anything but WSLv1) would already make the action execution fail
-            conditionTransformer = {
-                """
-                    |(
-                        ${it.prependIndent("|    ")}
-                    |)
-                    |&& (matrix.environment != 'windows-2019')
-                """.trimMargin()
-            },
             actualCommand = """
                 cat
                 <(wsl.exe --list --verbose || true)
@@ -1396,15 +1379,12 @@ fun Step<*>.getSuccessOnOrNotOnDistributionCondition(distribution: Distribution,
 // and https://bugs.launchpad.net/ubuntu/+source/systemd/+bug/2069555
 fun getWslVersionExpression(vararg wsl2Distributions: Distribution) = """
     |(
-    |    (
-             ${
-                 wsl2Distributions.joinToString(
-                     separator = "\n|        || ",
-                     prefix = "|        "
-                 ) { "(matrix.distribution.user-id == '${it.userId}')" }
-             }
-    |    )
-    |    && (matrix.environment != 'windows-2019')
+         ${
+             wsl2Distributions.joinToString(
+                 separator = "\n|        || ",
+                 prefix = "|        "
+             ) { "(matrix.distribution.user-id == '${it.userId}')" }
+         }
     |)
     |&& '2'
     ||| '1'

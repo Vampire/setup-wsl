@@ -86,7 +86,6 @@ jobs:
       fail-fast: false
       matrix:
         environment:
-        - 'windows-2019'
         - 'windows-2022'
         - 'windows-2025'
         - 'windows-latest'
@@ -128,16 +127,12 @@ jobs:
       fail-fast: false
       matrix:
         environment:
-        - 'windows-2019'
         - 'windows-2022'
         - 'windows-2025'
         - 'windows-latest'
         wsl-version:
         - '-1'
         - '0'
-        include:
-        - environment: 'windows-2019'
-          wsl-version: '2'
     steps:
     - id: 'step-0'
       name: 'Restore built artifacts from cache'
@@ -169,7 +164,6 @@ jobs:
       fail-fast: false
       matrix:
         environment:
-        - 'windows-2019'
         - 'windows-2022'
         - 'windows-2025'
         - 'windows-latest'
@@ -375,7 +369,6 @@ jobs:
       fail-fast: false
       matrix:
         environment:
-        - 'windows-2019'
         - 'windows-2022'
         - 'windows-2025'
         - 'windows-latest'
@@ -434,10 +427,7 @@ jobs:
         use-cache: 'false'
         wsl-version: |-
           ${{ (
-              (
                   (matrix.distribution.user-id == 'kali-linux')
-              )
-              && (matrix.environment != 'windows-2019')
           )
           && '2'
           || '1' }}
@@ -898,7 +888,6 @@ jobs:
       fail-fast: false
       matrix:
         environment:
-        - 'windows-2019'
         - 'windows-2022'
         - 'windows-2025'
         - 'windows-latest'
@@ -1008,7 +997,6 @@ jobs:
       fail-fast: false
       matrix:
         environment:
-        - 'windows-2019'
         - 'windows-2022'
         - 'windows-2025'
         - 'windows-latest'
@@ -1154,7 +1142,6 @@ jobs:
       fail-fast: false
       matrix:
         environment:
-        - 'windows-2019'
         - 'windows-2022'
         - 'windows-2025'
         - 'windows-latest'
@@ -1213,10 +1200,7 @@ jobs:
         additional-packages: '${{ matrix.distribution.default-absent-tool }} bash'
         wsl-version: |-
           ${{ (
-              (
                   (matrix.distribution.user-id == 'kali-linux')
-              )
-              && (matrix.environment != 'windows-2019')
           )
           && '2'
           || '1' }}
@@ -1383,7 +1367,6 @@ jobs:
       fail-fast: false
       matrix:
         environment:
-        - 'windows-2019'
         - 'windows-2022'
         - 'windows-2025'
         - 'windows-latest'
@@ -1450,11 +1433,8 @@ jobs:
         cat <(wsl.exe --list --verbose || true) <(wsl.exe --list --verbose || true | iconv -f UTF-16LE -t UTF-8)
         [[ "$(cat <(wsl.exe --list --verbose || true) <(wsl.exe --list --verbose || true | iconv -f UTF-16LE -t UTF-8))" == *${{ matrix.distribution.wsl-id }}*\ 2* ]]
       if: |-
-        (
-            always()
-            && (steps.step-1.outcome == 'success')
-        )
-        && (matrix.environment != 'windows-2019')
+        always()
+        && (steps.step-1.outcome == 'success')
   test_multiple_usage_with_different_distributions:
     name: 'Test multiple usage with different distributions ("${{ matrix.distributions.distribution1.user-id }}" / "${{ matrix.distributions.distribution2.user-id }}" / "${{ matrix.distributions.distribution3.user-id }}") on ${{ matrix.environment }}'
     runs-on: '${{ matrix.environment }}'
@@ -1465,7 +1445,6 @@ jobs:
       fail-fast: false
       matrix:
         environment:
-        - 'windows-2019'
         - 'windows-2022'
         - 'windows-2025'
         - 'windows-latest'
@@ -1622,7 +1601,6 @@ jobs:
       fail-fast: false
       matrix:
         environment:
-        - 'windows-2019'
         - 'windows-2022'
         - 'windows-2025'
         - 'windows-latest'
@@ -1669,17 +1647,6 @@ jobs:
           match-pattern: '*Debian*'
           default-absent-tool: 'dos2unix'
         exclude:
-        - environment: 'windows-2019'
-          distribution:
-            wsl-id: 'Debian'
-            user-id: 'Debian'
-            match-pattern: '*Debian*'
-            default-absent-tool: 'dos2unix'
-          distribution2:
-            wsl-id: 'Debian'
-            user-id: 'Debian'
-            match-pattern: '*Debian*'
-            default-absent-tool: 'dos2unix'
         - environment: 'windows-2022'
           distribution:
             wsl-id: 'Debian'
@@ -1714,17 +1681,6 @@ jobs:
             match-pattern: '*Debian*'
             default-absent-tool: 'dos2unix'
         include:
-        - environment: 'windows-2019'
-          distribution:
-            wsl-id: 'Debian'
-            user-id: 'Debian'
-            match-pattern: '*Debian*'
-            default-absent-tool: 'dos2unix'
-          distribution2:
-            wsl-id: 'Ubuntu'
-            user-id: 'Ubuntu-20.04'
-            match-pattern: '*Ubuntu*20.04*'
-            default-absent-tool: 'dos2unix'
         - environment: 'windows-2022'
           distribution:
             wsl-id: 'Debian'
@@ -1779,10 +1735,7 @@ jobs:
           || '' }}
         wsl-version: |-
           ${{ (
-              (
                   (matrix.distribution.user-id == 'Ubuntu-24.04')
-              )
-              && (matrix.environment != 'windows-2019')
           )
           && '2'
           || '1' }}
@@ -1799,10 +1752,7 @@ jobs:
             || (
                 (
                 (
-                    (
                         (matrix.distribution.user-id == 'Ubuntu-24.04')
-                    )
-                    && (matrix.environment != 'windows-2019')
                 )
                 && '2'
                 || '1'
@@ -1889,7 +1839,6 @@ jobs:
       fail-fast: false
       matrix:
         environment:
-        - 'windows-2019'
         - 'windows-2022'
         - 'windows-2025'
         - 'windows-latest'
