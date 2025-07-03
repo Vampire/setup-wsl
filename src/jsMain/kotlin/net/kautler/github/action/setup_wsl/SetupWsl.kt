@@ -390,7 +390,11 @@ suspend fun installDistribution() {
         wslArguments = arrayOf("--set-default-version", "${wslVersion()}")
     )
 
-    if ((wslVersion() != 1u) && (process.env["ImageOS"] == "win22") && (process.env["RUNNER_ENVIRONMENT"] == "github-hosted")) {
+    if ((wslVersion() != 1u)
+        && (process.env["ImageOS"] == "win22")
+        && (process.env["RUNNER_ARCH"] == "X64")
+        && (process.env["RUNNER_ENVIRONMENT"] == "github-hosted")
+    ) {
         retry(10) {
             executeWslCommand(
                 wslArguments = arrayOf("--update")
