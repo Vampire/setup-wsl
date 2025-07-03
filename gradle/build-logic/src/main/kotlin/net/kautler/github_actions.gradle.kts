@@ -18,10 +18,12 @@ package net.kautler
 
 import net.kautler.githubactions.DetermineImportedFiles
 import net.kautler.githubactions.PreprocessGithubWorkflow
+import org.ajoberstar.grgit.operation.BranchListOp.Mode.ALL
 import org.gradle.accessors.dm.LibrariesForLibs
 
 plugins {
     `java-base`
+    id("org.ajoberstar.grgit.service")
 }
 
 val compilerEmbeddableClasspath by configurations.creating {
@@ -83,3 +85,36 @@ file(".github/workflows")
             dependsOn(preprocessWorkflow)
         }
     }
+
+val majorVersion: String by project
+val preprocessVerifyReleaseWorkflow by tasks.existing(PreprocessGithubWorkflow::class) {
+    inputs.property("majorVersion", majorVersion)
+
+    doLast {
+        val grgit = grgitService
+            .service
+            .get()
+            .grgit
+
+        if (grgit
+                .branch
+                .list { mode = ALL }
+                .asSequence()
+                .map { it.name }
+                .contains("origin/v$majorVersion")
+        ) {
+            workflowFile.get().apply {
+                readText()
+                    .replace(
+                        """'Vampire/setup-wsl@v(?<version>\d++)'""".toRegex(),
+                        {
+                            if (it.groups["version"]!!.value.toInt() < majorVersion.toInt()) {
+                                "'Vampire/setup-wsl@v$majorVersion'"
+                            } else it.value
+                        }
+                    )
+                    .also { writeText(it) }
+            }
+        }
+    }
+}
