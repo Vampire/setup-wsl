@@ -47,4 +47,4 @@ jobs:
     steps:
     - id: 'step-0'
       name: 'Execute action'
-      uses: 'Vampire/setup-wsl@v5'
+      uses: 'Vampire/setup-wsl@v6'

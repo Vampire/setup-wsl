@@ -6,7 +6,7 @@ Setup WSL
 
 A GitHub action to install and setup a Linux distribution for the Windows Subsystem for Linux (WSL).
 
-Beginning with `windows-2019` virtual environment for GitHub actions, WSLv1 is enabled.
+Beginning with `windows-2019` virtual environment for GitHub actions, WSLv1 was enabled.
 Beginning with later `windows-2022` virtual environment version for GitHub actions, WSLv2 is also available.
 However, there is no Linux distribution installed by default and there is also no easy shell for
 `run` steps that executes commands within a WSL distribution.
@@ -52,7 +52,7 @@ To use this action with all inputs set to their default value, just use its name
 _**Example:**_
 
 ```yaml
-- uses: Vampire/setup-wsl@v5
+- uses: Vampire/setup-wsl@v6
 ```
 
 This will first check whether the distribution is installed already. If not, it will be installed and also
@@ -115,7 +115,7 @@ defaults:
         shell: wsl-bash {0}
 
 steps:
-    - uses: Vampire/setup-wsl@v5
+    - uses: Vampire/setup-wsl@v6
 
     - run: |
           npm ci
@@ -157,7 +157,7 @@ The values currently supported by this action are:
 
 _**Example:**_
 ```yaml
-- uses: Vampire/setup-wsl@v5
+- uses: Vampire/setup-wsl@v6
   with:
       distribution: Ubuntu-18.04
 ```
@@ -174,7 +174,7 @@ space of the repository. Refer to [`actions/cache` documentation][actions/cache 
 
 _**Example:**_
 ```yaml
-- uses: Vampire/setup-wsl@v5
+- uses: Vampire/setup-wsl@v6
   with:
       use-cache: 'false'
 ```
@@ -195,7 +195,7 @@ its contents in your configured value.
 
 _**Example:**_
 ```yaml
-- uses: Vampire/setup-wsl@v5
+- uses: Vampire/setup-wsl@v6
   with:
       wsl-conf: |
           [automount]
@@ -214,7 +214,7 @@ This can also be used if the distribution is installed already.
 
 _**Example:**_
 ```yaml
-- uses: Vampire/setup-wsl@v5
+- uses: Vampire/setup-wsl@v6
   with:
       set-as-default: 'false'
 ```
@@ -228,7 +228,7 @@ This can also be used if the distribution is installed already.
 
 _**Example:**_
 ```yaml
-- uses: Vampire/setup-wsl@v5
+- uses: Vampire/setup-wsl@v6
   with:
       update: 'true'
 ```
@@ -242,7 +242,7 @@ This can also be used if the distribution is installed already.
 
 _**Example:**_
 ```yaml
-- uses: Vampire/setup-wsl@v5
+- uses: Vampire/setup-wsl@v6
   with:
       additional-packages:
           dos2unix
@@ -260,7 +260,7 @@ it is automatically added.
 
 _**Example:**_
 ```yaml
-- uses: Vampire/setup-wsl@v5
+- uses: Vampire/setup-wsl@v6
   with:
       wsl-shell-user: test
 ```
@@ -291,7 +291,7 @@ scripts, the [`wsl-shell-wrapper-path` output](#wsl-shell-wrapper-path) and
 
 _**Examples:**_
 ```yaml
-- uses: Vampire/setup-wsl@v5
+- uses: Vampire/setup-wsl@v6
   with:
       wsl-shell-command: ash -eu
 
@@ -302,21 +302,21 @@ _**Examples:**_
   run: |
       useradd -m -p 4qBD5NWD3IkbU test
 
-- uses: Vampire/setup-wsl@v5
+- uses: Vampire/setup-wsl@v6
   with:
       wsl-shell-command: bash -c "sudo -u test bash --noprofile --norc -euo pipefail "\
 
 - shell: wsl-bash {0}
   run: id
 
-- uses: Vampire/setup-wsl@v5
+- uses: Vampire/setup-wsl@v6
   with:
       wsl-shell-command: bash -c "sudo -u test bash --noprofile --norc -euo pipefail '{0}'"
 
 - shell: wsl-bash {0}
   run: id
 
-- uses: Vampire/setup-wsl@v5
+- uses: Vampire/setup-wsl@v6
   with:
     wsl-shell-command: bash -c "cd && bash --noprofile --norc -euo pipefail '{0}'"
 
@@ -334,13 +334,11 @@ work or break, so issues a warning for the action run. Currently, WSLv1 and WSLv
 issue a warning. If a new WSL version is available and your workflow works with it, please report an issue
 so that proper tests can be added and the warning for that version removed.
 
-**Default value:**
-* `1` if running on `windows-2019` virtual environment as this is not yet supporting WSLv2
-* `2` if not running on `windows-2019` virtual environment
+**Default value:** `2`
 
 _**Example:**_
 ```yaml
-- uses: Vampire/setup-wsl@v3
+- uses: Vampire/setup-wsl@v6
   with:
     wsl-version: 1
 ```

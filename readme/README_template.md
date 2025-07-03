@@ -6,7 +6,7 @@ Setup WSL
 
 A GitHub action to install and setup a Linux distribution for the Windows Subsystem for Linux (WSL).
 
-Beginning with `windows-2019` virtual environment for GitHub actions, WSLv1 is enabled.
+Beginning with `windows-2019` virtual environment for GitHub actions, WSLv1 was enabled.
 Beginning with later `windows-2022` virtual environment version for GitHub actions, WSLv2 is also available.
 However, there is no Linux distribution installed by default and there is also no easy shell for
 `run` steps that executes commands within a WSL distribution.
@@ -334,13 +334,11 @@ work or break, so issues a warning for the action run. Currently, WSLv1 and WSLv
 issue a warning. If a new WSL version is available and your workflow works with it, please report an issue
 so that proper tests can be added and the warning for that version removed.
 
-**Default value:**
-* `1` if running on `windows-2019` virtual environment as this is not yet supporting WSLv2
-* `2` if not running on `windows-2019` virtual environment
+**Default value:** `2`
 
 _**Example:**_
 ```yaml
-- uses: Vampire/setup-wsl@v3
+- uses: Vampire/setup-wsl@v$majorVersion
   with:
     wsl-version: 1
 ```
