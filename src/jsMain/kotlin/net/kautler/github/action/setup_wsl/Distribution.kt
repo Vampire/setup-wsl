@@ -210,7 +210,13 @@ abstract class AptGetBasedDistribution : Distribution {
     }
 
     override suspend fun update() {
-        refresh()
+        update(true)
+    }
+
+    protected suspend fun update(refresh: Boolean) {
+        if (refresh) {
+            refresh()
+        }
         exec(
             commandLine = "wsl",
             args = arrayOf(
@@ -302,7 +308,14 @@ object Debian : AptGetBasedDistribution(
     version = SemVer("1.0.0"),
     downloadUrl = URL("https://aka.ms/wsl-debian-gnulinux"),
     installerFile = "debian.exe"
-)
+) {
+    override suspend fun update() {
+        refresh()
+        retry(5) {
+            update(false)
+        }
+    }
+}
 
 object Kali : AptGetBasedDistribution(
     wslId = "MyDistribution",
