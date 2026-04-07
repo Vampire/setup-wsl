@@ -1,5 +1,5 @@
 /*
- * Copyright 2020-2025 Björn Kautler
+ * Copyright 2020-2026 Björn Kautler
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -309,6 +309,21 @@ object Debian : AptGetBasedDistribution(
     downloadUrl = URL("https://aka.ms/wsl-debian-gnulinux"),
     installerFile = "debian.exe"
 ) {
+    override suspend fun refresh() {
+        exec(
+            commandLine = "wsl",
+            args = arrayOf(
+                "--distribution",
+                wslId,
+                "sed",
+                "-i",
+                "s/ftp.debian.org/archive.debian.org/",
+                "/etc/apt/sources.list"
+            )
+        )
+        super.refresh()
+    }
+
     override suspend fun update() {
         refresh()
         retry(5) {
