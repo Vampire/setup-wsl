@@ -1,5 +1,5 @@
 /*
- * Copyright 2020-2023 Björn Kautler
+ * Copyright 2020-2026 Björn Kautler
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -30,16 +30,16 @@ import kotlinx.serialization.encoding.Encoder
 import kotlinx.serialization.encoding.decodeStructure
 import kotlinx.serialization.encoding.encodeStructure
 
-//@ExperimentalSerializationApi
 object DependencyLatestSerializer : KSerializer<DependencyLatest> {
-    override val descriptor = buildClassSerialDescriptor("com.github.benmanes.gradle.versions.reporter.result.DependencyLatest") {
-        element<String?>("group")
-        element<String?>("name")
-        element<String?>("version")
-        element<String?>("projectUrl")
-        element<String?>("userReason")
-        element<String>("latest")
-    }
+    override val descriptor =
+        buildClassSerialDescriptor("com.github.benmanes.gradle.versions.reporter.result.DependencyLatest") {
+            element<String?>("group")
+            element<String?>("name")
+            element<String?>("version")
+            element<String?>("projectUrl")
+            element<String?>("userReason")
+            element<String>("latest")
+        }
 
     override fun deserialize(decoder: Decoder) = decoder.decodeStructure(descriptor) {
         var group: String? = null

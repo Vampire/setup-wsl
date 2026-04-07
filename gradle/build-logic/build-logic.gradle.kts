@@ -1,5 +1,5 @@
 /*
- * Copyright 2020-2025 Björn Kautler
+ * Copyright 2020-2026 Björn Kautler
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,7 +18,7 @@ import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
 plugins {
     `kotlin-dsl`
-    id(libs.plugins.convention.dependency.updates.report.aggregation.get().pluginId)
+    alias(libs.plugins.convention.dependency.updates.report.aggregatee)
     alias(libs.plugins.dependency.analysis)
 }
 
@@ -40,7 +40,7 @@ dependencies {
 
 tasks.withType<KotlinCompile>().configureEach {
     compilerOptions {
-        allWarningsAsErrors.set(true)
+        allWarningsAsErrors = true
     }
 }
 

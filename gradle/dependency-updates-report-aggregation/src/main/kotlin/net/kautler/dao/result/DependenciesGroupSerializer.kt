@@ -1,5 +1,5 @@
 /*
- * Copyright 2020-2023 Björn Kautler
+ * Copyright 2020-2026 Björn Kautler
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -34,10 +34,11 @@ import java.util.SortedSet
 class DependenciesGroupSerializer<E : Dependency>(
     private val elementSerializer: KSerializer<E>
 ) : KSerializer<DependenciesGroup<E>> {
-    override val descriptor = buildClassSerialDescriptor("com.github.benmanes.gradle.versions.reporter.result.DependenciesGroup") {
-        element<Int>("count")
-        element("dependencies", SetSerializer(elementSerializer).descriptor)
-    }
+    override val descriptor =
+        buildClassSerialDescriptor("com.github.benmanes.gradle.versions.reporter.result.DependenciesGroup") {
+            element<Int>("count")
+            element("dependencies", SetSerializer(elementSerializer).descriptor)
+        }
 
     override fun deserialize(decoder: Decoder) = decoder.decodeStructure(descriptor) {
         var count: Int? = null
@@ -47,7 +48,9 @@ class DependenciesGroupSerializer<E : Dependency>(
             when (val index = decodeElementIndex(descriptor)) {
                 DECODE_DONE -> break
                 0 -> count = decodeIntElement(descriptor, index)
-                1 -> dependencies = decodeSerializableElement(descriptor, index, SetSerializer(elementSerializer)).toSortedSet()
+                1 -> dependencies =
+                    decodeSerializableElement(descriptor, index, SetSerializer(elementSerializer)).toSortedSet()
+
                 else -> error("Unexpected index $index")
             }
         }

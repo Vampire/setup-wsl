@@ -1,5 +1,5 @@
 /*
- * Copyright 2020-2023 Björn Kautler
+ * Copyright 2020-2026 Björn Kautler
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,30 +17,33 @@
 package net.kautler
 
 import net.kautler.util.NullOutputStream
+import net.kautler.util.PreliminaryReleaseFilter
+import net.kautler.util.ProblemsProvider
 import net.kautler.util.add
 import net.kautler.util.ignoredDependencies
-import java.net.URL
 import java.security.DigestInputStream
 import java.security.MessageDigest
 
 plugins {
-    id("net.kautler.dependency-updates-report-aggregation")
+    id("net.kautler.dependency-updates-report-aggregator")
     id("com.autonomousapps.dependency-analysis")
 }
 
 val majorVersion by extra("$version".substringBefore('.'))
 
 val validateGradleWrapperJar by tasks.registering {
-    onlyIf {
-        !gradle.startParameter.isOffline
-    }
+    val offlineBuild = gradle.startParameter.isOffline
+    onlyIf { !offlineBuild }
 
+    val resources = resources
+    val gradleVersion = gradle.gradleVersion
+    val projectDirectory = layout.projectDirectory
+    val problemReporter = objects.newInstance<ProblemsProvider>().problems.reporter
     doLast {
-        val expectedDigest = URL("https://services.gradle.org/distributions/gradle-${gradle.gradleVersion}-wrapper.jar.sha256").readText()
+        val expectedDigest = resources.text.fromUri("https://services.gradle.org/distributions/gradle-$gradleVersion-wrapper.jar.sha256").asString()
 
         val sha256 = MessageDigest.getInstance("SHA-256")
-        layout
-            .projectDirectory
+        projectDirectory
             .dir("gradle")
             .dir("wrapper")
             .file("gradle-wrapper.jar")
@@ -52,8 +55,18 @@ val validateGradleWrapperJar by tasks.registering {
             "%02x".repeat(it.size).format(*it.toTypedArray())
         }
 
-        check(expectedDigest == actualDigest) {
-            "The wrapper JAR does not match the configured Gradle version, please update the wrapper"
+        if (expectedDigest != actualDigest) {
+            throw problemReporter.throwing(
+                IllegalStateException(),
+                ProblemId.create(
+                    "the-wrapper-jar-does-not-match-the-configured-gradle-version",
+                    "The wrapper JAR does not match the configured Gradle version",
+                    ProblemGroup.create("build-authoring", "Build Authoring")
+                )
+            ) {
+                solution("Update the wrapper to the version of Gradle")
+                severity(Severity.ERROR)
+            }
         }
     }
 }
@@ -61,18 +74,28 @@ val validateGradleWrapperJar by tasks.registering {
 tasks.dependencyUpdates {
     dependsOn(validateGradleWrapperJar)
 
+    rejectVersionIf {
+        if (PreliminaryReleaseFilter.reject(this)) {
+            reject("preliminary release")
+        }
+
+        // branches above already rejected with appropriate reason
+        return@rejectVersionIf false
+    }
+
     ignoredDependencies {
         // This plugin should always be used without version as it is tightly
         // tied to the Gradle version that is building the precompiled script plugins
         add(group = "org.gradle.kotlin.kotlin-dsl", name = "org.gradle.kotlin.kotlin-dsl.gradle.plugin")
         // These dependencies are used in the build logic so should match the
         // embedded Kotlin version and not be upgraded independently
+        add(group = "org.jetbrains.kotlin", name = "kotlin-assignment-compiler-plugin-embeddable")
+        add(group = "org.jetbrains.kotlin", name = "kotlin-build-tools-impl")
         add(group = "org.jetbrains.kotlin", name = "kotlin-compiler-embeddable")
-        add(group = "org.jetbrains.kotlin", name = "kotlin-klib-commonizer-embeddable")
         add(group = "org.jetbrains.kotlin", name = "kotlin-reflect")
-        add(group = "org.jetbrains.kotlin", name = "kotlin-sam-with-receiver")
+        add(group = "org.jetbrains.kotlin", name = "kotlin-sam-with-receiver-compiler-plugin-embeddable")
         add(group = "org.jetbrains.kotlin", name = "kotlin-scripting-compiler-embeddable")
-        add(group = "org.jetbrains.kotlin", name = "kotlin-stdlib-jdk8")
+        add(group = "org.jetbrains.kotlin", name = "kotlin-stdlib")
     }
 }
 

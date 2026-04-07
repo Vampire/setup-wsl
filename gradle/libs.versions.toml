@@ -45,13 +45,13 @@ workflows-kotlin-main-kts = { module = "org.jetbrains.kotlin:kotlin-main-kts", v
 workflows-kotlin-scripting-compiler = { module = "org.jetbrains.kotlin:kotlin-scripting-compiler", version.ref = "workflows-kotlin" }
 
 [plugins]
-convention-dependencies = { id = "net.kautler.dependencies", version = "?" }
-convention-dependency-updates-report-aggregation = { id = "net.kautler.dependency-updates-report-aggregation", version = "?" }
-convention-github_actions = { id = "net.kautler.github_actions", version = "?" }
-convention-ncc-packer = { id = "net.kautler.ncc_packer", version = "?" }
-convention-node = { id = "net.kautler.node", version = "?" }
-convention-publishing = { id = "net.kautler.publishing", version = "?" }
-convention-readme = { id = "net.kautler.readme", version = "?" }
+convention-dependencies = { id = "net.kautler.dependencies" }
+convention-dependency-updates-report-aggregatee = { id = "net.kautler.dependency-updates-report-aggregatee" }
+convention-github_actions = { id = "net.kautler.github_actions" }
+convention-ncc-packer = { id = "net.kautler.ncc_packer" }
+convention-node = { id = "net.kautler.node" }
+convention-publishing = { id = "net.kautler.publishing" }
+convention-readme = { id = "net.kautler.readme" }
 dependency-analysis = { id = "com.autonomousapps.dependency-analysis", version.ref = "build-gradle-plugin-dependency-analysis" }
 github = { id = "net.wooga.github", version.ref = "build-gradle-plugin-github" }
 grgit = { id = "org.ajoberstar.grgit.service", version.ref = "build-gradle-plugin-grgit" }

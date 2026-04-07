@@ -1,5 +1,5 @@
 /*
- * Copyright 2020-2026 Björn Kautler
+ * Copyright 2026 Björn Kautler
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,10 +14,12 @@
  * limitations under the License.
  */
 
-plugins {
-    alias(libs.plugins.convention.dependencies)
-    alias(libs.plugins.convention.node)
-    alias(libs.plugins.convention.github.actions)
-    alias(libs.plugins.convention.readme)
-    alias(libs.plugins.convention.publishing)
+package net.kautler.util
+
+import org.gradle.api.problems.Problems
+import javax.inject.Inject
+
+interface ProblemsProvider {
+    @get:Inject
+    val problems: Problems
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright 2020-2023 Björn Kautler
+ * Copyright 2020-2026 Björn Kautler
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -30,11 +30,12 @@ import kotlinx.serialization.encoding.decodeStructure
 import kotlinx.serialization.encoding.encodeStructure
 
 object VersionAvailableSerializer : KSerializer<VersionAvailable> {
-    override val descriptor = buildClassSerialDescriptor("com.github.benmanes.gradle.versions.reporter.result.VersionAvailable") {
-        element<String?>("release")
-        element<String?>("milestone")
-        element<String?>("integration")
-    }
+    override val descriptor =
+        buildClassSerialDescriptor("com.github.benmanes.gradle.versions.reporter.result.VersionAvailable") {
+            element<String?>("release")
+            element<String?>("milestone")
+            element<String?>("integration")
+        }
 
     override fun deserialize(decoder: Decoder) = decoder.decodeStructure(descriptor) {
         var release: String? = null

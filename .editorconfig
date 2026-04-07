@@ -1,4 +1,4 @@
-# Copyright 2020-2026 Björn Kautler
+# Copyright 2026 BjÃ¶rn Kautler
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -12,15 +12,17 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-group = net.kautler
-version = 6.0.1-SNAPSHOT
-description = A GitHub action to install and setup a Linux distribution for the Windows Subsystem for Linux (WSL)
+root = true
 
-org.gradle.kotlin.dsl.skipMetadataVersionCheck = false
-org.gradle.kotlin.dsl.allWarningsAsErrors = true
-org.gradle.configuration-cache = true
-org.gradle.caching = true
+[*]
+charset = utf-8
+end_of_line = lf
+insert_final_newline = true
+# work-around for https://youtrack.jetbrains.com/issue/IDEA-324136
+#trim_trailing_whitespace = true
+indent_style = space
+indent_size = 4
 
-dependency.analysis.print.build.health = true
-kotlin.code.style = official
-kotlin.js.ir.output.granularity = whole-program
+[*.{kt,kts}]
+ij_kotlin_allow_trailing_comma = false
+ij_kotlin_allow_trailing_comma_on_call_site = false

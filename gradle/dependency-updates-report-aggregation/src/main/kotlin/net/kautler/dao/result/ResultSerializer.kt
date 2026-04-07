@@ -1,5 +1,5 @@
 /*
- * Copyright 2020-2023 Björn Kautler
+ * Copyright 2020-2026 Björn Kautler
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -56,12 +56,41 @@ object ResultSerializer : KSerializer<Result> {
         while (true) {
             when (val index = decodeElementIndex(descriptor)) {
                 DECODE_DONE -> break
-                0 -> count = decodeIntElement(descriptor, index)
-                1 -> current = decodeSerializableElement(descriptor, index, DependenciesGroupSerializer(DependencySerializer))
-                2 -> outdated = decodeSerializableElement(descriptor, index, DependenciesGroupSerializer(DependencyOutdatedSerializer))
-                3 -> exceeded = decodeSerializableElement(descriptor, index, DependenciesGroupSerializer(DependencyLatestSerializer))
-                4 -> undeclared = decodeSerializableElement(descriptor, index, DependenciesGroupSerializer(DependencySerializer))
-                5 -> unresolved = decodeSerializableElement(descriptor, index, DependenciesGroupSerializer(DependencyUnresolvedSerializer))
+                0 -> count = decodeIntElement(
+                    descriptor,
+                    index
+                )
+
+                1 -> current = decodeSerializableElement(
+                    descriptor,
+                    index,
+                    DependenciesGroupSerializer(DependencySerializer)
+                )
+
+                2 -> outdated = decodeSerializableElement(
+                    descriptor,
+                    index,
+                    DependenciesGroupSerializer(DependencyOutdatedSerializer)
+                )
+
+                3 -> exceeded = decodeSerializableElement(
+                    descriptor,
+                    index,
+                    DependenciesGroupSerializer(DependencyLatestSerializer)
+                )
+
+                4 -> undeclared = decodeSerializableElement(
+                    descriptor,
+                    index,
+                    DependenciesGroupSerializer(DependencySerializer)
+                )
+
+                5 -> unresolved = decodeSerializableElement(
+                    descriptor,
+                    index,
+                    DependenciesGroupSerializer(DependencyUnresolvedSerializer)
+                )
+
                 else -> error("Unexpected index $index")
             }
         }
@@ -102,12 +131,41 @@ object ResultSerializer : KSerializer<Result> {
 
     override fun serialize(encoder: Encoder, value: Result) {
         encoder.encodeStructure(descriptor) {
-            encodeIntElement(descriptor, 0, value.count)
-            encodeSerializableElement(descriptor, 1, DependenciesGroupSerializer(DependencySerializer), value.current)
-            encodeSerializableElement(descriptor, 2, DependenciesGroupSerializer(DependencyOutdatedSerializer), value.outdated)
-            encodeSerializableElement(descriptor, 3, DependenciesGroupSerializer(DependencyLatestSerializer), value.exceeded)
-            encodeSerializableElement(descriptor, 4, DependenciesGroupSerializer(DependencySerializer), value.undeclared)
-            encodeSerializableElement(descriptor, 5, DependenciesGroupSerializer(DependencyUnresolvedSerializer), value.unresolved)
+            encodeIntElement(
+                descriptor,
+                0,
+                value.count
+            )
+            encodeSerializableElement(
+                descriptor,
+                1,
+                DependenciesGroupSerializer(DependencySerializer),
+                value.current
+            )
+            encodeSerializableElement(
+                descriptor,
+                2,
+                DependenciesGroupSerializer(DependencyOutdatedSerializer),
+                value.outdated
+            )
+            encodeSerializableElement(
+                descriptor,
+                3,
+                DependenciesGroupSerializer(DependencyLatestSerializer),
+                value.exceeded
+            )
+            encodeSerializableElement(
+                descriptor,
+                4,
+                DependenciesGroupSerializer(DependencySerializer),
+                value.undeclared
+            )
+            encodeSerializableElement(
+                descriptor,
+                5,
+                DependenciesGroupSerializer(DependencyUnresolvedSerializer),
+                value.unresolved
+            )
         }
     }
 }

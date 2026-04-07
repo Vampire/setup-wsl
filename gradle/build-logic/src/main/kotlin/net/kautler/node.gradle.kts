@@ -1,5 +1,5 @@
 /*
- * Copyright 2020-2025 Björn Kautler
+ * Copyright 2020-2026 Björn Kautler
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,7 +17,6 @@
 package net.kautler
 
 import net.kautler.dao.action.GitHubAction
-import net.kautler.util.npm
 import org.gradle.accessors.dm.LibrariesForLibs
 import org.gradle.accessors.dm.LibrariesForKotlinWrappers
 import org.jetbrains.kotlin.gradle.targets.js.nodejs.NodeJsEnvSpec
@@ -63,7 +62,7 @@ kotlin {
 
 tasks.withType<KotlinCompilationTask<*>>().configureEach {
     compilerOptions {
-        allWarningsAsErrors.set(true)
+        allWarningsAsErrors = true
     }
 }
 
@@ -103,13 +102,13 @@ val inputDefaultValues by lazy {
 
 // work-around for https://youtrack.jetbrains.com/issue/KT-56305
 tasks.withType<NodeJsExec>().configureEach {
-    val toolCacheDir = "$temporaryDir/tool-cache"
+    val toolCacheDir = file("$temporaryDir/tool-cache")
 
     // only execute safe actions that do not change the execution environment
     environment("INPUT_ONLY_SAFE_ACTIONS", true)
 
     environment("RUNNER_TEMP", "$temporaryDir/runner-temp")
-    environment("RUNNER_TOOL_CACHE", toolCacheDir)
+    environment("RUNNER_TOOL_CACHE", toolCacheDir.absoluteFile)
 
     inputDefaultValues?.forEach { (name, default) ->
         environment(
@@ -119,29 +118,22 @@ tasks.withType<NodeJsExec>().configureEach {
     }
 
     doFirst("Delete tool-cache") {
-        file(toolCacheDir).deleteRecursively()
+        toolCacheDir.deleteRecursively()
     }
 }
 
 configure<NodeJsEnvSpec> {
-    version.set(libs.versions.build.node.get())
-    downloadBaseUrl.set(provider { null })
+    version = libs.versions.build.node.get()
+    downloadBaseUrl = provider { null }
 }
 
 configure<YarnRootEnvSpec> {
-    downloadBaseUrl.set(provider { null })
+    downloadBaseUrl = provider { null }
 }
 
-val executable by configurations.registering {
-    isCanBeConsumed = true
-    isCanBeResolved = false
-    isVisible = false
-}
-
-artifacts {
+configurations.consumable("executable") {
     val jsProductionExecutableCompileSync by tasks.existing(IncrementalSyncTask::class)
-    add(
-        executable.name,
+    outgoing.artifact(
         jsProductionExecutableCompileSync.map {
             it
                 .destinationDirectory
@@ -151,19 +143,9 @@ artifacts {
     )
 }
 
-// work-around for missing feature in dependencies block added in Gradle 8.3
-//val setupWsl by configurations.registering {
-val setupWslDistribution by configurations.creating {
-    isCanBeConsumed = false
-    isCanBeResolved = false
-    isVisible = false
-}
-
-val setupWslDistributionFiles by configurations.registering {
-    isCanBeConsumed = false
-    isCanBeResolved = true
-    isVisible = false
-    extendsFrom(setupWslDistribution)
+val setupWslDistribution = configurations.dependencyScope("setupWslDistribution")
+val setupWslDistributionFiles = configurations.resolvable("setupWslDistributionFiles") {
+    extendsFrom(setupWslDistribution.get())
 }
 
 dependencies {

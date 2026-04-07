@@ -1,5 +1,5 @@
 /*
- * Copyright 2020-2023 Björn Kautler
+ * Copyright 2020-2026 Björn Kautler
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,6 +16,8 @@
 
 package net.kautler
 
+import net.kautler.util.ProblemsProvider
+import org.gradle.kotlin.dsl.newInstance
 import java.security.MessageDigest
 
 plugins {
@@ -27,35 +29,48 @@ plugins {
 val majorVersion: String by project
 val readmeTemplateFilePath = "readme/README_template.md"
 val readmeFilePath = "README.md"
-val readmeChecksumFilePath = "readme/README.md.sha256"
+val readmeChecksumFilePath = "readme/$readmeFilePath.sha256"
 
-val readmeCopySpec = copySpec {
-    from(readmeTemplateFilePath)
-    rename { readmeFilePath }
-    filteringCharset = "UTF-8"
-    expand("majorVersion" to majorVersion)
-}
-
-val verifyReadme by tasks.registering {
+val verifyReadme by tasks.registering(ReadmeTask::class) {
+    val majorVersion = majorVersion
     inputs.property("majorVersion", majorVersion)
-    inputs.file(readmeTemplateFilePath).withPropertyName("readmeTemplate")
-    inputs.files(readmeFilePath).withPropertyName("readme")
-    inputs.file(readmeChecksumFilePath).withPropertyName("readmeChecksum")
+    val readmeTemplateFile = file(readmeTemplateFilePath)
+    inputs.file(readmeTemplateFile).withPropertyName("readmeTemplate")
+    val readmeFile = file(readmeFilePath)
+    inputs.files(readmeFile).withPropertyName("readme")
+    val readmeChecksumFile = file(readmeChecksumFilePath)
+    inputs.file(readmeChecksumFile).withPropertyName("readmeChecksum")
 
+    val allTasks = provider { gradle.taskGraph.allTasks.map { it.path } }
+    val problemReporter = objects.newInstance<ProblemsProvider>().problems.reporter
     doLast("verify readme") {
-        if (!file(readmeFilePath).exists() || file(readmeChecksumFilePath).readText() != calculateReadmeChecksum()) {
-            // do not use hasTask() as this requires realization of the task that maybe is not necessary
-            if (gradle.taskGraph.allTasks.any { it.name == "updateReadme" }) {
-                error(
-                    "The README.md file was tampered with manually, "
-                            + "if you want to overwrite it, add \"-x $name\" to your Gradle call"
+        if (!readmeFile.exists() || (readmeChecksumFile.readText() != calculateChecksum(readmeFile))) {
+            throw problemReporter.throwing(
+                IllegalStateException(),
+                ProblemId.create(
+                    "the-${readmeFile.path}-file-was-tampered-with-manually",
+                    buildString {
+                        append("The ${readmeFile.path} file was tampered with manually")
+                        // do not use hasTask() as this requires realization of the task that maybe is not necessary
+                        if (allTasks.get().contains(":updateReadme")) {
+                            append(""", if you want to overwrite it, add "-x $name" to your Gradle call""")
+                        }
+                    },
+                    ProblemGroup.create("readme-tampering", "README Tampering")
                 )
+            ) {
+                solution("Modify the ${readmeTemplateFile.path} file instead")
+                solution("Revert the tampered ${readmeFile.path} file")
+                solution("Overwrite the tampered ${readmeFile.path} file using the 'updateReadme' task")
+                severity(Severity.ERROR)
             }
-            error("The README.md file was tampered with manually")
         }
 
-        copy {
-            with(readmeCopySpec)
+        fs.copy {
+            from(readmeTemplateFile)
+            rename { readmeFile.name }
+            filteringCharset = "UTF-8"
+            expand("majorVersion" to majorVersion)
             into(temporaryDir)
         }
     }
@@ -65,32 +80,44 @@ tasks.check {
     dependsOn(verifyReadme)
 }
 
-tasks.register("updateReadme") {
+val updateReadme by tasks.registering(ReadmeTask::class) {
     dependsOn(verifyReadme)
 
+    val majorVersion = majorVersion
     inputs.property("majorVersion", majorVersion)
-    inputs.file(readmeTemplateFilePath).withPropertyName("readmeTemplate")
-    outputs.file(readmeFilePath).withPropertyName("readme")
-    outputs.file(readmeChecksumFilePath).withPropertyName("readmeChecksum")
+    val readmeTemplateFile = file(readmeTemplateFilePath)
+    inputs.file(readmeTemplateFile).withPropertyName("readmeTemplate")
+    val readmeFile = file(readmeFilePath)
+    outputs.file(readmeFile).withPropertyName("readme")
+    val readmeChecksumFile = file(readmeChecksumFilePath)
+    outputs.file(readmeChecksumFile).withPropertyName("readmeChecksum")
 
     doLast("update readme") {
-        copy {
-            with(readmeCopySpec)
+        fs.copy {
+            from(readmeTemplateFile)
+            rename { readmeFile.name }
+            filteringCharset = "UTF-8"
+            expand("majorVersion" to majorVersion)
             into(".")
         }
-        file(readmeChecksumFilePath).writeText(calculateReadmeChecksum())
+        readmeChecksumFile.writeText(calculateChecksum(readmeFile))
     }
 }
 
-fun calculateReadmeChecksum() = MessageDigest.getInstance("SHA-256").let { sha256 ->
-    sha256.digest(
-        file("README.md")
-            .readLines()
-            .joinToString("\n")
-            .toByteArray()
-    ).let {
-        BigInteger(1, it)
-            .toString(16)
-            .padStart(sha256.digestLength * 2, '0')
+abstract class ReadmeTask : DefaultTask() {
+    @get:Inject
+    abstract val fs: FileSystemOperations
+
+    fun calculateChecksum(file: File) = MessageDigest.getInstance("SHA-256").let { sha256 ->
+        sha256.digest(
+            file
+                .readLines()
+                .joinToString("\n")
+                .toByteArray()
+        ).let {
+            BigInteger(1, it)
+                .toString(16)
+                .padStart(sha256.digestLength * 2, '0')
+        }
     }
 }

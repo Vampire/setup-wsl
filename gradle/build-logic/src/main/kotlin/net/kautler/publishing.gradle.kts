@@ -16,58 +16,73 @@
 
 package net.kautler
 
+import net.kautler.util.BuildFeaturesProvider
+import net.kautler.util.InitJGit
+import net.kautler.util.ProblemsProvider
 import net.kautler.util.Property.Companion.boolean
 import net.kautler.util.Property.Companion.optionalString
+import net.kautler.util.ReleaseBody
 import net.kautler.util.afterReleaseBuild
 import net.kautler.util.beforeReleaseBuild
 import net.kautler.util.cachedProvider
 import net.kautler.util.checkoutMergeFromReleaseBranch
+import net.kautler.util.checkoutMergeToReleaseBranch
 import net.kautler.util.createReleaseTag
 import net.kautler.util.preTagCommit
+import net.kautler.util.registerMockTask
 import net.kautler.util.release
 import net.kautler.util.runBuildTasks
 import net.kautler.util.updateVersion
+import net.researchgate.release.ReleaseExtension
 import net.researchgate.release.ReleasePlugin
+import net.researchgate.release.tasks.CreateReleaseTag
+import net.researchgate.release.tasks.PreTagCommit
+import net.researchgate.release.tasks.UpdateVersion
 import org.ajoberstar.grgit.operation.BranchListOp.Mode.ALL
 import org.gradle.tooling.GradleConnector
 import org.kohsuke.github.GHIssueState.OPEN
 import wooga.gradle.github.base.tasks.Github
+import wooga.gradle.github.base.tasks.internal.AbstractGithubTask
 import wooga.gradle.github.publish.PublishMethod.update
 import wooga.gradle.github.publish.tasks.GithubPublish
-import java.awt.GraphicsEnvironment.isHeadless
-import java.util.concurrent.CompletableFuture
-import javax.swing.JButton
-import javax.swing.JFrame
-import javax.swing.JOptionPane.DEFAULT_OPTION
-import javax.swing.JOptionPane.OK_OPTION
-import javax.swing.JOptionPane.QUESTION_MESSAGE
-import javax.swing.JOptionPane.showOptionDialog
-import javax.swing.JScrollPane
-import javax.swing.JTextArea
-import javax.swing.SwingUtilities
 
 plugins {
     // needed for accessing majorVersion
     id("net.kautler.dependencies")
     id("org.ajoberstar.grgit.service")
     id("net.wooga.github")
+    id("net.kautler.readme")
 }
 
-// part of work-around for https://github.com/researchgate/gradle-release/issues/304
-apply(plugin = "net.researchgate.release")
+// part of work-around for https://github.com/researchgate/gradle-release/pull/405
+if (objects.newInstance<BuildFeaturesProvider>().buildFeatures.configurationCache.active.get()) {
+    extensions.create<ReleaseExtension>("release", project, emptyMap<String, Any>())
+    tasks.registerMockTask<GradleBuild>("release")
+    tasks.registerMockTask<GradleBuild>("runBuildTasks")
+    tasks.registerMockTask<Task>("checkoutMergeFromReleaseBranch")
+    tasks.registerMockTask<Task>("checkoutMergeToReleaseBranch")
+    tasks.registerMockTask<UpdateVersion>("updateVersion")
+    tasks.registerMockTask<Task>("afterReleaseBuild")
+    tasks.registerMockTask<PreTagCommit>("preTagCommit")
+    tasks.registerMockTask<CreateReleaseTag>("createReleaseTag")
+    tasks.registerMockTask<Task>("beforeReleaseBuild")
+} else {
+    // part of work-around for https://github.com/researchgate/gradle-release/issues/304
+    apply(plugin = "net.researchgate.release")
+}
 
-extra["release.useAutomaticVersion"] = boolean(project, "release.useAutomaticVersion").getValue()
-extra["release.releaseVersion"] = optionalString(project, "release.releaseVersion").getValue()
-extra["release.newVersion"] = optionalString(project, "release.newVersion").getValue()
+extra["release.useAutomaticVersion"] = boolean("release.useAutomaticVersion").getValue()
+extra["release.releaseVersion"] = optionalString("release.releaseVersion").getValue()
+extra["release.newVersion"] = optionalString("release.newVersion").getValue()
 
 val majorVersion: String by project
 
 release {
-    pushReleaseVersionBranch.set("v$majorVersion")
-    tagTemplate.set("v\$version")
+    pushReleaseVersionBranch = "v$majorVersion"
+    tagTemplate = "v\$version"
     git {
-        requireBranch.set("master")
-        signTag.set(true)
+        requireBranch = "master"
+        signTag = true
     }
 }
 
@@ -79,11 +94,12 @@ val releaseVersion get() = !"$version".endsWith("-SNAPSHOT")
 
 val removeDistributionsFromGit by tasks.registering {
     mustRunAfter(tasks.checkoutMergeFromReleaseBranch)
-    usesService(grgitService.service)
+
+    val grgitService = grgitService.service
+    usesService(grgitService)
 
     doLast("Remove distributions from Git") {
         grgitService
-            .service
             .get()
             .grgit
             .remove {
@@ -96,10 +112,10 @@ tasks.updateVersion {
     dependsOn(removeDistributionsFromGit)
 }
 
-val gitHubToken by optionalString("github.token", project)
+val gitHubToken by optionalString("github.token")
 
 github {
-    token.set(provider { gitHubToken })
+    token = provider { gitHubToken }
 }
 
 // part of work-around for https://github.com/researchgate/gradle-release/issues/304
@@ -128,108 +144,42 @@ configure(listOf(tasks.release, tasks.runBuildTasks)) {
     }
 }
 
+// work-around for GitHub plugin using JGit without a ValueSource
+// in non-configurable property branchName
+providers.of(InitJGit::class) {
+    parameters {
+        projectDirectory = layout.projectDirectory
+    }
+}.get()
+
 tasks.withType<GithubPublish>().configureEach {
     onlyIf { releaseVersion }
-    tagName.set(releaseTagName)
-    releaseName.set(releaseTagName)
+    tagName = releaseTagName
+    releaseName = releaseTagName
 }
 
 tasks.githubPublish {
-    usesService(grgitService.service)
-    body.set(provider {
-        val releaseBody = grgitService
-            .service
-            .get()
-            .findGrgit()
-            .map {
-                it
-                    .log {
-                        includes.add(release.git.requireBranch.get())
-                        github
-                            .clientProvider
-                            .get()
-                            .getRepository(github.repositoryName.get())
-                            .latestRelease
-                            ?.apply {
-                                excludes.add(tagName)
-                            }
-                    }
-                    .filter { commit ->
-                        !commit.shortMessage.startsWith("[Gradle Release Plugin] ")
-                    }
-                    .asReversed()
-                    .joinToString("\n") { commit ->
-                        "- ${commit.shortMessage} [${commit.id}]"
-                    }
-            }
-            .orElse("")
-
-        if (isHeadless()) {
-            return@provider releaseBody
+    body = providers.of(ReleaseBody::class) {
+        parameters {
+            projectDirectory = layout.projectDirectory
+            githubToken = github.token
+            repositoryName = github.repositoryName
+            branchName = release.git.requireBranch
         }
-
-        val result = CompletableFuture<String>()
-
-        SwingUtilities.invokeLater {
-            val initialReleaseBody = """
-                # Highlights
-                - 
-
-                # Details
-
-            """.trimIndent() + releaseBody
-
-            val textArea = JTextArea(initialReleaseBody)
-
-            val parentFrame = JFrame().apply {
-                isUndecorated = true
-                setLocationRelativeTo(null)
-                isVisible = true
-            }
-
-            val resetButton = JButton("Reset").apply {
-                addActionListener {
-                    textArea.text = initialReleaseBody
-                }
-            }
-
-            result.complete(
-                try {
-                    when (
-                        showOptionDialog(
-                            parentFrame,
-                            JScrollPane(textArea),
-                            "Release Body",
-                            DEFAULT_OPTION,
-                            QUESTION_MESSAGE,
-                            null,
-                            arrayOf("OK", resetButton),
-                            null
-                        )
-                    ) {
-                        OK_OPTION -> textArea.text!!
-                        else -> releaseBody
-                    }
-                } finally {
-                    parentFrame.dispose()
-                }
-            )
-        }
-
-        return@provider result.join()!!
-    })
-    draft.set(true)
+    }
+    draft = true
 }
 
 val undraftGithubRelease by tasks.registering(GithubPublish::class) {
     mustRunAfter(tasks.createReleaseTag)
-    publishMethod.set(update)
+    publishMethod = update
 }
 
 val finishMilestone by tasks.registering(Github::class) {
-    onlyIf { releaseVersion }
-    usesService(grgitService.service)
+    val releaseVersion = provider { releaseVersion }
+    onlyIf { releaseVersion.get() }
 
+    val releaseTagName = releaseTagName
     doLast("finish milestone") {
         repository.apply {
             listMilestones(OPEN)
@@ -246,7 +196,9 @@ val finishMilestone by tasks.registering(Github::class) {
 
 val addDistributionsToGit by tasks.registering {
     dependsOn(tasks.named("assemble"))
-    usesService(grgitService.service)
+
+    val grgitService = grgitService.service
+    usesService(grgitService)
 
     doLast("Add distributions to Git") {
         val gitIgnore = file(".gitignore")
@@ -254,7 +206,6 @@ val addDistributionsToGit by tasks.registering {
         gitIgnore.renameTo(gitIgnoreBak)
         try {
             grgitService
-                .service
                 .get()
                 .grgit
                 .add {
@@ -265,6 +216,7 @@ val addDistributionsToGit by tasks.registering {
         }
     }
 }
+
 tasks.publish {
     dependsOn(addDistributionsToGit)
 }
@@ -284,11 +236,12 @@ listOf(finishMilestone).forEach {
 }
 
 val createMajorBranch by tasks.registering {
+    val grgitService = grgitService.service
+    usesService(grgitService)
+
+    val majorVersion = majorVersion
     doLast {
-        val grgit = grgitService
-            .service
-            .get()
-            .grgit
+        val grgit = grgitService.get().grgit
 
         val (maxMajorVersion, maxMajorVersionBranch) = grgit
             .branch
@@ -305,7 +258,7 @@ val createMajorBranch by tasks.registering {
     }
 }
 
-val checkoutMergeToReleaseBranch by tasks.existing {
+tasks.checkoutMergeToReleaseBranch {
     dependsOn(createMajorBranch)
 }
 
@@ -328,23 +281,33 @@ tasks.updateVersion {
 }
 
 val checkBranchProtectionCompatibility by tasks.registering(Github::class) {
-    usesService(grgitService.service)
-
+    val problemReporter = objects.newInstance<ProblemsProvider>().problems.reporter
+    val branchName = release.git.requireBranch
     doLast {
-        check(
-            !repository
-                .getBranch(release.git.requireBranch.get())
+        if (repository
+                .getBranch(branchName.get())
                 .protection
                 .enforceAdmins
                 .isEnabled
         ) {
-            """
-                Please disable branch protection for administrators before triggering a release, for example using
-
-                gh api 'repos/{owner}/{repo}/branches/${release.git.requireBranch.get()}/protection/enforce_admins' -X DELETE
-            """.trimIndent()
+            throw problemReporter.throwing(
+                IllegalStateException(),
+                ProblemId.create(
+                    "the-branch-protection-for-administrators-is-active",
+                    "The branch protection for administrators is active",
+                    ProblemGroup.create("remote-state", "Remote State")
+                )
+            ) {
+                solution("Disable branch protection for administrators before triggering a release")
+                solution("gh api 'repos/{owner}/{repo}/branches/${branchName.get()}/protection/enforce_admins' -X DELETE")
+                severity(Severity.ERROR)
+            }
         }
     }
+}
+
+tasks.withType<AbstractGithubTask<*>>().configureEach {
+    notCompatibleWithConfigurationCache("Plugin is unmaintained and contains not-serializable state in tasks")
 }
 
 tasks.beforeReleaseBuild {

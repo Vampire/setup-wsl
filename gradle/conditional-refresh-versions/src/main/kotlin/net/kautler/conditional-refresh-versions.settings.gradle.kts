@@ -1,5 +1,5 @@
 /*
- * Copyright 2020-2023 Björn Kautler
+ * Copyright 2020-2026 Björn Kautler
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,8 +16,23 @@
 
 package net.kautler
 
-require(gradle.rootBuild.startParameter.taskNames.count { it.endsWith("refreshVersions") } <= 1) {
-    "Only one refreshVersions task can be executed per Gradle run"
+import net.kautler.util.ProblemsProvider
+
+// besides avoiding that different tasks overwrite each other result, the whole plugin is a
+// work-around for https://github.com/Splitties/refreshVersions/667
+
+if (gradle.rootBuild.startParameter.taskNames.count { it.endsWith("refreshVersions") } > 1) {
+    throw extensions.create<ProblemsProvider>("problemsProvider").problems.reporter.throwing(
+        IllegalArgumentException(),
+        ProblemId.create(
+            "only-one-refreshversions-task-can-be-executed-per-gradle-run",
+            "Multiple refreshVersions tasks requested",
+            ProblemGroup.create("build-authoring", "Build Authoring")
+        )
+    ) {
+        solution("Only request one refreshVersions task per Gradle run")
+        severity(Severity.ERROR)
+    }
 }
 
 onRefreshVersionsRequested {

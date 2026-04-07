@@ -1,5 +1,5 @@
 /*
- * Copyright 2025 Björn Kautler
+ * Copyright 2026 Björn Kautler
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -25,6 +25,7 @@ import org.gradle.api.tasks.InputFiles
 import org.gradle.api.tasks.OutputFile
 import org.gradle.api.tasks.TaskAction
 import org.gradle.api.tasks.UntrackedTask
+import org.gradle.kotlin.dsl.assign
 import org.gradle.kotlin.dsl.submit
 import org.gradle.workers.WorkerExecutor
 import javax.inject.Inject
@@ -51,9 +52,9 @@ abstract class DetermineImportedFiles : DefaultTask() {
         workerExecutor.classLoaderIsolation {
             classpath.from(kotlinCompilerEmbeddableClasspath)
         }.submit(DetermineImportedFilesWorkAction::class) {
-            projectDirectory.set(layout.projectDirectory)
-            mainKtsFile.set(this@DetermineImportedFiles.mainKtsFile)
-            importedFiles.set(this@DetermineImportedFiles.importedFiles)
+            projectDirectory = layout.projectDirectory
+            mainKtsFile = this@DetermineImportedFiles.mainKtsFile
+            importedFiles = this@DetermineImportedFiles.importedFiles
         }
     }
 }

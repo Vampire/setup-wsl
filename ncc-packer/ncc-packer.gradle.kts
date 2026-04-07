@@ -1,5 +1,5 @@
 /*
- * Copyright 2020-2023 Björn Kautler
+ * Copyright 2020-2026 Björn Kautler
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,5 +15,5 @@
  */
 
 plugins {
-    id(libs.plugins.convention.ncc.packer.get().pluginId)
+    alias(libs.plugins.convention.ncc.packer)
 }

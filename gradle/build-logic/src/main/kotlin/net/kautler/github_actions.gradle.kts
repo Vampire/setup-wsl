@@ -1,5 +1,5 @@
 /*
- * Copyright 2020-2025 Björn Kautler
+ * Copyright 2020-2026 Björn Kautler
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -26,25 +26,28 @@ plugins {
     id("org.ajoberstar.grgit.service")
 }
 
-val compilerEmbeddableClasspath by configurations.creating {
-    isCanBeConsumed = false
+val compilerEmbeddableRuntime = configurations.dependencyScope("compilerEmbeddableRuntime")
+val compilerEmbeddableClasspath = configurations.resolvable("compilerEmbeddableClasspath") {
+    extendsFrom(compilerEmbeddableRuntime.get())
 }
 
-val compilerClasspath by configurations.creating {
-    isCanBeConsumed = false
+val compilerRuntime = configurations.dependencyScope("compilerRuntime")
+val compilerClasspath = configurations.resolvable("compilerClasspath") {
+    extendsFrom(compilerRuntime.get())
 }
 
-val scriptClasspath by configurations.creating {
-    isCanBeConsumed = false
+val scriptRuntime = configurations.dependencyScope("scriptRuntime")
+val scriptClasspath = configurations.resolvable("scriptClasspath") {
+    extendsFrom(scriptRuntime.get())
 }
 
 val libs = the<LibrariesForLibs>()
 
 dependencies {
-    compilerEmbeddableClasspath(libs.workflows.kotlin.compiler.embeddable)
-    compilerClasspath(libs.workflows.kotlin.compiler)
-    compilerClasspath(libs.workflows.kotlin.scripting.compiler)
-    scriptClasspath(libs.workflows.kotlin.main.kts) {
+    compilerEmbeddableRuntime(libs.workflows.kotlin.compiler.embeddable)
+    compilerRuntime(libs.workflows.kotlin.compiler)
+    compilerRuntime(libs.workflows.kotlin.scripting.compiler)
+    scriptRuntime(libs.workflows.kotlin.main.kts) {
         isTransitive = false
     }
 }
@@ -62,7 +65,7 @@ file(".github/workflows")
         val determineImportedFiles =
             tasks.register<DetermineImportedFiles>("determineImportedFilesFor${pascalCasedWorkflowName}Workflow") {
                 mainKtsFile.set(workflowScript)
-                importedFiles.set(layout.buildDirectory.file("importedFilesFor${pascalCasedWorkflowName}Workflow.txt"))
+                importedFiles = layout.buildDirectory.file("importedFilesFor${pascalCasedWorkflowName}Workflow.txt")
                 kotlinCompilerEmbeddableClasspath.from(compilerEmbeddableClasspath)
             }
         val preprocessWorkflow =
@@ -71,9 +74,9 @@ file(".github/workflows")
                 importedFiles.from(determineImportedFiles.flatMap { it.importedFiles }.map { it.asFile.readLines() })
                 kotlinCompilerClasspath.from(compilerClasspath)
                 mainKtsClasspath.from(scriptClasspath)
-                javaLauncher.set(javaToolchains.launcherFor {
-                    languageVersion.set(JavaLanguageVersion.of(17))
-                })
+                javaLauncher = javaToolchains.launcherFor {
+                    languageVersion = JavaLanguageVersion.of(17)
+                }
             }
         val deleteWorkflowYaml = tasks.register<Delete>("delete${pascalCasedWorkflowName}WorkflowYaml") {
             delete(preprocessWorkflow.flatMap { it.workflowFile })
@@ -88,15 +91,16 @@ file(".github/workflows")
 
 val majorVersion: String by project
 val preprocessVerifyReleaseWorkflow by tasks.existing(PreprocessGithubWorkflow::class) {
+    val grgitService = grgitService.service
+    usesService(grgitService)
+
+    val majorVersion = majorVersion
     inputs.property("majorVersion", majorVersion)
 
     doLast {
-        val grgit = grgitService
-            .service
-            .get()
-            .grgit
-
-        if (grgit
+        if (grgitService
+                .get()
+                .grgit
                 .branch
                 .list { mode = ALL }
                 .asSequence()
