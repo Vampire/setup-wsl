@@ -1,5 +1,5 @@
 /*
- * Copyright 2020-2023 Björn Kautler
+ * Copyright 2020-2026 Björn Kautler
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,6 +17,9 @@
 package net.kautler.util
 
 import net.researchgate.release.ReleaseExtension
+import net.researchgate.release.tasks.CreateReleaseTag
+import net.researchgate.release.tasks.PreTagCommit
+import net.researchgate.release.tasks.UpdateVersion
 import org.gradle.api.Action
 import org.gradle.api.Project
 import org.gradle.api.Task
@@ -42,17 +45,17 @@ val TaskContainer.runBuildTasks: TaskProvider<GradleBuild>
 val TaskContainer.checkoutMergeFromReleaseBranch: TaskProvider<Task>
     get() = named("checkoutMergeFromReleaseBranch")
 
-val TaskContainer.updateVersion: TaskProvider<Task>
-    get() = named("updateVersion")
+val TaskContainer.updateVersion: TaskProvider<UpdateVersion>
+    get() = named<UpdateVersion>("updateVersion")
 
 val TaskContainer.afterReleaseBuild: TaskProvider<Task>
     get() = named("afterReleaseBuild")
 
-val TaskContainer.preTagCommit: TaskProvider<Task>
-    get() = named("preTagCommit")
+val TaskContainer.preTagCommit: TaskProvider<PreTagCommit>
+    get() = named<PreTagCommit>("preTagCommit")
 
-val TaskContainer.createReleaseTag: TaskProvider<Task>
-    get() = named("createReleaseTag")
+val TaskContainer.createReleaseTag: TaskProvider<CreateReleaseTag>
+    get() = named<CreateReleaseTag>("createReleaseTag")
 
 val TaskContainer.beforeReleaseBuild: TaskProvider<Task>
     get() = named("beforeReleaseBuild")

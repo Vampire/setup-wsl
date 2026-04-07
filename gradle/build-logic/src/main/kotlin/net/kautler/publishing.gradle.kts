@@ -1,5 +1,5 @@
 /*
- * Copyright 2020-2023 Björn Kautler
+ * Copyright 2020-2026 Björn Kautler
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -53,7 +53,6 @@ plugins {
     id("net.wooga.github")
 }
 
-// part of work-around for https://github.com/gradle/gradle/issues/23747
 // part of work-around for https://github.com/researchgate/gradle-release/issues/304
 apply(plugin = "net.researchgate.release")
 
@@ -124,6 +123,7 @@ configure(listOf(tasks.release, tasks.runBuildTasks)) {
                         .setStandardInput(System.`in`)
                         .setStandardOutput(System.out)
                         .setStandardError(System.err)
+                        .addArguments("--no-configuration-cache")
                     gradle.startParameter.excludedTaskNames.forEach {
                         buildLauncher.addArguments("-x", it)
                     }
@@ -197,11 +197,18 @@ tasks.githubPublish {
 
             result.complete(
                 try {
-                    when (showOptionDialog(
-                        parentFrame, JScrollPane(textArea), "Release Body",
-                        DEFAULT_OPTION, QUESTION_MESSAGE, null,
-                        arrayOf("OK", resetButton), null
-                    )) {
+                    when (
+                        showOptionDialog(
+                            parentFrame,
+                            JScrollPane(textArea),
+                            "Release Body",
+                            DEFAULT_OPTION,
+                            QUESTION_MESSAGE,
+                            null,
+                            arrayOf("OK", resetButton),
+                            null
+                        )
+                    ) {
                         OK_OPTION -> textArea.text!!
                         else -> releaseBody
                     }
@@ -217,11 +224,12 @@ tasks.githubPublish {
 }
 
 val undraftGithubRelease by tasks.registering(GithubPublish::class) {
+    mustRunAfter(tasks.createReleaseTag)
     publishMethod.set(update)
 }
 
 val finishMilestone by tasks.registering(Github::class) {
-    enabled = releaseVersion
+    onlyIf { releaseVersion }
     // work-around for https://github.com/ajoberstar/grgit/pull/382
     //usesService(grgitService.service)
 
@@ -314,10 +322,6 @@ tasks.preTagCommit {
     dependsOn(updateReadme)
     dependsOn(createMajorBranch)
     dependsOn(preprocessVerifyReleaseWorkflow)
-}
-
-undraftGithubRelease {
-    mustRunAfter(tasks.createReleaseTag)
 }
 
 // it does not really depend on, but there is no other hook to call
