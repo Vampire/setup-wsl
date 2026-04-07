@@ -20,7 +20,7 @@ plugins {
     `kotlin-dsl`
     kotlin("plugin.serialization") version embeddedKotlinVersion
     alias(libs.plugins.versions)
-    alias(libs.plugins.dependency.analysis)
+    id(libs.plugins.dependency.analysis.get().pluginId)
 }
 
 dependencies {
@@ -31,7 +31,7 @@ dependencies {
 }
 
 dependencyAnalysis {
-    dependencies {
+    structure {
         bundle("com.github.ben-manes.versions.gradle.plugin") {
             includeDependency("com.github.ben-manes.versions:com.github.ben-manes.versions.gradle.plugin")
             includeDependency("com.github.ben-manes:gradle-versions-plugin")
@@ -42,8 +42,19 @@ dependencyAnalysis {
             onAny {
                 severity("fail")
             }
+            // work-around for https://github.com/autonomousapps/dependency-analysis-gradle-plugin/issues/1629
+            onDuplicateClassWarnings {
+                severity("fail")
+            }
         }
     }
+    reporting {
+        printBuildHealth(true)
+    }
+}
+
+tasks.check {
+    dependsOn(tasks.buildHealth)
 }
 
 tasks.withType<KotlinCompile>().configureEach {

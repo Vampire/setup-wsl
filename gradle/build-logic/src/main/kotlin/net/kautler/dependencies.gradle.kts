@@ -25,6 +25,7 @@ import java.security.DigestInputStream
 import java.security.MessageDigest
 
 plugins {
+    `lifecycle-base`
     id("net.kautler.dependency-updates-report-aggregator")
     id("com.autonomousapps.dependency-analysis")
 }
@@ -105,12 +106,21 @@ dependencyAnalysis {
             onAny {
                 severity("fail")
             }
+            // work-around for https://github.com/autonomousapps/dependency-analysis-gradle-plugin/issues/1629
+            onDuplicateClassWarnings {
+                severity("fail")
+            }
         }
+    }
+    reporting {
+        printBuildHealth(true)
     }
 }
 
-tasks.configureEach {
-    if (name == "buildHealth") {
-        dependsOn(gradle.includedBuilds.map { it.task(":buildHealth") })
-    }
+tasks.buildHealth {
+    dependsOn(gradle.includedBuilds.map { it.task(":buildHealth") })
+}
+
+tasks.check {
+    dependsOn(tasks.buildHealth)
 }

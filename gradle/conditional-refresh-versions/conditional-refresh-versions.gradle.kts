@@ -19,7 +19,7 @@ import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 plugins {
     `kotlin-dsl`
     alias(libs.plugins.versions)
-    alias(libs.plugins.dependency.analysis)
+    id(libs.plugins.dependency.analysis.get().pluginId)
 }
 
 dependencies {
@@ -27,7 +27,7 @@ dependencies {
 }
 
 dependencyAnalysis {
-    dependencies {
+    structure {
         bundle("de.fayard.refreshVersions.gradle.plugin") {
             includeDependency("de.fayard.refreshVersions:de.fayard.refreshVersions.gradle.plugin")
             includeDependency("de.fayard.refreshVersions:refreshVersions")
@@ -39,8 +39,19 @@ dependencyAnalysis {
             onAny {
                 severity("fail")
             }
+            // work-around for https://github.com/autonomousapps/dependency-analysis-gradle-plugin/issues/1629
+            onDuplicateClassWarnings {
+                severity("fail")
+            }
         }
     }
+    reporting {
+        printBuildHealth(true)
+    }
+}
+
+tasks.check {
+    dependsOn(tasks.buildHealth)
 }
 
 tasks.withType<KotlinCompile>().configureEach {
