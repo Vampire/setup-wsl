@@ -1,7 +1,7 @@
 #!/usr/bin/env kotlin
 
 /*
- * Copyright 2020-2025 Björn Kautler
+ * Copyright 2020-2026 Björn Kautler
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -139,7 +139,8 @@ val ubuntu1604 = Distribution(
 
 val distributions = listOf(
     debian,
-    alpine,
+    // disable testing on Alpine for the time being due to https://github.com/Vampire/setup-wsl/issues/82
+    //alpine,
     kali,
     openSuseLeap15_2,
     ubuntu2404,
@@ -1146,7 +1147,7 @@ workflowWithCopyright(
                     name = "Execute action for ${expr("matrix.distributions.distribution$it.user-id")}",
                     action = SetupWsl(
                         distribution = SetupWsl.Distribution.Custom(expr("matrix.distributions.distribution$it.user-id")),
-                        additionalPackages = if (it == 2) listOf("bash") else null,
+                        //additionalPackages = if (it == 2) listOf("bash") else null,
                         setAsDefault = if (it >= 3) false else null,
                         wslVersion = 1
                     )
