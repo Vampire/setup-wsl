@@ -20,6 +20,7 @@ import net.kautler.util.Property.Companion.boolean
 import net.kautler.util.Property.Companion.optionalString
 import net.kautler.util.afterReleaseBuild
 import net.kautler.util.beforeReleaseBuild
+import net.kautler.util.cachedProvider
 import net.kautler.util.checkoutMergeFromReleaseBranch
 import net.kautler.util.createReleaseTag
 import net.kautler.util.preTagCommit
@@ -44,7 +45,6 @@ import javax.swing.JOptionPane.showOptionDialog
 import javax.swing.JScrollPane
 import javax.swing.JTextArea
 import javax.swing.SwingUtilities
-import kotlin.LazyThreadSafetyMode.NONE
 
 plugins {
     // needed for accessing majorVersion
@@ -71,20 +71,15 @@ release {
     }
 }
 
-val releasePlugin by lazy(NONE) {
-    plugins.findPlugin(ReleasePlugin::class)!!
-}
-
-val releaseTagName by lazy(NONE) {
-    releasePlugin.tagName()!!
+val releaseTagName = cachedProvider {
+    plugins.findPlugin(ReleasePlugin::class)!!.tagName()
 }
 
 val releaseVersion get() = !"$version".endsWith("-SNAPSHOT")
 
 val removeDistributionsFromGit by tasks.registering {
     mustRunAfter(tasks.checkoutMergeFromReleaseBranch)
-    // work-around for https://github.com/ajoberstar/grgit/pull/382
-    //usesService(grgitService.service)
+    usesService(grgitService.service)
 
     doLast("Remove distributions from Git") {
         grgitService
@@ -135,36 +130,39 @@ configure(listOf(tasks.release, tasks.runBuildTasks)) {
 
 tasks.withType<GithubPublish>().configureEach {
     onlyIf { releaseVersion }
-    tagName.set(provider { releaseTagName })
-    releaseName.set(provider { releaseTagName })
+    tagName.set(releaseTagName)
+    releaseName.set(releaseTagName)
 }
 
 tasks.githubPublish {
-    // work-around for https://github.com/ajoberstar/grgit/pull/382
-    //usesService(grgitService.service)
+    usesService(grgitService.service)
     body.set(provider {
         val releaseBody = grgitService
             .service
             .get()
-            .grgit
-            .log {
-                includes.add(release.git.requireBranch.get())
-                github
-                    .clientProvider
-                    .get()
-                    .getRepository(github.repositoryName.get())
-                    .latestRelease
-                    ?.apply {
-                        excludes.add(tagName)
+            .findGrgit()
+            .map {
+                it
+                    .log {
+                        includes.add(release.git.requireBranch.get())
+                        github
+                            .clientProvider
+                            .get()
+                            .getRepository(github.repositoryName.get())
+                            .latestRelease
+                            ?.apply {
+                                excludes.add(tagName)
+                            }
+                    }
+                    .filter { commit ->
+                        !commit.shortMessage.startsWith("[Gradle Release Plugin] ")
+                    }
+                    .asReversed()
+                    .joinToString("\n") { commit ->
+                        "- ${commit.shortMessage} [${commit.id}]"
                     }
             }
-            .filter { commit ->
-                !commit.shortMessage.startsWith("[Gradle Release Plugin] ")
-            }
-            .asReversed()
-            .joinToString("\n") { commit ->
-                "- ${commit.shortMessage} [${commit.id}]"
-            }
+            .orElse("")
 
         if (isHeadless()) {
             return@provider releaseBody
@@ -175,7 +173,7 @@ tasks.githubPublish {
         SwingUtilities.invokeLater {
             val initialReleaseBody = """
                 # Highlights
-                -
+                - 
 
                 # Details
 
@@ -230,15 +228,14 @@ val undraftGithubRelease by tasks.registering(GithubPublish::class) {
 
 val finishMilestone by tasks.registering(Github::class) {
     onlyIf { releaseVersion }
-    // work-around for https://github.com/ajoberstar/grgit/pull/382
-    //usesService(grgitService.service)
+    usesService(grgitService.service)
 
     doLast("finish milestone") {
         repository.apply {
             listMilestones(OPEN)
                 .find { it.title == "Next Version" }!!
                 .apply {
-                    title = releaseTagName
+                    title = releaseTagName.get()
                     close()
                 }
 
@@ -249,8 +246,7 @@ val finishMilestone by tasks.registering(Github::class) {
 
 val addDistributionsToGit by tasks.registering {
     dependsOn(tasks.named("assemble"))
-    // work-around for https://github.com/ajoberstar/grgit/pull/382
-    //usesService(grgitService.service)
+    usesService(grgitService.service)
 
     doLast("Add distributions to Git") {
         val gitIgnore = file(".gitignore")
@@ -332,8 +328,7 @@ tasks.updateVersion {
 }
 
 val checkBranchProtectionCompatibility by tasks.registering(Github::class) {
-    // work-around for https://github.com/ajoberstar/grgit/pull/382
-    //usesService(grgitService.service)
+    usesService(grgitService.service)
 
     doLast {
         check(
