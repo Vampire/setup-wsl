@@ -74,7 +74,7 @@ configure<NodeJsEnvSpec> {
 
 val setupWslExecutable = configurations.dependencyScope("setupWslExecutable")
 val setupWslExecutableFile = configurations.resolvable("setupWslExecutableFile") {
-    extendsFrom(setupWslExecutable.get())
+    extendsFrom(setupWslExecutable)
 }
 
 dependencies {

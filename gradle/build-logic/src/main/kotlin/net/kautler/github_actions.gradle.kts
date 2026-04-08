@@ -28,17 +28,17 @@ plugins {
 
 val compilerEmbeddableRuntime = configurations.dependencyScope("compilerEmbeddableRuntime")
 val compilerEmbeddableClasspath = configurations.resolvable("compilerEmbeddableClasspath") {
-    extendsFrom(compilerEmbeddableRuntime.get())
+    extendsFrom(compilerEmbeddableRuntime)
 }
 
 val compilerRuntime = configurations.dependencyScope("compilerRuntime")
 val compilerClasspath = configurations.resolvable("compilerClasspath") {
-    extendsFrom(compilerRuntime.get())
+    extendsFrom(compilerRuntime)
 }
 
 val scriptRuntime = configurations.dependencyScope("scriptRuntime")
 val scriptClasspath = configurations.resolvable("scriptClasspath") {
-    extendsFrom(scriptRuntime.get())
+    extendsFrom(scriptRuntime)
 }
 
 val libs = the<LibrariesForLibs>()

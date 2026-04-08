@@ -28,8 +28,6 @@ import org.gradle.kotlin.dsl.listProperty
 import org.gradle.kotlin.dsl.mapProperty
 import org.gradle.kotlin.dsl.property
 import org.gradle.kotlin.dsl.setProperty
-import kotlin.contracts.ExperimentalContracts
-import kotlin.contracts.contract
 import kotlin.experimental.ExperimentalTypeInference
 import kotlin.reflect.full.isSubclassOf
 
@@ -89,28 +87,28 @@ inline fun <reified T : Any> ProviderFactory.cachedProvider(
 
 @OptIn(ExperimentalTypeInference::class)
 @OverloadResolutionByLambdaReturnType
-inline fun <T, reified S : Any> Provider<out T>.cachedMap(
+inline fun <T : Any, reified S : Any> Provider<out T>.cachedMap(
     project: Project,
     crossinline transformer: (T) -> S?
 ): Provider<out S> =
     cachedMap(project.objects, transformer)
 
 @JvmName("cachedMapToList")
-inline fun <T, reified S : Any> Provider<out T>.cachedMap(
+inline fun <T : Any, reified S : Any> Provider<out T>.cachedMap(
     project: Project,
     crossinline transformer: (T) -> List<S>?
 ): Provider<out List<S>> =
     cachedMap(project.objects, transformer)
 
 @JvmName("cachedMapToMap")
-inline fun <T, reified K : Any, reified V : Any> Provider<out T>.cachedMap(
+inline fun <T : Any, reified K : Any, reified V : Any> Provider<out T>.cachedMap(
     project: Project,
     crossinline transformer: (T) -> Map<K, V>?
 ): Provider<out Map<K, V>> =
     cachedMap(project.objects, transformer)
 
 @JvmName("cachedMapToSet")
-inline fun <T, reified S : Any> Provider<out T>.cachedMap(
+inline fun <T : Any, reified S : Any> Provider<out T>.cachedMap(
     project: Project,
     crossinline transformer: (T) -> Set<S>?
 ): Provider<out Set<S>> =
@@ -118,57 +116,57 @@ inline fun <T, reified S : Any> Provider<out T>.cachedMap(
 
 @OptIn(ExperimentalTypeInference::class)
 @OverloadResolutionByLambdaReturnType
-inline fun <T, reified S : Any> Provider<out T>.cachedMap(
+inline fun <T : Any, reified S : Any> Provider<out T>.cachedMap(
     objects: ObjectFactory,
     crossinline transformer: (T) -> S?
 ): Provider<out S> =
-    map { transformer(it).markedAsNonNull }.cached(objects)
+    map { transformer(it) }.cached(objects)
 
 @JvmName("cachedMapToList")
-inline fun <T, reified S : Any> Provider<out T>.cachedMap(
+inline fun <T : Any, reified S : Any> Provider<out T>.cachedMap(
     objects: ObjectFactory,
     crossinline transformer: (T) -> List<S>?
 ): Provider<out List<S>> =
-    map { transformer(it).markedAsNonNull }.cached(objects)
+    map { transformer(it) }.cached(objects)
 
 @JvmName("cachedMapToMap")
-inline fun <T, reified K : Any, reified V : Any> Provider<out T>.cachedMap(
+inline fun <T : Any, reified K : Any, reified V : Any> Provider<out T>.cachedMap(
     objects: ObjectFactory,
     crossinline transformer: (T) -> Map<K, V>?
 ): Provider<out Map<K, V>> =
-    map { transformer(it).markedAsNonNull }.cached(objects)
+    map { transformer(it) }.cached(objects)
 
 @JvmName("cachedMapToSet")
-inline fun <T, reified S : Any> Provider<out T>.cachedMap(
+inline fun <T : Any, reified S : Any> Provider<out T>.cachedMap(
     objects: ObjectFactory,
     crossinline transformer: (T) -> Set<S>?
 ): Provider<out Set<S>> =
-    map { transformer(it).markedAsNonNull }.cached(objects)
+    map { transformer(it) }.cached(objects)
 
 @OptIn(ExperimentalTypeInference::class)
 @OverloadResolutionByLambdaReturnType
-inline fun <T, reified S : Any> Provider<out T>.cachedFlatMap(
+inline fun <T : Any, reified S : Any> Provider<out T>.cachedFlatMap(
     project: Project,
     crossinline transformer: (T) -> Provider<out S>?
 ): Provider<out S> =
     cachedFlatMap(project.objects, transformer)
 
 @JvmName("cachedFlatMapToList")
-inline fun <T, reified S : Any> Provider<out T>.cachedFlatMap(
+inline fun <T : Any, reified S : Any> Provider<out T>.cachedFlatMap(
     project: Project,
     crossinline transformer: (T) -> Provider<out List<S>>?
 ): Provider<out List<S>> =
     cachedFlatMap(project.objects, transformer)
 
 @JvmName("cachedFlatMapToMap")
-inline fun <T, reified K : Any, reified V : Any> Provider<out T>.cachedFlatMap(
+inline fun <T : Any, reified K : Any, reified V : Any> Provider<out T>.cachedFlatMap(
     project: Project,
     crossinline transformer: (T) -> Provider<out Map<K, V>>?
 ): Provider<out Map<K, V>> =
     cachedFlatMap(project.objects, transformer)
 
 @JvmName("cachedFlatMapToSet")
-inline fun <T, reified S : Any> Provider<out T>.cachedFlatMap(
+inline fun <T : Any, reified S : Any> Provider<out T>.cachedFlatMap(
     project: Project,
     crossinline transformer: (T) -> Provider<out Set<S>>?
 ): Provider<out Set<S>> =
@@ -176,44 +174,44 @@ inline fun <T, reified S : Any> Provider<out T>.cachedFlatMap(
 
 @OptIn(ExperimentalTypeInference::class)
 @OverloadResolutionByLambdaReturnType
-inline fun <T, reified S : Any> Provider<out T>.cachedFlatMap(
+inline fun <T : Any, reified S : Any> Provider<out T>.cachedFlatMap(
     objects: ObjectFactory,
     crossinline transformer: (T) -> Provider<out S>?
 ): Provider<out S> =
-    flatMap { transformer(it).markedAsNonNull }.cached(objects)
+    flatMap { transformer(it) }.cached(objects)
 
 @JvmName("cachedFlatMapToList")
-inline fun <T, reified S : Any> Provider<out T>.cachedFlatMap(
+inline fun <T : Any, reified S : Any> Provider<out T>.cachedFlatMap(
     objects: ObjectFactory,
     crossinline transformer: (T) -> Provider<out List<S>>?
 ): Provider<out List<S>> =
-    flatMap { transformer(it).markedAsNonNull }.cached(objects)
+    flatMap { transformer(it) }.cached(objects)
 
 @JvmName("cachedFlatMapToMap")
-inline fun <T, reified K : Any, reified V : Any> Provider<out T>.cachedFlatMap(
+inline fun <T : Any, reified K : Any, reified V : Any> Provider<out T>.cachedFlatMap(
     objects: ObjectFactory,
     crossinline transformer: (T) -> Provider<out Map<K, V>>?
 ): Provider<out Map<K, V>> =
-    flatMap { transformer(it).markedAsNonNull }.cached(objects)
+    flatMap { transformer(it) }.cached(objects)
 
 @JvmName("cachedFlatMapToSet")
-inline fun <T, reified S : Any> Provider<out T>.cachedFlatMap(
+inline fun <T : Any, reified S : Any> Provider<out T>.cachedFlatMap(
     objects: ObjectFactory,
     crossinline transformer: (T) -> Provider<out Set<S>>?
 ): Provider<out Set<S>> =
-    flatMap { transformer(it).markedAsNonNull }.cached(objects)
+    flatMap { transformer(it) }.cached(objects)
 
 @OptIn(ExperimentalTypeInference::class)
 @OverloadResolutionByLambdaReturnType
-inline fun <T, U, reified R : Any> Provider<out T>.cachedZip(
+inline fun <T : Any, U : Any, reified R : Any> Provider<out T>.cachedZip(
     project: Project,
     right: Provider<out U>,
     crossinline combiner: (T, U) -> R?
-): Provider<out R?> =
+): Provider<out R> =
     cachedZip(project.objects, right, combiner)
 
 @JvmName("cachedZipToList")
-inline fun <T, U, reified R : Any> Provider<out T>.cachedZip(
+inline fun <T : Any, U : Any, reified R : Any> Provider<out T>.cachedZip(
     project: Project,
     right: Provider<out U>,
     crossinline combiner: (T, U) -> List<R>?
@@ -221,7 +219,7 @@ inline fun <T, U, reified R : Any> Provider<out T>.cachedZip(
     cachedZip(project.objects, right, combiner)
 
 @JvmName("cachedZipToMap")
-inline fun <T, U, reified K : Any, reified V : Any> Provider<out T>.cachedZip(
+inline fun <T : Any, U : Any, reified K : Any, reified V : Any> Provider<out T>.cachedZip(
     project: Project,
     right: Provider<out U>,
     crossinline combiner: (T, U) -> Map<K, V>?
@@ -229,7 +227,7 @@ inline fun <T, U, reified K : Any, reified V : Any> Provider<out T>.cachedZip(
     cachedZip(project.objects, right, combiner)
 
 @JvmName("cachedZipToSet")
-inline fun <T, U, reified R : Any> Provider<out T>.cachedZip(
+inline fun <T : Any, U : Any, reified R : Any> Provider<out T>.cachedZip(
     project: Project,
     right: Provider<out U>,
     crossinline combiner: (T, U) -> Set<R>?
@@ -238,7 +236,7 @@ inline fun <T, U, reified R : Any> Provider<out T>.cachedZip(
 
 @OptIn(ExperimentalTypeInference::class)
 @OverloadResolutionByLambdaReturnType
-inline fun <T, U, reified R : Any> Provider<out T>.cachedZip(
+inline fun <T : Any, U : Any, reified R : Any> Provider<out T>.cachedZip(
     objects: ObjectFactory,
     right: Provider<out U>,
     crossinline combiner: (T, U) -> R?
@@ -246,7 +244,7 @@ inline fun <T, U, reified R : Any> Provider<out T>.cachedZip(
     zip(right) { leftValue, rightValue -> combiner(leftValue, rightValue) }.cached(objects)
 
 @JvmName("cachedZipToList")
-inline fun <T, U, reified R : Any> Provider<out T>.cachedZip(
+inline fun <T : Any, U : Any, reified R : Any> Provider<out T>.cachedZip(
     objects: ObjectFactory,
     right: Provider<out U>,
     crossinline combiner: (T, U) -> List<R>?
@@ -254,7 +252,7 @@ inline fun <T, U, reified R : Any> Provider<out T>.cachedZip(
     zip(right) { leftValue, rightValue -> combiner(leftValue, rightValue) }.cached(objects)
 
 @JvmName("cachedZipToMap")
-inline fun <T, U, reified K : Any, reified V : Any> Provider<out T>.cachedZip(
+inline fun <T : Any, U : Any, reified K : Any, reified V : Any> Provider<out T>.cachedZip(
     objects: ObjectFactory,
     right: Provider<out U>,
     crossinline combiner: (T, U) -> Map<K, V>?
@@ -262,37 +260,37 @@ inline fun <T, U, reified K : Any, reified V : Any> Provider<out T>.cachedZip(
     zip(right) { leftValue, rightValue -> combiner(leftValue, rightValue) }.cached(objects)
 
 @JvmName("cachedZipToSet")
-inline fun <T, U, reified R : Any> Provider<out T>.cachedZip(
+inline fun <T : Any, U : Any, reified R : Any> Provider<out T>.cachedZip(
     objects: ObjectFactory,
     right: Provider<out U>,
     crossinline combiner: (T, U) -> Set<R>?
 ): Provider<out Set<R>> =
     zip(right) { leftValue, rightValue -> combiner(leftValue, rightValue) }.cached(objects)
 
-inline fun <reified T : Any> Provider<out T?>.cached(
+inline fun <reified T : Any> Provider<out T>.cached(
     project: Project
 ): Provider<out T> =
     cached(project.objects)
 
 @JvmName("cachedList")
-inline fun <reified T : Any> Provider<out List<T>?>.cached(
+inline fun <reified T : Any> Provider<out List<T>>.cached(
     project: Project
 ): Provider<out List<T>> =
     cached(project.objects)
 
 @JvmName("cachedMap")
-inline fun <reified K : Any, reified V : Any> Provider<out Map<K, V>?>.cached(
+inline fun <reified K : Any, reified V : Any> Provider<out Map<K, V>>.cached(
     project: Project
 ): Provider<out Map<K, V>> =
     cached(project.objects)
 
 @JvmName("cachedSet")
-inline fun <reified T : Any> Provider<out Set<T>?>.cached(
+inline fun <reified T : Any> Provider<out Set<T>>.cached(
     project: Project
 ): Provider<out Set<T>> =
     cached(project.objects)
 
-inline fun <reified T : Any> Provider<out T?>.cached(
+inline fun <reified T : Any> Provider<out T>.cached(
     objects: ObjectFactory
 ): Provider<out T> =
     @Suppress("UNCHECKED_CAST")
@@ -305,7 +303,7 @@ inline fun <reified T : Any> Provider<out T?>.cached(
         .asImmutable()
 
 @JvmName("cachedList")
-inline fun <reified T : Any> Provider<out List<T>?>.cached(
+inline fun <reified T : Any> Provider<out List<T>>.cached(
     objects: ObjectFactory
 ): Provider<out List<T>> =
     objects
@@ -314,7 +312,7 @@ inline fun <reified T : Any> Provider<out List<T>?>.cached(
         .asImmutable()
 
 @JvmName("cachedMap")
-inline fun <reified K : Any, reified V : Any> Provider<out Map<K, V>?>.cached(
+inline fun <reified K : Any, reified V : Any> Provider<out Map<K, V>>.cached(
     objects: ObjectFactory
 ): Provider<out Map<K, V>> =
     objects
@@ -323,7 +321,7 @@ inline fun <reified K : Any, reified V : Any> Provider<out Map<K, V>?>.cached(
         .asImmutable()
 
 @JvmName("cachedSet")
-inline fun <reified T : Any> Provider<out Set<T>?>.cached(
+inline fun <reified T : Any> Provider<out Set<T>>.cached(
     objects: ObjectFactory
 ): Provider<out Set<T>> =
     objects
@@ -334,19 +332,4 @@ inline fun <reified T : Any> Provider<out Set<T>?>.cached(
 fun <T : HasConfigurableValue> T.asImmutable() = apply {
     disallowChanges()
     finalizeValueOnRead()
-}
-
-// work-around for https://github.com/gradle/gradle/issues/12388
-@OptIn(ExperimentalContracts::class)
-val <T> T?.markedAsNonNull: T
-    get() {
-        markAsNonNull()
-        return this
-    }
-
-@OptIn(ExperimentalContracts::class)
-fun <T> T?.markAsNonNull() {
-    contract {
-        returns() implies (this@markAsNonNull != null)
-    }
 }

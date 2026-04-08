@@ -20,6 +20,7 @@ import org.gradle.api.file.DirectoryProperty
 import org.gradle.api.file.RegularFileProperty
 import org.gradle.workers.WorkAction
 import org.gradle.workers.WorkParameters
+import org.jetbrains.kotlin.K1Deprecation
 import org.jetbrains.kotlin.cli.common.messages.MessageCollector.Companion.NONE
 import org.jetbrains.kotlin.cli.jvm.compiler.EnvironmentConfigFiles.JVM_CONFIG_FILES
 import org.jetbrains.kotlin.cli.jvm.compiler.KotlinCoreEnvironment
@@ -56,6 +57,7 @@ abstract class DetermineImportedFilesWorkAction : WorkAction<DetermineImportedFi
     }
 }
 
+@OptIn(K1Deprecation::class)
 private val File.importedFiles: List<File>
     get() = if (!isFile) {
         emptyList()

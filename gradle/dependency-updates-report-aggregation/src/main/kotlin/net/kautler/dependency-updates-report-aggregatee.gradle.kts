@@ -32,8 +32,8 @@ plugins {
 
 val dependencyUpdatesResult = configurations.consumable("dependencyUpdatesResult") {
     attributes {
-        attribute(CATEGORY_ATTRIBUTE, objects.named(VERIFICATION))
-        attribute(VERIFICATION_TYPE_ATTRIBUTE, objects.named("dependency-updates-result"))
+        attribute(CATEGORY_ATTRIBUTE, named(VERIFICATION))
+        attribute(VERIFICATION_TYPE_ATTRIBUTE, named("dependency-updates-result"))
     }
 }
 

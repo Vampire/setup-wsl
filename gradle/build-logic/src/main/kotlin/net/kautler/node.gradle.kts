@@ -145,7 +145,7 @@ configurations.consumable("executable") {
 
 val setupWslDistribution = configurations.dependencyScope("setupWslDistribution")
 val setupWslDistributionFiles = configurations.resolvable("setupWslDistributionFiles") {
-    extendsFrom(setupWslDistribution.get())
+    extendsFrom(setupWslDistribution)
 }
 
 dependencies {

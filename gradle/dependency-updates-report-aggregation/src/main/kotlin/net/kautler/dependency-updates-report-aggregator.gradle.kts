@@ -38,10 +38,10 @@ plugins {
 
 val dependencyUpdatesResultsDependencies = configurations.dependencyScope("dependencyUpdatesResultsDependencies")
 val dependencyUpdatesResults = configurations.resolvable("dependencyUpdatesResults") {
-    extendsFrom(dependencyUpdatesResultsDependencies.get())
+    extendsFrom(dependencyUpdatesResultsDependencies)
     attributes {
-        attribute(CATEGORY_ATTRIBUTE, objects.named(VERIFICATION))
-        attribute(VERIFICATION_TYPE_ATTRIBUTE, objects.named("dependency-updates-result"))
+        attribute(CATEGORY_ATTRIBUTE, named(VERIFICATION))
+        attribute(VERIFICATION_TYPE_ATTRIBUTE, named("dependency-updates-result"))
     }
 }
 

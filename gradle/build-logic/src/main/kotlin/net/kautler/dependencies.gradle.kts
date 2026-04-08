@@ -91,6 +91,7 @@ tasks.dependencyUpdates {
         // These dependencies are used in the build logic so should match the
         // embedded Kotlin version and not be upgraded independently
         add(group = "org.jetbrains.kotlin", name = "kotlin-assignment-compiler-plugin-embeddable")
+        add(group = "org.jetbrains.kotlin", name = "kotlin-build-tools-compat")
         add(group = "org.jetbrains.kotlin", name = "kotlin-build-tools-impl")
         add(group = "org.jetbrains.kotlin", name = "kotlin-compiler-embeddable")
         add(group = "org.jetbrains.kotlin", name = "kotlin-reflect")
