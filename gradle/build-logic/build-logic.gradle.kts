@@ -36,6 +36,8 @@ dependencies {
     implementation(libs.build.github.api)
     implementation(libs.build.snakeyaml)
     compileOnly(embeddedKotlin("compiler-embeddable"))
+    // just to get update notifications by versions plugin
+    compileOnly(plugin(libs.plugins.refresh.versions))
 }
 
 tasks.withType<KotlinCompile>().configureEach {
