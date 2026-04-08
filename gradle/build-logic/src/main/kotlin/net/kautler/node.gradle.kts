@@ -71,23 +71,6 @@ tasks.withType<IncrementalSyncTask>().configureEach {
     doFirst {
         outputs.files.forEach { it.deleteRecursively() }
     }
-
-    // work-around for https://youtrack.jetbrains.com/issue/KTOR-6158
-    doLast {
-        outputs
-            .files
-            .asFileTree
-            .filter { it.name == "setup-wsl.mjs" }
-            .forEach {
-                it
-                    .readText()
-                    .replace("eval('require')('abort-controller')", "globalThis.AbortController")
-                    .replace("eval('require')('node-fetch')", "globalThis.fetch")
-                    .replace("function readBodyNode(", "function _readBodyNode(")
-                    .replace(" readBodyNode(", " readBodyBrowser(")
-                    .apply(it::writeText)
-            }
-    }
 }
 
 val inputDefaultValues by lazy {
