@@ -32,7 +32,8 @@ import java.security.MessageDigest
 plugins {
     `lifecycle-base`
     id("net.kautler.dependency-updates-report-aggregator")
-    id("com.autonomousapps.dependency-analysis")
+    // part of work-around for https://github.com/autonomousapps/dependency-analysis-gradle-plugin/issues/1672
+    //id("com.autonomousapps.dependency-analysis")
 }
 
 val majorVersion by extra("$version".substringBefore('.'))
@@ -121,27 +122,31 @@ tasks.dependencyUpdates {
     }
 }
 
-dependencyAnalysis {
-    issues {
-        all {
-            onAny {
-                severity("fail")
-            }
-            // work-around for https://github.com/autonomousapps/dependency-analysis-gradle-plugin/issues/1629
-            onDuplicateClassWarnings {
-                severity("fail")
-            }
-        }
-    }
-    reporting {
-        printBuildHealth(true)
-    }
-}
-
-tasks.buildHealth {
+// part of work-around for https://github.com/autonomousapps/dependency-analysis-gradle-plugin/issues/1672
+//dependencyAnalysis {
+//    issues {
+//        all {
+//            onAny {
+//                severity("fail")
+//            }
+//            // work-around for https://github.com/autonomousapps/dependency-analysis-gradle-plugin/issues/1629
+//            onDuplicateClassWarnings {
+//                severity("fail")
+//            }
+//        }
+//    }
+//    reporting {
+//        printBuildHealth(true)
+//    }
+//}
+//
+//tasks.buildHealth {
+val buildHealth by tasks.registering {
     dependsOn(gradle.includedBuilds.map { it.task(":buildHealth") })
 }
 
 tasks.check {
-    dependsOn(tasks.buildHealth)
+    // part of work-around for https://github.com/autonomousapps/dependency-analysis-gradle-plugin/issues/1672
+    //dependsOn(tasks.buildHealth)
+    dependsOn(buildHealth)
 }

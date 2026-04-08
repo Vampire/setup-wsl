@@ -26,7 +26,8 @@ dependencies {
     compileOnly(files(libs.javaClass.superclass.protectionDomain.codeSource.location))
     compileOnly(files(kotlinWrappers.javaClass.superclass.protectionDomain.codeSource.location))
     implementation(plugin(libs.plugins.versions))
-    implementation(plugin(libs.plugins.dependency.analysis))
+    // part of work-around for https://github.com/autonomousapps/dependency-analysis-gradle-plugin/issues/1672
+    //implementation(plugin(libs.plugins.dependency.analysis))
     implementation(plugin(libs.plugins.release))
     implementation(plugin(libs.plugins.grgit))
     implementation(plugin(libs.plugins.github))
@@ -90,11 +91,6 @@ dependencyAnalysis {
                 exclude("org/jetbrains/kotlin/cli/common/messages/MessageCollector\$Companion")
                 exclude("org/jetbrains/kotlin/com/intellij/openapi/Disposable")
                 exclude("org/jetbrains/kotlin/com/intellij/openapi/util/Disposer")
-            }
-            onUsedTransitiveDependencies {
-                // false positives
-                exclude(":dependency-updates-report-aggregation")
-                exclude("org.jetbrains:annotations")
             }
         }
     }

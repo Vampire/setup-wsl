@@ -30,7 +30,7 @@ pluginManagement {
 
 plugins {
     id("net.kautler.conditional-refresh-versions")
-    id("com.autonomousapps.build-health") version "3.1.0"
+    id("com.autonomousapps.build-health") version "3.6.1"
     embeddedKotlin("jvm") apply false
     id("org.gradle.toolchains.foojay-resolver-convention") version "1.0.0"
     id("com.gradle.develocity") version "4.4.0"
