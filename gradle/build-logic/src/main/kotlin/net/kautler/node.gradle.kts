@@ -17,8 +17,8 @@
 package net.kautler
 
 import net.kautler.dao.action.GitHubAction
-import org.gradle.accessors.dm.LibrariesForLibs
 import org.gradle.accessors.dm.LibrariesForKotlinWrappers
+import org.gradle.accessors.dm.LibrariesForLibs
 import org.jetbrains.kotlin.gradle.targets.js.nodejs.NodeJsEnvSpec
 import org.jetbrains.kotlin.gradle.targets.js.nodejs.NodeJsExec
 import org.jetbrains.kotlin.gradle.targets.js.yarn.YarnRootEnvSpec
@@ -54,7 +54,6 @@ kotlin {
                 implementation(kotlinWrappers.js)
                 implementation(kotlinWrappers.node)
                 implementation(kotlinWrappers.semver)
-                implementation(kotlinWrappers.nullWritable)
             }
         }
     }

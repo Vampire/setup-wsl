@@ -1,5 +1,5 @@
 /*
- * Copyright 2020-2025 Björn Kautler
+ * Copyright 2020-2026 Björn Kautler
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -54,6 +54,7 @@ import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.onStart
 import node.buffer.Buffer
 import node.buffer.BufferEncoding
+import node.buffer.utf16le
 import node.fs.exists
 import node.fs.mkdtemp
 import node.fs.readdir
@@ -62,7 +63,8 @@ import node.os.tmpdir
 import node.path.path
 import node.process.Platform
 import node.process.process
-import nullwritable.NullWritable
+import node.process.win32
+import node.stream.NullWritable
 import org.w3c.dom.url.URL
 import kotlin.time.Duration
 import kotlin.time.Duration.Companion.minutes
