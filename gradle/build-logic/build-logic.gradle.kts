@@ -32,6 +32,8 @@ dependencies {
     implementation(plugin(libs.plugins.github))
     implementation(plugin(libs.plugins.kotlin.multiplatform))
     implementation(":dependency-updates-report-aggregation")
+    implementation(platform(libs.build.kotlinx.serialization.bom))
+    implementation(libs.build.kotlinx.serialization.json)
     implementation(libs.build.github.api)
     implementation(libs.build.snakeyaml)
     compileOnly(libs.build.inject)
