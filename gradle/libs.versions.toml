@@ -26,7 +26,7 @@ build-node = "20.11.0"
 build-snakeyaml = "2.6"
 kotlin = "2.3.20"
 kotlinx-coroutines = "1.10.2"
-ktor = "3.1.2"
+ktor = "3.4.2"
 workflows-kotlin = "2.3.20"
 
 [libraries]
