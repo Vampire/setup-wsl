@@ -1,7 +1,7 @@
 #!/usr/bin/env kotlin
 
 /*
- * Copyright 2020-2025 Björn Kautler
+ * Copyright 2020-2026 Björn Kautler
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -29,14 +29,6 @@ import io.github.typesafegithub.workflows.actions.vampire.SetupWsl
 import io.github.typesafegithub.workflows.domain.RunnerType.WindowsLatest
 import io.github.typesafegithub.workflows.domain.triggers.Push
 import io.github.typesafegithub.workflows.domain.triggers.WorkflowDispatch
-
-// comment in for editability with IntelliSense
-//fun workflowWithCopyright(
-//    name: String,
-//    on: List<io.github.typesafegithub.workflows.domain.triggers.Trigger>,
-//    sourceFile: java.io.File,
-//    block: io.github.typesafegithub.workflows.dsl.WorkflowBuilder.() -> Unit
-//) = Unit
 
 workflowWithCopyright(
     name = "Verify Release",
