@@ -25,7 +25,7 @@
 @file:Repository("https://bindings.krzeminski.it/")
 @file:DependsOn("actions:checkout___major:[v6,v7-alpha)")
 @file:DependsOn("actions:setup-java___major:[v4,v5-alpha)")
-@file:DependsOn("gradle:actions__dependency-submission___major:[v4,v5-alpha)")
+@file:DependsOn("gradle:actions__dependency-submission___major:[v6,v7-alpha)")
 
 import io.github.typesafegithub.workflows.actions.actions.Checkout
 import io.github.typesafegithub.workflows.actions.actions.SetupJava
@@ -70,7 +70,7 @@ workflowWithCopyright(
                     "--info",
                     "--stacktrace",
                     "--show-version"
-                ),
+                ).joinToString(" "),
                 buildScanPublish = true,
                 buildScanTermsOfUseUrl = HttpsGradleComHelpLegalTermsOfUse,
                 buildScanTermsOfUseAgree = Yes

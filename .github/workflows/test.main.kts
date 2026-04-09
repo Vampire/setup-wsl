@@ -27,7 +27,7 @@
 @file:DependsOn("actions:cache__save___major:[v4,v5-alpha)")
 @file:DependsOn("actions:checkout___major:[v6,v7-alpha)")
 @file:DependsOn("actions:setup-java___major:[v4,v5-alpha)")
-@file:DependsOn("gradle:actions__setup-gradle___major:[v4,v5-alpha)")
+@file:DependsOn("gradle:actions__setup-gradle___major:[v6,v7-alpha)")
 @file:DependsOn("Vampire:setup-wsl:RELEASE")
 
 import io.github.typesafegithub.workflows.actions.actions.CacheRestore

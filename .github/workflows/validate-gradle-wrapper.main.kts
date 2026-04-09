@@ -24,7 +24,7 @@
 
 @file:Repository("https://bindings.krzeminski.it/")
 @file:DependsOn("actions:checkout___major:[v6,v7-alpha)")
-@file:DependsOn("gradle:actions__wrapper-validation___major:[v4,v5-alpha)")
+@file:DependsOn("gradle:actions__wrapper-validation___major:[v6,v7-alpha)")
 
 import io.github.typesafegithub.workflows.actions.actions.Checkout
 import io.github.typesafegithub.workflows.actions.gradle.ActionsWrapperValidation

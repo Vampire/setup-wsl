@@ -58,7 +58,7 @@ jobs:
         distribution: 'temurin'
     - id: 'step-3'
       name: 'Submit Dependency Graph'
-      uses: 'gradle/actions/dependency-submission@v4'
+      uses: 'gradle/actions/dependency-submission@v6'
       with:
         additional-arguments: '--info --stacktrace --show-version'
         build-scan-publish: 'true'
