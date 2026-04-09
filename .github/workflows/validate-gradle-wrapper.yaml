@@ -30,7 +30,7 @@ jobs:
     steps:
     - id: 'step-0'
       name: 'Check out'
-      uses: 'actions/checkout@v4'
+      uses: 'actions/checkout@v6'
     - id: 'step-1'
       name: 'Execute script'
       run: 'rm ''.github/workflows/validate-gradle-wrapper.yaml'' && ''.github/workflows/validate-gradle-wrapper.main.kts'''
@@ -48,7 +48,7 @@ jobs:
       run: 'git config --global core.autocrlf input'
     - id: 'step-1'
       name: 'Checkout'
-      uses: 'actions/checkout@v4'
+      uses: 'actions/checkout@v6'
     - id: 'step-2'
       name: 'Validate Gradle Wrapper'
       uses: 'gradle/actions/wrapper-validation@v4'
