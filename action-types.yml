@@ -25,6 +25,7 @@ inputs:
             - Alpine-3.18
             - Alpine-3.17
             - Alpine
+            - Debian-13
             - Debian-12
             - Debian-11
             - Debian

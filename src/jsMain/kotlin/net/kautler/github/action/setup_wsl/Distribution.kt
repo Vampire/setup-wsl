@@ -37,6 +37,7 @@ val distributions = listOf(
     Debian,
     Debian11,
     Debian12,
+    Debian13,
     Kali,
     OpenSuseLeap15_2,
     Ubuntu1604,
@@ -305,6 +306,13 @@ object Debian12 : DebianDistribution(
     distributionName = "Debian",
     version = SemVer("1.20.0"),
     downloadUrl = URL("https://salsa.debian.org/debian/WSL/-/jobs/7130915/artifacts/raw/Debian_WSL_AMD64_v1.20.0.0.wsl")
+)
+
+object Debian13 : DebianDistribution(
+    wslId = "Debian-13",
+    distributionName = "Debian",
+    version = SemVer("1.24.0"),
+    downloadUrl = URL("https://salsa.debian.org/debian/WSL/-/jobs/9229125/artifacts/raw/Debian_WSL_AMD64_v1.24.0.0.wsl")
 )
 
 object Kali : AptGetBasedDistribution(
