@@ -21,7 +21,7 @@
 
 @file:Repository("https://repo.maven.apache.org/maven2/")
 // work-around for https://youtrack.jetbrains.com/issue/KT-69145
-@file:DependsOn("io.github.typesafegithub:github-workflows-kt:3.2.0")
+@file:DependsOn("io.github.typesafegithub:github-workflows-kt:3.7.0")
 
 @file:DependsOn("actions:checkout___major:[v4,v5-alpha)")
 @file:DependsOn("typesafegithub:github-actions-typing___major:[v2,v3-alpha)")
