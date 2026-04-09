@@ -153,6 +153,7 @@ The values currently supported by this action are:
 * `Alpine-3.18`
 * `Alpine-3.17`
 * `Alpine` _(deprecated, 'Alpine-3.17' is a drop-in replacement, except for the wsl-shell-distribution-wrapper name)_
+* `Debian-13`
 * `Debian-12`
 * `Debian-11`
 * `Debian` **(default)** _(deprecated, 'Debian-11' is a drop-in replacement, except for the wsl-shell-distribution-wrapper name)_
