@@ -145,6 +145,12 @@ so the second that is used will not be installed as the first one will be found 
 WSL distribution ID.
 
 The values currently supported by this action are:
+* `Alpine-3.23`
+* `Alpine-3.22`
+* `Alpine-3.21`
+* `Alpine-3.20`
+* `Alpine-3.19`
+* `Alpine-3.18`
 * `Alpine-3.17`
 * `Alpine` _(deprecated, 'Alpine-3.17' is a drop-in replacement, except for the wsl-shell-distribution-wrapper name)_
 * `Debian-11`
