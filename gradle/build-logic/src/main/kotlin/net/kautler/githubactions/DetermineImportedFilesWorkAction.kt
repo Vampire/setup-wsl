@@ -1,5 +1,5 @@
 /*
- * Copyright 2025 Björn Kautler
+ * Copyright 2025-2026 Björn Kautler
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,7 +20,7 @@ import org.gradle.api.file.DirectoryProperty
 import org.gradle.api.file.RegularFileProperty
 import org.gradle.workers.WorkAction
 import org.gradle.workers.WorkParameters
-import org.jetbrains.kotlin.cli.common.CLIConfigurationKeys.MESSAGE_COLLECTOR_KEY
+import org.jetbrains.kotlin.K1Deprecation
 import org.jetbrains.kotlin.cli.common.messages.MessageCollector.Companion.NONE
 import org.jetbrains.kotlin.cli.jvm.compiler.EnvironmentConfigFiles.JVM_CONFIG_FILES
 import org.jetbrains.kotlin.cli.jvm.compiler.KotlinCoreEnvironment
@@ -28,12 +28,12 @@ import org.jetbrains.kotlin.com.intellij.openapi.util.Disposer
 import org.jetbrains.kotlin.com.intellij.openapi.vfs.local.CoreLocalFileSystem
 import org.jetbrains.kotlin.com.intellij.openapi.vfs.local.CoreLocalVirtualFile
 import org.jetbrains.kotlin.com.intellij.psi.PsiManager
+import org.jetbrains.kotlin.config.CommonConfigurationKeys.MESSAGE_COLLECTOR_KEY
 import org.jetbrains.kotlin.config.CompilerConfiguration
 import org.jetbrains.kotlin.psi.KtFile
 import org.jetbrains.kotlin.psi.KtLiteralStringTemplateEntry
 import org.jetbrains.kotlin.psi.KtStringTemplateExpression
 import java.io.File
-import java.nio.file.Path
 
 abstract class DetermineImportedFilesWorkAction : WorkAction<DetermineImportedFilesWorkAction.Parameters> {
     override fun execute() {
@@ -57,6 +57,7 @@ abstract class DetermineImportedFilesWorkAction : WorkAction<DetermineImportedFi
     }
 }
 
+@OptIn(K1Deprecation::class)
 private val File.importedFiles: List<File>
     get() = if (!isFile) {
         emptyList()
@@ -73,7 +74,7 @@ private val File.importedFiles: List<File>
                     )
                     .project
             )
-            .findFile(CoreLocalVirtualFile::class.java.getConstructor(CoreLocalFileSystem::class.java, Path::class.java).newInstance(CoreLocalFileSystem(), toPath()))
+            .findFile(CoreLocalVirtualFile(CoreLocalFileSystem(), toPath()))
             .let { it as KtFile }
             .fileAnnotationList
             ?.annotationEntries

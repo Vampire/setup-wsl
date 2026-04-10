@@ -1,5 +1,5 @@
 /*
- * Copyright 2020-2025 Björn Kautler
+ * Copyright 2020-2026 Björn Kautler
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,28 +16,28 @@
 
 package net.kautler.github.action.setup_wsl
 
-import actions.core.debug
-import actions.core.isDebug
 import actions.exec.ExecOptions
 import actions.exec.exec
-import io.ktor.client.HttpClient
-import io.ktor.client.engine.js.Js
-import io.ktor.client.plugins.UserAgent
-import io.ktor.client.request.forms.submitForm
-import io.ktor.client.statement.bodyAsText
-import io.ktor.http.HttpStatusCode.Companion.OK
-import io.ktor.http.parameters
 import js.objects.recordOf
-import kotlinx.coroutines.CoroutineStart.LAZY
-import kotlinx.coroutines.DelicateCoroutinesApi
-import kotlinx.coroutines.GlobalScope
-import kotlinx.coroutines.async
+import net.kautler.github.action.setup_wsl.InstallMethod.APP_BUNDLE
+import net.kautler.github.action.setup_wsl.InstallMethod.TARBALL
+import net.kautler.github.action.setup_wsl.InstallMethod.WSL_FILE
 import org.w3c.dom.url.URL
 import semver.SemVer
 
 val distributions = listOf(
     Alpine,
+    Alpine317,
+    Alpine318,
+    Alpine319,
+    Alpine320,
+    Alpine321,
+    Alpine322,
+    Alpine323,
     Debian,
+    Debian11,
+    Debian12,
+    Debian13,
     Kali,
     OpenSuseLeap15_2,
     Ubuntu1604,
@@ -47,109 +47,50 @@ val distributions = listOf(
     Ubuntu2404
 ).associateBy { it.userId }
 
+enum class InstallMethod { APP_BUNDLE, TARBALL, WSL_FILE }
+
 sealed class Distribution(
     val wslId: String,
+    val userId: String,
     val distributionName: String,
     val version: SemVer,
-    private val _downloadUrl: URL?,
-    private val productId: String?,
-    val installerFile: String,
-    val userId: String = wslId
+    val downloadUrl: URL,
+    val installerFile: String? = null
 ) {
-    @DelicateCoroutinesApi
-    val downloadUrl = GlobalScope.async(start = LAZY) {
-        if (_downloadUrl != null) {
-            return@async _downloadUrl
-        }
+    constructor(
+        wslId: String,
+        distributionName: String,
+        version: SemVer,
+        downloadUrl: URL,
+        installerFile: String? = null
+    ) : this(wslId, wslId, distributionName, version, downloadUrl, installerFile)
 
-        val parameters = parameters {
-            append("type", "ProductId")
-            append("url", productId!!)
-        }
+    val downloadFileName = downloadUrl
+        .pathname
+        .substringAfterLast('/')
+        .substringBefore('?')
 
-        return@async HttpClient(Js) {
-            install(UserAgent) {
-                agent = "Setup WSL GitHub Action"
-            }
-        }.use { client ->
-            retry(5) {
-                val response = client.submitForm(
-                    url = "https://store.rg-adguard.net/api/GetFiles",
-                    formParameters = parameters
-                )
-
-                if (response.status != OK) {
-                    if (isDebug()) {
-                        val echoResponse = client.submitForm(
-                            url = "https://echo.free.beeceptor.com/api/GetFiles",
-                            formParameters = parameters
-                        )
-                        if (echoResponse.status == OK) {
-                            debug("Request:\n${echoResponse.bodyAsText()}")
-                        } else {
-                            debug("Could not get echo response (statusCode: ${echoResponse.status.value} / statusMessage: ${echoResponse.status.description})")
-                        }
-
-                        val responseMessage = JSON.stringify(
-                            recordOf(
-                                "httpVersion" to "${response.version}",
-                                "headers" to "${response.headers}",
-                                "method" to "${response.call.request.method}",
-                                "url" to "${response.call.request.url}",
-                                "statusCode" to response.status.value,
-                                "statusMessage" to response.status.description,
-                                "body" to response.bodyAsText()
-                            ),
-                            space = 2
-                        )
-                        debug("Response:\n$responseMessage")
-                    }
-                    error("Could not determine download URL (statusCode: ${response.status.value} / statusMessage: ${response.status.description})")
-                }
-
-                val body = response.bodyAsText()
-                val downloadLinkAnchorMatch =
-                    """<a [^>]*href="(?<url>[^"]+)"[^>]*>[^<]*\.appx(?:bundle)?</a>""".toRegex().find(body)
-                        ?: error("Could not determine download URL from:\n$body")
-
-                return@retry URL(downloadLinkAnchorMatch.groups[1]!!.value)
-            }
-        }
+    val installMethod = when {
+        installerFile != null -> APP_BUNDLE
+        downloadFileName.endsWith(".wsl") -> WSL_FILE
+        downloadFileName.endsWith(".tar.gz") || downloadFileName.endsWith(".tgz") -> TARBALL
+        else -> error("Unknown install method for download URL '$downloadUrl'")
     }
 
-    constructor(
-        wslId: String,
-        distributionName: String,
-        version: SemVer,
-        downloadUrl: URL,
-        installerFile: String
-    ) : this(wslId, distributionName, version, downloadUrl, null, installerFile)
-
-    constructor(
-        wslId: String,
-        userId: String,
-        distributionName: String,
-        version: SemVer,
-        downloadUrl: URL,
-        installerFile: String,
-    ) : this(wslId, distributionName, version, downloadUrl, null, installerFile, userId)
-
-    constructor(
-        wslId: String,
-        distributionName: String,
-        version: SemVer,
-        productId: String,
-        installerFile: String
-    ) : this(wslId, distributionName, version, null, productId, installerFile)
-
-    constructor(
-        wslId: String,
-        userId: String,
-        distributionName: String,
-        version: SemVer,
-        productId: String,
-        installerFile: String
-    ) : this(wslId, distributionName, version, null, productId, installerFile, userId)
+    open suspend fun createUser(username: String) {
+        exec(
+            commandLine = "wsl",
+            args = arrayOf(
+                "--distribution",
+                wslId,
+                "useradd",
+                "-m",
+                "-p",
+                "4qBD5NWD3IkbU",
+                username
+            )
+        )
+    }
 
     abstract suspend fun update()
 
@@ -162,7 +103,7 @@ abstract class AptGetBasedDistribution : Distribution {
         distributionName: String,
         version: SemVer,
         downloadUrl: URL,
-        installerFile: String
+        installerFile: String? = null
     ) : super(wslId, distributionName, version, downloadUrl, installerFile)
 
     constructor(
@@ -171,25 +112,8 @@ abstract class AptGetBasedDistribution : Distribution {
         distributionName: String,
         version: SemVer,
         downloadUrl: URL,
-        installerFile: String
+        installerFile: String? = null
     ) : super(wslId, userId, distributionName, version, downloadUrl, installerFile)
-
-    constructor(
-        wslId: String,
-        distributionName: String,
-        version: SemVer,
-        productId: String,
-        installerFile: String
-    ) : super(wslId, distributionName, version, productId, installerFile)
-
-    constructor(
-        wslId: String,
-        userId: String,
-        distributionName: String,
-        version: SemVer,
-        productId: String,
-        installerFile: String
-    ) : super(wslId, userId, distributionName, version, productId, installerFile)
 
     protected open suspend fun refresh() {
         exec(
@@ -262,8 +186,6 @@ object Ubuntu2404 : AptGetBasedDistribution(
     wslId = "Ubuntu-24.04",
     distributionName = "Ubuntu",
     version = SemVer("24.4.0"),
-    // work-around for missing shortlink on https://learn.microsoft.com/en-us/windows/wsl/install-manual#downloading-distributions
-    //downloadUrl = URL("https://aka.ms/wslubuntu2404"),
     downloadUrl = URL("https://wslstorestorage.blob.core.windows.net/wslblob/Ubuntu2404-240425.AppxBundle"),
     installerFile = "ubuntu2404.exe"
 )
@@ -302,13 +224,24 @@ object Ubuntu1604 : AptGetBasedDistribution(
     installerFile = "ubuntu1604.exe"
 )
 
-object Debian : AptGetBasedDistribution(
-    wslId = "Debian",
-    distributionName = "Debian",
-    version = SemVer("1.0.0"),
-    downloadUrl = URL("https://aka.ms/wsl-debian-gnulinux"),
-    installerFile = "debian.exe"
-) {
+abstract class DebianDistribution : AptGetBasedDistribution {
+    constructor(
+        wslId: String,
+        distributionName: String,
+        version: SemVer,
+        downloadUrl: URL,
+        installerFile: String? = null
+    ) : super(wslId, distributionName, version, downloadUrl, installerFile)
+
+    constructor(
+        wslId: String,
+        userId: String,
+        distributionName: String,
+        version: SemVer,
+        downloadUrl: URL,
+        installerFile: String? = null
+    ) : super(wslId, userId, distributionName, version, downloadUrl, installerFile)
+
     override suspend fun update() {
         refresh()
         retry(5) {
@@ -316,6 +249,71 @@ object Debian : AptGetBasedDistribution(
         }
     }
 }
+
+abstract class ArchivedDebianDistribution : DebianDistribution {
+    constructor(
+        wslId: String,
+        distributionName: String,
+        version: SemVer,
+        downloadUrl: URL,
+        installerFile: String? = null
+    ) : super(wslId, distributionName, version, downloadUrl, installerFile)
+
+    constructor(
+        wslId: String,
+        userId: String,
+        distributionName: String,
+        version: SemVer,
+        downloadUrl: URL,
+        installerFile: String? = null
+    ) : super(wslId, userId, distributionName, version, downloadUrl, installerFile)
+
+    override suspend fun refresh() {
+        exec(
+            commandLine = "wsl",
+            args = arrayOf(
+                "--distribution",
+                wslId,
+                "sed",
+                "-i",
+                "s/ftp.debian.org/archive.debian.org/",
+                "/etc/apt/sources.list"
+            )
+        )
+        super.refresh()
+    }
+}
+
+object Debian : ArchivedDebianDistribution(
+    wslId = "Debian",
+    distributionName = "Debian",
+    version = SemVer("1.0.0"),
+    downloadUrl = URL("https://aka.ms/wsl-debian-gnulinux"),
+    installerFile = "debian.exe"
+)
+
+object Debian11 : ArchivedDebianDistribution(
+    wslId = "Debian",
+    userId = "Debian-11",
+    distributionName = "Debian",
+    version = SemVer("1.0.0"),
+    downloadUrl = URL("https://aka.ms/wsl-debian-gnulinux"),
+    installerFile = "debian.exe"
+)
+
+object Debian12 : DebianDistribution(
+    wslId = "Debian-12",
+    distributionName = "Debian",
+    version = SemVer("1.20.0"),
+    downloadUrl = URL("https://salsa.debian.org/debian/WSL/-/jobs/7130915/artifacts/raw/Debian_WSL_AMD64_v1.20.0.0.wsl")
+)
+
+object Debian13 : DebianDistribution(
+    wslId = "Debian-13",
+    distributionName = "Debian",
+    version = SemVer("1.24.0"),
+    downloadUrl = URL("https://salsa.debian.org/debian/WSL/-/jobs/9229125/artifacts/raw/Debian_WSL_AMD64_v1.24.0.0.wsl")
+)
 
 object Kali : AptGetBasedDistribution(
     wslId = "MyDistribution",
@@ -353,7 +351,7 @@ abstract class ZypperBasedDistribution : Distribution {
         distributionName: String,
         version: SemVer,
         downloadUrl: URL,
-        installerFile: String
+        installerFile: String? = null
     ) : super(wslId, distributionName, version, downloadUrl, installerFile)
 
     constructor(
@@ -362,25 +360,8 @@ abstract class ZypperBasedDistribution : Distribution {
         distributionName: String,
         version: SemVer,
         downloadUrl: URL,
-        installerFile: String
+        installerFile: String? = null
     ) : super(wslId, userId, distributionName, version, downloadUrl, installerFile)
-
-    constructor(
-        wslId: String,
-        distributionName: String,
-        version: SemVer,
-        productId: String,
-        installerFile: String
-    ) : super(wslId, distributionName, version, productId, installerFile)
-
-    constructor(
-        wslId: String,
-        userId: String,
-        distributionName: String,
-        version: SemVer,
-        productId: String,
-        installerFile: String
-    ) : super(wslId, userId, distributionName, version, productId, installerFile)
 
     protected open suspend fun refresh() {
         exec(
@@ -445,7 +426,7 @@ abstract class ApkBasedDistribution : Distribution {
         distributionName: String,
         version: SemVer,
         downloadUrl: URL,
-        installerFile: String
+        installerFile: String? = null
     ) : super(wslId, distributionName, version, downloadUrl, installerFile)
 
     constructor(
@@ -454,25 +435,8 @@ abstract class ApkBasedDistribution : Distribution {
         distributionName: String,
         version: SemVer,
         downloadUrl: URL,
-        installerFile: String
+        installerFile: String? = null
     ) : super(wslId, userId, distributionName, version, downloadUrl, installerFile)
-
-    constructor(
-        wslId: String,
-        distributionName: String,
-        version: SemVer,
-        productId: String,
-        installerFile: String
-    ) : super(wslId, distributionName, version, productId, installerFile)
-
-    constructor(
-        wslId: String,
-        userId: String,
-        distributionName: String,
-        version: SemVer,
-        productId: String,
-        installerFile: String
-    ) : super(wslId, userId, distributionName, version, productId, installerFile)
 
     private suspend fun refresh() {
         exec(
@@ -514,10 +478,93 @@ abstract class ApkBasedDistribution : Distribution {
     }
 }
 
-object Alpine : ApkBasedDistribution(
+abstract class AlpineDistribution : ApkBasedDistribution {
+    constructor(
+        wslId: String,
+        distributionName: String,
+        version: SemVer,
+        downloadUrl: URL,
+        installerFile: String? = null
+    ) : super(wslId, distributionName, version, downloadUrl, installerFile)
+
+    constructor(
+        wslId: String,
+        userId: String,
+        distributionName: String,
+        version: SemVer,
+        downloadUrl: URL,
+        installerFile: String? = null
+    ) : super(wslId, userId, distributionName, version, downloadUrl, installerFile)
+
+    override suspend fun createUser(username: String) {
+        // Alpine minirootfs does not include the shadow package, so useradd is not available.
+        // Use BusyBox adduser instead.
+        exec(
+            commandLine = "wsl",
+            args = arrayOf(
+                "--distribution",
+                wslId,
+                "adduser",
+                "-D",
+                username
+            )
+        )
+    }
+}
+
+object Alpine : AlpineDistribution(
     wslId = "Alpine",
     distributionName = "Alpine",
-    version = SemVer("1.0.3"),
-    productId = "9p804crf0395",
-    installerFile = "Alpine.exe"
+    version = SemVer("3.17.10"),
+    downloadUrl = URL("https://dl-cdn.alpinelinux.org/alpine/v3.17/releases/x86_64/alpine-minirootfs-3.17.10-x86_64.tar.gz")
+)
+
+object Alpine317 : AlpineDistribution(
+    wslId = "Alpine",
+    userId = "Alpine-3.17",
+    distributionName = "Alpine",
+    version = SemVer("3.17.10"),
+    downloadUrl = URL("https://dl-cdn.alpinelinux.org/alpine/v3.17/releases/x86_64/alpine-minirootfs-3.17.10-x86_64.tar.gz")
+)
+
+object Alpine318 : AlpineDistribution(
+    wslId = "Alpine-3.18",
+    distributionName = "Alpine",
+    version = SemVer("3.18.12"),
+    downloadUrl = URL("https://dl-cdn.alpinelinux.org/alpine/v3.18/releases/x86_64/alpine-minirootfs-3.18.12-x86_64.tar.gz")
+)
+
+object Alpine319 : AlpineDistribution(
+    wslId = "Alpine-3.19",
+    distributionName = "Alpine",
+    version = SemVer("3.19.9"),
+    downloadUrl = URL("https://dl-cdn.alpinelinux.org/alpine/v3.19/releases/x86_64/alpine-minirootfs-3.19.9-x86_64.tar.gz")
+)
+
+object Alpine320 : AlpineDistribution(
+    wslId = "Alpine-3.20",
+    distributionName = "Alpine",
+    version = SemVer("3.20.9"),
+    downloadUrl = URL("https://dl-cdn.alpinelinux.org/alpine/v3.20/releases/x86_64/alpine-minirootfs-3.20.9-x86_64.tar.gz"),
+)
+
+object Alpine321 : AlpineDistribution(
+    wslId = "Alpine-3.21",
+    distributionName = "Alpine",
+    version = SemVer("3.21.6"),
+    downloadUrl = URL("https://dl-cdn.alpinelinux.org/alpine/v3.21/releases/x86_64/alpine-minirootfs-3.21.6-x86_64.tar.gz"),
+)
+
+object Alpine322 : AlpineDistribution(
+    wslId = "Alpine-3.22",
+    distributionName = "Alpine",
+    version = SemVer("3.22.3"),
+    downloadUrl = URL("https://dl-cdn.alpinelinux.org/alpine/v3.22/releases/x86_64/alpine-minirootfs-3.22.3-x86_64.tar.gz"),
+)
+
+object Alpine323 : AlpineDistribution(
+    wslId = "Alpine-3.23",
+    distributionName = "Alpine",
+    version = SemVer("3.23.3"),
+    downloadUrl = URL("https://dl-cdn.alpinelinux.org/alpine/v3.23/releases/x86_64/alpine-minirootfs-3.23.3-x86_64.tar.gz"),
 )

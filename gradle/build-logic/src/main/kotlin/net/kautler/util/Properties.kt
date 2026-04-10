@@ -1,5 +1,5 @@
 /*
- * Copyright 2020-2023 Björn Kautler
+ * Copyright 2020-2026 Björn Kautler
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,11 +18,15 @@ package net.kautler.util
 
 import org.gradle.api.Project
 import org.gradle.api.Task
+import org.gradle.api.problems.ProblemGroup
+import org.gradle.api.problems.ProblemId
+import org.gradle.api.problems.ProblemReporter
+import org.gradle.api.problems.Severity
 import kotlin.properties.ReadOnlyProperty
 import kotlin.reflect.KProperty
 import kotlin.properties.PropertyDelegateProvider as KotlinPropertyDelegateProvider
 
-sealed class Property<out T> constructor(
+sealed class Property<out T>(
     private val default: () -> T,
     private var propertyName: String,
     private var project: Project
@@ -45,11 +49,31 @@ sealed class Property<out T> constructor(
             ::BooleanProperty
         )
 
+        fun Project.boolean(
+            default: () -> Boolean = { false },
+            propertyName: String? = null
+        ) = boolean(default, propertyName, this)
+
+        fun Task.boolean(
+            default: () -> Boolean = { false },
+            propertyName: String? = null
+        ) = boolean(default, propertyName, project)
+
         fun boolean(
             default: Boolean,
             propertyName: String? = null,
             project: Project? = null
         ) = boolean({ default }, propertyName, project)
+
+        fun Project.boolean(
+            default: Boolean,
+            propertyName: String? = null
+        ) = boolean(default, propertyName, this)
+
+        fun Task.boolean(
+            default: Boolean,
+            propertyName: String? = null
+        ) = boolean(default, propertyName, project)
 
         fun boolean(
             project: Project,
@@ -57,11 +81,33 @@ sealed class Property<out T> constructor(
             default: () -> Boolean = { false }
         ): Property<Boolean> = BooleanProperty(default, propertyName, project)
 
+        @JvmName("booleanProperty")
+        fun Project.boolean(
+            propertyName: String,
+            default: () -> Boolean = { false }
+        ) = boolean(this, propertyName, default)
+
+        fun Task.boolean(
+            propertyName: String,
+            default: () -> Boolean = { false }
+        ) = boolean(project, propertyName, default)
+
         fun boolean(
             project: Project,
             propertyName: String,
             default: Boolean
         ) = boolean(project, propertyName) { default }
+
+        @JvmName("booleanProperty")
+        fun Project.boolean(
+            propertyName: String,
+            default: Boolean
+        ) = boolean(this, propertyName, default)
+
+        fun Task.boolean(
+            propertyName: String,
+            default: Boolean
+        ) = boolean(project, propertyName, default)
 
         fun string(
             default: () -> String,
@@ -74,11 +120,31 @@ sealed class Property<out T> constructor(
             ::StringProperty
         )
 
+        fun Project.string(
+            default: () -> String,
+            propertyName: String? = null
+        ) = string(default, propertyName, this)
+
+        fun Task.string(
+            default: () -> String,
+            propertyName: String? = null
+        ) = string(default, propertyName, project)
+
         fun string(
             default: String,
             propertyName: String? = null,
             project: Project? = null
         ) = string({ default }, propertyName, project)
+
+        fun Project.string(
+            default: String,
+            propertyName: String? = null
+        ) = string(default, propertyName, this)
+
+        fun Task.string(
+            default: String,
+            propertyName: String? = null
+        ) = string(default, propertyName, project)
 
         fun string(
             project: Project,
@@ -86,11 +152,33 @@ sealed class Property<out T> constructor(
             default: () -> String
         ): Property<String> = StringProperty(default, propertyName, project)
 
+        @JvmName("stringProperty")
+        fun Project.string(
+            propertyName: String,
+            default: () -> String
+        ) = string(this, propertyName, default)
+
+        fun Task.string(
+            propertyName: String,
+            default: () -> String
+        ) = string(project, propertyName, default)
+
         fun string(
             project: Project,
             propertyName: String,
             default: String
         ) = string(project, propertyName) { default }
+
+        @JvmName("stringProperty")
+        fun Project.string(
+            propertyName: String,
+            default: String
+        ) = string(this, propertyName, default)
+
+        fun Task.string(
+            propertyName: String,
+            default: String
+        ) = string(project, propertyName, default)
 
         fun optionalString(
             propertyName: String? = null,
@@ -102,10 +190,27 @@ sealed class Property<out T> constructor(
             ::OptionalStringProperty
         )
 
+        fun Project.optionalString(
+            propertyName: String? = null
+        ) = optionalString(propertyName, this)
+
+        fun Task.optionalString(
+            propertyName: String? = null
+        ) = optionalString(propertyName, project)
+
         fun optionalString(
             project: Project,
             propertyName: String
         ): Property<String?> = OptionalStringProperty(propertyName, project)
+
+        @JvmName("optionalStringProperty")
+        fun Project.optionalString(
+            propertyName: String
+        ) = optionalString(this, propertyName)
+
+        fun Task.optionalString(
+            propertyName: String
+        ) = optionalString(project, propertyName)
 
         fun double(
             default: () -> Double = { 0.0 },
@@ -118,11 +223,31 @@ sealed class Property<out T> constructor(
             ::DoubleProperty
         )
 
+        fun Project.double(
+            default: () -> Double = { 0.0 },
+            propertyName: String? = null
+        ) = double(default, propertyName, this)
+
+        fun Task.double(
+            default: () -> Double = { 0.0 },
+            propertyName: String? = null
+        ) = double(default, propertyName, project)
+
         fun double(
             default: Double,
             propertyName: String? = null,
             project: Project? = null
         ) = double({ default }, propertyName, project)
+
+        fun Project.double(
+            default: Double,
+            propertyName: String? = null
+        ) = double(default, propertyName, this)
+
+        fun Task.double(
+            default: Double,
+            propertyName: String? = null
+        ) = double(default, propertyName, project)
 
         fun double(
             project: Project,
@@ -130,11 +255,33 @@ sealed class Property<out T> constructor(
             default: () -> Double = { 0.0 }
         ): Property<Double> = DoubleProperty(default, propertyName, project)
 
+        @JvmName("doubleProperty")
+        fun Project.double(
+            propertyName: String,
+            default: () -> Double = { 0.0 }
+        ) = double(this, propertyName, default)
+
+        fun Task.double(
+            propertyName: String,
+            default: () -> Double = { 0.0 }
+        ) = double(project, propertyName, default)
+
         fun double(
             project: Project,
             propertyName: String,
             default: Double
         ) = double(project, propertyName) { default }
+
+        @JvmName("doubleProperty")
+        fun Project.double(
+            propertyName: String,
+            default: Double
+        ) = double(this, propertyName, default)
+
+        fun Task.double(
+            propertyName: String,
+            default: Double
+        ) = double(project, propertyName, default)
     }
 }
 
@@ -207,11 +354,20 @@ private fun findProperty(project: Project, propertyName: String): String? {
     return if (result.isNullOrBlank()) null else result
 }
 
-fun String?.verifyPropertyIsSet(propertyName: String, rootProjectName: String) {
+fun String?.verifyPropertyIsSet(problemReporter: ProblemReporter, propertyName: String, rootProjectName: String) {
     if (isNullOrBlank()) {
-        error(
-            "Please set the project property '$propertyName' or '$rootProjectName.$propertyName'. " +
-                    "If both are set, the latter will be effective."
-        )
+        throw problemReporter.throwing(
+            IllegalStateException(),
+            ProblemId.create(
+                "properties-'$propertyName'-and-'$rootProjectName.$propertyName'-missing",
+                "The properties '$propertyName' and '$rootProjectName.$propertyName' are missing",
+                ProblemGroup.create("required-properties", "Required Properties")
+            )
+        ) {
+            solution("Set the project property '$propertyName'")
+            solution("Set the project property '$rootProjectName.$propertyName'")
+            solution("If both are set, the latter will be effective")
+            severity(Severity.ERROR)
+        }
     }
 }

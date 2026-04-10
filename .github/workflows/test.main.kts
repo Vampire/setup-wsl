@@ -1,7 +1,7 @@
 #!/usr/bin/env kotlin
 
 /*
- * Copyright 2020-2025 Björn Kautler
+ * Copyright 2020-2026 Björn Kautler
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,14 +20,14 @@
 
 @file:Repository("https://repo.maven.apache.org/maven2/")
 // work-around for https://youtrack.jetbrains.com/issue/KT-69145
-@file:DependsOn("io.github.typesafegithub:github-workflows-kt:3.2.0")
+@file:DependsOn("io.github.typesafegithub:github-workflows-kt:3.7.0")
 
 @file:Repository("https://bindings.krzeminski.it/")
-@file:DependsOn("actions:cache__restore___major:[v4,v5-alpha)")
-@file:DependsOn("actions:cache__save___major:[v4,v5-alpha)")
-@file:DependsOn("actions:checkout___major:[v4,v5-alpha)")
-@file:DependsOn("actions:setup-java___major:[v4,v5-alpha)")
-@file:DependsOn("gradle:actions__setup-gradle___major:[v4,v5-alpha)")
+@file:DependsOn("actions:cache__restore___major:[v5,v6-alpha)")
+@file:DependsOn("actions:cache__save___major:[v5,v6-alpha)")
+@file:DependsOn("actions:checkout___major:[v6,v7-alpha)")
+@file:DependsOn("actions:setup-java___major:[v5,v6-alpha)")
+@file:DependsOn("gradle:actions__setup-gradle___major:[v6,v7-alpha)")
 @file:DependsOn("Vampire:setup-wsl:RELEASE")
 
 import io.github.typesafegithub.workflows.actions.actions.CacheRestore
@@ -42,10 +42,10 @@ import io.github.typesafegithub.workflows.actions.vampire.SetupWsl
 import io.github.typesafegithub.workflows.actions.vampire.SetupWsl.Distribution.Debian
 import io.github.typesafegithub.workflows.actions.vampire.SetupWsl.Distribution.Ubuntu1604
 import io.github.typesafegithub.workflows.actions.vampire.SetupWsl.Distribution.Ubuntu1804
-import io.github.typesafegithub.workflows.domain.CommandStep
-import io.github.typesafegithub.workflows.domain.ActionStep
-import io.github.typesafegithub.workflows.domain.JobOutputs.EMPTY
 import io.github.typesafegithub.workflows.domain.AbstractResult.Status.Success
+import io.github.typesafegithub.workflows.domain.ActionStep
+import io.github.typesafegithub.workflows.domain.CommandStep
+import io.github.typesafegithub.workflows.domain.JobOutputs.EMPTY
 import io.github.typesafegithub.workflows.domain.RunnerType
 import io.github.typesafegithub.workflows.domain.RunnerType.WindowsLatest
 import io.github.typesafegithub.workflows.domain.Shell
@@ -60,31 +60,102 @@ import io.github.typesafegithub.workflows.dsl.WorkflowBuilder
 import io.github.typesafegithub.workflows.dsl.expressions.expr
 import kotlin.math.min
 
-// comment in for editability with IntelliSense
-//fun workflowWithCopyright(
-//    name: String,
-//    on: List<io.github.typesafegithub.workflows.domain.triggers.Trigger>,
-//    sourceFile: java.io.File,
-//    block: io.github.typesafegithub.workflows.dsl.WorkflowBuilder.() -> Unit
-//) = Unit
-
 val environments = listOf(
     "windows-2022",
     "windows-2025",
     "windows-latest"
 )
 
-val debian = Distribution(
-    wslId = "Debian",
-    userId = "Debian",
-    matchPattern = "*Debian*",
-    defaultAbsentTool = "dos2unix"
+val alpine323 = Distribution(
+    wslId = "Alpine-3.23",
+    matchPattern = "*Alpine*3.23*",
+    defaultAbsentTool = "dos2unix",
+    createTestUserCommand = "adduser -D test"
+)
+
+val alpine322 = Distribution(
+    wslId = "Alpine-3.22",
+    matchPattern = "*Alpine*3.22*",
+    defaultAbsentTool = "dos2unix",
+    createTestUserCommand = "adduser -D test"
+)
+
+val alpine321 = Distribution(
+    wslId = "Alpine-3.21",
+    matchPattern = "*Alpine*3.21*",
+    defaultAbsentTool = "dos2unix",
+    createTestUserCommand = "adduser -D test"
+)
+
+val alpine320 = Distribution(
+    wslId = "Alpine-3.20",
+    matchPattern = "*Alpine*3.20*",
+    defaultAbsentTool = "dos2unix",
+    createTestUserCommand = "adduser -D test"
+)
+
+val alpine319 = Distribution(
+    wslId = "Alpine-3.19",
+    matchPattern = "*Alpine*3.19*",
+    defaultAbsentTool = "dos2unix",
+    createTestUserCommand = "adduser -D test"
+)
+
+val alpine318 = Distribution(
+    wslId = "Alpine-3.18",
+    matchPattern = "*Alpine*3.18*",
+    defaultAbsentTool = "dos2unix",
+    createTestUserCommand = "adduser -D test"
+)
+
+val alpine317 = Distribution(
+    wslId = "Alpine",
+    userId = "Alpine-3.17",
+    matchPattern = "*Alpine*3.17*",
+    defaultAbsentTool = "dos2unix",
+    createTestUserCommand = "adduser -D test"
 )
 
 val alpine = Distribution(
     wslId = "Alpine",
-    userId = "Alpine",
-    matchPattern = "*Alpine*",
+    matchPattern = "*Alpine*3.17*",
+    defaultAbsentTool = "dos2unix",
+    createTestUserCommand = "adduser -D test"
+)
+
+val alpineDistributions = listOf(
+    alpine323,
+    alpine322,
+    alpine321,
+    alpine320,
+    alpine319,
+    alpine318,
+    alpine317,
+    alpine
+)
+
+val debian13 = Distribution(
+    wslId = "Debian-13",
+    matchPattern = "*Debian*13*",
+    defaultAbsentTool = "dos2unix"
+)
+
+val debian12 = Distribution(
+    wslId = "Debian-12",
+    matchPattern = "*Debian*12*",
+    defaultAbsentTool = "dos2unix"
+)
+
+val debian11 = Distribution(
+    wslId = "Debian",
+    userId = "Debian-11",
+    matchPattern = "*Debian*11*",
+    defaultAbsentTool = "dos2unix"
+)
+
+val debian = Distribution(
+    wslId = "Debian",
+    matchPattern = "*Debian*11*",
     defaultAbsentTool = "dos2unix"
 )
 
@@ -97,14 +168,12 @@ val kali = Distribution(
 
 val openSuseLeap15_2 = Distribution(
     wslId = "openSUSE-Leap-15.2",
-    userId = "openSUSE-Leap-15.2",
     matchPattern = "*openSUSE*Leap*15.2*",
     defaultAbsentTool = "which"
 )
 
 val ubuntu2404 = Distribution(
     wslId = "Ubuntu-24.04",
-    userId = "Ubuntu-24.04",
     matchPattern = "*Ubuntu*24.04*",
     defaultAbsentTool = "dos2unix"
 )
@@ -125,21 +194,22 @@ val ubuntu2004 = Distribution(
 
 val ubuntu1804 = Distribution(
     wslId = "Ubuntu-18.04",
-    userId = "Ubuntu-18.04",
     matchPattern = "*Ubuntu*18.04*",
     defaultAbsentTool = "dos2unix"
 )
 
 val ubuntu1604 = Distribution(
     wslId = "Ubuntu-16.04",
-    userId = "Ubuntu-16.04",
     matchPattern = "*Ubuntu*16.04*",
     defaultAbsentTool = "dos2unix"
 )
 
 val distributions = listOf(
+    *alpineDistributions.toTypedArray(),
+    debian13,
+    debian12,
+    debian11,
     debian,
-    alpine,
     kali,
     openSuseLeap15_2,
     ubuntu2404,
@@ -386,7 +456,11 @@ workflowWithCopyright(
         )
         verifyFailure(
             name = "Test - wsl-bash should fail if bash is not present by default",
-            conditionTransformer = { executeActionStep.getSuccessOnDistributionCondition(alpine) },
+            conditionTransformer = {
+                executeActionStep.getSuccessOnDistributionCondition(
+                    *alpineDistributions.toTypedArray()
+                )
+            },
             verificationShell = null,
             verificationTransformer = { _, command ->
                 """wsl sh -euc "${command.replace("==", "=")}""""
@@ -399,7 +473,9 @@ workflowWithCopyright(
                 additionalPackages = listOf("bash"),
                 wslVersion = null
             ),
-            condition = executeActionStep.getSuccessOnDistributionCondition(alpine)
+            condition = executeActionStep.getSuccessOnDistributionCondition(
+                *alpineDistributions.toTypedArray()
+            )
         )
         commonTests()
         verifyFailure(
@@ -478,7 +554,7 @@ workflowWithCopyright(
         )
         runAfterSuccess(
             name = "Add user test",
-            command = "useradd -m -p 4qBD5NWD3IkbU test"
+            command = expr("matrix.distribution.create-test-user-command")
         )
         executeActionStep = usesSelfAfterSuccess(
             name = "Set wsl-bash wrapper to use user test by default",
@@ -631,13 +707,15 @@ workflowWithCopyright(
                 additionalPackages = listOf("bash"),
                 wslVersion = null
             ),
-            condition = executeActionStep.getSuccessOnDistributionCondition(alpine)
+            condition = executeActionStep.getSuccessOnDistributionCondition(
+                *alpineDistributions.toTypedArray()
+            )
         )
         runAfterSuccess(
-            name = "Test - /etc/wsl.conf should exist",
+            name = "Test - /etc/wsl.conf should have expected content",
             command = """
                 [ -f /etc/wsl.conf ]
-                cat /etc/wsl.conf
+                diff -u <(echo -e '[automount]\noptions = uid=1000') /etc/wsl.conf
             """
         )
         runAfterSuccess(
@@ -672,12 +750,19 @@ workflowWithCopyright(
                 additionalPackages = listOf("bash"),
                 wslVersion = null
             ),
-            condition = executeActionStep.getSuccessOnDistributionCondition(alpine)
+            condition = executeActionStep.getSuccessOnDistributionCondition(
+                *alpineDistributions.toTypedArray()
+            )
         )
         runAfterSuccess(
-            name = "Test - /etc/wsl.conf should not exist",
-            command = "[ ! -f /etc/wsl.conf ] || { cat /etc/wsl.conf; false; }",
-            conditionTransformer = { executeActionStep.getSuccessNotOnDistributionCondition(ubuntu2404) }
+            name = "Test - /etc/wsl.conf should not exist or not have the content we will put there",
+            command = """
+                if [ -f /etc/wsl.conf ]; then
+                    if diff -u <(echo -e '[automount]\nroot = /') /etc/wsl.conf; then
+                        false
+                    fi
+                fi
+            """
         )
         runAfterSuccess(
             name = "Test - C: should be mounted at /mnt/c",
@@ -703,10 +788,10 @@ workflowWithCopyright(
             )
         )
         runAfterSuccess(
-            name = "Test - /etc/wsl.conf should exist",
+            name = "Test - /etc/wsl.conf should have expected content",
             command = """
                 [ -f /etc/wsl.conf ]
-                cat /etc/wsl.conf
+                diff -u <(echo -e '[automount]\nroot = /') /etc/wsl.conf
             """
         )
         runAfterSuccess(
@@ -791,10 +876,10 @@ workflowWithCopyright(
                 additionalPackages = listOf(
                     expr(
                         """
-                        (matrix.distribution.user-id == '${alpine.userId}')
-                        && 'bash'
-                        || ''
-                    """.trimIndent()
+                            (${getOnDistributionCondition(*alpineDistributions.toTypedArray())})
+                            && 'bash'
+                            || ''
+                        """.trimIndent()
                     )
                 ),
                 wslVersion = null,
@@ -872,10 +957,10 @@ workflowWithCopyright(
                 additionalPackages = listOf(
                     expr(
                         """
-                        (matrix.distribution.user-id == '${alpine.userId}')
-                        && 'bash'
-                        || ''
-                    """.trimIndent()
+                            (${getOnDistributionCondition(*alpineDistributions.toTypedArray())})
+                            && 'bash'
+                            || ''
+                        """.trimIndent()
                     )
                 ),
                 wslVersion = null
@@ -908,34 +993,34 @@ workflowWithCopyright(
                     "environment" to environments,
                     "distributions" to listOf(
                         mapOf(
-                            "distribution1" to debian,
+                            "distribution1" to debian11,
                             "distribution2" to ubuntu2004,
                             "distribution3" to ubuntu1804
                         ),
                         mapOf(
-                            "distribution1" to debian,
+                            "distribution1" to debian11,
                             "distribution2" to ubuntu1804,
                             "distribution3" to ubuntu2004
                         ),
                         mapOf(
                             "distribution1" to ubuntu2004,
-                            "distribution2" to debian,
+                            "distribution2" to debian11,
                             "distribution3" to ubuntu1804
                         ),
                         mapOf(
                             "distribution1" to ubuntu2004,
                             "distribution2" to ubuntu1804,
-                            "distribution3" to debian
+                            "distribution3" to debian11
                         ),
                         mapOf(
                             "distribution1" to ubuntu1804,
-                            "distribution2" to debian,
+                            "distribution2" to debian11,
                             "distribution3" to ubuntu2004
                         ),
                         mapOf(
                             "distribution1" to ubuntu1804,
                             "distribution2" to ubuntu2004,
-                            "distribution3" to debian
+                            "distribution3" to debian11
                         )
                     ).map {
                         it.mapValues { (_, distribution) -> distribution.asMap }
@@ -998,18 +1083,18 @@ workflowWithCopyright(
                 "matrix" to mapOf(
                     "environment" to environments,
                     "distribution" to distributions,
-                    "distribution2" to listOf(debian).map { it.asMap },
+                    "distribution2" to listOf(debian11).map { it.asMap },
                     "exclude" to environments.map {
                         mapOf(
                             "environment" to it,
-                            "distribution" to debian.asMap,
-                            "distribution2" to debian.asMap
+                            "distribution" to debian11.asMap,
+                            "distribution2" to debian11.asMap
                         )
                     },
                     "include" to environments.map {
                         mapOf(
                             "environment" to it,
-                            "distribution" to debian.asMap,
+                            "distribution" to debian11.asMap,
                             "distribution2" to ubuntu2004.asMap
                         )
                     }
@@ -1024,10 +1109,10 @@ workflowWithCopyright(
                 additionalPackages = listOf(
                     expr(
                         """
-                            |(matrix.distribution.user-id != '${kali.userId}')
-                            |&& 'bash'
-                            ||| ''
-                        """.trimMargin()
+                            (matrix.distribution.user-id != '${kali.userId}')
+                            && 'bash'
+                            || ''
+                        """.trimIndent()
                     )
                 ),
                 // part of work-around for https://bugs.kali.org/view.php?id=8921
@@ -1146,7 +1231,15 @@ workflowWithCopyright(
                     name = "Execute action for ${expr("matrix.distributions.distribution$it.user-id")}",
                     action = SetupWsl(
                         distribution = SetupWsl.Distribution.Custom(expr("matrix.distributions.distribution$it.user-id")),
-                        additionalPackages = if (it == 2) listOf("bash") else null,
+                        additionalPackages = listOf(
+                            expr(
+                                """
+                                    (${getOnDistributionCondition(it, *alpineDistributions.toTypedArray())})
+                                    && 'bash'
+                                    || ''
+                                """.trimIndent()
+                            )
+                        ),
                         setAsDefault = if (it >= 3) false else null,
                         wslVersion = 1
                     )
@@ -1157,7 +1250,7 @@ workflowWithCopyright(
                 verifyInstalledDistribution(
                     name = "Test - wsl-bash_${expr("matrix.distributions.distribution$i.user-id")} should use the correct distribution",
                     conditionTransformer = if (distributions[i] == ubuntu2004.asMap) {
-                        { executeActionStep.getSuccessNotOnDistributionCondition(ubuntu2004, i) }
+                        { executeActionStep.getSuccessNotOnDistributionCondition(i, ubuntu2004) }
                     } else {
                         { it }
                     },
@@ -1169,7 +1262,7 @@ workflowWithCopyright(
                 if (distributions[i] == ubuntu2004.asMap) {
                     verifyInstalledDistribution(
                         name = "Test - wsl-bash_${expr("matrix.distributions.distribution$i.user-id")} should use the correct distribution",
-                        conditionTransformer = { executeActionStep.getSuccessNotOnDistributionCondition(ubuntu2204, i) },
+                        conditionTransformer = { executeActionStep.getSuccessNotOnDistributionCondition(i, ubuntu2204) },
                         shell = Shell.Custom("wsl-bash_${distributions[i]["user-id"]} {0}"),
                         expectedPatternExpression = "matrix.distributions.distribution$i.match-pattern"
                     )
@@ -1190,7 +1283,7 @@ fun JobBuilder<*>.commonTests() {
             // do not just rely on false here, but explicitly use exit
             // in case failing commands do not make the script fail
             // and use "shell = Cmd" to capture that the wrapper script is hiding errors
-            "IF '${expr("${provocationStep.outcome}") }' NEQ 'failure' EXIT /B 1"
+            "IF '${expr("${provocationStep.outcome}")}' NEQ 'failure' EXIT /B 1"
         }
     )
     verifyFailure(
@@ -1260,7 +1353,11 @@ fun JobBuilder<*>.usesSelf(
 )
 
 fun JobBuilder<*>.deleteWslBashOnAlpine() = deleteWslBash(
-    conditionTransformer = { executeActionStep.getSuccessOnDistributionCondition(alpine)}
+    conditionTransformer = {
+        executeActionStep.getSuccessOnDistributionCondition(
+            *alpineDistributions.toTypedArray()
+        )
+    }
 )
 
 fun JobBuilder<*>.deleteWslBash(
@@ -1370,18 +1467,55 @@ val Step<*>.successCondition
         && (${outcome.eq(Success)})
     """.trimIndent()
 
-fun Step<*>.getSuccessOnDistributionCondition(distribution: Distribution, i: Int? = null) =
-    getSuccessOnOrNotOnDistributionCondition(distribution, true, i)
+fun Step<*>.getSuccessOnDistributionCondition(vararg distributions: Distribution) =
+    getSuccessOnOrNotOnDistributionCondition(distributions, true, null)
 
-fun Step<*>.getSuccessNotOnDistributionCondition(distribution: Distribution, i: Int? = null) =
-    getSuccessOnOrNotOnDistributionCondition(distribution, false, i)
+fun Step<*>.getSuccessOnDistributionCondition(i: Int, vararg distributions: Distribution) =
+    getSuccessOnOrNotOnDistributionCondition(distributions, true, i)
 
-fun Step<*>.getSuccessOnOrNotOnDistributionCondition(distribution: Distribution, on: Boolean = true, i: Int? = null) = """
-    |(
-        ${successCondition.prependIndent("|    ")}
-    |)
-    |&& (matrix.${i?.let { "distributions.distribution$it" } ?: "distribution"}.user-id ${if (on) "==" else "!="} '${distribution.userId}')
-""".trimMargin()
+fun Step<*>.getSuccessNotOnDistributionCondition(vararg distributions: Distribution) =
+    getSuccessOnOrNotOnDistributionCondition(distributions, false, null)
+
+fun Step<*>.getSuccessNotOnDistributionCondition(i: Int, vararg distributions: Distribution) =
+    getSuccessOnOrNotOnDistributionCondition(distributions, false, i)
+
+fun Step<*>.getSuccessOnOrNotOnDistributionCondition(distributions: Array<out Distribution>, on: Boolean = true, i: Int? = null): String {
+    return """
+        |(
+            ${successCondition.prependIndent("|    ")}
+        |)
+        |&& (${getOnOrNotOnDistributionCondition(distributions, on, i)})
+    """.trimMargin()
+}
+
+fun getOnDistributionCondition(vararg distributions: Distribution) =
+    getOnOrNotOnDistributionCondition(distributions, true, null)
+
+fun getOnDistributionCondition(i: Int, vararg distributions: Distribution) =
+    getOnOrNotOnDistributionCondition(distributions, true, i)
+
+fun getNotOnDistributionCondition(vararg distributions: Distribution) =
+    getOnOrNotOnDistributionCondition(distributions, false, null)
+
+fun getNotOnDistributionCondition(i: Int, vararg distributions: Distribution) =
+    getOnOrNotOnDistributionCondition(distributions, false, i)
+
+fun getOnOrNotOnDistributionCondition(
+    distributions: Array<out Distribution>,
+    on: Boolean = true,
+    i: Int? = null
+): String {
+    val contains = "${if (on) "" else "!"}contains"
+    val distributionsJson = distributions.joinToString(
+        separator = """", """",
+        prefix = """fromJSON('["""",
+        postfix = """"]')"""
+    ) {
+        it.userId
+    }
+    val distribution = "matrix.${i?.let { "distributions.distribution$it" } ?: "distribution"}.user-id"
+    return "$contains($distributionsJson, $distribution)"
+}
 
 // part of work-around for https://bugs.kali.org/view.php?id=8921
 // and https://bugs.kali.org/view.php?id=6672
@@ -1401,14 +1535,16 @@ fun getWslVersionExpression(vararg wsl2Distributions: Distribution) = """
 
 data class Distribution(
     val wslId: String,
-    val userId: String,
+    val userId: String = wslId,
     val matchPattern: String,
-    val defaultAbsentTool: String
+    val defaultAbsentTool: String,
+    val createTestUserCommand: String = "useradd -m -p 4qBD5NWD3IkbU test"
 ) {
     val asMap = mapOf(
         "wsl-id" to wslId,
         "user-id" to userId,
         "match-pattern" to matchPattern,
-        "default-absent-tool" to defaultAbsentTool
+        "default-absent-tool" to defaultAbsentTool,
+        "create-test-user-command" to createTestUserCommand
     )
 }

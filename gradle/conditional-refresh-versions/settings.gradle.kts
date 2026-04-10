@@ -1,5 +1,5 @@
 /*
- * Copyright 2020-2023 Björn Kautler
+ * Copyright 2020-2026 Björn Kautler
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,6 +15,7 @@
  */
 
 import org.gradle.api.initialization.resolve.RepositoriesMode.FAIL_ON_PROJECT_REPOS
+import org.gradle.api.initialization.resolve.RulesMode.FAIL_ON_PROJECT_RULES
 
 pluginManagement {
     repositories {
@@ -23,16 +24,35 @@ pluginManagement {
     }
 }
 
+plugins {
+    id("com.autonomousapps.build-health") version "3.6.1"
+    embeddedKotlin("jvm") apply false
+    id("org.gradle.toolchains.foojay-resolver-convention") version "1.0.0"
+    id("com.gradle.develocity") version "4.4.0"
+    id("com.gradle.common-custom-user-data-gradle-plugin") version "2.6.0"
+}
+
 dependencyResolutionManagement {
     repositories {
         mavenCentral()
         gradlePluginPortal()
     }
-    repositoriesMode.set(FAIL_ON_PROJECT_REPOS)
+    repositoriesMode = FAIL_ON_PROJECT_REPOS
+    rulesMode = FAIL_ON_PROJECT_RULES
 
     versionCatalogs {
         create("libs") {
             from(files("../libs.versions.toml"))
+        }
+    }
+}
+
+develocity {
+    buildScan {
+        publishing {
+            onlyIf {
+                System.getenv("DEVELOCITY_INJECTION_ENABLED").toBoolean()
+            }
         }
     }
 }

@@ -1,7 +1,7 @@
 #!/usr/bin/env kotlin
 
 /*
- * Copyright 2025 Björn Kautler
+ * Copyright 2025-2026 Björn Kautler
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,12 +20,12 @@
 
 @file:Repository("https://repo.maven.apache.org/maven2/")
 // work-around for https://youtrack.jetbrains.com/issue/KT-69145
-@file:DependsOn("io.github.typesafegithub:github-workflows-kt:3.2.0")
+@file:DependsOn("io.github.typesafegithub:github-workflows-kt:3.7.0")
 
 @file:Repository("https://bindings.krzeminski.it/")
-@file:DependsOn("actions:checkout___major:[v4,v5-alpha)")
-@file:DependsOn("actions:setup-java___major:[v4,v5-alpha)")
-@file:DependsOn("gradle:actions__dependency-submission___major:[v4,v5-alpha)")
+@file:DependsOn("actions:checkout___major:[v6,v7-alpha)")
+@file:DependsOn("actions:setup-java___major:[v5,v6-alpha)")
+@file:DependsOn("gradle:actions__dependency-submission___major:[v6,v7-alpha)")
 
 import io.github.typesafegithub.workflows.actions.actions.Checkout
 import io.github.typesafegithub.workflows.actions.actions.SetupJava
@@ -35,14 +35,6 @@ import io.github.typesafegithub.workflows.actions.gradle.ActionsDependencySubmis
 import io.github.typesafegithub.workflows.actions.gradle.ActionsDependencySubmission.BuildScanTermsOfUseUrl.HttpsGradleComHelpLegalTermsOfUse
 import io.github.typesafegithub.workflows.domain.RunnerType.UbuntuLatest
 import io.github.typesafegithub.workflows.domain.triggers.Push
-
-// comment in for editability with IntelliSense
-//fun workflowWithCopyright(
-//    name: String,
-//    on: List<io.github.typesafegithub.workflows.domain.triggers.Trigger>,
-//    sourceFile: java.io.File,
-//    block: io.github.typesafegithub.workflows.dsl.WorkflowBuilder.() -> Unit
-//) = Unit
 
 workflowWithCopyright(
     name = "Submit Dependency Graph",
@@ -78,7 +70,7 @@ workflowWithCopyright(
                     "--info",
                     "--stacktrace",
                     "--show-version"
-                ),
+                ).joinToString(" "),
                 buildScanPublish = true,
                 buildScanTermsOfUseUrl = HttpsGradleComHelpLegalTermsOfUse,
                 buildScanTermsOfUseAgree = Yes

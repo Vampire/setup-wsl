@@ -1,5 +1,5 @@
 /*
- * Copyright 2025 Björn Kautler
+ * Copyright 2026 Björn Kautler
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -31,6 +31,7 @@ import org.gradle.api.tasks.PathSensitive
 import org.gradle.api.tasks.PathSensitivity.RELATIVE
 import org.gradle.api.tasks.TaskAction
 import org.gradle.jvm.toolchain.JavaLauncher
+import org.gradle.kotlin.dsl.assign
 import org.gradle.kotlin.dsl.submit
 import org.gradle.work.NormalizeLineEndings
 import org.gradle.workers.WorkerExecutor
@@ -74,10 +75,10 @@ abstract class PreprocessGithubWorkflow : DefaultTask() {
     @TaskAction
     fun determineImportedFiles() {
         workerExecutor.noIsolation().submit(PreprocessGithubWorkflowWorkAction::class) {
-            workflowScript.set(this@PreprocessGithubWorkflow.workflowScript)
+            workflowScript = this@PreprocessGithubWorkflow.workflowScript
             kotlinCompilerClasspath.from(this@PreprocessGithubWorkflow.kotlinCompilerClasspath)
             mainKtsClasspath.from(this@PreprocessGithubWorkflow.mainKtsClasspath)
-            javaExecutable.set(this@PreprocessGithubWorkflow.javaLauncher.map { it.executablePath })
+            javaExecutable = this@PreprocessGithubWorkflow.javaLauncher.map { it.executablePath }
         }
     }
 }

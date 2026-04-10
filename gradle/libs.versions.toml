@@ -1,4 +1,4 @@
-# Copyright 2020-2025 Björn Kautler
+# Copyright 2020-2026 Björn Kautler
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -13,21 +13,20 @@
 # limitations under the License.
 
 [versions]
-build-github-api = "1.314"
-build-gradle-plugin-dependency-analysis = "1.19.0"
-build-gradle-plugin-github = "3.0.0"
-build-gradle-plugin-grgit = "5.0.0"
-build-gradle-plugin-refresh-versions = "0.51.0"
-build-gradle-plugin-release = "3.0.2"
-build-gradle-plugin-versions = "0.46.0"
+build-github-api = "1.330"
+build-gradle-plugin-dependency-analysis = "3.6.1"
+build-gradle-plugin-github = "4.0.0"
+build-gradle-plugin-grgit = "5.3.3"
+build-gradle-plugin-refresh-versions = "0.60.6"
+build-gradle-plugin-release = "3.1.0"
+build-gradle-plugin-versions = "0.53.0"
 build-inject = "1"
-build-kotlinx-serialization = "1.5.0"
+build-kotlinx-serialization = "1.11.0"
 build-node = "20.11.0"
-build-snakeyaml = "2.0"
-kotlin = "2.1.20"
+build-snakeyaml = "2.6"
+kotlin = "2.3.20"
 kotlinx-coroutines = "1.10.2"
-ktor = "3.1.2"
-workflows-kotlin = "2.1.20"
+workflows-kotlin = "2.3.20"
 
 [libraries]
 build-github-api = { module = "org.kohsuke:github-api", version.ref = "build-github-api" }
@@ -37,21 +36,19 @@ build-kotlinx-serialization-core = { module = "org.jetbrains.kotlinx:kotlinx-ser
 build-kotlinx-serialization-json = { module = "org.jetbrains.kotlinx:kotlinx-serialization-json" }
 build-snakeyaml = { module = "org.yaml:snakeyaml", version.ref = "build-snakeyaml" }
 kotlinx-coroutines-core = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-core", version.ref = "kotlinx-coroutines" }
-ktor-client-core = { module = "io.ktor:ktor-client-core", version.ref = "ktor" }
-ktor-client-js = { module = "io.ktor:ktor-client-js", version.ref = "ktor" }
 workflows-kotlin-compiler = { module = "org.jetbrains.kotlin:kotlin-compiler", version.ref = "workflows-kotlin" }
 workflows-kotlin-compiler-embeddable = { module = "org.jetbrains.kotlin:kotlin-compiler-embeddable", version.ref = "workflows-kotlin" }
 workflows-kotlin-main-kts = { module = "org.jetbrains.kotlin:kotlin-main-kts", version.ref = "workflows-kotlin" }
 workflows-kotlin-scripting-compiler = { module = "org.jetbrains.kotlin:kotlin-scripting-compiler", version.ref = "workflows-kotlin" }
 
 [plugins]
-convention-dependencies = { id = "net.kautler.dependencies", version = "?" }
-convention-dependency-updates-report-aggregation = { id = "net.kautler.dependency-updates-report-aggregation", version = "?" }
-convention-github_actions = { id = "net.kautler.github_actions", version = "?" }
-convention-ncc-packer = { id = "net.kautler.ncc_packer", version = "?" }
-convention-node = { id = "net.kautler.node", version = "?" }
-convention-publishing = { id = "net.kautler.publishing", version = "?" }
-convention-readme = { id = "net.kautler.readme", version = "?" }
+convention-dependencies = { id = "net.kautler.dependencies" }
+convention-dependency-updates-report-aggregatee = { id = "net.kautler.dependency-updates-report-aggregatee" }
+convention-github_actions = { id = "net.kautler.github_actions" }
+convention-ncc-packer = { id = "net.kautler.ncc_packer" }
+convention-node = { id = "net.kautler.node" }
+convention-publishing = { id = "net.kautler.publishing" }
+convention-readme = { id = "net.kautler.readme" }
 dependency-analysis = { id = "com.autonomousapps.dependency-analysis", version.ref = "build-gradle-plugin-dependency-analysis" }
 github = { id = "net.wooga.github", version.ref = "build-gradle-plugin-github" }
 grgit = { id = "org.ajoberstar.grgit.service", version.ref = "build-gradle-plugin-grgit" }

@@ -1,5 +1,5 @@
 /*
- * Copyright 2025 Björn Kautler
+ * Copyright 2025-2026 Björn Kautler
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,6 +18,7 @@ package net.kautler.githubactions
 
 import org.gradle.api.file.ConfigurableFileCollection
 import org.gradle.api.file.RegularFileProperty
+import org.gradle.kotlin.dsl.assign
 import org.gradle.process.ExecOperations
 import org.gradle.workers.WorkAction
 import org.gradle.workers.WorkParameters
@@ -34,7 +35,7 @@ abstract class PreprocessGithubWorkflowWorkAction : WorkAction<PreprocessGithubW
                 execOperations.javaexec {
                     executable = parameters.javaExecutable.get().asFile.absolutePath
                     classpath(parameters.kotlinCompilerClasspath)
-                    mainClass.set("org.jetbrains.kotlin.cli.jvm.K2JVMCompiler")
+                    mainClass = "org.jetbrains.kotlin.cli.jvm.K2JVMCompiler"
                     args("-no-stdlib", "-no-reflect")
                     args("-classpath", parameters.mainKtsClasspath.asPath)
                     args("-script", parameters.workflowScript.get().asFile.absolutePath)

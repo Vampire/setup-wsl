@@ -1,5 +1,5 @@
 /*
- * Copyright 2020-2025 Björn Kautler
+ * Copyright 2020-2026 Björn Kautler
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,6 +16,8 @@
 
 package net.kautler.nccpacker
 
+import js.array.component1
+import js.array.component2
 import js.buffer.ArrayBufferView
 import js.objects.Object
 import js.reflect.upcast
@@ -28,6 +30,7 @@ import node.process.process
 import vercel.ncc.NccBuildOptions
 import vercel.ncc.ncc
 
+@OptIn(ExperimentalWasmJsInterop::class)
 suspend fun main(vararg args: String) {
     runCatching {
         val (input, output) = args

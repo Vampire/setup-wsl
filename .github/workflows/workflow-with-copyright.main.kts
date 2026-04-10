@@ -1,5 +1,5 @@
 /*
- * Copyright 2020-2025 Björn Kautler
+ * Copyright 2020-2026 Björn Kautler
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,7 +15,7 @@
  */
 
 @file:Repository("https://repo.maven.apache.org/maven2/")
-@file:DependsOn("io.github.typesafegithub:github-workflows-kt:3.2.0")
+@file:DependsOn("io.github.typesafegithub:github-workflows-kt:3.7.0")
 
 import io.github.typesafegithub.workflows.domain.Concurrency
 import io.github.typesafegithub.workflows.domain.triggers.Trigger
@@ -23,6 +23,8 @@ import io.github.typesafegithub.workflows.dsl.WorkflowBuilder
 import io.github.typesafegithub.workflows.dsl.expressions.Contexts.github
 import io.github.typesafegithub.workflows.dsl.expressions.expr
 import io.github.typesafegithub.workflows.dsl.workflow
+import io.github.typesafegithub.workflows.yaml.CheckoutActionVersionSource.InferFromClasspath
+import io.github.typesafegithub.workflows.yaml.DEFAULT_CONSISTENCY_CHECK_JOB_CONFIG
 import io.github.typesafegithub.workflows.yaml.Preamble.WithOriginalAfter
 import java.io.File
 
@@ -42,9 +44,12 @@ fun workflowWithCopyright(
             group = "${expr { github.workflow }}-${expr("${github.eventPullRequest.pull_request.number} || ${github.ref}")}",
             cancelInProgress = true
         ),
+        consistencyCheckJobConfig = DEFAULT_CONSISTENCY_CHECK_JOB_CONFIG.copy(
+            checkoutActionVersion = InferFromClasspath()
+        ),
         preamble = WithOriginalAfter(
             """
-                Copyright 2020-2025 Björn Kautler
+                Copyright 2020-2026 Björn Kautler
 
                 Licensed under the Apache License, Version 2.0 (the "License");
                 you may not use this file except in compliance with the License.

@@ -1,5 +1,5 @@
 /*
- * Copyright 2020-2023 Björn Kautler
+ * Copyright 2020-2026 Björn Kautler
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -31,14 +31,15 @@ import kotlinx.serialization.encoding.decodeStructure
 import kotlinx.serialization.encoding.encodeStructure
 
 object DependencyUnresolvedSerializer : KSerializer<DependencyUnresolved> {
-    override val descriptor = buildClassSerialDescriptor("com.github.benmanes.gradle.versions.reporter.result.DependencyUnresolved") {
-        element<String?>("group")
-        element<String?>("name")
-        element<String?>("version")
-        element<String?>("projectUrl")
-        element<String?>("userReason")
-        element<String>("reason")
-    }
+    override val descriptor =
+        buildClassSerialDescriptor("com.github.benmanes.gradle.versions.reporter.result.DependencyUnresolved") {
+            element<String?>("group")
+            element<String?>("name")
+            element<String?>("version")
+            element<String?>("projectUrl")
+            element<String?>("userReason")
+            element<String>("reason")
+        }
 
     override fun deserialize(decoder: Decoder) = decoder.decodeStructure(descriptor) {
         var group: String? = null

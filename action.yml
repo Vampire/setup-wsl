@@ -1,4 +1,4 @@
-# Copyright 2020-2022 Björn Kautler
+# Copyright 2020-2026 Björn Kautler
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -27,7 +27,26 @@ inputs:
             'Ubuntu-22.04' and 'Ubuntu-20.04' can not be used together at the same time.
             They use the same WSL distribution ID, so the second that is used will not be installed
             as the first one will be found as already installed by WSL distribution ID.
-            Valid values: 'Alpine', 'Debian', 'kali-linux', 'openSUSE-Leap-15.2', 'Ubuntu-24.04', 'Ubuntu-22.04', 'Ubuntu-20.04', 'Ubuntu-18.04', 'Ubuntu-16.04'
+            Valid values:
+                - 'Alpine-3.23'
+                - 'Alpine-3.22'
+                - 'Alpine-3.21'
+                - 'Alpine-3.20'
+                - 'Alpine-3.19'
+                - 'Alpine-3.18'
+                - 'Alpine-3.17'
+                - 'Alpine' (deprecated, 'Alpine-3.17' is a drop-in replacement, except for the wsl-shell-distribution-wrapper name)
+                - 'Debian-13'
+                - 'Debian-12'
+                - 'Debian-11'
+                - 'Debian' (deprecated, 'Debian-11' is a drop-in replacement, except for the wsl-shell-distribution-wrapper name)
+                - 'kali-linux'
+                - 'openSUSE-Leap-15.2'
+                - 'Ubuntu-24.04'
+                - 'Ubuntu-22.04'
+                - 'Ubuntu-20.04'
+                - 'Ubuntu-18.04'
+                - 'Ubuntu-16.04'
         required: false
         default: Debian
 
@@ -48,6 +67,11 @@ inputs:
             This can be used to adjust various settings as documented at
             https://docs.microsoft.com/en-us/windows/wsl/wsl-config#configuration-settings-for-wslconf.
             This can also be used if the distribution is installed already.
+
+            WARNING: Setting this option will overwrite any existing content of the file.
+            Some distributions like Debian-12+ and Ubuntu-24.04+ ship with a default wsl.conf file.
+            Make sure to check whether a file exists by default and whether you want to include
+            its contents in your configured value.
         required: false
 
     set-as-default:

@@ -145,8 +145,18 @@ so the second that is used will not be installed as the first one will be found 
 WSL distribution ID.
 
 The values currently supported by this action are:
-* `Debian` **(default)**
-* `Alpine`
+* `Alpine-3.23`
+* `Alpine-3.22`
+* `Alpine-3.21`
+* `Alpine-3.20`
+* `Alpine-3.19`
+* `Alpine-3.18`
+* `Alpine-3.17`
+* `Alpine` _(deprecated, 'Alpine-3.17' is a drop-in replacement, except for the wsl-shell-distribution-wrapper name)_
+* `Debian-13`
+* `Debian-12`
+* `Debian-11`
+* `Debian` **(default)** _(deprecated, 'Debian-11' is a drop-in replacement, except for the wsl-shell-distribution-wrapper name)_
 * `kali-linux`
 * `openSUSE-Leap-15.2`
 * `Ubuntu-24.04`
@@ -187,8 +197,8 @@ https://docs.microsoft.com/en-us/windows/wsl/wsl-config#configuration-settings-f
 This can also be used if the distribution is installed already.
 
 **WARNING:** Setting this option will overwrite any existing content of the file.
-Some distributions like Ubuntu-24.04 might already ship with a wsl.conf file.
-Make sure to check whether a file exists by default and whether you want to included
+Some distributions like Debian-12+ and Ubuntu-24.04+ ship with a default wsl.conf file.
+Make sure to check whether a file exists by default and whether you want to include
 its contents in your configured value.
 
 **Default value:** none
@@ -378,7 +388,7 @@ License
 -------
 
 ```
-Copyright 2020-2023 Björn Kautler
+Copyright 2020-2026 Björn Kautler
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.

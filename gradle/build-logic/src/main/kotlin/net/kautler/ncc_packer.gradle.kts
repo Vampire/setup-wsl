@@ -1,5 +1,5 @@
 /*
- * Copyright 2020-2025 Björn Kautler
+ * Copyright 2020-2026 Björn Kautler
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,6 +19,7 @@ package net.kautler
 import org.gradle.accessors.dm.LibrariesForLibs
 import org.gradle.accessors.dm.LibrariesForKotlinWrappers
 import org.gradle.kotlin.dsl.configure
+import org.gradle.kotlin.dsl.getValue
 import org.gradle.kotlin.dsl.withType
 import org.jetbrains.kotlin.gradle.targets.js.dsl.ExperimentalMainFunctionArgumentsDsl
 import org.jetbrains.kotlin.gradle.targets.js.nodejs.NodeJsEnvSpec
@@ -56,7 +57,7 @@ kotlin {
 
 tasks.withType<KotlinCompilationTask<*>>().configureEach {
     compilerOptions {
-        allWarningsAsErrors.set(true)
+        allWarningsAsErrors = true
     }
 }
 
@@ -68,21 +69,11 @@ tasks.withType<IncrementalSyncTask>().configureEach {
 }
 
 configure<NodeJsEnvSpec> {
-    downloadBaseUrl.set(provider { null })
+    downloadBaseUrl = provider { null }
 }
 
-// work-around for missing feature in dependencies block added in Gradle 8.3
-//val setupWsl by configurations.registering {
-val setupWslExecutable by configurations.creating {
-    isCanBeConsumed = false
-    isCanBeResolved = false
-    isVisible = false
-}
-
-val setupWslExecutableFile by configurations.registering {
-    isCanBeConsumed = false
-    isCanBeResolved = true
-    isVisible = false
+val setupWslExecutable = configurations.dependencyScope("setupWslExecutable")
+val setupWslExecutableFile = configurations.resolvable("setupWslExecutableFile") {
     extendsFrom(setupWslExecutable)
 }
 
@@ -108,7 +99,7 @@ tasks.withType<NodeJsExec>().configureEach {
 
         init {
             input.fileProvider(setupWslExecutableFile)
-            this.destinationDirectory.set(destinationDirectory)
+            this.destinationDirectory = destinationDirectory
         }
 
         override fun asArguments(): Iterable<String> =
@@ -132,16 +123,9 @@ tasks.withType<NodeJsExec>().configureEach {
     }
 }
 
-val setupWslDistribution by configurations.registering {
-    isCanBeConsumed = true
-    isCanBeResolved = false
-    isVisible = false
-}
-
-artifacts {
+configurations.consumable("setupWslDistribution") {
     val jsNodeProductionRun by tasks.existing
-    add(
-        setupWslDistribution.name,
+    outgoing.artifact(
         jsNodeProductionRun.map {
             val output: Provider<Directory> by it.extra
             output.get()

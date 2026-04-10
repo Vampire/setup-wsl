@@ -1,5 +1,5 @@
 /*
- * Copyright 2020-2025 Björn Kautler
+ * Copyright 2020-2026 Björn Kautler
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,12 +17,9 @@
 import de.fayard.refreshVersions.core.FeatureFlag.GRADLE_UPDATES
 import net.kautler.conditionalRefreshVersions
 import org.gradle.api.initialization.resolve.RepositoriesMode.FAIL_ON_PROJECT_REPOS
+import org.gradle.api.initialization.resolve.RulesMode.FAIL_ON_PROJECT_RULES
 
 pluginManagement {
-    require(JavaVersion.current().isJava11Compatible) {
-        "This build requires Gradle to be run with at least Java 11"
-    }
-
     includeBuild("gradle/build-logic")
     includeBuild("gradle/conditional-refresh-versions")
     repositories {
@@ -33,8 +30,12 @@ pluginManagement {
 
 plugins {
     id("net.kautler.conditional-refresh-versions")
-    id("com.gradle.develocity") version "4.0.1"
-    id("com.gradle.common-custom-user-data-gradle-plugin") version "2.2.1"
+    // part of work-around for https://github.com/autonomousapps/dependency-analysis-gradle-plugin/issues/1672
+    //id("com.autonomousapps.build-health") version "3.6.1"
+    //kotlin("multiplatform") version "2.1.20" apply false
+    id("org.gradle.toolchains.foojay-resolver-convention") version "1.0.0"
+    id("com.gradle.develocity") version "4.4.0"
+    id("com.gradle.common-custom-user-data-gradle-plugin") version "2.6.0"
 }
 
 conditionalRefreshVersions {
@@ -44,25 +45,25 @@ conditionalRefreshVersions {
     rejectVersionIf {
         candidate.stabilityLevel.isLessStableThan(current.stabilityLevel)
     }
-    // work-around for https://github.com/jmfayard/refreshVersions/issues/662
-    file("build/tmp/refreshVersions").mkdirs()
-    // work-around for https://github.com/jmfayard/refreshVersions/issues/640
-    versionsPropertiesFile = file("build/tmp/refreshVersions/versions.properties")
+    // work-around for https://github.com/Splitties/refreshVersions/issues/662
+    layout.rootDirectory.dir("build/tmp/refreshVersions").asFile.mkdirs()
+    // work-around for https://github.com/Splitties/refreshVersions/issues/640
+    versionsPropertiesFile = layout.rootDirectory.file("build/tmp/refreshVersions/versions.properties").asFile
 }
 
 gradle.rootProject {
-    tasks.configureEach {
-        if (name == "refreshVersions") {
-            doLast {
-                // work-around for https://github.com/jmfayard/refreshVersions/issues/661
-                // and https://github.com/jmfayard/refreshVersions/issues/663
-                file("gradle/libs.versions.toml").apply {
-                    readText()
-                        .replace("⬆ =", " ⬆ =")
-                        .replace("]\n\n", "]\n")
-                        .replace("""(?s)^(.*)(\n\Q[plugins]\E[^\[]*)(\n.*)$""".toRegex(), "$1$3$2")
-                        .also { writeText(it) }
-                }
+    tasks.named { it == "refreshVersions" }.configureEach {
+        val layout = layout
+        doLast {
+            // work-around for https://github.com/Splitties/refreshVersions/issues/661
+            // and https://github.com/Splitties/refreshVersions/issues/663
+            layout.projectDirectory.file("gradle/libs.versions.toml").asFile.apply {
+                readText()
+                    .replace("⬆ =", " ⬆ =")
+                    .replace("⬆=", "⬆ =")
+                    .replace("]\n\n", "]\n")
+                    .replace("""(?s)^(.*)(\n\Q[plugins]\E[^\[]*)(\n.*)$""".toRegex(), "$1$3$2")
+                    .also { writeText(it) }
             }
         }
     }
@@ -96,11 +97,12 @@ dependencyResolutionManagement {
         }
         mavenCentral()
     }
-    repositoriesMode.set(FAIL_ON_PROJECT_REPOS)
+    repositoriesMode = FAIL_ON_PROJECT_REPOS
+    rulesMode = FAIL_ON_PROJECT_RULES
 
     versionCatalogs {
         val kotlinWrappers by registering {
-            from("org.jetbrains.kotlin-wrappers:kotlin-wrappers-catalog:2025.5.2")
+            from("org.jetbrains.kotlin-wrappers:kotlin-wrappers-catalog:2026.4.5")
         }
     }
 }

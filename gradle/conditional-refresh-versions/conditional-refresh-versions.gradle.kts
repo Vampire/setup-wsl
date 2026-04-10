@@ -1,5 +1,5 @@
 /*
- * Copyright 2020-2023 Björn Kautler
+ * Copyright 2020-2026 Björn Kautler
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,7 +19,7 @@ import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 plugins {
     `kotlin-dsl`
     alias(libs.plugins.versions)
-    alias(libs.plugins.dependency.analysis)
+    id(libs.plugins.dependency.analysis.get().pluginId)
 }
 
 dependencies {
@@ -27,7 +27,7 @@ dependencies {
 }
 
 dependencyAnalysis {
-    dependencies {
+    structure {
         bundle("de.fayard.refreshVersions.gradle.plugin") {
             includeDependency("de.fayard.refreshVersions:de.fayard.refreshVersions.gradle.plugin")
             includeDependency("de.fayard.refreshVersions:refreshVersions")
@@ -39,13 +39,24 @@ dependencyAnalysis {
             onAny {
                 severity("fail")
             }
+            // work-around for https://github.com/autonomousapps/dependency-analysis-gradle-plugin/issues/1629
+            onDuplicateClassWarnings {
+                severity("fail")
+            }
         }
     }
+    reporting {
+        printBuildHealth(true)
+    }
+}
+
+tasks.check {
+    dependsOn(tasks.buildHealth)
 }
 
 tasks.withType<KotlinCompile>().configureEach {
     compilerOptions {
-        allWarningsAsErrors.set(true)
+        allWarningsAsErrors = true
     }
 }
 

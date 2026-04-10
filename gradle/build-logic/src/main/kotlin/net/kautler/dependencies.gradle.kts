@@ -1,5 +1,5 @@
 /*
- * Copyright 2020-2023 Björn Kautler
+ * Copyright 2020-2026 Björn Kautler
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,31 +16,38 @@
 
 package net.kautler
 
+import kotlinx.serialization.json.Json
+import kotlinx.serialization.json.JsonObject
+import kotlinx.serialization.json.jsonArray
+import kotlinx.serialization.json.jsonPrimitive
 import net.kautler.util.NullOutputStream
+import net.kautler.util.PreliminaryReleaseFilter
+import net.kautler.util.ProblemsProvider
 import net.kautler.util.add
 import net.kautler.util.ignoredDependencies
-import java.net.URL
+import org.gradle.kotlin.dsl.newInstance
 import java.security.DigestInputStream
 import java.security.MessageDigest
 
 plugins {
-    id("net.kautler.dependency-updates-report-aggregation")
-    id("com.autonomousapps.dependency-analysis")
+    `lifecycle-base`
+    id("net.kautler.dependency-updates-report-aggregator")
+    // part of work-around for https://github.com/autonomousapps/dependency-analysis-gradle-plugin/issues/1672
+    //id("com.autonomousapps.dependency-analysis")
 }
 
 val majorVersion by extra("$version".substringBefore('.'))
 
 val validateGradleWrapperJar by tasks.registering {
-    onlyIf {
-        !gradle.startParameter.isOffline
-    }
+    val offlineBuild = gradle.startParameter.isOffline
+    onlyIf { !offlineBuild }
 
+    val resources = resources
+    val projectDirectory = layout.projectDirectory
+    val problemReporter = objects.newInstance<ProblemsProvider>().problems.reporter
     doLast {
-        val expectedDigest = URL("https://services.gradle.org/distributions/gradle-${gradle.gradleVersion}-wrapper.jar.sha256").readText()
-
         val sha256 = MessageDigest.getInstance("SHA-256")
-        layout
-            .projectDirectory
+        projectDirectory
             .dir("gradle")
             .dir("wrapper")
             .file("gradle-wrapper.jar")
@@ -48,12 +55,40 @@ val validateGradleWrapperJar by tasks.registering {
             .inputStream()
             .let { DigestInputStream(it, sha256) }
             .use { it.copyTo(NullOutputStream()) }
-        val actualDigest = sha256.digest().let {
+        val currentWrapperChecksum = sha256.digest().let {
             "%02x".repeat(it.size).format(*it.toTypedArray())
         }
 
-        check(expectedDigest == actualDigest) {
-            "The wrapper JAR does not match the configured Gradle version, please update the wrapper"
+        val gradleVersionOfWrapper = resources.text.fromUri("https://services.gradle.org/versions/all")
+            .asString()
+            .let(Json.Default::parseToJsonElement)
+            .jsonArray
+            .asSequence()
+            .filterIsInstance<JsonObject>()
+            .find {
+                it["wrapperChecksumUrl"]
+                    ?.jsonPrimitive
+                    ?.content
+                    ?.let(resources.text::fromUri)
+                    ?.asString() == currentWrapperChecksum
+            }
+            ?.get("version")
+            ?.jsonPrimitive
+            ?.content
+            ?.let(GradleVersion::version)
+
+        if((gradleVersionOfWrapper == null) || (gradleVersionOfWrapper < GradleVersion.current())) {
+            throw problemReporter.throwing(
+                IllegalStateException(),
+                ProblemId.create(
+                    "the-wrapper-jar-is-not-from-the-configured-gradle-version-or-newer",
+                    "The wrapper JAR is not from the configured Gradle version or newer",
+                    ProblemGroup.create("build-authoring", "Build Authoring")
+                )
+            ) {
+                solution("Update the wrapper to the version of Gradle or newer")
+                severity(Severity.ERROR)
+            }
         }
     }
 }
@@ -61,33 +96,57 @@ val validateGradleWrapperJar by tasks.registering {
 tasks.dependencyUpdates {
     dependsOn(validateGradleWrapperJar)
 
+    rejectVersionIf {
+        if (PreliminaryReleaseFilter.reject(this)) {
+            reject("preliminary release")
+        }
+
+        // branches above already rejected with appropriate reason
+        return@rejectVersionIf false
+    }
+
     ignoredDependencies {
         // This plugin should always be used without version as it is tightly
         // tied to the Gradle version that is building the precompiled script plugins
         add(group = "org.gradle.kotlin.kotlin-dsl", name = "org.gradle.kotlin.kotlin-dsl.gradle.plugin")
         // These dependencies are used in the build logic so should match the
         // embedded Kotlin version and not be upgraded independently
+        add(group = "org.jetbrains.kotlin", name = "kotlin-assignment-compiler-plugin-embeddable")
+        add(group = "org.jetbrains.kotlin", name = "kotlin-build-tools-compat")
+        add(group = "org.jetbrains.kotlin", name = "kotlin-build-tools-impl")
         add(group = "org.jetbrains.kotlin", name = "kotlin-compiler-embeddable")
-        add(group = "org.jetbrains.kotlin", name = "kotlin-klib-commonizer-embeddable")
         add(group = "org.jetbrains.kotlin", name = "kotlin-reflect")
-        add(group = "org.jetbrains.kotlin", name = "kotlin-sam-with-receiver")
+        add(group = "org.jetbrains.kotlin", name = "kotlin-sam-with-receiver-compiler-plugin-embeddable")
         add(group = "org.jetbrains.kotlin", name = "kotlin-scripting-compiler-embeddable")
-        add(group = "org.jetbrains.kotlin", name = "kotlin-stdlib-jdk8")
+        add(group = "org.jetbrains.kotlin", name = "kotlin-stdlib")
     }
 }
 
-dependencyAnalysis {
-    issues {
-        all {
-            onAny {
-                severity("fail")
-            }
-        }
-    }
+// part of work-around for https://github.com/autonomousapps/dependency-analysis-gradle-plugin/issues/1672
+//dependencyAnalysis {
+//    issues {
+//        all {
+//            onAny {
+//                severity("fail")
+//            }
+//            // work-around for https://github.com/autonomousapps/dependency-analysis-gradle-plugin/issues/1629
+//            onDuplicateClassWarnings {
+//                severity("fail")
+//            }
+//        }
+//    }
+//    reporting {
+//        printBuildHealth(true)
+//    }
+//}
+//
+//tasks.buildHealth {
+val buildHealth by tasks.registering {
+    dependsOn(gradle.includedBuilds.map { it.task(":buildHealth") })
 }
 
-tasks.configureEach {
-    if (name == "buildHealth") {
-        dependsOn(gradle.includedBuilds.map { it.task(":buildHealth") })
-    }
+tasks.check {
+    // part of work-around for https://github.com/autonomousapps/dependency-analysis-gradle-plugin/issues/1672
+    //dependsOn(tasks.buildHealth)
+    dependsOn(buildHealth)
 }

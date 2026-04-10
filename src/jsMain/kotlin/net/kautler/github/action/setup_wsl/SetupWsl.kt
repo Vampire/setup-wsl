@@ -1,5 +1,5 @@
 /*
- * Copyright 2020-2025 Björn Kautler
+ * Copyright 2020-2026 Björn Kautler
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -39,6 +39,7 @@ import actions.io.mkdirP
 import actions.io.mv
 import actions.io.which
 import actions.tool.cache.cacheDir
+import actions.tool.cache.cacheFile
 import actions.tool.cache.downloadTool
 import actions.tool.cache.find
 import kotlinx.coroutines.CoroutineStart.LAZY
@@ -52,8 +53,12 @@ import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.onStart
+import net.kautler.github.action.setup_wsl.InstallMethod.APP_BUNDLE
+import net.kautler.github.action.setup_wsl.InstallMethod.TARBALL
+import net.kautler.github.action.setup_wsl.InstallMethod.WSL_FILE
 import node.buffer.Buffer
 import node.buffer.BufferEncoding
+import node.buffer.utf16le
 import node.fs.exists
 import node.fs.mkdtemp
 import node.fs.readdir
@@ -62,7 +67,8 @@ import node.os.tmpdir
 import node.path.path
 import node.process.Platform
 import node.process.process
-import nullwritable.NullWritable
+import node.process.win32
+import node.stream.NullWritable
 import org.w3c.dom.url.URL
 import kotlin.time.Duration
 import kotlin.time.Duration.Companion.minutes
@@ -105,8 +111,29 @@ val wslHelp = GlobalScope.async(start = LAZY) {
 
 val distribution by lazy {
     val distributionId = getInput("distribution", InputOptions(required = true))
+    val distribution = distributions[distributionId]
 
-    return@lazy requireNotNull(distributions[distributionId]) {
+    when (distribution) {
+        Alpine -> warning(
+            """
+                'Alpine' distribution is deprecated.
+                Please migrate to a versioned distribution such as 'Alpine-3.23'.
+                'Alpine-3.17' is a drop-in replacement, except for the wsl-shell-distribution-wrapper name.
+            """.trimIndent()
+        )
+
+        Debian -> warning(
+            """
+                'Debian' distribution is deprecated.
+                Please migrate to a versioned distribution such as 'Debian-13'.
+                'Debian-11' is a drop-in replacement, except for the wsl-shell-distribution-wrapper name.
+            """.trimIndent()
+        )
+
+        else -> Unit
+    }
+
+    return@lazy requireNotNull(distribution) {
         "'${distributionId}' is not a valid distribution. Valid values: ${
             distributions.keys.sortedWith(String.CASE_INSENSITIVE_ORDER).joinToString()
         }"
@@ -180,30 +207,49 @@ val distributionDirectory = GlobalScope.async(start = LAZY) {
 
     val cacheKey = "2:distributionDirectory_${distribution.distributionName}_${distribution.version}"
 
+    val installerFile = when (distribution.installMethod) {
+        TARBALL, WSL_FILE -> distribution.downloadFileName
+        APP_BUNDLE -> distribution.installerFile!!
+    }
+
     val restoredKey = if (useCache) restoreCache(arrayOf(cacheDirectory), cacheKey) else null
     if (restoredKey != null) {
-        if (exists(path.join(cacheDirectory, distribution.installerFile))) {
+        if (exists(path.join(cacheDirectory, installerFile))) {
             return@async cacheDirectory
         }
     }
 
-    val distributionDownload = downloadTool("${distribution.downloadUrl()}")
-    var extractedDistributionDirectory = extractZip(distributionDownload)
+    val distributionDownload = downloadTool("${distribution.downloadUrl}")
 
-    if (!exists(path.join(extractedDistributionDirectory, distribution.installerFile))) {
-        extractedDistributionDirectory = readdir(extractedDistributionDirectory)
-            .asFlow()
-            .filter { it.contains("""(?<!_(?:scale-(?:100|125|150|400)|ARM64))\.appx$""".toRegex()) }
-            .map { extractZip(path.join(extractedDistributionDirectory, it)) }
-            .firstOrNull { exists(path.join(it, distribution.installerFile)) }
-            ?: error("'${distribution.installerFile}' not found for distribution '${distribution.userId}'")
+    when (distribution.installMethod) {
+        TARBALL, WSL_FILE -> {
+            cacheDirectory = cacheFile(
+                distributionDownload,
+                installerFile,
+                distribution.distributionName,
+                "${distribution.version}"
+            )
+        }
+
+        APP_BUNDLE -> {
+            var extractedDistributionDirectory = extractZip(distributionDownload)
+
+            if (!exists(path.join(extractedDistributionDirectory, installerFile))) {
+                extractedDistributionDirectory = readdir(extractedDistributionDirectory)
+                    .asFlow()
+                    .filter { it.contains("""(?<!_(?:scale-(?:100|125|150|400)|ARM64))\.appx$""".toRegex()) }
+                    .map { extractZip(path.join(extractedDistributionDirectory, it)) }
+                    .firstOrNull { exists(path.join(it, installerFile)) }
+                    ?: error("'$installerFile' not found for distribution '${distribution.userId}'")
+            }
+
+            cacheDirectory = cacheDir(
+                extractedDistributionDirectory,
+                distribution.distributionName,
+                "${distribution.version}"
+            )
+        }
     }
-
-    cacheDirectory = cacheDir(
-        extractedDistributionDirectory,
-        distribution.distributionName,
-        "${distribution.version}"
-    )
 
     if (useCache) {
         saveCache(arrayOf(cacheDirectory), cacheKey)
@@ -273,6 +319,8 @@ val wslShellName by lazy {
 }
 
 val wslShellWrapperDirectory = path.join(process.env["RUNNER_TEMP"]!!, "wsl-shell-wrapper")
+
+val wslInstallationsDirectory = path.join(process.env["RUNNER_TEMP"]!!, "wsl")
 
 val wslShellWrapperPath by lazy {
     path.join(wslShellWrapperDirectory, "wsl-$wslShellName.bat")
@@ -403,11 +451,52 @@ suspend fun installDistribution() {
         waitForWslStatusNotContaining("WSL is finishing an upgrade...")
     }
 
-    exec(
-        commandLine = """"${path.join(distributionDirectory(), distribution.installerFile)}"""",
-        args = arrayOf("install", "--root"),
-        options = ExecOptions(input = Buffer.from(""))
+    val installerFile = path.join(
+        distributionDirectory(),
+        when (distribution.installMethod) {
+            TARBALL, WSL_FILE -> distribution.downloadFileName
+            APP_BUNDLE -> distribution.installerFile!!
+        }
     )
+
+    when (distribution.installMethod) {
+        WSL_FILE if (wslHelp().contains("--from-file")) -> {
+            exec(
+                commandLine = "wsl",
+                args = arrayOf(
+                    "--install",
+                    "--from-file",
+                    installerFile,
+                    // skip the OOBE script that prompts for interactive user creation
+                    "--no-launch",
+                    "--name",
+                    distribution.wslId
+                )
+            )
+        }
+
+        TARBALL, WSL_FILE -> {
+            val installLocation = path.join(wslInstallationsDirectory, distribution.wslId)
+            mkdirP(installLocation)
+            exec(
+                commandLine = "wsl",
+                args = arrayOf(
+                    "--import",
+                    distribution.wslId,
+                    installLocation,
+                    installerFile
+                )
+            )
+        }
+
+        APP_BUNDLE -> {
+            exec(
+                commandLine = """"$installerFile"""",
+                args = arrayOf("install", "--root"),
+                options = ExecOptions(input = Buffer.from(""))
+            )
+        }
+    }
 }
 
 suspend fun waitForWslStatusNotContaining(
@@ -472,18 +561,7 @@ suspend fun writeWslShellWrapper() {
             options = ExecOptions(ignoreReturnCode = true)
         ) == 0
         if (!wslShellUserExists) {
-            exec(
-                commandLine = "wsl",
-                args = arrayOf(
-                    "--distribution",
-                    wslId(),
-                    "useradd",
-                    "-m",
-                    "-p",
-                    "4qBD5NWD3IkbU",
-                    wslShellUser
-                )
-            )
+            distribution.createUser(wslShellUser)
         }
     }
 
