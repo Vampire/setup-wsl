@@ -153,6 +153,7 @@ The values currently supported by this action are:
 * `Alpine-3.18`
 * `Alpine-3.17`
 * `Alpine` _(deprecated, 'Alpine-3.17' is a drop-in replacement, except for the wsl-shell-distribution-wrapper name)_
+* `Debian-12`
 * `Debian-11`
 * `Debian` **(default)** _(deprecated, 'Debian-11' is a drop-in replacement, except for the wsl-shell-distribution-wrapper name)_
 * `kali-linux`
@@ -195,8 +196,8 @@ https://docs.microsoft.com/en-us/windows/wsl/wsl-config#configuration-settings-f
 This can also be used if the distribution is installed already.
 
 **WARNING:** Setting this option will overwrite any existing content of the file.
-Some distributions like Ubuntu-24.04 might already ship with a wsl.conf file.
-Make sure to check whether a file exists by default and whether you want to included
+Some distributions like Debian-12+ and Ubuntu-24.04+ ship with a default wsl.conf file.
+Make sure to check whether a file exists by default and whether you want to include
 its contents in your configured value.
 
 **Default value:** none

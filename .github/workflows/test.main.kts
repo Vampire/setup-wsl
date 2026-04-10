@@ -134,6 +134,12 @@ val alpineDistributions = listOf(
     alpine
 )
 
+val debian12 = Distribution(
+    wslId = "Debian-12",
+    matchPattern = "*Debian*12*",
+    defaultAbsentTool = "dos2unix"
+)
+
 val debian11 = Distribution(
     wslId = "Debian",
     userId = "Debian-11",
@@ -194,6 +200,7 @@ val ubuntu1604 = Distribution(
 
 val distributions = listOf(
     *alpineDistributions.toTypedArray(),
+    debian12,
     debian11,
     debian,
     kali,

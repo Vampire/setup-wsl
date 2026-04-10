@@ -55,6 +55,7 @@ import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.onStart
 import net.kautler.github.action.setup_wsl.InstallMethod.APP_BUNDLE
 import net.kautler.github.action.setup_wsl.InstallMethod.TARBALL
+import net.kautler.github.action.setup_wsl.InstallMethod.WSL_FILE
 import node.buffer.Buffer
 import node.buffer.BufferEncoding
 import node.buffer.utf16le
@@ -124,7 +125,7 @@ val distribution by lazy {
         Debian -> warning(
             """
                 'Debian' distribution is deprecated.
-                Please migrate to a versioned distribution such as 'Debian-11'.
+                Please migrate to a versioned distribution such as 'Debian-12'.
                 'Debian-11' is a drop-in replacement, except for the wsl-shell-distribution-wrapper name.
             """.trimIndent()
         )
@@ -207,7 +208,7 @@ val distributionDirectory = GlobalScope.async(start = LAZY) {
     val cacheKey = "2:distributionDirectory_${distribution.distributionName}_${distribution.version}"
 
     val installerFile = when (distribution.installMethod) {
-        TARBALL -> distribution.downloadFileName
+        TARBALL, WSL_FILE -> distribution.downloadFileName
         APP_BUNDLE -> distribution.installerFile!!
     }
 
@@ -221,7 +222,7 @@ val distributionDirectory = GlobalScope.async(start = LAZY) {
     val distributionDownload = downloadTool("${distribution.downloadUrl}")
 
     when (distribution.installMethod) {
-        TARBALL -> {
+        TARBALL, WSL_FILE -> {
             cacheDirectory = cacheFile(
                 distributionDownload,
                 installerFile,
@@ -453,13 +454,28 @@ suspend fun installDistribution() {
     val installerFile = path.join(
         distributionDirectory(),
         when (distribution.installMethod) {
-            TARBALL -> distribution.downloadFileName
+            TARBALL, WSL_FILE -> distribution.downloadFileName
             APP_BUNDLE -> distribution.installerFile!!
         }
     )
 
     when (distribution.installMethod) {
-        TARBALL -> {
+        WSL_FILE if (wslHelp().contains("--from-file")) -> {
+            exec(
+                commandLine = "wsl",
+                args = arrayOf(
+                    "--install",
+                    "--from-file",
+                    installerFile,
+                    // skip the OOBE script that prompts for interactive user creation
+                    "--no-launch",
+                    "--name",
+                    distribution.wslId
+                )
+            )
+        }
+
+        TARBALL, WSL_FILE -> {
             val installLocation = path.join(wslInstallationsDirectory, distribution.wslId)
             mkdirP(installLocation)
             exec(
