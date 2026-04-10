@@ -180,7 +180,7 @@ jobs:
         distribution:
         - wsl-id: 'Debian'
           user-id: 'Debian'
-          match-pattern: '*Debian*'
+          match-pattern: '*Debian*11*'
           default-absent-tool: 'dos2unix'
     steps:
     - id: 'step-0'
@@ -389,8 +389,12 @@ jobs:
         - 'windows-latest'
         distribution:
         - wsl-id: 'Debian'
+          user-id: 'Debian-11'
+          match-pattern: '*Debian*11*'
+          default-absent-tool: 'dos2unix'
+        - wsl-id: 'Debian'
           user-id: 'Debian'
-          match-pattern: '*Debian*'
+          match-pattern: '*Debian*11*'
           default-absent-tool: 'dos2unix'
         - wsl-id: 'MyDistribution'
           user-id: 'kali-linux'
@@ -909,8 +913,12 @@ jobs:
         - 'windows-latest'
         distribution:
         - wsl-id: 'Debian'
+          user-id: 'Debian-11'
+          match-pattern: '*Debian*11*'
+          default-absent-tool: 'dos2unix'
+        - wsl-id: 'Debian'
           user-id: 'Debian'
-          match-pattern: '*Debian*'
+          match-pattern: '*Debian*11*'
           default-absent-tool: 'dos2unix'
         - wsl-id: 'MyDistribution'
           user-id: 'kali-linux'
@@ -1019,8 +1027,12 @@ jobs:
         - 'windows-latest'
         distribution:
         - wsl-id: 'Debian'
+          user-id: 'Debian-11'
+          match-pattern: '*Debian*11*'
+          default-absent-tool: 'dos2unix'
+        - wsl-id: 'Debian'
           user-id: 'Debian'
-          match-pattern: '*Debian*'
+          match-pattern: '*Debian*11*'
           default-absent-tool: 'dos2unix'
         - wsl-id: 'MyDistribution'
           user-id: 'kali-linux'
@@ -1165,8 +1177,12 @@ jobs:
         - 'windows-latest'
         distribution:
         - wsl-id: 'Debian'
+          user-id: 'Debian-11'
+          match-pattern: '*Debian*11*'
+          default-absent-tool: 'dos2unix'
+        - wsl-id: 'Debian'
           user-id: 'Debian'
-          match-pattern: '*Debian*'
+          match-pattern: '*Debian*11*'
           default-absent-tool: 'dos2unix'
         - wsl-id: 'MyDistribution'
           user-id: 'kali-linux'
@@ -1259,8 +1275,12 @@ jobs:
         - 'windows-latest'
         distribution:
         - wsl-id: 'Debian'
+          user-id: 'Debian-11'
+          match-pattern: '*Debian*11*'
+          default-absent-tool: 'dos2unix'
+        - wsl-id: 'Debian'
           user-id: 'Debian'
-          match-pattern: '*Debian*'
+          match-pattern: '*Debian*11*'
           default-absent-tool: 'dos2unix'
         - wsl-id: 'MyDistribution'
           user-id: 'kali-linux'
@@ -1397,8 +1417,12 @@ jobs:
         - 'windows-latest'
         distribution:
         - wsl-id: 'Debian'
+          user-id: 'Debian-11'
+          match-pattern: '*Debian*11*'
+          default-absent-tool: 'dos2unix'
+        - wsl-id: 'Debian'
           user-id: 'Debian'
-          match-pattern: '*Debian*'
+          match-pattern: '*Debian*11*'
           default-absent-tool: 'dos2unix'
         - wsl-id: 'MyDistribution'
           user-id: 'kali-linux'
@@ -1477,8 +1501,8 @@ jobs:
         distributions:
         - distribution1:
             wsl-id: 'Debian'
-            user-id: 'Debian'
-            match-pattern: '*Debian*'
+            user-id: 'Debian-11'
+            match-pattern: '*Debian*11*'
             default-absent-tool: 'dos2unix'
           distribution2:
             wsl-id: 'Ubuntu'
@@ -1492,8 +1516,8 @@ jobs:
             default-absent-tool: 'dos2unix'
         - distribution1:
             wsl-id: 'Debian'
-            user-id: 'Debian'
-            match-pattern: '*Debian*'
+            user-id: 'Debian-11'
+            match-pattern: '*Debian*11*'
             default-absent-tool: 'dos2unix'
           distribution2:
             wsl-id: 'Ubuntu-18.04'
@@ -1512,8 +1536,8 @@ jobs:
             default-absent-tool: 'dos2unix'
           distribution2:
             wsl-id: 'Debian'
-            user-id: 'Debian'
-            match-pattern: '*Debian*'
+            user-id: 'Debian-11'
+            match-pattern: '*Debian*11*'
             default-absent-tool: 'dos2unix'
           distribution3:
             wsl-id: 'Ubuntu-18.04'
@@ -1532,8 +1556,8 @@ jobs:
             default-absent-tool: 'dos2unix'
           distribution3:
             wsl-id: 'Debian'
-            user-id: 'Debian'
-            match-pattern: '*Debian*'
+            user-id: 'Debian-11'
+            match-pattern: '*Debian*11*'
             default-absent-tool: 'dos2unix'
         - distribution1:
             wsl-id: 'Ubuntu-18.04'
@@ -1542,8 +1566,8 @@ jobs:
             default-absent-tool: 'dos2unix'
           distribution2:
             wsl-id: 'Debian'
-            user-id: 'Debian'
-            match-pattern: '*Debian*'
+            user-id: 'Debian-11'
+            match-pattern: '*Debian*11*'
             default-absent-tool: 'dos2unix'
           distribution3:
             wsl-id: 'Ubuntu'
@@ -1562,8 +1586,8 @@ jobs:
             default-absent-tool: 'dos2unix'
           distribution3:
             wsl-id: 'Debian'
-            user-id: 'Debian'
-            match-pattern: '*Debian*'
+            user-id: 'Debian-11'
+            match-pattern: '*Debian*11*'
             default-absent-tool: 'dos2unix'
     steps:
     - id: 'step-0'
@@ -1637,8 +1661,12 @@ jobs:
         - 'windows-latest'
         distribution:
         - wsl-id: 'Debian'
+          user-id: 'Debian-11'
+          match-pattern: '*Debian*11*'
+          default-absent-tool: 'dos2unix'
+        - wsl-id: 'Debian'
           user-id: 'Debian'
-          match-pattern: '*Debian*'
+          match-pattern: '*Debian*11*'
           default-absent-tool: 'dos2unix'
         - wsl-id: 'MyDistribution'
           user-id: 'kali-linux'
@@ -1670,49 +1698,49 @@ jobs:
           default-absent-tool: 'dos2unix'
         distribution2:
         - wsl-id: 'Debian'
-          user-id: 'Debian'
-          match-pattern: '*Debian*'
+          user-id: 'Debian-11'
+          match-pattern: '*Debian*11*'
           default-absent-tool: 'dos2unix'
         exclude:
         - environment: 'windows-2022'
           distribution:
             wsl-id: 'Debian'
-            user-id: 'Debian'
-            match-pattern: '*Debian*'
+            user-id: 'Debian-11'
+            match-pattern: '*Debian*11*'
             default-absent-tool: 'dos2unix'
           distribution2:
             wsl-id: 'Debian'
-            user-id: 'Debian'
-            match-pattern: '*Debian*'
+            user-id: 'Debian-11'
+            match-pattern: '*Debian*11*'
             default-absent-tool: 'dos2unix'
         - environment: 'windows-2025'
           distribution:
             wsl-id: 'Debian'
-            user-id: 'Debian'
-            match-pattern: '*Debian*'
+            user-id: 'Debian-11'
+            match-pattern: '*Debian*11*'
             default-absent-tool: 'dos2unix'
           distribution2:
             wsl-id: 'Debian'
-            user-id: 'Debian'
-            match-pattern: '*Debian*'
+            user-id: 'Debian-11'
+            match-pattern: '*Debian*11*'
             default-absent-tool: 'dos2unix'
         - environment: 'windows-latest'
           distribution:
             wsl-id: 'Debian'
-            user-id: 'Debian'
-            match-pattern: '*Debian*'
+            user-id: 'Debian-11'
+            match-pattern: '*Debian*11*'
             default-absent-tool: 'dos2unix'
           distribution2:
             wsl-id: 'Debian'
-            user-id: 'Debian'
-            match-pattern: '*Debian*'
+            user-id: 'Debian-11'
+            match-pattern: '*Debian*11*'
             default-absent-tool: 'dos2unix'
         include:
         - environment: 'windows-2022'
           distribution:
             wsl-id: 'Debian'
-            user-id: 'Debian'
-            match-pattern: '*Debian*'
+            user-id: 'Debian-11'
+            match-pattern: '*Debian*11*'
             default-absent-tool: 'dos2unix'
           distribution2:
             wsl-id: 'Ubuntu'
@@ -1722,8 +1750,8 @@ jobs:
         - environment: 'windows-2025'
           distribution:
             wsl-id: 'Debian'
-            user-id: 'Debian'
-            match-pattern: '*Debian*'
+            user-id: 'Debian-11'
+            match-pattern: '*Debian*11*'
             default-absent-tool: 'dos2unix'
           distribution2:
             wsl-id: 'Ubuntu'
@@ -1733,8 +1761,8 @@ jobs:
         - environment: 'windows-latest'
           distribution:
             wsl-id: 'Debian'
-            user-id: 'Debian'
-            match-pattern: '*Debian*'
+            user-id: 'Debian-11'
+            match-pattern: '*Debian*11*'
             default-absent-tool: 'dos2unix'
           distribution2:
             wsl-id: 'Ubuntu'
@@ -1878,35 +1906,40 @@ jobs:
         - incompatibleUbuntu: 'Ubuntu-22.04'
           distribution1:
             wsl-id: 'Debian'
-            user-id: 'Debian'
-            match-pattern: '*Debian*'
+            user-id: 'Debian-11'
+            match-pattern: '*Debian*11*'
             default-absent-tool: 'dos2unix'
           distribution2:
+            wsl-id: 'Debian'
+            user-id: 'Debian'
+            match-pattern: '*Debian*11*'
+            default-absent-tool: 'dos2unix'
+          distribution3:
             wsl-id: 'MyDistribution'
             user-id: 'kali-linux'
             match-pattern: '*Kali*'
             default-absent-tool: 'dos2unix'
-          distribution3:
+          distribution4:
             wsl-id: 'openSUSE-Leap-15.2'
             user-id: 'openSUSE-Leap-15.2'
             match-pattern: '*openSUSE*Leap*15.2*'
             default-absent-tool: 'which'
-          distribution4:
+          distribution5:
             wsl-id: 'Ubuntu-24.04'
             user-id: 'Ubuntu-24.04'
             match-pattern: '*Ubuntu*24.04*'
             default-absent-tool: 'dos2unix'
-          distribution5:
+          distribution6:
             wsl-id: 'Ubuntu'
             user-id: 'Ubuntu-20.04'
             match-pattern: '*Ubuntu*20.04*'
             default-absent-tool: 'dos2unix'
-          distribution6:
+          distribution7:
             wsl-id: 'Ubuntu-18.04'
             user-id: 'Ubuntu-18.04'
             match-pattern: '*Ubuntu*18.04*'
             default-absent-tool: 'dos2unix'
-          distribution7:
+          distribution8:
             wsl-id: 'Ubuntu-16.04'
             user-id: 'Ubuntu-16.04'
             match-pattern: '*Ubuntu*16.04*'
@@ -1914,35 +1947,40 @@ jobs:
         - incompatibleUbuntu: 'Ubuntu-20.04'
           distribution1:
             wsl-id: 'Debian'
-            user-id: 'Debian'
-            match-pattern: '*Debian*'
+            user-id: 'Debian-11'
+            match-pattern: '*Debian*11*'
             default-absent-tool: 'dos2unix'
           distribution2:
+            wsl-id: 'Debian'
+            user-id: 'Debian'
+            match-pattern: '*Debian*11*'
+            default-absent-tool: 'dos2unix'
+          distribution3:
             wsl-id: 'MyDistribution'
             user-id: 'kali-linux'
             match-pattern: '*Kali*'
             default-absent-tool: 'dos2unix'
-          distribution3:
+          distribution4:
             wsl-id: 'openSUSE-Leap-15.2'
             user-id: 'openSUSE-Leap-15.2'
             match-pattern: '*openSUSE*Leap*15.2*'
             default-absent-tool: 'which'
-          distribution4:
+          distribution5:
             wsl-id: 'Ubuntu-24.04'
             user-id: 'Ubuntu-24.04'
             match-pattern: '*Ubuntu*24.04*'
             default-absent-tool: 'dos2unix'
-          distribution5:
+          distribution6:
             wsl-id: 'Ubuntu'
             user-id: 'Ubuntu-22.04'
             match-pattern: '*Ubuntu*22.04*'
             default-absent-tool: 'dos2unix'
-          distribution6:
+          distribution7:
             wsl-id: 'Ubuntu-18.04'
             user-id: 'Ubuntu-18.04'
             match-pattern: '*Ubuntu*18.04*'
             default-absent-tool: 'dos2unix'
-          distribution7:
+          distribution8:
             wsl-id: 'Ubuntu-16.04'
             user-id: 'Ubuntu-16.04'
             match-pattern: '*Ubuntu*16.04*'
@@ -2010,80 +2048,96 @@ jobs:
         set-as-default: 'false'
         wsl-version: '1'
     - id: 'step-9'
+      name: 'Execute action for ${{ matrix.distributions.distribution8.user-id }}'
+      uses: './'
+      with:
+        distribution: '${{ matrix.distributions.distribution8.user-id }}'
+        set-as-default: 'false'
+        wsl-version: '1'
+    - id: 'step-10'
       name: 'Test - wsl-bash_${{ matrix.distributions.distribution1.user-id }} should use the correct distribution'
-      shell: 'wsl-bash_Debian {0}'
+      shell: 'wsl-bash_Debian-11 {0}'
       run: |-
         cat <(lsb_release -a || true) <(uname -a || true) <([ -d /etc ] && find /etc -maxdepth 1 -type f \( -name '*release' -or -name 'issue*' \) -exec cat {} + || true) <([ -d /etc/products.d ] && find /etc/products.d -maxdepth 1 -type f -name '*.prod' -exec cat {} + || true) <([ -f /proc/version ] && cat /proc/version || true)
         [[ "$(cat <(lsb_release -a || true) <(uname -a || true) <([ -d /etc ] && find /etc -maxdepth 1 -type f \( -name '*release' -or -name 'issue*' \) -exec cat {} + || true) <([ -d /etc/products.d ] && find /etc/products.d -maxdepth 1 -type f -name '*.prod' -exec cat {} + || true) <([ -f /proc/version ] && cat /proc/version || true))" == ${{ matrix.distributions.distribution1.match-pattern }} ]]
       if: |-
         always()
         && (steps.step-2.outcome == 'success')
-    - id: 'step-10'
+    - id: 'step-11'
       name: 'Test - wsl-bash_${{ matrix.distributions.distribution2.user-id }} should use the correct distribution'
-      shell: 'wsl-bash_kali-linux {0}'
+      shell: 'wsl-bash_Debian {0}'
       run: |-
         cat <(lsb_release -a || true) <(uname -a || true) <([ -d /etc ] && find /etc -maxdepth 1 -type f \( -name '*release' -or -name 'issue*' \) -exec cat {} + || true) <([ -d /etc/products.d ] && find /etc/products.d -maxdepth 1 -type f -name '*.prod' -exec cat {} + || true) <([ -f /proc/version ] && cat /proc/version || true)
         [[ "$(cat <(lsb_release -a || true) <(uname -a || true) <([ -d /etc ] && find /etc -maxdepth 1 -type f \( -name '*release' -or -name 'issue*' \) -exec cat {} + || true) <([ -d /etc/products.d ] && find /etc/products.d -maxdepth 1 -type f -name '*.prod' -exec cat {} + || true) <([ -f /proc/version ] && cat /proc/version || true))" == ${{ matrix.distributions.distribution2.match-pattern }} ]]
       if: |-
         always()
         && (steps.step-3.outcome == 'success')
-    - id: 'step-11'
+    - id: 'step-12'
       name: 'Test - wsl-bash_${{ matrix.distributions.distribution3.user-id }} should use the correct distribution'
-      shell: 'wsl-bash_openSUSE-Leap-15.2 {0}'
+      shell: 'wsl-bash_kali-linux {0}'
       run: |-
         cat <(lsb_release -a || true) <(uname -a || true) <([ -d /etc ] && find /etc -maxdepth 1 -type f \( -name '*release' -or -name 'issue*' \) -exec cat {} + || true) <([ -d /etc/products.d ] && find /etc/products.d -maxdepth 1 -type f -name '*.prod' -exec cat {} + || true) <([ -f /proc/version ] && cat /proc/version || true)
         [[ "$(cat <(lsb_release -a || true) <(uname -a || true) <([ -d /etc ] && find /etc -maxdepth 1 -type f \( -name '*release' -or -name 'issue*' \) -exec cat {} + || true) <([ -d /etc/products.d ] && find /etc/products.d -maxdepth 1 -type f -name '*.prod' -exec cat {} + || true) <([ -f /proc/version ] && cat /proc/version || true))" == ${{ matrix.distributions.distribution3.match-pattern }} ]]
       if: |-
         always()
         && (steps.step-4.outcome == 'success')
-    - id: 'step-12'
+    - id: 'step-13'
       name: 'Test - wsl-bash_${{ matrix.distributions.distribution4.user-id }} should use the correct distribution'
-      shell: 'wsl-bash_Ubuntu-24.04 {0}'
+      shell: 'wsl-bash_openSUSE-Leap-15.2 {0}'
       run: |-
         cat <(lsb_release -a || true) <(uname -a || true) <([ -d /etc ] && find /etc -maxdepth 1 -type f \( -name '*release' -or -name 'issue*' \) -exec cat {} + || true) <([ -d /etc/products.d ] && find /etc/products.d -maxdepth 1 -type f -name '*.prod' -exec cat {} + || true) <([ -f /proc/version ] && cat /proc/version || true)
         [[ "$(cat <(lsb_release -a || true) <(uname -a || true) <([ -d /etc ] && find /etc -maxdepth 1 -type f \( -name '*release' -or -name 'issue*' \) -exec cat {} + || true) <([ -d /etc/products.d ] && find /etc/products.d -maxdepth 1 -type f -name '*.prod' -exec cat {} + || true) <([ -f /proc/version ] && cat /proc/version || true))" == ${{ matrix.distributions.distribution4.match-pattern }} ]]
       if: |-
         always()
         && (steps.step-5.outcome == 'success')
-    - id: 'step-13'
-      name: 'Test - wsl-bash_${{ matrix.distributions.distribution5.user-id }} should use the correct distribution'
-      shell: 'wsl-bash_Ubuntu-22.04 {0}'
-      run: |-
-        cat <(lsb_release -a || true) <(uname -a || true) <([ -d /etc ] && find /etc -maxdepth 1 -type f \( -name '*release' -or -name 'issue*' \) -exec cat {} + || true) <([ -d /etc/products.d ] && find /etc/products.d -maxdepth 1 -type f -name '*.prod' -exec cat {} + || true) <([ -f /proc/version ] && cat /proc/version || true)
-        [[ "$(cat <(lsb_release -a || true) <(uname -a || true) <([ -d /etc ] && find /etc -maxdepth 1 -type f \( -name '*release' -or -name 'issue*' \) -exec cat {} + || true) <([ -d /etc/products.d ] && find /etc/products.d -maxdepth 1 -type f -name '*.prod' -exec cat {} + || true) <([ -f /proc/version ] && cat /proc/version || true))" == ${{ matrix.distributions.distribution5.match-pattern }} ]]
-      if: |-
-        (
-            always()
-            && (steps.step-6.outcome == 'success')
-        )
-        && (matrix.distributions.distribution5.user-id != 'Ubuntu-20.04')
     - id: 'step-14'
       name: 'Test - wsl-bash_${{ matrix.distributions.distribution5.user-id }} should use the correct distribution'
-      shell: 'wsl-bash_Ubuntu-20.04 {0}'
+      shell: 'wsl-bash_Ubuntu-24.04 {0}'
       run: |-
         cat <(lsb_release -a || true) <(uname -a || true) <([ -d /etc ] && find /etc -maxdepth 1 -type f \( -name '*release' -or -name 'issue*' \) -exec cat {} + || true) <([ -d /etc/products.d ] && find /etc/products.d -maxdepth 1 -type f -name '*.prod' -exec cat {} + || true) <([ -f /proc/version ] && cat /proc/version || true)
         [[ "$(cat <(lsb_release -a || true) <(uname -a || true) <([ -d /etc ] && find /etc -maxdepth 1 -type f \( -name '*release' -or -name 'issue*' \) -exec cat {} + || true) <([ -d /etc/products.d ] && find /etc/products.d -maxdepth 1 -type f -name '*.prod' -exec cat {} + || true) <([ -f /proc/version ] && cat /proc/version || true))" == ${{ matrix.distributions.distribution5.match-pattern }} ]]
       if: |-
-        (
-            always()
-            && (steps.step-6.outcome == 'success')
-        )
-        && (matrix.distributions.distribution5.user-id != 'Ubuntu-22.04')
+        always()
+        && (steps.step-6.outcome == 'success')
     - id: 'step-15'
       name: 'Test - wsl-bash_${{ matrix.distributions.distribution6.user-id }} should use the correct distribution'
-      shell: 'wsl-bash_Ubuntu-18.04 {0}'
+      shell: 'wsl-bash_Ubuntu-22.04 {0}'
       run: |-
         cat <(lsb_release -a || true) <(uname -a || true) <([ -d /etc ] && find /etc -maxdepth 1 -type f \( -name '*release' -or -name 'issue*' \) -exec cat {} + || true) <([ -d /etc/products.d ] && find /etc/products.d -maxdepth 1 -type f -name '*.prod' -exec cat {} + || true) <([ -f /proc/version ] && cat /proc/version || true)
         [[ "$(cat <(lsb_release -a || true) <(uname -a || true) <([ -d /etc ] && find /etc -maxdepth 1 -type f \( -name '*release' -or -name 'issue*' \) -exec cat {} + || true) <([ -d /etc/products.d ] && find /etc/products.d -maxdepth 1 -type f -name '*.prod' -exec cat {} + || true) <([ -f /proc/version ] && cat /proc/version || true))" == ${{ matrix.distributions.distribution6.match-pattern }} ]]
       if: |-
-        always()
-        && (steps.step-7.outcome == 'success')
+        (
+            always()
+            && (steps.step-7.outcome == 'success')
+        )
+        && (matrix.distributions.distribution6.user-id != 'Ubuntu-20.04')
     - id: 'step-16'
+      name: 'Test - wsl-bash_${{ matrix.distributions.distribution6.user-id }} should use the correct distribution'
+      shell: 'wsl-bash_Ubuntu-20.04 {0}'
+      run: |-
+        cat <(lsb_release -a || true) <(uname -a || true) <([ -d /etc ] && find /etc -maxdepth 1 -type f \( -name '*release' -or -name 'issue*' \) -exec cat {} + || true) <([ -d /etc/products.d ] && find /etc/products.d -maxdepth 1 -type f -name '*.prod' -exec cat {} + || true) <([ -f /proc/version ] && cat /proc/version || true)
+        [[ "$(cat <(lsb_release -a || true) <(uname -a || true) <([ -d /etc ] && find /etc -maxdepth 1 -type f \( -name '*release' -or -name 'issue*' \) -exec cat {} + || true) <([ -d /etc/products.d ] && find /etc/products.d -maxdepth 1 -type f -name '*.prod' -exec cat {} + || true) <([ -f /proc/version ] && cat /proc/version || true))" == ${{ matrix.distributions.distribution6.match-pattern }} ]]
+      if: |-
+        (
+            always()
+            && (steps.step-7.outcome == 'success')
+        )
+        && (matrix.distributions.distribution6.user-id != 'Ubuntu-22.04')
+    - id: 'step-17'
       name: 'Test - wsl-bash_${{ matrix.distributions.distribution7.user-id }} should use the correct distribution'
-      shell: 'wsl-bash_Ubuntu-16.04 {0}'
+      shell: 'wsl-bash_Ubuntu-18.04 {0}'
       run: |-
         cat <(lsb_release -a || true) <(uname -a || true) <([ -d /etc ] && find /etc -maxdepth 1 -type f \( -name '*release' -or -name 'issue*' \) -exec cat {} + || true) <([ -d /etc/products.d ] && find /etc/products.d -maxdepth 1 -type f -name '*.prod' -exec cat {} + || true) <([ -f /proc/version ] && cat /proc/version || true)
         [[ "$(cat <(lsb_release -a || true) <(uname -a || true) <([ -d /etc ] && find /etc -maxdepth 1 -type f \( -name '*release' -or -name 'issue*' \) -exec cat {} + || true) <([ -d /etc/products.d ] && find /etc/products.d -maxdepth 1 -type f -name '*.prod' -exec cat {} + || true) <([ -f /proc/version ] && cat /proc/version || true))" == ${{ matrix.distributions.distribution7.match-pattern }} ]]
       if: |-
         always()
         && (steps.step-8.outcome == 'success')
+    - id: 'step-18'
+      name: 'Test - wsl-bash_${{ matrix.distributions.distribution8.user-id }} should use the correct distribution'
+      shell: 'wsl-bash_Ubuntu-16.04 {0}'
+      run: |-
+        cat <(lsb_release -a || true) <(uname -a || true) <([ -d /etc ] && find /etc -maxdepth 1 -type f \( -name '*release' -or -name 'issue*' \) -exec cat {} + || true) <([ -d /etc/products.d ] && find /etc/products.d -maxdepth 1 -type f -name '*.prod' -exec cat {} + || true) <([ -f /proc/version ] && cat /proc/version || true)
+        [[ "$(cat <(lsb_release -a || true) <(uname -a || true) <([ -d /etc ] && find /etc -maxdepth 1 -type f \( -name '*release' -or -name 'issue*' \) -exec cat {} + || true) <([ -d /etc/products.d ] && find /etc/products.d -maxdepth 1 -type f -name '*.prod' -exec cat {} + || true) <([ -f /proc/version ] && cat /proc/version || true))" == ${{ matrix.distributions.distribution8.match-pattern }} ]]
+      if: |-
+        always()
+        && (steps.step-9.outcome == 'success')

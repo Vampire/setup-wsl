@@ -145,8 +145,9 @@ so the second that is used will not be installed as the first one will be found 
 WSL distribution ID.
 
 The values currently supported by this action are:
-* `Debian` **(default)**
 * `Alpine`
+* `Debian-11`
+* `Debian` **(default)** _(deprecated, 'Debian-11' is a drop-in replacement, except for the wsl-shell-distribution-wrapper name)_
 * `kali-linux`
 * `openSUSE-Leap-15.2`
 * `Ubuntu-24.04`
