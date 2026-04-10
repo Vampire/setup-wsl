@@ -48,7 +48,7 @@ inputs:
                 - 'Ubuntu-18.04'
                 - 'Ubuntu-16.04'
         required: false
-        default: Debian
+        default: Debian-13
 
     use-cache:
         description: |

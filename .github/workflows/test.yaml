@@ -178,9 +178,9 @@ jobs:
         - 'windows-2025'
         - 'windows-latest'
         distribution:
-        - wsl-id: 'Debian'
-          user-id: 'Debian'
-          match-pattern: '*Debian*11*'
+        - wsl-id: 'Debian-13'
+          user-id: 'Debian-13'
+          match-pattern: '*Debian*13*'
           default-absent-tool: 'dos2unix'
           create-test-user-command: 'useradd -m -p 4qBD5NWD3IkbU test'
     steps:

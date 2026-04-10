@@ -399,7 +399,7 @@ workflowWithCopyright(
                 "fail-fast" to false,
                 "matrix" to mapOf(
                     "environment" to environments,
-                    "distribution" to listOf(debian).map { it.asMap }
+                    "distribution" to listOf(debian13).map { it.asMap }
                 )
             )
         )
