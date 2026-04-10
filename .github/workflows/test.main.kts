@@ -698,10 +698,10 @@ workflowWithCopyright(
             )
         )
         runAfterSuccess(
-            name = "Test - /etc/wsl.conf should exist",
+            name = "Test - /etc/wsl.conf should have expected content",
             command = """
                 [ -f /etc/wsl.conf ]
-                cat /etc/wsl.conf
+                diff -u <(echo -e '[automount]\noptions = uid=1000') /etc/wsl.conf
             """
         )
         runAfterSuccess(
@@ -741,9 +741,14 @@ workflowWithCopyright(
             )
         )
         runAfterSuccess(
-            name = "Test - /etc/wsl.conf should not exist",
-            command = "[ ! -f /etc/wsl.conf ] || { cat /etc/wsl.conf; false; }",
-            conditionTransformer = { executeActionStep.getSuccessNotOnDistributionCondition(ubuntu2404) }
+            name = "Test - /etc/wsl.conf should not exist or not have the content we will put there",
+            command = """
+                if [ -f /etc/wsl.conf ]; then
+                    if diff -u <(echo -e '[automount]\nroot = /') /etc/wsl.conf; then
+                        false
+                    fi
+                fi
+            """
         )
         runAfterSuccess(
             name = "Test - C: should be mounted at /mnt/c",
@@ -769,10 +774,10 @@ workflowWithCopyright(
             )
         )
         runAfterSuccess(
-            name = "Test - /etc/wsl.conf should exist",
+            name = "Test - /etc/wsl.conf should have expected content",
             command = """
                 [ -f /etc/wsl.conf ]
-                cat /etc/wsl.conf
+                diff -u <(echo -e '[automount]\nroot = /') /etc/wsl.conf
             """
         )
         runAfterSuccess(
