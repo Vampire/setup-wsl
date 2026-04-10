@@ -28,7 +28,8 @@ inputs:
             They use the same WSL distribution ID, so the second that is used will not be installed
             as the first one will be found as already installed by WSL distribution ID.
             Valid values:
-                - 'Alpine'
+                - 'Alpine-3.17'
+                - 'Alpine' (deprecated, 'Alpine-3.17' is a drop-in replacement, except for the wsl-shell-distribution-wrapper name)
                 - 'Debian-11'
                 - 'Debian' (deprecated, 'Debian-11' is a drop-in replacement, except for the wsl-shell-distribution-wrapper name)
                 - 'kali-linux'
