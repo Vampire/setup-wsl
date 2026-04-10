@@ -39,6 +39,7 @@ import actions.io.mkdirP
 import actions.io.mv
 import actions.io.which
 import actions.tool.cache.cacheDir
+import actions.tool.cache.cacheFile
 import actions.tool.cache.downloadTool
 import actions.tool.cache.find
 import kotlinx.coroutines.CoroutineStart.LAZY
@@ -52,6 +53,8 @@ import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.onStart
+import net.kautler.github.action.setup_wsl.InstallMethod.APP_BUNDLE
+import net.kautler.github.action.setup_wsl.InstallMethod.TARBALL
 import node.buffer.Buffer
 import node.buffer.BufferEncoding
 import node.buffer.utf16le
@@ -195,30 +198,49 @@ val distributionDirectory = GlobalScope.async(start = LAZY) {
 
     val cacheKey = "2:distributionDirectory_${distribution.distributionName}_${distribution.version}"
 
+    val installerFile = when (distribution.installMethod) {
+        TARBALL -> distribution.downloadFileName
+        APP_BUNDLE -> distribution.installerFile!!
+    }
+
     val restoredKey = if (useCache) restoreCache(arrayOf(cacheDirectory), cacheKey) else null
     if (restoredKey != null) {
-        if (exists(path.join(cacheDirectory, distribution.installerFile))) {
+        if (exists(path.join(cacheDirectory, installerFile))) {
             return@async cacheDirectory
         }
     }
 
-    val distributionDownload = downloadTool("${distribution.downloadUrl()}")
-    var extractedDistributionDirectory = extractZip(distributionDownload)
+    val distributionDownload = downloadTool("${distribution.downloadUrl}")
 
-    if (!exists(path.join(extractedDistributionDirectory, distribution.installerFile))) {
-        extractedDistributionDirectory = readdir(extractedDistributionDirectory)
-            .asFlow()
-            .filter { it.contains("""(?<!_(?:scale-(?:100|125|150|400)|ARM64))\.appx$""".toRegex()) }
-            .map { extractZip(path.join(extractedDistributionDirectory, it)) }
-            .firstOrNull { exists(path.join(it, distribution.installerFile)) }
-            ?: error("'${distribution.installerFile}' not found for distribution '${distribution.userId}'")
+    when (distribution.installMethod) {
+        TARBALL -> {
+            cacheDirectory = cacheFile(
+                distributionDownload,
+                installerFile,
+                distribution.distributionName,
+                "${distribution.version}"
+            )
+        }
+
+        APP_BUNDLE -> {
+            var extractedDistributionDirectory = extractZip(distributionDownload)
+
+            if (!exists(path.join(extractedDistributionDirectory, installerFile))) {
+                extractedDistributionDirectory = readdir(extractedDistributionDirectory)
+                    .asFlow()
+                    .filter { it.contains("""(?<!_(?:scale-(?:100|125|150|400)|ARM64))\.appx$""".toRegex()) }
+                    .map { extractZip(path.join(extractedDistributionDirectory, it)) }
+                    .firstOrNull { exists(path.join(it, installerFile)) }
+                    ?: error("'$installerFile' not found for distribution '${distribution.userId}'")
+            }
+
+            cacheDirectory = cacheDir(
+                extractedDistributionDirectory,
+                distribution.distributionName,
+                "${distribution.version}"
+            )
+        }
     }
-
-    cacheDirectory = cacheDir(
-        extractedDistributionDirectory,
-        distribution.distributionName,
-        "${distribution.version}"
-    )
 
     if (useCache) {
         saveCache(arrayOf(cacheDirectory), cacheKey)
@@ -288,6 +310,8 @@ val wslShellName by lazy {
 }
 
 val wslShellWrapperDirectory = path.join(process.env["RUNNER_TEMP"]!!, "wsl-shell-wrapper")
+
+val wslInstallationsDirectory = path.join(process.env["RUNNER_TEMP"]!!, "wsl")
 
 val wslShellWrapperPath by lazy {
     path.join(wslShellWrapperDirectory, "wsl-$wslShellName.bat")
@@ -418,11 +442,37 @@ suspend fun installDistribution() {
         waitForWslStatusNotContaining("WSL is finishing an upgrade...")
     }
 
-    exec(
-        commandLine = """"${path.join(distributionDirectory(), distribution.installerFile)}"""",
-        args = arrayOf("install", "--root"),
-        options = ExecOptions(input = Buffer.from(""))
+    val installerFile = path.join(
+        distributionDirectory(),
+        when (distribution.installMethod) {
+            TARBALL -> distribution.downloadFileName
+            APP_BUNDLE -> distribution.installerFile!!
+        }
     )
+
+    when (distribution.installMethod) {
+        TARBALL -> {
+            val installLocation = path.join(wslInstallationsDirectory, distribution.wslId)
+            mkdirP(installLocation)
+            exec(
+                commandLine = "wsl",
+                args = arrayOf(
+                    "--import",
+                    distribution.wslId,
+                    installLocation,
+                    installerFile
+                )
+            )
+        }
+
+        APP_BUNDLE -> {
+            exec(
+                commandLine = """"$installerFile"""",
+                args = arrayOf("install", "--root"),
+                options = ExecOptions(input = Buffer.from(""))
+            )
+        }
+    }
 }
 
 suspend fun waitForWslStatusNotContaining(
@@ -487,18 +537,7 @@ suspend fun writeWslShellWrapper() {
             options = ExecOptions(ignoreReturnCode = true)
         ) == 0
         if (!wslShellUserExists) {
-            exec(
-                commandLine = "wsl",
-                args = arrayOf(
-                    "--distribution",
-                    wslId(),
-                    "useradd",
-                    "-m",
-                    "-p",
-                    "4qBD5NWD3IkbU",
-                    wslShellUser
-                )
-            )
+            distribution.createUser(wslShellUser)
         }
     }
 

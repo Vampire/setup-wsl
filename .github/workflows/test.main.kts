@@ -68,8 +68,9 @@ val environments = listOf(
 
 val alpine = Distribution(
     wslId = "Alpine",
-    matchPattern = "*Alpine*",
-    defaultAbsentTool = "dos2unix"
+    matchPattern = "*Alpine*3.17*",
+    defaultAbsentTool = "dos2unix",
+    createTestUserCommand = "adduser -D test"
 )
 
 val debian11 = Distribution(
@@ -131,8 +132,7 @@ val ubuntu1604 = Distribution(
 )
 
 val distributions = listOf(
-    // disable testing on Alpine for the time being due to https://github.com/Vampire/setup-wsl/issues/82
-    //alpine,
+    alpine,
     debian11,
     debian,
     kali,
@@ -473,7 +473,7 @@ workflowWithCopyright(
         )
         runAfterSuccess(
             name = "Add user test",
-            command = "useradd -m -p 4qBD5NWD3IkbU test"
+            command = expr("matrix.distribution.create-test-user-command")
         )
         executeActionStep = usesSelfAfterSuccess(
             name = "Set wsl-bash wrapper to use user test by default",
@@ -1141,7 +1141,15 @@ workflowWithCopyright(
                     name = "Execute action for ${expr("matrix.distributions.distribution$it.user-id")}",
                     action = SetupWsl(
                         distribution = SetupWsl.Distribution.Custom(expr("matrix.distributions.distribution$it.user-id")),
-                        //additionalPackages = if (it == 2) listOf("bash") else null,
+                        additionalPackages = listOf(
+                            expr(
+                                """
+                                    (${getOnDistributionCondition(it, alpine)})
+                                    && 'bash'
+                                    || ''
+                                """.trimIndent()
+                            )
+                        ),
                         setAsDefault = if (it >= 3) false else null,
                         wslVersion = 1
                     )
@@ -1152,7 +1160,7 @@ workflowWithCopyright(
                 verifyInstalledDistribution(
                     name = "Test - wsl-bash_${expr("matrix.distributions.distribution$i.user-id")} should use the correct distribution",
                     conditionTransformer = if (distributions[i] == ubuntu2004.asMap) {
-                        { executeActionStep.getSuccessNotOnDistributionCondition(ubuntu2004, i) }
+                        { executeActionStep.getSuccessNotOnDistributionCondition(i, ubuntu2004) }
                     } else {
                         { it }
                     },
@@ -1164,7 +1172,7 @@ workflowWithCopyright(
                 if (distributions[i] == ubuntu2004.asMap) {
                     verifyInstalledDistribution(
                         name = "Test - wsl-bash_${expr("matrix.distributions.distribution$i.user-id")} should use the correct distribution",
-                        conditionTransformer = { executeActionStep.getSuccessNotOnDistributionCondition(ubuntu2204, i) },
+                        conditionTransformer = { executeActionStep.getSuccessNotOnDistributionCondition(i, ubuntu2204) },
                         shell = Shell.Custom("wsl-bash_${distributions[i]["user-id"]} {0}"),
                         expectedPatternExpression = "matrix.distributions.distribution$i.match-pattern"
                     )
@@ -1365,18 +1373,55 @@ val Step<*>.successCondition
         && (${outcome.eq(Success)})
     """.trimIndent()
 
-fun Step<*>.getSuccessOnDistributionCondition(distribution: Distribution, i: Int? = null) =
-    getSuccessOnOrNotOnDistributionCondition(distribution, true, i)
+fun Step<*>.getSuccessOnDistributionCondition(vararg distributions: Distribution) =
+    getSuccessOnOrNotOnDistributionCondition(distributions, true, null)
 
-fun Step<*>.getSuccessNotOnDistributionCondition(distribution: Distribution, i: Int? = null) =
-    getSuccessOnOrNotOnDistributionCondition(distribution, false, i)
+fun Step<*>.getSuccessOnDistributionCondition(i: Int, vararg distributions: Distribution) =
+    getSuccessOnOrNotOnDistributionCondition(distributions, true, i)
 
-fun Step<*>.getSuccessOnOrNotOnDistributionCondition(distribution: Distribution, on: Boolean = true, i: Int? = null) = """
-    |(
-        ${successCondition.prependIndent("|    ")}
-    |)
-    |&& (matrix.${i?.let { "distributions.distribution$it" } ?: "distribution"}.user-id ${if (on) "==" else "!="} '${distribution.userId}')
-""".trimMargin()
+fun Step<*>.getSuccessNotOnDistributionCondition(vararg distributions: Distribution) =
+    getSuccessOnOrNotOnDistributionCondition(distributions, false, null)
+
+fun Step<*>.getSuccessNotOnDistributionCondition(i: Int, vararg distributions: Distribution) =
+    getSuccessOnOrNotOnDistributionCondition(distributions, false, i)
+
+fun Step<*>.getSuccessOnOrNotOnDistributionCondition(distributions: Array<out Distribution>, on: Boolean = true, i: Int? = null): String {
+    return """
+        |(
+            ${successCondition.prependIndent("|    ")}
+        |)
+        |&& (${getOnOrNotOnDistributionCondition(distributions, on, i)})
+    """.trimMargin()
+}
+
+fun getOnDistributionCondition(vararg distributions: Distribution) =
+    getOnOrNotOnDistributionCondition(distributions, true, null)
+
+fun getOnDistributionCondition(i: Int, vararg distributions: Distribution) =
+    getOnOrNotOnDistributionCondition(distributions, true, i)
+
+fun getNotOnDistributionCondition(vararg distributions: Distribution) =
+    getOnOrNotOnDistributionCondition(distributions, false, null)
+
+fun getNotOnDistributionCondition(i: Int, vararg distributions: Distribution) =
+    getOnOrNotOnDistributionCondition(distributions, false, i)
+
+fun getOnOrNotOnDistributionCondition(
+    distributions: Array<out Distribution>,
+    on: Boolean = true,
+    i: Int? = null
+): String {
+    val contains = "${if (on) "" else "!"}contains"
+    val distributionsJson = distributions.joinToString(
+        separator = """", """",
+        prefix = """fromJSON('["""",
+        postfix = """"]')"""
+    ) {
+        it.userId
+    }
+    val distribution = "matrix.${i?.let { "distributions.distribution$it" } ?: "distribution"}.user-id"
+    return "$contains($distributionsJson, $distribution)"
+}
 
 // part of work-around for https://bugs.kali.org/view.php?id=8921
 // and https://bugs.kali.org/view.php?id=6672
@@ -1398,12 +1443,14 @@ data class Distribution(
     val wslId: String,
     val userId: String = wslId,
     val matchPattern: String,
-    val defaultAbsentTool: String
+    val defaultAbsentTool: String,
+    val createTestUserCommand: String = "useradd -m -p 4qBD5NWD3IkbU test"
 ) {
     val asMap = mapOf(
         "wsl-id" to wslId,
         "user-id" to userId,
         "match-pattern" to matchPattern,
-        "default-absent-tool" to defaultAbsentTool
+        "default-absent-tool" to defaultAbsentTool,
+        "create-test-user-command" to createTestUserCommand
     )
 }
