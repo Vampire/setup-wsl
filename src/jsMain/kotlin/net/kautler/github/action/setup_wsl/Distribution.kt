@@ -21,6 +21,7 @@ import actions.exec.exec
 import js.objects.recordOf
 import net.kautler.github.action.setup_wsl.InstallMethod.APP_BUNDLE
 import net.kautler.github.action.setup_wsl.InstallMethod.TARBALL
+import net.kautler.github.action.setup_wsl.InstallMethod.WSL_FILE
 import org.w3c.dom.url.URL
 import semver.SemVer
 
@@ -35,6 +36,7 @@ val distributions = listOf(
     Alpine323,
     Debian,
     Debian11,
+    Debian12,
     Kali,
     OpenSuseLeap15_2,
     Ubuntu1604,
@@ -44,7 +46,7 @@ val distributions = listOf(
     Ubuntu2404
 ).associateBy { it.userId }
 
-enum class InstallMethod { APP_BUNDLE, TARBALL }
+enum class InstallMethod { APP_BUNDLE, TARBALL, WSL_FILE }
 
 sealed class Distribution(
     val wslId: String,
@@ -69,6 +71,7 @@ sealed class Distribution(
 
     val installMethod = when {
         installerFile != null -> APP_BUNDLE
+        downloadFileName.endsWith(".wsl") -> WSL_FILE
         downloadFileName.endsWith(".tar.gz") || downloadFileName.endsWith(".tgz") -> TARBALL
         else -> error("Unknown install method for download URL '$downloadUrl'")
     }
@@ -295,6 +298,13 @@ object Debian11 : ArchivedDebianDistribution(
     version = SemVer("1.0.0"),
     downloadUrl = URL("https://aka.ms/wsl-debian-gnulinux"),
     installerFile = "debian.exe"
+)
+
+object Debian12 : DebianDistribution(
+    wslId = "Debian-12",
+    distributionName = "Debian",
+    version = SemVer("1.20.0"),
+    downloadUrl = URL("https://salsa.debian.org/debian/WSL/-/jobs/7130915/artifacts/raw/Debian_WSL_AMD64_v1.20.0.0.wsl")
 )
 
 object Kali : AptGetBasedDistribution(
