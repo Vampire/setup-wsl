@@ -1094,11 +1094,11 @@ jobs:
         )
         && (contains(fromJSON('["Alpine-3.23", "Alpine-3.22", "Alpine-3.21", "Alpine-3.20", "Alpine-3.19", "Alpine-3.18", "Alpine-3.17", "Alpine"]'), matrix.distribution.user-id))
     - id: 'step-5'
-      name: 'Test - /etc/wsl.conf should exist'
+      name: 'Test - /etc/wsl.conf should have expected content'
       shell: 'wsl-bash {0}'
       run: |-
         [ -f /etc/wsl.conf ]
-        cat /etc/wsl.conf
+        diff -u <(echo -e '[automount]\noptions = uid=1000') /etc/wsl.conf
       if: |-
         always()
         && (steps.step-2.outcome == 'success')
@@ -1254,15 +1254,17 @@ jobs:
         )
         && (contains(fromJSON('["Alpine-3.23", "Alpine-3.22", "Alpine-3.21", "Alpine-3.20", "Alpine-3.19", "Alpine-3.18", "Alpine-3.17", "Alpine"]'), matrix.distribution.user-id))
     - id: 'step-5'
-      name: 'Test - /etc/wsl.conf should not exist'
+      name: 'Test - /etc/wsl.conf should not exist or not have the content we will put there'
       shell: 'wsl-bash {0}'
-      run: '[ ! -f /etc/wsl.conf ] || { cat /etc/wsl.conf; false; }'
+      run: |-
+        if [ -f /etc/wsl.conf ]; then
+            if diff -u <(echo -e '[automount]\nroot = /') /etc/wsl.conf; then
+                false
+            fi
+        fi
       if: |-
-        (
-            always()
-            && (steps.step-2.outcome == 'success')
-        )
-        && (!contains(fromJSON('["Ubuntu-24.04"]'), matrix.distribution.user-id))
+        always()
+        && (steps.step-2.outcome == 'success')
     - id: 'step-6'
       name: 'Test - C: should be mounted at /mnt/c'
       shell: 'wsl-bash {0}'
@@ -1293,11 +1295,11 @@ jobs:
         always()
         && (steps.step-2.outcome == 'success')
     - id: 'step-9'
-      name: 'Test - /etc/wsl.conf should exist'
+      name: 'Test - /etc/wsl.conf should have expected content'
       shell: 'wsl-bash {0}'
       run: |-
         [ -f /etc/wsl.conf ]
-        cat /etc/wsl.conf
+        diff -u <(echo -e '[automount]\nroot = /') /etc/wsl.conf
       if: |-
         always()
         && (steps.step-8.outcome == 'success')
