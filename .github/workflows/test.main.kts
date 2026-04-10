@@ -42,10 +42,10 @@ import io.github.typesafegithub.workflows.actions.vampire.SetupWsl
 import io.github.typesafegithub.workflows.actions.vampire.SetupWsl.Distribution.Debian
 import io.github.typesafegithub.workflows.actions.vampire.SetupWsl.Distribution.Ubuntu1604
 import io.github.typesafegithub.workflows.actions.vampire.SetupWsl.Distribution.Ubuntu1804
-import io.github.typesafegithub.workflows.domain.CommandStep
-import io.github.typesafegithub.workflows.domain.ActionStep
-import io.github.typesafegithub.workflows.domain.JobOutputs.EMPTY
 import io.github.typesafegithub.workflows.domain.AbstractResult.Status.Success
+import io.github.typesafegithub.workflows.domain.ActionStep
+import io.github.typesafegithub.workflows.domain.CommandStep
+import io.github.typesafegithub.workflows.domain.JobOutputs.EMPTY
 import io.github.typesafegithub.workflows.domain.RunnerType
 import io.github.typesafegithub.workflows.domain.RunnerType.WindowsLatest
 import io.github.typesafegithub.workflows.domain.Shell
@@ -66,11 +66,24 @@ val environments = listOf(
     "windows-latest"
 )
 
+val alpine317 = Distribution(
+    wslId = "Alpine",
+    userId = "Alpine-3.17",
+    matchPattern = "*Alpine*3.17*",
+    defaultAbsentTool = "dos2unix",
+    createTestUserCommand = "adduser -D test"
+)
+
 val alpine = Distribution(
     wslId = "Alpine",
     matchPattern = "*Alpine*3.17*",
     defaultAbsentTool = "dos2unix",
     createTestUserCommand = "adduser -D test"
+)
+
+val alpineDistributions = listOf(
+    alpine317,
+    alpine
 )
 
 val debian11 = Distribution(
@@ -132,7 +145,7 @@ val ubuntu1604 = Distribution(
 )
 
 val distributions = listOf(
-    alpine,
+    *alpineDistributions.toTypedArray(),
     debian11,
     debian,
     kali,
@@ -381,7 +394,11 @@ workflowWithCopyright(
         )
         verifyFailure(
             name = "Test - wsl-bash should fail if bash is not present by default",
-            conditionTransformer = { executeActionStep.getSuccessOnDistributionCondition(alpine) },
+            conditionTransformer = {
+                executeActionStep.getSuccessOnDistributionCondition(
+                    *alpineDistributions.toTypedArray()
+                )
+            },
             verificationShell = null,
             verificationTransformer = { _, command ->
                 """wsl sh -euc "${command.replace("==", "=")}""""
@@ -394,7 +411,9 @@ workflowWithCopyright(
                 additionalPackages = listOf("bash"),
                 wslVersion = null
             ),
-            condition = executeActionStep.getSuccessOnDistributionCondition(alpine)
+            condition = executeActionStep.getSuccessOnDistributionCondition(
+                *alpineDistributions.toTypedArray()
+            )
         )
         commonTests()
         verifyFailure(
@@ -626,7 +645,9 @@ workflowWithCopyright(
                 additionalPackages = listOf("bash"),
                 wslVersion = null
             ),
-            condition = executeActionStep.getSuccessOnDistributionCondition(alpine)
+            condition = executeActionStep.getSuccessOnDistributionCondition(
+                *alpineDistributions.toTypedArray()
+            )
         )
         runAfterSuccess(
             name = "Test - /etc/wsl.conf should exist",
@@ -667,7 +688,9 @@ workflowWithCopyright(
                 additionalPackages = listOf("bash"),
                 wslVersion = null
             ),
-            condition = executeActionStep.getSuccessOnDistributionCondition(alpine)
+            condition = executeActionStep.getSuccessOnDistributionCondition(
+                *alpineDistributions.toTypedArray()
+            )
         )
         runAfterSuccess(
             name = "Test - /etc/wsl.conf should not exist",
@@ -786,10 +809,10 @@ workflowWithCopyright(
                 additionalPackages = listOf(
                     expr(
                         """
-                        (matrix.distribution.user-id == '${alpine.userId}')
-                        && 'bash'
-                        || ''
-                    """.trimIndent()
+                            (${getOnDistributionCondition(*alpineDistributions.toTypedArray())})
+                            && 'bash'
+                            || ''
+                        """.trimIndent()
                     )
                 ),
                 wslVersion = null,
@@ -867,10 +890,10 @@ workflowWithCopyright(
                 additionalPackages = listOf(
                     expr(
                         """
-                        (matrix.distribution.user-id == '${alpine.userId}')
-                        && 'bash'
-                        || ''
-                    """.trimIndent()
+                            (${getOnDistributionCondition(*alpineDistributions.toTypedArray())})
+                            && 'bash'
+                            || ''
+                        """.trimIndent()
                     )
                 ),
                 wslVersion = null
@@ -1019,10 +1042,10 @@ workflowWithCopyright(
                 additionalPackages = listOf(
                     expr(
                         """
-                            |(matrix.distribution.user-id != '${kali.userId}')
-                            |&& 'bash'
-                            ||| ''
-                        """.trimMargin()
+                            (matrix.distribution.user-id != '${kali.userId}')
+                            && 'bash'
+                            || ''
+                        """.trimIndent()
                     )
                 ),
                 // part of work-around for https://bugs.kali.org/view.php?id=8921
@@ -1144,7 +1167,7 @@ workflowWithCopyright(
                         additionalPackages = listOf(
                             expr(
                                 """
-                                    (${getOnDistributionCondition(it, alpine)})
+                                    (${getOnDistributionCondition(it, *alpineDistributions.toTypedArray())})
                                     && 'bash'
                                     || ''
                                 """.trimIndent()
@@ -1193,7 +1216,7 @@ fun JobBuilder<*>.commonTests() {
             // do not just rely on false here, but explicitly use exit
             // in case failing commands do not make the script fail
             // and use "shell = Cmd" to capture that the wrapper script is hiding errors
-            "IF '${expr("${provocationStep.outcome}") }' NEQ 'failure' EXIT /B 1"
+            "IF '${expr("${provocationStep.outcome}")}' NEQ 'failure' EXIT /B 1"
         }
     )
     verifyFailure(
@@ -1263,7 +1286,11 @@ fun JobBuilder<*>.usesSelf(
 )
 
 fun JobBuilder<*>.deleteWslBashOnAlpine() = deleteWslBash(
-    conditionTransformer = { executeActionStep.getSuccessOnDistributionCondition(alpine)}
+    conditionTransformer = {
+        executeActionStep.getSuccessOnDistributionCondition(
+            *alpineDistributions.toTypedArray()
+        )
+    }
 )
 
 fun JobBuilder<*>.deleteWslBash(

@@ -113,6 +113,14 @@ val distribution by lazy {
     val distribution = distributions[distributionId]
 
     when (distribution) {
+        Alpine -> warning(
+            """
+                'Alpine' distribution is deprecated.
+                Please migrate to a versioned distribution such as 'Alpine-3.17'.
+                'Alpine-3.17' is a drop-in replacement, except for the wsl-shell-distribution-wrapper name.
+            """.trimIndent()
+        )
+
         Debian -> warning(
             """
                 'Debian' distribution is deprecated.

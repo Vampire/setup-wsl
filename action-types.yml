@@ -17,6 +17,7 @@ inputs:
     distribution:
         type: enum
         allowed-values:
+            - Alpine-3.17
             - Alpine
             - Debian-11
             - Debian
