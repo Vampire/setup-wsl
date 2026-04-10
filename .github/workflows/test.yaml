@@ -444,11 +444,6 @@ jobs:
           match-pattern: '*Debian*11*'
           default-absent-tool: 'dos2unix'
           create-test-user-command: 'useradd -m -p 4qBD5NWD3IkbU test'
-        - wsl-id: 'Debian'
-          user-id: 'Debian'
-          match-pattern: '*Debian*11*'
-          default-absent-tool: 'dos2unix'
-          create-test-user-command: 'useradd -m -p 4qBD5NWD3IkbU test'
         - wsl-id: 'MyDistribution'
           user-id: 'kali-linux'
           match-pattern: '*Kali*'
@@ -1027,11 +1022,6 @@ jobs:
           match-pattern: '*Debian*11*'
           default-absent-tool: 'dos2unix'
           create-test-user-command: 'useradd -m -p 4qBD5NWD3IkbU test'
-        - wsl-id: 'Debian'
-          user-id: 'Debian'
-          match-pattern: '*Debian*11*'
-          default-absent-tool: 'dos2unix'
-          create-test-user-command: 'useradd -m -p 4qBD5NWD3IkbU test'
         - wsl-id: 'MyDistribution'
           user-id: 'kali-linux'
           match-pattern: '*Kali*'
@@ -1197,11 +1187,6 @@ jobs:
           create-test-user-command: 'useradd -m -p 4qBD5NWD3IkbU test'
         - wsl-id: 'Debian'
           user-id: 'Debian-11'
-          match-pattern: '*Debian*11*'
-          default-absent-tool: 'dos2unix'
-          create-test-user-command: 'useradd -m -p 4qBD5NWD3IkbU test'
-        - wsl-id: 'Debian'
-          user-id: 'Debian'
           match-pattern: '*Debian*11*'
           default-absent-tool: 'dos2unix'
           create-test-user-command: 'useradd -m -p 4qBD5NWD3IkbU test'
@@ -1411,11 +1396,6 @@ jobs:
           match-pattern: '*Debian*11*'
           default-absent-tool: 'dos2unix'
           create-test-user-command: 'useradd -m -p 4qBD5NWD3IkbU test'
-        - wsl-id: 'Debian'
-          user-id: 'Debian'
-          match-pattern: '*Debian*11*'
-          default-absent-tool: 'dos2unix'
-          create-test-user-command: 'useradd -m -p 4qBD5NWD3IkbU test'
         - wsl-id: 'MyDistribution'
           user-id: 'kali-linux'
           match-pattern: '*Kali*'
@@ -1565,11 +1545,6 @@ jobs:
           create-test-user-command: 'useradd -m -p 4qBD5NWD3IkbU test'
         - wsl-id: 'Debian'
           user-id: 'Debian-11'
-          match-pattern: '*Debian*11*'
-          default-absent-tool: 'dos2unix'
-          create-test-user-command: 'useradd -m -p 4qBD5NWD3IkbU test'
-        - wsl-id: 'Debian'
-          user-id: 'Debian'
           match-pattern: '*Debian*11*'
           default-absent-tool: 'dos2unix'
           create-test-user-command: 'useradd -m -p 4qBD5NWD3IkbU test'
@@ -1766,11 +1741,6 @@ jobs:
           create-test-user-command: 'useradd -m -p 4qBD5NWD3IkbU test'
         - wsl-id: 'Debian'
           user-id: 'Debian-11'
-          match-pattern: '*Debian*11*'
-          default-absent-tool: 'dos2unix'
-          create-test-user-command: 'useradd -m -p 4qBD5NWD3IkbU test'
-        - wsl-id: 'Debian'
-          user-id: 'Debian'
           match-pattern: '*Debian*11*'
           default-absent-tool: 'dos2unix'
           create-test-user-command: 'useradd -m -p 4qBD5NWD3IkbU test'
@@ -2087,11 +2057,6 @@ jobs:
           create-test-user-command: 'useradd -m -p 4qBD5NWD3IkbU test'
         - wsl-id: 'Debian'
           user-id: 'Debian-11'
-          match-pattern: '*Debian*11*'
-          default-absent-tool: 'dos2unix'
-          create-test-user-command: 'useradd -m -p 4qBD5NWD3IkbU test'
-        - wsl-id: 'Debian'
-          user-id: 'Debian'
           match-pattern: '*Debian*11*'
           default-absent-tool: 'dos2unix'
           create-test-user-command: 'useradd -m -p 4qBD5NWD3IkbU test'
@@ -2418,42 +2383,36 @@ jobs:
             default-absent-tool: 'dos2unix'
             create-test-user-command: 'useradd -m -p 4qBD5NWD3IkbU test'
           distribution12:
-            wsl-id: 'Debian'
-            user-id: 'Debian'
-            match-pattern: '*Debian*11*'
-            default-absent-tool: 'dos2unix'
-            create-test-user-command: 'useradd -m -p 4qBD5NWD3IkbU test'
-          distribution13:
             wsl-id: 'MyDistribution'
             user-id: 'kali-linux'
             match-pattern: '*Kali*'
             default-absent-tool: 'dos2unix'
             create-test-user-command: 'useradd -m -p 4qBD5NWD3IkbU test'
-          distribution14:
+          distribution13:
             wsl-id: 'openSUSE-Leap-15.2'
             user-id: 'openSUSE-Leap-15.2'
             match-pattern: '*openSUSE*Leap*15.2*'
             default-absent-tool: 'which'
             create-test-user-command: 'useradd -m -p 4qBD5NWD3IkbU test'
-          distribution15:
+          distribution14:
             wsl-id: 'Ubuntu-24.04'
             user-id: 'Ubuntu-24.04'
             match-pattern: '*Ubuntu*24.04*'
             default-absent-tool: 'dos2unix'
             create-test-user-command: 'useradd -m -p 4qBD5NWD3IkbU test'
-          distribution16:
+          distribution15:
             wsl-id: 'Ubuntu'
             user-id: 'Ubuntu-20.04'
             match-pattern: '*Ubuntu*20.04*'
             default-absent-tool: 'dos2unix'
             create-test-user-command: 'useradd -m -p 4qBD5NWD3IkbU test'
-          distribution17:
+          distribution16:
             wsl-id: 'Ubuntu-18.04'
             user-id: 'Ubuntu-18.04'
             match-pattern: '*Ubuntu*18.04*'
             default-absent-tool: 'dos2unix'
             create-test-user-command: 'useradd -m -p 4qBD5NWD3IkbU test'
-          distribution18:
+          distribution17:
             wsl-id: 'Ubuntu-16.04'
             user-id: 'Ubuntu-16.04'
             match-pattern: '*Ubuntu*16.04*'
@@ -2527,42 +2486,36 @@ jobs:
             default-absent-tool: 'dos2unix'
             create-test-user-command: 'useradd -m -p 4qBD5NWD3IkbU test'
           distribution12:
-            wsl-id: 'Debian'
-            user-id: 'Debian'
-            match-pattern: '*Debian*11*'
-            default-absent-tool: 'dos2unix'
-            create-test-user-command: 'useradd -m -p 4qBD5NWD3IkbU test'
-          distribution13:
             wsl-id: 'MyDistribution'
             user-id: 'kali-linux'
             match-pattern: '*Kali*'
             default-absent-tool: 'dos2unix'
             create-test-user-command: 'useradd -m -p 4qBD5NWD3IkbU test'
-          distribution14:
+          distribution13:
             wsl-id: 'openSUSE-Leap-15.2'
             user-id: 'openSUSE-Leap-15.2'
             match-pattern: '*openSUSE*Leap*15.2*'
             default-absent-tool: 'which'
             create-test-user-command: 'useradd -m -p 4qBD5NWD3IkbU test'
-          distribution15:
+          distribution14:
             wsl-id: 'Ubuntu-24.04'
             user-id: 'Ubuntu-24.04'
             match-pattern: '*Ubuntu*24.04*'
             default-absent-tool: 'dos2unix'
             create-test-user-command: 'useradd -m -p 4qBD5NWD3IkbU test'
-          distribution16:
+          distribution15:
             wsl-id: 'Ubuntu'
             user-id: 'Ubuntu-22.04'
             match-pattern: '*Ubuntu*22.04*'
             default-absent-tool: 'dos2unix'
             create-test-user-command: 'useradd -m -p 4qBD5NWD3IkbU test'
-          distribution17:
+          distribution16:
             wsl-id: 'Ubuntu-18.04'
             user-id: 'Ubuntu-18.04'
             match-pattern: '*Ubuntu*18.04*'
             default-absent-tool: 'dos2unix'
             create-test-user-command: 'useradd -m -p 4qBD5NWD3IkbU test'
-          distribution18:
+          distribution17:
             wsl-id: 'Ubuntu-16.04'
             user-id: 'Ubuntu-16.04'
             match-pattern: '*Ubuntu*16.04*'
@@ -2769,17 +2722,6 @@ jobs:
           || '' }}
         wsl-version: '1'
     - id: 'step-19'
-      name: 'Execute action for ${{ matrix.distributions.distribution18.user-id }}'
-      uses: './'
-      with:
-        distribution: '${{ matrix.distributions.distribution18.user-id }}'
-        set-as-default: 'false'
-        additional-packages: |-
-          ${{ (contains(fromJSON('["Alpine-3.23", "Alpine-3.22", "Alpine-3.21", "Alpine-3.20", "Alpine-3.19", "Alpine-3.18", "Alpine-3.17", "Alpine"]'), matrix.distributions.distribution18.user-id))
-          && 'bash'
-          || '' }}
-        wsl-version: '1'
-    - id: 'step-20'
       name: 'Test - wsl-bash_${{ matrix.distributions.distribution1.user-id }} should use the correct distribution'
       shell: 'wsl-bash_Alpine-3.23 {0}'
       run: |-
@@ -2788,7 +2730,7 @@ jobs:
       if: |-
         always()
         && (steps.step-2.outcome == 'success')
-    - id: 'step-21'
+    - id: 'step-20'
       name: 'Test - wsl-bash_${{ matrix.distributions.distribution2.user-id }} should use the correct distribution'
       shell: 'wsl-bash_Alpine-3.22 {0}'
       run: |-
@@ -2797,7 +2739,7 @@ jobs:
       if: |-
         always()
         && (steps.step-3.outcome == 'success')
-    - id: 'step-22'
+    - id: 'step-21'
       name: 'Test - wsl-bash_${{ matrix.distributions.distribution3.user-id }} should use the correct distribution'
       shell: 'wsl-bash_Alpine-3.21 {0}'
       run: |-
@@ -2806,7 +2748,7 @@ jobs:
       if: |-
         always()
         && (steps.step-4.outcome == 'success')
-    - id: 'step-23'
+    - id: 'step-22'
       name: 'Test - wsl-bash_${{ matrix.distributions.distribution4.user-id }} should use the correct distribution'
       shell: 'wsl-bash_Alpine-3.20 {0}'
       run: |-
@@ -2815,7 +2757,7 @@ jobs:
       if: |-
         always()
         && (steps.step-5.outcome == 'success')
-    - id: 'step-24'
+    - id: 'step-23'
       name: 'Test - wsl-bash_${{ matrix.distributions.distribution5.user-id }} should use the correct distribution'
       shell: 'wsl-bash_Alpine-3.19 {0}'
       run: |-
@@ -2824,7 +2766,7 @@ jobs:
       if: |-
         always()
         && (steps.step-6.outcome == 'success')
-    - id: 'step-25'
+    - id: 'step-24'
       name: 'Test - wsl-bash_${{ matrix.distributions.distribution6.user-id }} should use the correct distribution'
       shell: 'wsl-bash_Alpine-3.18 {0}'
       run: |-
@@ -2833,7 +2775,7 @@ jobs:
       if: |-
         always()
         && (steps.step-7.outcome == 'success')
-    - id: 'step-26'
+    - id: 'step-25'
       name: 'Test - wsl-bash_${{ matrix.distributions.distribution7.user-id }} should use the correct distribution'
       shell: 'wsl-bash_Alpine-3.17 {0}'
       run: |-
@@ -2842,7 +2784,7 @@ jobs:
       if: |-
         always()
         && (steps.step-8.outcome == 'success')
-    - id: 'step-27'
+    - id: 'step-26'
       name: 'Test - wsl-bash_${{ matrix.distributions.distribution8.user-id }} should use the correct distribution'
       shell: 'wsl-bash_Alpine {0}'
       run: |-
@@ -2851,7 +2793,7 @@ jobs:
       if: |-
         always()
         && (steps.step-9.outcome == 'success')
-    - id: 'step-28'
+    - id: 'step-27'
       name: 'Test - wsl-bash_${{ matrix.distributions.distribution9.user-id }} should use the correct distribution'
       shell: 'wsl-bash_Debian-13 {0}'
       run: |-
@@ -2860,7 +2802,7 @@ jobs:
       if: |-
         always()
         && (steps.step-10.outcome == 'success')
-    - id: 'step-29'
+    - id: 'step-28'
       name: 'Test - wsl-bash_${{ matrix.distributions.distribution10.user-id }} should use the correct distribution'
       shell: 'wsl-bash_Debian-12 {0}'
       run: |-
@@ -2869,7 +2811,7 @@ jobs:
       if: |-
         always()
         && (steps.step-11.outcome == 'success')
-    - id: 'step-30'
+    - id: 'step-29'
       name: 'Test - wsl-bash_${{ matrix.distributions.distribution11.user-id }} should use the correct distribution'
       shell: 'wsl-bash_Debian-11 {0}'
       run: |-
@@ -2878,81 +2820,72 @@ jobs:
       if: |-
         always()
         && (steps.step-12.outcome == 'success')
-    - id: 'step-31'
+    - id: 'step-30'
       name: 'Test - wsl-bash_${{ matrix.distributions.distribution12.user-id }} should use the correct distribution'
-      shell: 'wsl-bash_Debian {0}'
+      shell: 'wsl-bash_kali-linux {0}'
       run: |-
         cat <(lsb_release -a || true) <(uname -a || true) <([ -d /etc ] && find /etc -maxdepth 1 -type f \( -name '*release' -or -name 'issue*' \) -exec cat {} + || true) <([ -d /etc/products.d ] && find /etc/products.d -maxdepth 1 -type f -name '*.prod' -exec cat {} + || true) <([ -f /proc/version ] && cat /proc/version || true)
         [[ "$(cat <(lsb_release -a || true) <(uname -a || true) <([ -d /etc ] && find /etc -maxdepth 1 -type f \( -name '*release' -or -name 'issue*' \) -exec cat {} + || true) <([ -d /etc/products.d ] && find /etc/products.d -maxdepth 1 -type f -name '*.prod' -exec cat {} + || true) <([ -f /proc/version ] && cat /proc/version || true))" == ${{ matrix.distributions.distribution12.match-pattern }} ]]
       if: |-
         always()
         && (steps.step-13.outcome == 'success')
-    - id: 'step-32'
+    - id: 'step-31'
       name: 'Test - wsl-bash_${{ matrix.distributions.distribution13.user-id }} should use the correct distribution'
-      shell: 'wsl-bash_kali-linux {0}'
+      shell: 'wsl-bash_openSUSE-Leap-15.2 {0}'
       run: |-
         cat <(lsb_release -a || true) <(uname -a || true) <([ -d /etc ] && find /etc -maxdepth 1 -type f \( -name '*release' -or -name 'issue*' \) -exec cat {} + || true) <([ -d /etc/products.d ] && find /etc/products.d -maxdepth 1 -type f -name '*.prod' -exec cat {} + || true) <([ -f /proc/version ] && cat /proc/version || true)
         [[ "$(cat <(lsb_release -a || true) <(uname -a || true) <([ -d /etc ] && find /etc -maxdepth 1 -type f \( -name '*release' -or -name 'issue*' \) -exec cat {} + || true) <([ -d /etc/products.d ] && find /etc/products.d -maxdepth 1 -type f -name '*.prod' -exec cat {} + || true) <([ -f /proc/version ] && cat /proc/version || true))" == ${{ matrix.distributions.distribution13.match-pattern }} ]]
       if: |-
         always()
         && (steps.step-14.outcome == 'success')
-    - id: 'step-33'
+    - id: 'step-32'
       name: 'Test - wsl-bash_${{ matrix.distributions.distribution14.user-id }} should use the correct distribution'
-      shell: 'wsl-bash_openSUSE-Leap-15.2 {0}'
+      shell: 'wsl-bash_Ubuntu-24.04 {0}'
       run: |-
         cat <(lsb_release -a || true) <(uname -a || true) <([ -d /etc ] && find /etc -maxdepth 1 -type f \( -name '*release' -or -name 'issue*' \) -exec cat {} + || true) <([ -d /etc/products.d ] && find /etc/products.d -maxdepth 1 -type f -name '*.prod' -exec cat {} + || true) <([ -f /proc/version ] && cat /proc/version || true)
         [[ "$(cat <(lsb_release -a || true) <(uname -a || true) <([ -d /etc ] && find /etc -maxdepth 1 -type f \( -name '*release' -or -name 'issue*' \) -exec cat {} + || true) <([ -d /etc/products.d ] && find /etc/products.d -maxdepth 1 -type f -name '*.prod' -exec cat {} + || true) <([ -f /proc/version ] && cat /proc/version || true))" == ${{ matrix.distributions.distribution14.match-pattern }} ]]
       if: |-
         always()
         && (steps.step-15.outcome == 'success')
-    - id: 'step-34'
+    - id: 'step-33'
       name: 'Test - wsl-bash_${{ matrix.distributions.distribution15.user-id }} should use the correct distribution'
-      shell: 'wsl-bash_Ubuntu-24.04 {0}'
+      shell: 'wsl-bash_Ubuntu-22.04 {0}'
       run: |-
         cat <(lsb_release -a || true) <(uname -a || true) <([ -d /etc ] && find /etc -maxdepth 1 -type f \( -name '*release' -or -name 'issue*' \) -exec cat {} + || true) <([ -d /etc/products.d ] && find /etc/products.d -maxdepth 1 -type f -name '*.prod' -exec cat {} + || true) <([ -f /proc/version ] && cat /proc/version || true)
         [[ "$(cat <(lsb_release -a || true) <(uname -a || true) <([ -d /etc ] && find /etc -maxdepth 1 -type f \( -name '*release' -or -name 'issue*' \) -exec cat {} + || true) <([ -d /etc/products.d ] && find /etc/products.d -maxdepth 1 -type f -name '*.prod' -exec cat {} + || true) <([ -f /proc/version ] && cat /proc/version || true))" == ${{ matrix.distributions.distribution15.match-pattern }} ]]
       if: |-
-        always()
-        && (steps.step-16.outcome == 'success')
-    - id: 'step-35'
-      name: 'Test - wsl-bash_${{ matrix.distributions.distribution16.user-id }} should use the correct distribution'
-      shell: 'wsl-bash_Ubuntu-22.04 {0}'
-      run: |-
-        cat <(lsb_release -a || true) <(uname -a || true) <([ -d /etc ] && find /etc -maxdepth 1 -type f \( -name '*release' -or -name 'issue*' \) -exec cat {} + || true) <([ -d /etc/products.d ] && find /etc/products.d -maxdepth 1 -type f -name '*.prod' -exec cat {} + || true) <([ -f /proc/version ] && cat /proc/version || true)
-        [[ "$(cat <(lsb_release -a || true) <(uname -a || true) <([ -d /etc ] && find /etc -maxdepth 1 -type f \( -name '*release' -or -name 'issue*' \) -exec cat {} + || true) <([ -d /etc/products.d ] && find /etc/products.d -maxdepth 1 -type f -name '*.prod' -exec cat {} + || true) <([ -f /proc/version ] && cat /proc/version || true))" == ${{ matrix.distributions.distribution16.match-pattern }} ]]
-      if: |-
         (
             always()
-            && (steps.step-17.outcome == 'success')
+            && (steps.step-16.outcome == 'success')
         )
-        && (!contains(fromJSON('["Ubuntu-20.04"]'), matrix.distributions.distribution16.user-id))
-    - id: 'step-36'
-      name: 'Test - wsl-bash_${{ matrix.distributions.distribution16.user-id }} should use the correct distribution'
+        && (!contains(fromJSON('["Ubuntu-20.04"]'), matrix.distributions.distribution15.user-id))
+    - id: 'step-34'
+      name: 'Test - wsl-bash_${{ matrix.distributions.distribution15.user-id }} should use the correct distribution'
       shell: 'wsl-bash_Ubuntu-20.04 {0}'
       run: |-
         cat <(lsb_release -a || true) <(uname -a || true) <([ -d /etc ] && find /etc -maxdepth 1 -type f \( -name '*release' -or -name 'issue*' \) -exec cat {} + || true) <([ -d /etc/products.d ] && find /etc/products.d -maxdepth 1 -type f -name '*.prod' -exec cat {} + || true) <([ -f /proc/version ] && cat /proc/version || true)
-        [[ "$(cat <(lsb_release -a || true) <(uname -a || true) <([ -d /etc ] && find /etc -maxdepth 1 -type f \( -name '*release' -or -name 'issue*' \) -exec cat {} + || true) <([ -d /etc/products.d ] && find /etc/products.d -maxdepth 1 -type f -name '*.prod' -exec cat {} + || true) <([ -f /proc/version ] && cat /proc/version || true))" == ${{ matrix.distributions.distribution16.match-pattern }} ]]
+        [[ "$(cat <(lsb_release -a || true) <(uname -a || true) <([ -d /etc ] && find /etc -maxdepth 1 -type f \( -name '*release' -or -name 'issue*' \) -exec cat {} + || true) <([ -d /etc/products.d ] && find /etc/products.d -maxdepth 1 -type f -name '*.prod' -exec cat {} + || true) <([ -f /proc/version ] && cat /proc/version || true))" == ${{ matrix.distributions.distribution15.match-pattern }} ]]
       if: |-
         (
             always()
-            && (steps.step-17.outcome == 'success')
+            && (steps.step-16.outcome == 'success')
         )
-        && (!contains(fromJSON('["Ubuntu-22.04"]'), matrix.distributions.distribution16.user-id))
-    - id: 'step-37'
-      name: 'Test - wsl-bash_${{ matrix.distributions.distribution17.user-id }} should use the correct distribution'
+        && (!contains(fromJSON('["Ubuntu-22.04"]'), matrix.distributions.distribution15.user-id))
+    - id: 'step-35'
+      name: 'Test - wsl-bash_${{ matrix.distributions.distribution16.user-id }} should use the correct distribution'
       shell: 'wsl-bash_Ubuntu-18.04 {0}'
+      run: |-
+        cat <(lsb_release -a || true) <(uname -a || true) <([ -d /etc ] && find /etc -maxdepth 1 -type f \( -name '*release' -or -name 'issue*' \) -exec cat {} + || true) <([ -d /etc/products.d ] && find /etc/products.d -maxdepth 1 -type f -name '*.prod' -exec cat {} + || true) <([ -f /proc/version ] && cat /proc/version || true)
+        [[ "$(cat <(lsb_release -a || true) <(uname -a || true) <([ -d /etc ] && find /etc -maxdepth 1 -type f \( -name '*release' -or -name 'issue*' \) -exec cat {} + || true) <([ -d /etc/products.d ] && find /etc/products.d -maxdepth 1 -type f -name '*.prod' -exec cat {} + || true) <([ -f /proc/version ] && cat /proc/version || true))" == ${{ matrix.distributions.distribution16.match-pattern }} ]]
+      if: |-
+        always()
+        && (steps.step-17.outcome == 'success')
+    - id: 'step-36'
+      name: 'Test - wsl-bash_${{ matrix.distributions.distribution17.user-id }} should use the correct distribution'
+      shell: 'wsl-bash_Ubuntu-16.04 {0}'
       run: |-
         cat <(lsb_release -a || true) <(uname -a || true) <([ -d /etc ] && find /etc -maxdepth 1 -type f \( -name '*release' -or -name 'issue*' \) -exec cat {} + || true) <([ -d /etc/products.d ] && find /etc/products.d -maxdepth 1 -type f -name '*.prod' -exec cat {} + || true) <([ -f /proc/version ] && cat /proc/version || true)
         [[ "$(cat <(lsb_release -a || true) <(uname -a || true) <([ -d /etc ] && find /etc -maxdepth 1 -type f \( -name '*release' -or -name 'issue*' \) -exec cat {} + || true) <([ -d /etc/products.d ] && find /etc/products.d -maxdepth 1 -type f -name '*.prod' -exec cat {} + || true) <([ -f /proc/version ] && cat /proc/version || true))" == ${{ matrix.distributions.distribution17.match-pattern }} ]]
       if: |-
         always()
         && (steps.step-18.outcome == 'success')
-    - id: 'step-38'
-      name: 'Test - wsl-bash_${{ matrix.distributions.distribution18.user-id }} should use the correct distribution'
-      shell: 'wsl-bash_Ubuntu-16.04 {0}'
-      run: |-
-        cat <(lsb_release -a || true) <(uname -a || true) <([ -d /etc ] && find /etc -maxdepth 1 -type f \( -name '*release' -or -name 'issue*' \) -exec cat {} + || true) <([ -d /etc/products.d ] && find /etc/products.d -maxdepth 1 -type f -name '*.prod' -exec cat {} + || true) <([ -f /proc/version ] && cat /proc/version || true)
-        [[ "$(cat <(lsb_release -a || true) <(uname -a || true) <([ -d /etc ] && find /etc -maxdepth 1 -type f \( -name '*release' -or -name 'issue*' \) -exec cat {} + || true) <([ -d /etc/products.d ] && find /etc/products.d -maxdepth 1 -type f -name '*.prod' -exec cat {} + || true) <([ -f /proc/version ] && cat /proc/version || true))" == ${{ matrix.distributions.distribution18.match-pattern }} ]]
-      if: |-
-        always()
-        && (steps.step-19.outcome == 'success')

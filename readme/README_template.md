@@ -156,7 +156,6 @@ The values currently supported by this action are:
 * `Debian-13` **(default)**
 * `Debian-12`
 * `Debian-11`
-* `Debian` _(deprecated, 'Debian-11' is a drop-in replacement, except for the wsl-shell-distribution-wrapper name)_
 * `kali-linux`
 * `openSUSE-Leap-15.2`
 * `Ubuntu-24.04`

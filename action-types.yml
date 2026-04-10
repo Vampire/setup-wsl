@@ -28,7 +28,6 @@ inputs:
             - Debian-13
             - Debian-12
             - Debian-11
-            - Debian
             - kali-linux
             - openSUSE-Leap-15.2
             - Ubuntu-24.04

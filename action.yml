@@ -39,7 +39,6 @@ inputs:
                 - 'Debian-13'
                 - 'Debian-12'
                 - 'Debian-11'
-                - 'Debian' (deprecated, 'Debian-11' is a drop-in replacement, except for the wsl-shell-distribution-wrapper name)
                 - 'kali-linux'
                 - 'openSUSE-Leap-15.2'
                 - 'Ubuntu-24.04'

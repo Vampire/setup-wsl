@@ -153,12 +153,6 @@ val debian11 = Distribution(
     defaultAbsentTool = "dos2unix"
 )
 
-val debian = Distribution(
-    wslId = "Debian",
-    matchPattern = "*Debian*11*",
-    defaultAbsentTool = "dos2unix"
-)
-
 val kali = Distribution(
     wslId = "MyDistribution",
     userId = "kali-linux",
@@ -209,7 +203,6 @@ val distributions = listOf(
     debian13,
     debian12,
     debian11,
-    debian,
     kali,
     openSuseLeap15_2,
     ubuntu2404,

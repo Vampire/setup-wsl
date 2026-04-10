@@ -34,7 +34,6 @@ val distributions = listOf(
     Alpine321,
     Alpine322,
     Alpine323,
-    Debian,
     Debian11,
     Debian12,
     Debian13,
@@ -283,14 +282,6 @@ abstract class ArchivedDebianDistribution : DebianDistribution {
         super.refresh()
     }
 }
-
-object Debian : ArchivedDebianDistribution(
-    wslId = "Debian",
-    distributionName = "Debian",
-    version = SemVer("1.0.0"),
-    downloadUrl = URL("https://aka.ms/wsl-debian-gnulinux"),
-    installerFile = "debian.exe"
-)
 
 object Debian11 : ArchivedDebianDistribution(
     wslId = "Debian",

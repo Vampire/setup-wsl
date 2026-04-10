@@ -122,14 +122,6 @@ val distribution by lazy {
             """.trimIndent()
         )
 
-        Debian -> warning(
-            """
-                'Debian' distribution is deprecated.
-                Please migrate to a versioned distribution such as 'Debian-13'.
-                'Debian-11' is a drop-in replacement, except for the wsl-shell-distribution-wrapper name.
-            """.trimIndent()
-        )
-
         else -> Unit
     }
 
