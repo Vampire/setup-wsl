@@ -26,7 +26,6 @@ build-node = "20.11.0"
 build-snakeyaml = "2.6"
 kotlin = "2.3.20"
 kotlinx-coroutines = "1.10.2"
-ktor = "3.4.2"
 workflows-kotlin = "2.3.20"
 
 [libraries]
@@ -37,8 +36,6 @@ build-kotlinx-serialization-core = { module = "org.jetbrains.kotlinx:kotlinx-ser
 build-kotlinx-serialization-json = { module = "org.jetbrains.kotlinx:kotlinx-serialization-json" }
 build-snakeyaml = { module = "org.yaml:snakeyaml", version.ref = "build-snakeyaml" }
 kotlinx-coroutines-core = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-core", version.ref = "kotlinx-coroutines" }
-ktor-client-core = { module = "io.ktor:ktor-client-core", version.ref = "ktor" }
-ktor-client-js = { module = "io.ktor:ktor-client-js", version.ref = "ktor" }
 workflows-kotlin-compiler = { module = "org.jetbrains.kotlin:kotlin-compiler", version.ref = "workflows-kotlin" }
 workflows-kotlin-compiler-embeddable = { module = "org.jetbrains.kotlin:kotlin-compiler-embeddable", version.ref = "workflows-kotlin" }
 workflows-kotlin-main-kts = { module = "org.jetbrains.kotlin:kotlin-main-kts", version.ref = "workflows-kotlin" }

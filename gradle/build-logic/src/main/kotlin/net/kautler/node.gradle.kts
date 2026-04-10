@@ -44,8 +44,6 @@ kotlin {
         jsMain {
             dependencies {
                 implementation(libs.kotlinx.coroutines.core)
-                implementation(libs.ktor.client.core)
-                implementation(libs.ktor.client.js)
                 implementation(kotlinWrappers.actions.cache)
                 implementation(kotlinWrappers.actions.core)
                 implementation(kotlinWrappers.actions.exec)

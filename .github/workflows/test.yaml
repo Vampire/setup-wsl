@@ -182,6 +182,7 @@ jobs:
           user-id: 'Debian'
           match-pattern: '*Debian*11*'
           default-absent-tool: 'dos2unix'
+          create-test-user-command: 'useradd -m -p 4qBD5NWD3IkbU test'
     steps:
     - id: 'step-0'
       name: 'Install zstd on windows-11-arm'
@@ -388,42 +389,56 @@ jobs:
         - 'windows-2025'
         - 'windows-latest'
         distribution:
+        - wsl-id: 'Alpine'
+          user-id: 'Alpine'
+          match-pattern: '*Alpine*3.17*'
+          default-absent-tool: 'dos2unix'
+          create-test-user-command: 'adduser -D test'
         - wsl-id: 'Debian'
           user-id: 'Debian-11'
           match-pattern: '*Debian*11*'
           default-absent-tool: 'dos2unix'
+          create-test-user-command: 'useradd -m -p 4qBD5NWD3IkbU test'
         - wsl-id: 'Debian'
           user-id: 'Debian'
           match-pattern: '*Debian*11*'
           default-absent-tool: 'dos2unix'
+          create-test-user-command: 'useradd -m -p 4qBD5NWD3IkbU test'
         - wsl-id: 'MyDistribution'
           user-id: 'kali-linux'
           match-pattern: '*Kali*'
           default-absent-tool: 'dos2unix'
+          create-test-user-command: 'useradd -m -p 4qBD5NWD3IkbU test'
         - wsl-id: 'openSUSE-Leap-15.2'
           user-id: 'openSUSE-Leap-15.2'
           match-pattern: '*openSUSE*Leap*15.2*'
           default-absent-tool: 'which'
+          create-test-user-command: 'useradd -m -p 4qBD5NWD3IkbU test'
         - wsl-id: 'Ubuntu-24.04'
           user-id: 'Ubuntu-24.04'
           match-pattern: '*Ubuntu*24.04*'
           default-absent-tool: 'dos2unix'
+          create-test-user-command: 'useradd -m -p 4qBD5NWD3IkbU test'
         - wsl-id: 'Ubuntu'
           user-id: 'Ubuntu-22.04'
           match-pattern: '*Ubuntu*22.04*'
           default-absent-tool: 'dos2unix'
+          create-test-user-command: 'useradd -m -p 4qBD5NWD3IkbU test'
         - wsl-id: 'Ubuntu'
           user-id: 'Ubuntu-20.04'
           match-pattern: '*Ubuntu*20.04*'
           default-absent-tool: 'dos2unix'
+          create-test-user-command: 'useradd -m -p 4qBD5NWD3IkbU test'
         - wsl-id: 'Ubuntu-18.04'
           user-id: 'Ubuntu-18.04'
           match-pattern: '*Ubuntu*18.04*'
           default-absent-tool: 'dos2unix'
+          create-test-user-command: 'useradd -m -p 4qBD5NWD3IkbU test'
         - wsl-id: 'Ubuntu-16.04'
           user-id: 'Ubuntu-16.04'
           match-pattern: '*Ubuntu*16.04*'
           default-absent-tool: 'dos2unix'
+          create-test-user-command: 'useradd -m -p 4qBD5NWD3IkbU test'
     steps:
     - id: 'step-0'
       name: 'Install zstd on windows-11-arm'
@@ -461,7 +476,7 @@ jobs:
             always()
             && (steps.step-2.outcome == 'success')
         )
-        && (matrix.distribution.user-id == 'Alpine')
+        && (contains(fromJSON('["Alpine"]'), matrix.distribution.user-id))
     - id: 'step-4'
       name: 'Test - wsl-bash should fail if bash is not present by default (verification)'
       run: 'wsl sh -euc "[ ''${{ steps.step-3.outcome }}'' = ''failure'' ]"'
@@ -470,7 +485,7 @@ jobs:
             always()
             && (steps.step-2.outcome == 'success')
         )
-        && (matrix.distribution.user-id == 'Alpine')
+        && (contains(fromJSON('["Alpine"]'), matrix.distribution.user-id))
     - id: 'step-5'
       name: 'Delete wsl-bash'
       shell: 'cmd'
@@ -480,7 +495,7 @@ jobs:
             always()
             && (steps.step-2.outcome == 'success')
         )
-        && (matrix.distribution.user-id == 'Alpine')
+        && (contains(fromJSON('["Alpine"]'), matrix.distribution.user-id))
     - id: 'step-6'
       name: 'Install Bash on Alpine'
       uses: './'
@@ -492,7 +507,7 @@ jobs:
             always()
             && (steps.step-2.outcome == 'success')
         )
-        && (matrix.distribution.user-id == 'Alpine')
+        && (contains(fromJSON('["Alpine"]'), matrix.distribution.user-id))
     - id: 'step-7'
       name: 'Test - wsl-bash should be available as custom shell'
       shell: 'wsl-bash {0}'
@@ -725,7 +740,7 @@ jobs:
     - id: 'step-36'
       name: 'Add user test'
       shell: 'wsl-bash {0}'
-      run: 'useradd -m -p 4qBD5NWD3IkbU test'
+      run: '${{ matrix.distribution.create-test-user-command }}'
       if: |-
         always()
         && (steps.step-32.outcome == 'success')
@@ -912,42 +927,56 @@ jobs:
         - 'windows-2025'
         - 'windows-latest'
         distribution:
+        - wsl-id: 'Alpine'
+          user-id: 'Alpine'
+          match-pattern: '*Alpine*3.17*'
+          default-absent-tool: 'dos2unix'
+          create-test-user-command: 'adduser -D test'
         - wsl-id: 'Debian'
           user-id: 'Debian-11'
           match-pattern: '*Debian*11*'
           default-absent-tool: 'dos2unix'
+          create-test-user-command: 'useradd -m -p 4qBD5NWD3IkbU test'
         - wsl-id: 'Debian'
           user-id: 'Debian'
           match-pattern: '*Debian*11*'
           default-absent-tool: 'dos2unix'
+          create-test-user-command: 'useradd -m -p 4qBD5NWD3IkbU test'
         - wsl-id: 'MyDistribution'
           user-id: 'kali-linux'
           match-pattern: '*Kali*'
           default-absent-tool: 'dos2unix'
+          create-test-user-command: 'useradd -m -p 4qBD5NWD3IkbU test'
         - wsl-id: 'openSUSE-Leap-15.2'
           user-id: 'openSUSE-Leap-15.2'
           match-pattern: '*openSUSE*Leap*15.2*'
           default-absent-tool: 'which'
+          create-test-user-command: 'useradd -m -p 4qBD5NWD3IkbU test'
         - wsl-id: 'Ubuntu-24.04'
           user-id: 'Ubuntu-24.04'
           match-pattern: '*Ubuntu*24.04*'
           default-absent-tool: 'dos2unix'
+          create-test-user-command: 'useradd -m -p 4qBD5NWD3IkbU test'
         - wsl-id: 'Ubuntu'
           user-id: 'Ubuntu-22.04'
           match-pattern: '*Ubuntu*22.04*'
           default-absent-tool: 'dos2unix'
+          create-test-user-command: 'useradd -m -p 4qBD5NWD3IkbU test'
         - wsl-id: 'Ubuntu'
           user-id: 'Ubuntu-20.04'
           match-pattern: '*Ubuntu*20.04*'
           default-absent-tool: 'dos2unix'
+          create-test-user-command: 'useradd -m -p 4qBD5NWD3IkbU test'
         - wsl-id: 'Ubuntu-18.04'
           user-id: 'Ubuntu-18.04'
           match-pattern: '*Ubuntu*18.04*'
           default-absent-tool: 'dos2unix'
+          create-test-user-command: 'useradd -m -p 4qBD5NWD3IkbU test'
         - wsl-id: 'Ubuntu-16.04'
           user-id: 'Ubuntu-16.04'
           match-pattern: '*Ubuntu*16.04*'
           default-absent-tool: 'dos2unix'
+          create-test-user-command: 'useradd -m -p 4qBD5NWD3IkbU test'
     steps:
     - id: 'step-0'
       name: 'Install zstd on windows-11-arm'
@@ -981,7 +1010,7 @@ jobs:
             always()
             && (steps.step-2.outcome == 'success')
         )
-        && (matrix.distribution.user-id == 'Alpine')
+        && (contains(fromJSON('["Alpine"]'), matrix.distribution.user-id))
     - id: 'step-4'
       name: 'Install Bash on Alpine'
       uses: './'
@@ -993,7 +1022,7 @@ jobs:
             always()
             && (steps.step-2.outcome == 'success')
         )
-        && (matrix.distribution.user-id == 'Alpine')
+        && (contains(fromJSON('["Alpine"]'), matrix.distribution.user-id))
     - id: 'step-5'
       name: 'Test - /etc/wsl.conf should exist'
       shell: 'wsl-bash {0}'
@@ -1026,42 +1055,56 @@ jobs:
         - 'windows-2025'
         - 'windows-latest'
         distribution:
+        - wsl-id: 'Alpine'
+          user-id: 'Alpine'
+          match-pattern: '*Alpine*3.17*'
+          default-absent-tool: 'dos2unix'
+          create-test-user-command: 'adduser -D test'
         - wsl-id: 'Debian'
           user-id: 'Debian-11'
           match-pattern: '*Debian*11*'
           default-absent-tool: 'dos2unix'
+          create-test-user-command: 'useradd -m -p 4qBD5NWD3IkbU test'
         - wsl-id: 'Debian'
           user-id: 'Debian'
           match-pattern: '*Debian*11*'
           default-absent-tool: 'dos2unix'
+          create-test-user-command: 'useradd -m -p 4qBD5NWD3IkbU test'
         - wsl-id: 'MyDistribution'
           user-id: 'kali-linux'
           match-pattern: '*Kali*'
           default-absent-tool: 'dos2unix'
+          create-test-user-command: 'useradd -m -p 4qBD5NWD3IkbU test'
         - wsl-id: 'openSUSE-Leap-15.2'
           user-id: 'openSUSE-Leap-15.2'
           match-pattern: '*openSUSE*Leap*15.2*'
           default-absent-tool: 'which'
+          create-test-user-command: 'useradd -m -p 4qBD5NWD3IkbU test'
         - wsl-id: 'Ubuntu-24.04'
           user-id: 'Ubuntu-24.04'
           match-pattern: '*Ubuntu*24.04*'
           default-absent-tool: 'dos2unix'
+          create-test-user-command: 'useradd -m -p 4qBD5NWD3IkbU test'
         - wsl-id: 'Ubuntu'
           user-id: 'Ubuntu-22.04'
           match-pattern: '*Ubuntu*22.04*'
           default-absent-tool: 'dos2unix'
+          create-test-user-command: 'useradd -m -p 4qBD5NWD3IkbU test'
         - wsl-id: 'Ubuntu'
           user-id: 'Ubuntu-20.04'
           match-pattern: '*Ubuntu*20.04*'
           default-absent-tool: 'dos2unix'
+          create-test-user-command: 'useradd -m -p 4qBD5NWD3IkbU test'
         - wsl-id: 'Ubuntu-18.04'
           user-id: 'Ubuntu-18.04'
           match-pattern: '*Ubuntu*18.04*'
           default-absent-tool: 'dos2unix'
+          create-test-user-command: 'useradd -m -p 4qBD5NWD3IkbU test'
         - wsl-id: 'Ubuntu-16.04'
           user-id: 'Ubuntu-16.04'
           match-pattern: '*Ubuntu*16.04*'
           default-absent-tool: 'dos2unix'
+          create-test-user-command: 'useradd -m -p 4qBD5NWD3IkbU test'
     steps:
     - id: 'step-0'
       name: 'Install zstd on windows-11-arm'
@@ -1092,7 +1135,7 @@ jobs:
             always()
             && (steps.step-2.outcome == 'success')
         )
-        && (matrix.distribution.user-id == 'Alpine')
+        && (contains(fromJSON('["Alpine"]'), matrix.distribution.user-id))
     - id: 'step-4'
       name: 'Install Bash on Alpine'
       uses: './'
@@ -1104,7 +1147,7 @@ jobs:
             always()
             && (steps.step-2.outcome == 'success')
         )
-        && (matrix.distribution.user-id == 'Alpine')
+        && (contains(fromJSON('["Alpine"]'), matrix.distribution.user-id))
     - id: 'step-5'
       name: 'Test - /etc/wsl.conf should not exist'
       shell: 'wsl-bash {0}'
@@ -1114,7 +1157,7 @@ jobs:
             always()
             && (steps.step-2.outcome == 'success')
         )
-        && (matrix.distribution.user-id != 'Ubuntu-24.04')
+        && (!contains(fromJSON('["Ubuntu-24.04"]'), matrix.distribution.user-id))
     - id: 'step-6'
       name: 'Test - C: should be mounted at /mnt/c'
       shell: 'wsl-bash {0}'
@@ -1176,42 +1219,56 @@ jobs:
         - 'windows-2025'
         - 'windows-latest'
         distribution:
+        - wsl-id: 'Alpine'
+          user-id: 'Alpine'
+          match-pattern: '*Alpine*3.17*'
+          default-absent-tool: 'dos2unix'
+          create-test-user-command: 'adduser -D test'
         - wsl-id: 'Debian'
           user-id: 'Debian-11'
           match-pattern: '*Debian*11*'
           default-absent-tool: 'dos2unix'
+          create-test-user-command: 'useradd -m -p 4qBD5NWD3IkbU test'
         - wsl-id: 'Debian'
           user-id: 'Debian'
           match-pattern: '*Debian*11*'
           default-absent-tool: 'dos2unix'
+          create-test-user-command: 'useradd -m -p 4qBD5NWD3IkbU test'
         - wsl-id: 'MyDistribution'
           user-id: 'kali-linux'
           match-pattern: '*Kali*'
           default-absent-tool: 'dos2unix'
+          create-test-user-command: 'useradd -m -p 4qBD5NWD3IkbU test'
         - wsl-id: 'openSUSE-Leap-15.2'
           user-id: 'openSUSE-Leap-15.2'
           match-pattern: '*openSUSE*Leap*15.2*'
           default-absent-tool: 'which'
+          create-test-user-command: 'useradd -m -p 4qBD5NWD3IkbU test'
         - wsl-id: 'Ubuntu-24.04'
           user-id: 'Ubuntu-24.04'
           match-pattern: '*Ubuntu*24.04*'
           default-absent-tool: 'dos2unix'
+          create-test-user-command: 'useradd -m -p 4qBD5NWD3IkbU test'
         - wsl-id: 'Ubuntu'
           user-id: 'Ubuntu-22.04'
           match-pattern: '*Ubuntu*22.04*'
           default-absent-tool: 'dos2unix'
+          create-test-user-command: 'useradd -m -p 4qBD5NWD3IkbU test'
         - wsl-id: 'Ubuntu'
           user-id: 'Ubuntu-20.04'
           match-pattern: '*Ubuntu*20.04*'
           default-absent-tool: 'dos2unix'
+          create-test-user-command: 'useradd -m -p 4qBD5NWD3IkbU test'
         - wsl-id: 'Ubuntu-18.04'
           user-id: 'Ubuntu-18.04'
           match-pattern: '*Ubuntu*18.04*'
           default-absent-tool: 'dos2unix'
+          create-test-user-command: 'useradd -m -p 4qBD5NWD3IkbU test'
         - wsl-id: 'Ubuntu-16.04'
           user-id: 'Ubuntu-16.04'
           match-pattern: '*Ubuntu*16.04*'
           default-absent-tool: 'dos2unix'
+          create-test-user-command: 'useradd -m -p 4qBD5NWD3IkbU test'
     steps:
     - id: 'step-0'
       name: 'Install zstd on windows-11-arm'
@@ -1274,42 +1331,56 @@ jobs:
         - 'windows-2025'
         - 'windows-latest'
         distribution:
+        - wsl-id: 'Alpine'
+          user-id: 'Alpine'
+          match-pattern: '*Alpine*3.17*'
+          default-absent-tool: 'dos2unix'
+          create-test-user-command: 'adduser -D test'
         - wsl-id: 'Debian'
           user-id: 'Debian-11'
           match-pattern: '*Debian*11*'
           default-absent-tool: 'dos2unix'
+          create-test-user-command: 'useradd -m -p 4qBD5NWD3IkbU test'
         - wsl-id: 'Debian'
           user-id: 'Debian'
           match-pattern: '*Debian*11*'
           default-absent-tool: 'dos2unix'
+          create-test-user-command: 'useradd -m -p 4qBD5NWD3IkbU test'
         - wsl-id: 'MyDistribution'
           user-id: 'kali-linux'
           match-pattern: '*Kali*'
           default-absent-tool: 'dos2unix'
+          create-test-user-command: 'useradd -m -p 4qBD5NWD3IkbU test'
         - wsl-id: 'openSUSE-Leap-15.2'
           user-id: 'openSUSE-Leap-15.2'
           match-pattern: '*openSUSE*Leap*15.2*'
           default-absent-tool: 'which'
+          create-test-user-command: 'useradd -m -p 4qBD5NWD3IkbU test'
         - wsl-id: 'Ubuntu-24.04'
           user-id: 'Ubuntu-24.04'
           match-pattern: '*Ubuntu*24.04*'
           default-absent-tool: 'dos2unix'
+          create-test-user-command: 'useradd -m -p 4qBD5NWD3IkbU test'
         - wsl-id: 'Ubuntu'
           user-id: 'Ubuntu-22.04'
           match-pattern: '*Ubuntu*22.04*'
           default-absent-tool: 'dos2unix'
+          create-test-user-command: 'useradd -m -p 4qBD5NWD3IkbU test'
         - wsl-id: 'Ubuntu'
           user-id: 'Ubuntu-20.04'
           match-pattern: '*Ubuntu*20.04*'
           default-absent-tool: 'dos2unix'
+          create-test-user-command: 'useradd -m -p 4qBD5NWD3IkbU test'
         - wsl-id: 'Ubuntu-18.04'
           user-id: 'Ubuntu-18.04'
           match-pattern: '*Ubuntu*18.04*'
           default-absent-tool: 'dos2unix'
+          create-test-user-command: 'useradd -m -p 4qBD5NWD3IkbU test'
         - wsl-id: 'Ubuntu-16.04'
           user-id: 'Ubuntu-16.04'
           match-pattern: '*Ubuntu*16.04*'
           default-absent-tool: 'dos2unix'
+          create-test-user-command: 'useradd -m -p 4qBD5NWD3IkbU test'
         wsl-version:
         - 1
         - 2
@@ -1416,42 +1487,56 @@ jobs:
         - 'windows-2025'
         - 'windows-latest'
         distribution:
+        - wsl-id: 'Alpine'
+          user-id: 'Alpine'
+          match-pattern: '*Alpine*3.17*'
+          default-absent-tool: 'dos2unix'
+          create-test-user-command: 'adduser -D test'
         - wsl-id: 'Debian'
           user-id: 'Debian-11'
           match-pattern: '*Debian*11*'
           default-absent-tool: 'dos2unix'
+          create-test-user-command: 'useradd -m -p 4qBD5NWD3IkbU test'
         - wsl-id: 'Debian'
           user-id: 'Debian'
           match-pattern: '*Debian*11*'
           default-absent-tool: 'dos2unix'
+          create-test-user-command: 'useradd -m -p 4qBD5NWD3IkbU test'
         - wsl-id: 'MyDistribution'
           user-id: 'kali-linux'
           match-pattern: '*Kali*'
           default-absent-tool: 'dos2unix'
+          create-test-user-command: 'useradd -m -p 4qBD5NWD3IkbU test'
         - wsl-id: 'openSUSE-Leap-15.2'
           user-id: 'openSUSE-Leap-15.2'
           match-pattern: '*openSUSE*Leap*15.2*'
           default-absent-tool: 'which'
+          create-test-user-command: 'useradd -m -p 4qBD5NWD3IkbU test'
         - wsl-id: 'Ubuntu-24.04'
           user-id: 'Ubuntu-24.04'
           match-pattern: '*Ubuntu*24.04*'
           default-absent-tool: 'dos2unix'
+          create-test-user-command: 'useradd -m -p 4qBD5NWD3IkbU test'
         - wsl-id: 'Ubuntu'
           user-id: 'Ubuntu-22.04'
           match-pattern: '*Ubuntu*22.04*'
           default-absent-tool: 'dos2unix'
+          create-test-user-command: 'useradd -m -p 4qBD5NWD3IkbU test'
         - wsl-id: 'Ubuntu'
           user-id: 'Ubuntu-20.04'
           match-pattern: '*Ubuntu*20.04*'
           default-absent-tool: 'dos2unix'
+          create-test-user-command: 'useradd -m -p 4qBD5NWD3IkbU test'
         - wsl-id: 'Ubuntu-18.04'
           user-id: 'Ubuntu-18.04'
           match-pattern: '*Ubuntu*18.04*'
           default-absent-tool: 'dos2unix'
+          create-test-user-command: 'useradd -m -p 4qBD5NWD3IkbU test'
         - wsl-id: 'Ubuntu-16.04'
           user-id: 'Ubuntu-16.04'
           match-pattern: '*Ubuntu*16.04*'
           default-absent-tool: 'dos2unix'
+          create-test-user-command: 'useradd -m -p 4qBD5NWD3IkbU test'
     steps:
     - id: 'step-0'
       name: 'Install zstd on windows-11-arm'
@@ -1504,91 +1589,109 @@ jobs:
             user-id: 'Debian-11'
             match-pattern: '*Debian*11*'
             default-absent-tool: 'dos2unix'
+            create-test-user-command: 'useradd -m -p 4qBD5NWD3IkbU test'
           distribution2:
             wsl-id: 'Ubuntu'
             user-id: 'Ubuntu-20.04'
             match-pattern: '*Ubuntu*20.04*'
             default-absent-tool: 'dos2unix'
+            create-test-user-command: 'useradd -m -p 4qBD5NWD3IkbU test'
           distribution3:
             wsl-id: 'Ubuntu-18.04'
             user-id: 'Ubuntu-18.04'
             match-pattern: '*Ubuntu*18.04*'
             default-absent-tool: 'dos2unix'
+            create-test-user-command: 'useradd -m -p 4qBD5NWD3IkbU test'
         - distribution1:
             wsl-id: 'Debian'
             user-id: 'Debian-11'
             match-pattern: '*Debian*11*'
             default-absent-tool: 'dos2unix'
+            create-test-user-command: 'useradd -m -p 4qBD5NWD3IkbU test'
           distribution2:
             wsl-id: 'Ubuntu-18.04'
             user-id: 'Ubuntu-18.04'
             match-pattern: '*Ubuntu*18.04*'
             default-absent-tool: 'dos2unix'
+            create-test-user-command: 'useradd -m -p 4qBD5NWD3IkbU test'
           distribution3:
             wsl-id: 'Ubuntu'
             user-id: 'Ubuntu-20.04'
             match-pattern: '*Ubuntu*20.04*'
             default-absent-tool: 'dos2unix'
+            create-test-user-command: 'useradd -m -p 4qBD5NWD3IkbU test'
         - distribution1:
             wsl-id: 'Ubuntu'
             user-id: 'Ubuntu-20.04'
             match-pattern: '*Ubuntu*20.04*'
             default-absent-tool: 'dos2unix'
+            create-test-user-command: 'useradd -m -p 4qBD5NWD3IkbU test'
           distribution2:
             wsl-id: 'Debian'
             user-id: 'Debian-11'
             match-pattern: '*Debian*11*'
             default-absent-tool: 'dos2unix'
+            create-test-user-command: 'useradd -m -p 4qBD5NWD3IkbU test'
           distribution3:
             wsl-id: 'Ubuntu-18.04'
             user-id: 'Ubuntu-18.04'
             match-pattern: '*Ubuntu*18.04*'
             default-absent-tool: 'dos2unix'
+            create-test-user-command: 'useradd -m -p 4qBD5NWD3IkbU test'
         - distribution1:
             wsl-id: 'Ubuntu'
             user-id: 'Ubuntu-20.04'
             match-pattern: '*Ubuntu*20.04*'
             default-absent-tool: 'dos2unix'
+            create-test-user-command: 'useradd -m -p 4qBD5NWD3IkbU test'
           distribution2:
             wsl-id: 'Ubuntu-18.04'
             user-id: 'Ubuntu-18.04'
             match-pattern: '*Ubuntu*18.04*'
             default-absent-tool: 'dos2unix'
+            create-test-user-command: 'useradd -m -p 4qBD5NWD3IkbU test'
           distribution3:
             wsl-id: 'Debian'
             user-id: 'Debian-11'
             match-pattern: '*Debian*11*'
             default-absent-tool: 'dos2unix'
+            create-test-user-command: 'useradd -m -p 4qBD5NWD3IkbU test'
         - distribution1:
             wsl-id: 'Ubuntu-18.04'
             user-id: 'Ubuntu-18.04'
             match-pattern: '*Ubuntu*18.04*'
             default-absent-tool: 'dos2unix'
+            create-test-user-command: 'useradd -m -p 4qBD5NWD3IkbU test'
           distribution2:
             wsl-id: 'Debian'
             user-id: 'Debian-11'
             match-pattern: '*Debian*11*'
             default-absent-tool: 'dos2unix'
+            create-test-user-command: 'useradd -m -p 4qBD5NWD3IkbU test'
           distribution3:
             wsl-id: 'Ubuntu'
             user-id: 'Ubuntu-20.04'
             match-pattern: '*Ubuntu*20.04*'
             default-absent-tool: 'dos2unix'
+            create-test-user-command: 'useradd -m -p 4qBD5NWD3IkbU test'
         - distribution1:
             wsl-id: 'Ubuntu-18.04'
             user-id: 'Ubuntu-18.04'
             match-pattern: '*Ubuntu*18.04*'
             default-absent-tool: 'dos2unix'
+            create-test-user-command: 'useradd -m -p 4qBD5NWD3IkbU test'
           distribution2:
             wsl-id: 'Ubuntu'
             user-id: 'Ubuntu-20.04'
             match-pattern: '*Ubuntu*20.04*'
             default-absent-tool: 'dos2unix'
+            create-test-user-command: 'useradd -m -p 4qBD5NWD3IkbU test'
           distribution3:
             wsl-id: 'Debian'
             user-id: 'Debian-11'
             match-pattern: '*Debian*11*'
             default-absent-tool: 'dos2unix'
+            create-test-user-command: 'useradd -m -p 4qBD5NWD3IkbU test'
     steps:
     - id: 'step-0'
       name: 'Install zstd on windows-11-arm'
@@ -1660,47 +1763,62 @@ jobs:
         - 'windows-2025'
         - 'windows-latest'
         distribution:
+        - wsl-id: 'Alpine'
+          user-id: 'Alpine'
+          match-pattern: '*Alpine*3.17*'
+          default-absent-tool: 'dos2unix'
+          create-test-user-command: 'adduser -D test'
         - wsl-id: 'Debian'
           user-id: 'Debian-11'
           match-pattern: '*Debian*11*'
           default-absent-tool: 'dos2unix'
+          create-test-user-command: 'useradd -m -p 4qBD5NWD3IkbU test'
         - wsl-id: 'Debian'
           user-id: 'Debian'
           match-pattern: '*Debian*11*'
           default-absent-tool: 'dos2unix'
+          create-test-user-command: 'useradd -m -p 4qBD5NWD3IkbU test'
         - wsl-id: 'MyDistribution'
           user-id: 'kali-linux'
           match-pattern: '*Kali*'
           default-absent-tool: 'dos2unix'
+          create-test-user-command: 'useradd -m -p 4qBD5NWD3IkbU test'
         - wsl-id: 'openSUSE-Leap-15.2'
           user-id: 'openSUSE-Leap-15.2'
           match-pattern: '*openSUSE*Leap*15.2*'
           default-absent-tool: 'which'
+          create-test-user-command: 'useradd -m -p 4qBD5NWD3IkbU test'
         - wsl-id: 'Ubuntu-24.04'
           user-id: 'Ubuntu-24.04'
           match-pattern: '*Ubuntu*24.04*'
           default-absent-tool: 'dos2unix'
+          create-test-user-command: 'useradd -m -p 4qBD5NWD3IkbU test'
         - wsl-id: 'Ubuntu'
           user-id: 'Ubuntu-22.04'
           match-pattern: '*Ubuntu*22.04*'
           default-absent-tool: 'dos2unix'
+          create-test-user-command: 'useradd -m -p 4qBD5NWD3IkbU test'
         - wsl-id: 'Ubuntu'
           user-id: 'Ubuntu-20.04'
           match-pattern: '*Ubuntu*20.04*'
           default-absent-tool: 'dos2unix'
+          create-test-user-command: 'useradd -m -p 4qBD5NWD3IkbU test'
         - wsl-id: 'Ubuntu-18.04'
           user-id: 'Ubuntu-18.04'
           match-pattern: '*Ubuntu*18.04*'
           default-absent-tool: 'dos2unix'
+          create-test-user-command: 'useradd -m -p 4qBD5NWD3IkbU test'
         - wsl-id: 'Ubuntu-16.04'
           user-id: 'Ubuntu-16.04'
           match-pattern: '*Ubuntu*16.04*'
           default-absent-tool: 'dos2unix'
+          create-test-user-command: 'useradd -m -p 4qBD5NWD3IkbU test'
         distribution2:
         - wsl-id: 'Debian'
           user-id: 'Debian-11'
           match-pattern: '*Debian*11*'
           default-absent-tool: 'dos2unix'
+          create-test-user-command: 'useradd -m -p 4qBD5NWD3IkbU test'
         exclude:
         - environment: 'windows-2022'
           distribution:
@@ -1708,33 +1826,39 @@ jobs:
             user-id: 'Debian-11'
             match-pattern: '*Debian*11*'
             default-absent-tool: 'dos2unix'
+            create-test-user-command: 'useradd -m -p 4qBD5NWD3IkbU test'
           distribution2:
             wsl-id: 'Debian'
             user-id: 'Debian-11'
             match-pattern: '*Debian*11*'
             default-absent-tool: 'dos2unix'
+            create-test-user-command: 'useradd -m -p 4qBD5NWD3IkbU test'
         - environment: 'windows-2025'
           distribution:
             wsl-id: 'Debian'
             user-id: 'Debian-11'
             match-pattern: '*Debian*11*'
             default-absent-tool: 'dos2unix'
+            create-test-user-command: 'useradd -m -p 4qBD5NWD3IkbU test'
           distribution2:
             wsl-id: 'Debian'
             user-id: 'Debian-11'
             match-pattern: '*Debian*11*'
             default-absent-tool: 'dos2unix'
+            create-test-user-command: 'useradd -m -p 4qBD5NWD3IkbU test'
         - environment: 'windows-latest'
           distribution:
             wsl-id: 'Debian'
             user-id: 'Debian-11'
             match-pattern: '*Debian*11*'
             default-absent-tool: 'dos2unix'
+            create-test-user-command: 'useradd -m -p 4qBD5NWD3IkbU test'
           distribution2:
             wsl-id: 'Debian'
             user-id: 'Debian-11'
             match-pattern: '*Debian*11*'
             default-absent-tool: 'dos2unix'
+            create-test-user-command: 'useradd -m -p 4qBD5NWD3IkbU test'
         include:
         - environment: 'windows-2022'
           distribution:
@@ -1742,33 +1866,39 @@ jobs:
             user-id: 'Debian-11'
             match-pattern: '*Debian*11*'
             default-absent-tool: 'dos2unix'
+            create-test-user-command: 'useradd -m -p 4qBD5NWD3IkbU test'
           distribution2:
             wsl-id: 'Ubuntu'
             user-id: 'Ubuntu-20.04'
             match-pattern: '*Ubuntu*20.04*'
             default-absent-tool: 'dos2unix'
+            create-test-user-command: 'useradd -m -p 4qBD5NWD3IkbU test'
         - environment: 'windows-2025'
           distribution:
             wsl-id: 'Debian'
             user-id: 'Debian-11'
             match-pattern: '*Debian*11*'
             default-absent-tool: 'dos2unix'
+            create-test-user-command: 'useradd -m -p 4qBD5NWD3IkbU test'
           distribution2:
             wsl-id: 'Ubuntu'
             user-id: 'Ubuntu-20.04'
             match-pattern: '*Ubuntu*20.04*'
             default-absent-tool: 'dos2unix'
+            create-test-user-command: 'useradd -m -p 4qBD5NWD3IkbU test'
         - environment: 'windows-latest'
           distribution:
             wsl-id: 'Debian'
             user-id: 'Debian-11'
             match-pattern: '*Debian*11*'
             default-absent-tool: 'dos2unix'
+            create-test-user-command: 'useradd -m -p 4qBD5NWD3IkbU test'
           distribution2:
             wsl-id: 'Ubuntu'
             user-id: 'Ubuntu-20.04'
             match-pattern: '*Ubuntu*20.04*'
             default-absent-tool: 'dos2unix'
+            create-test-user-command: 'useradd -m -p 4qBD5NWD3IkbU test'
     steps:
     - id: 'step-0'
       name: 'Install zstd on windows-11-arm'
@@ -1905,86 +2035,114 @@ jobs:
         distributions:
         - incompatibleUbuntu: 'Ubuntu-22.04'
           distribution1:
+            wsl-id: 'Alpine'
+            user-id: 'Alpine'
+            match-pattern: '*Alpine*3.17*'
+            default-absent-tool: 'dos2unix'
+            create-test-user-command: 'adduser -D test'
+          distribution2:
             wsl-id: 'Debian'
             user-id: 'Debian-11'
             match-pattern: '*Debian*11*'
             default-absent-tool: 'dos2unix'
-          distribution2:
+            create-test-user-command: 'useradd -m -p 4qBD5NWD3IkbU test'
+          distribution3:
             wsl-id: 'Debian'
             user-id: 'Debian'
             match-pattern: '*Debian*11*'
             default-absent-tool: 'dos2unix'
-          distribution3:
+            create-test-user-command: 'useradd -m -p 4qBD5NWD3IkbU test'
+          distribution4:
             wsl-id: 'MyDistribution'
             user-id: 'kali-linux'
             match-pattern: '*Kali*'
             default-absent-tool: 'dos2unix'
-          distribution4:
+            create-test-user-command: 'useradd -m -p 4qBD5NWD3IkbU test'
+          distribution5:
             wsl-id: 'openSUSE-Leap-15.2'
             user-id: 'openSUSE-Leap-15.2'
             match-pattern: '*openSUSE*Leap*15.2*'
             default-absent-tool: 'which'
-          distribution5:
+            create-test-user-command: 'useradd -m -p 4qBD5NWD3IkbU test'
+          distribution6:
             wsl-id: 'Ubuntu-24.04'
             user-id: 'Ubuntu-24.04'
             match-pattern: '*Ubuntu*24.04*'
             default-absent-tool: 'dos2unix'
-          distribution6:
+            create-test-user-command: 'useradd -m -p 4qBD5NWD3IkbU test'
+          distribution7:
             wsl-id: 'Ubuntu'
             user-id: 'Ubuntu-20.04'
             match-pattern: '*Ubuntu*20.04*'
             default-absent-tool: 'dos2unix'
-          distribution7:
+            create-test-user-command: 'useradd -m -p 4qBD5NWD3IkbU test'
+          distribution8:
             wsl-id: 'Ubuntu-18.04'
             user-id: 'Ubuntu-18.04'
             match-pattern: '*Ubuntu*18.04*'
             default-absent-tool: 'dos2unix'
-          distribution8:
+            create-test-user-command: 'useradd -m -p 4qBD5NWD3IkbU test'
+          distribution9:
             wsl-id: 'Ubuntu-16.04'
             user-id: 'Ubuntu-16.04'
             match-pattern: '*Ubuntu*16.04*'
             default-absent-tool: 'dos2unix'
+            create-test-user-command: 'useradd -m -p 4qBD5NWD3IkbU test'
         - incompatibleUbuntu: 'Ubuntu-20.04'
           distribution1:
+            wsl-id: 'Alpine'
+            user-id: 'Alpine'
+            match-pattern: '*Alpine*3.17*'
+            default-absent-tool: 'dos2unix'
+            create-test-user-command: 'adduser -D test'
+          distribution2:
             wsl-id: 'Debian'
             user-id: 'Debian-11'
             match-pattern: '*Debian*11*'
             default-absent-tool: 'dos2unix'
-          distribution2:
+            create-test-user-command: 'useradd -m -p 4qBD5NWD3IkbU test'
+          distribution3:
             wsl-id: 'Debian'
             user-id: 'Debian'
             match-pattern: '*Debian*11*'
             default-absent-tool: 'dos2unix'
-          distribution3:
+            create-test-user-command: 'useradd -m -p 4qBD5NWD3IkbU test'
+          distribution4:
             wsl-id: 'MyDistribution'
             user-id: 'kali-linux'
             match-pattern: '*Kali*'
             default-absent-tool: 'dos2unix'
-          distribution4:
+            create-test-user-command: 'useradd -m -p 4qBD5NWD3IkbU test'
+          distribution5:
             wsl-id: 'openSUSE-Leap-15.2'
             user-id: 'openSUSE-Leap-15.2'
             match-pattern: '*openSUSE*Leap*15.2*'
             default-absent-tool: 'which'
-          distribution5:
+            create-test-user-command: 'useradd -m -p 4qBD5NWD3IkbU test'
+          distribution6:
             wsl-id: 'Ubuntu-24.04'
             user-id: 'Ubuntu-24.04'
             match-pattern: '*Ubuntu*24.04*'
             default-absent-tool: 'dos2unix'
-          distribution6:
+            create-test-user-command: 'useradd -m -p 4qBD5NWD3IkbU test'
+          distribution7:
             wsl-id: 'Ubuntu'
             user-id: 'Ubuntu-22.04'
             match-pattern: '*Ubuntu*22.04*'
             default-absent-tool: 'dos2unix'
-          distribution7:
+            create-test-user-command: 'useradd -m -p 4qBD5NWD3IkbU test'
+          distribution8:
             wsl-id: 'Ubuntu-18.04'
             user-id: 'Ubuntu-18.04'
             match-pattern: '*Ubuntu*18.04*'
             default-absent-tool: 'dos2unix'
-          distribution8:
+            create-test-user-command: 'useradd -m -p 4qBD5NWD3IkbU test'
+          distribution9:
             wsl-id: 'Ubuntu-16.04'
             user-id: 'Ubuntu-16.04'
             match-pattern: '*Ubuntu*16.04*'
             default-absent-tool: 'dos2unix'
+            create-test-user-command: 'useradd -m -p 4qBD5NWD3IkbU test'
     steps:
     - id: 'step-0'
       name: 'Install zstd on windows-11-arm'
@@ -2005,12 +2163,20 @@ jobs:
       uses: './'
       with:
         distribution: '${{ matrix.distributions.distribution1.user-id }}'
+        additional-packages: |-
+          ${{ (contains(fromJSON('["Alpine"]'), matrix.distributions.distribution1.user-id))
+          && 'bash'
+          || '' }}
         wsl-version: '1'
     - id: 'step-3'
       name: 'Execute action for ${{ matrix.distributions.distribution2.user-id }}'
       uses: './'
       with:
         distribution: '${{ matrix.distributions.distribution2.user-id }}'
+        additional-packages: |-
+          ${{ (contains(fromJSON('["Alpine"]'), matrix.distributions.distribution2.user-id))
+          && 'bash'
+          || '' }}
         wsl-version: '1'
     - id: 'step-4'
       name: 'Execute action for ${{ matrix.distributions.distribution3.user-id }}'
@@ -2018,6 +2184,10 @@ jobs:
       with:
         distribution: '${{ matrix.distributions.distribution3.user-id }}'
         set-as-default: 'false'
+        additional-packages: |-
+          ${{ (contains(fromJSON('["Alpine"]'), matrix.distributions.distribution3.user-id))
+          && 'bash'
+          || '' }}
         wsl-version: '1'
     - id: 'step-5'
       name: 'Execute action for ${{ matrix.distributions.distribution4.user-id }}'
@@ -2025,6 +2195,10 @@ jobs:
       with:
         distribution: '${{ matrix.distributions.distribution4.user-id }}'
         set-as-default: 'false'
+        additional-packages: |-
+          ${{ (contains(fromJSON('["Alpine"]'), matrix.distributions.distribution4.user-id))
+          && 'bash'
+          || '' }}
         wsl-version: '1'
     - id: 'step-6'
       name: 'Execute action for ${{ matrix.distributions.distribution5.user-id }}'
@@ -2032,6 +2206,10 @@ jobs:
       with:
         distribution: '${{ matrix.distributions.distribution5.user-id }}'
         set-as-default: 'false'
+        additional-packages: |-
+          ${{ (contains(fromJSON('["Alpine"]'), matrix.distributions.distribution5.user-id))
+          && 'bash'
+          || '' }}
         wsl-version: '1'
     - id: 'step-7'
       name: 'Execute action for ${{ matrix.distributions.distribution6.user-id }}'
@@ -2039,6 +2217,10 @@ jobs:
       with:
         distribution: '${{ matrix.distributions.distribution6.user-id }}'
         set-as-default: 'false'
+        additional-packages: |-
+          ${{ (contains(fromJSON('["Alpine"]'), matrix.distributions.distribution6.user-id))
+          && 'bash'
+          || '' }}
         wsl-version: '1'
     - id: 'step-8'
       name: 'Execute action for ${{ matrix.distributions.distribution7.user-id }}'
@@ -2046,6 +2228,10 @@ jobs:
       with:
         distribution: '${{ matrix.distributions.distribution7.user-id }}'
         set-as-default: 'false'
+        additional-packages: |-
+          ${{ (contains(fromJSON('["Alpine"]'), matrix.distributions.distribution7.user-id))
+          && 'bash'
+          || '' }}
         wsl-version: '1'
     - id: 'step-9'
       name: 'Execute action for ${{ matrix.distributions.distribution8.user-id }}'
@@ -2053,91 +2239,115 @@ jobs:
       with:
         distribution: '${{ matrix.distributions.distribution8.user-id }}'
         set-as-default: 'false'
+        additional-packages: |-
+          ${{ (contains(fromJSON('["Alpine"]'), matrix.distributions.distribution8.user-id))
+          && 'bash'
+          || '' }}
         wsl-version: '1'
     - id: 'step-10'
+      name: 'Execute action for ${{ matrix.distributions.distribution9.user-id }}'
+      uses: './'
+      with:
+        distribution: '${{ matrix.distributions.distribution9.user-id }}'
+        set-as-default: 'false'
+        additional-packages: |-
+          ${{ (contains(fromJSON('["Alpine"]'), matrix.distributions.distribution9.user-id))
+          && 'bash'
+          || '' }}
+        wsl-version: '1'
+    - id: 'step-11'
       name: 'Test - wsl-bash_${{ matrix.distributions.distribution1.user-id }} should use the correct distribution'
-      shell: 'wsl-bash_Debian-11 {0}'
+      shell: 'wsl-bash_Alpine {0}'
       run: |-
         cat <(lsb_release -a || true) <(uname -a || true) <([ -d /etc ] && find /etc -maxdepth 1 -type f \( -name '*release' -or -name 'issue*' \) -exec cat {} + || true) <([ -d /etc/products.d ] && find /etc/products.d -maxdepth 1 -type f -name '*.prod' -exec cat {} + || true) <([ -f /proc/version ] && cat /proc/version || true)
         [[ "$(cat <(lsb_release -a || true) <(uname -a || true) <([ -d /etc ] && find /etc -maxdepth 1 -type f \( -name '*release' -or -name 'issue*' \) -exec cat {} + || true) <([ -d /etc/products.d ] && find /etc/products.d -maxdepth 1 -type f -name '*.prod' -exec cat {} + || true) <([ -f /proc/version ] && cat /proc/version || true))" == ${{ matrix.distributions.distribution1.match-pattern }} ]]
       if: |-
         always()
         && (steps.step-2.outcome == 'success')
-    - id: 'step-11'
+    - id: 'step-12'
       name: 'Test - wsl-bash_${{ matrix.distributions.distribution2.user-id }} should use the correct distribution'
-      shell: 'wsl-bash_Debian {0}'
+      shell: 'wsl-bash_Debian-11 {0}'
       run: |-
         cat <(lsb_release -a || true) <(uname -a || true) <([ -d /etc ] && find /etc -maxdepth 1 -type f \( -name '*release' -or -name 'issue*' \) -exec cat {} + || true) <([ -d /etc/products.d ] && find /etc/products.d -maxdepth 1 -type f -name '*.prod' -exec cat {} + || true) <([ -f /proc/version ] && cat /proc/version || true)
         [[ "$(cat <(lsb_release -a || true) <(uname -a || true) <([ -d /etc ] && find /etc -maxdepth 1 -type f \( -name '*release' -or -name 'issue*' \) -exec cat {} + || true) <([ -d /etc/products.d ] && find /etc/products.d -maxdepth 1 -type f -name '*.prod' -exec cat {} + || true) <([ -f /proc/version ] && cat /proc/version || true))" == ${{ matrix.distributions.distribution2.match-pattern }} ]]
       if: |-
         always()
         && (steps.step-3.outcome == 'success')
-    - id: 'step-12'
+    - id: 'step-13'
       name: 'Test - wsl-bash_${{ matrix.distributions.distribution3.user-id }} should use the correct distribution'
-      shell: 'wsl-bash_kali-linux {0}'
+      shell: 'wsl-bash_Debian {0}'
       run: |-
         cat <(lsb_release -a || true) <(uname -a || true) <([ -d /etc ] && find /etc -maxdepth 1 -type f \( -name '*release' -or -name 'issue*' \) -exec cat {} + || true) <([ -d /etc/products.d ] && find /etc/products.d -maxdepth 1 -type f -name '*.prod' -exec cat {} + || true) <([ -f /proc/version ] && cat /proc/version || true)
         [[ "$(cat <(lsb_release -a || true) <(uname -a || true) <([ -d /etc ] && find /etc -maxdepth 1 -type f \( -name '*release' -or -name 'issue*' \) -exec cat {} + || true) <([ -d /etc/products.d ] && find /etc/products.d -maxdepth 1 -type f -name '*.prod' -exec cat {} + || true) <([ -f /proc/version ] && cat /proc/version || true))" == ${{ matrix.distributions.distribution3.match-pattern }} ]]
       if: |-
         always()
         && (steps.step-4.outcome == 'success')
-    - id: 'step-13'
+    - id: 'step-14'
       name: 'Test - wsl-bash_${{ matrix.distributions.distribution4.user-id }} should use the correct distribution'
-      shell: 'wsl-bash_openSUSE-Leap-15.2 {0}'
+      shell: 'wsl-bash_kali-linux {0}'
       run: |-
         cat <(lsb_release -a || true) <(uname -a || true) <([ -d /etc ] && find /etc -maxdepth 1 -type f \( -name '*release' -or -name 'issue*' \) -exec cat {} + || true) <([ -d /etc/products.d ] && find /etc/products.d -maxdepth 1 -type f -name '*.prod' -exec cat {} + || true) <([ -f /proc/version ] && cat /proc/version || true)
         [[ "$(cat <(lsb_release -a || true) <(uname -a || true) <([ -d /etc ] && find /etc -maxdepth 1 -type f \( -name '*release' -or -name 'issue*' \) -exec cat {} + || true) <([ -d /etc/products.d ] && find /etc/products.d -maxdepth 1 -type f -name '*.prod' -exec cat {} + || true) <([ -f /proc/version ] && cat /proc/version || true))" == ${{ matrix.distributions.distribution4.match-pattern }} ]]
       if: |-
         always()
         && (steps.step-5.outcome == 'success')
-    - id: 'step-14'
+    - id: 'step-15'
       name: 'Test - wsl-bash_${{ matrix.distributions.distribution5.user-id }} should use the correct distribution'
-      shell: 'wsl-bash_Ubuntu-24.04 {0}'
+      shell: 'wsl-bash_openSUSE-Leap-15.2 {0}'
       run: |-
         cat <(lsb_release -a || true) <(uname -a || true) <([ -d /etc ] && find /etc -maxdepth 1 -type f \( -name '*release' -or -name 'issue*' \) -exec cat {} + || true) <([ -d /etc/products.d ] && find /etc/products.d -maxdepth 1 -type f -name '*.prod' -exec cat {} + || true) <([ -f /proc/version ] && cat /proc/version || true)
         [[ "$(cat <(lsb_release -a || true) <(uname -a || true) <([ -d /etc ] && find /etc -maxdepth 1 -type f \( -name '*release' -or -name 'issue*' \) -exec cat {} + || true) <([ -d /etc/products.d ] && find /etc/products.d -maxdepth 1 -type f -name '*.prod' -exec cat {} + || true) <([ -f /proc/version ] && cat /proc/version || true))" == ${{ matrix.distributions.distribution5.match-pattern }} ]]
       if: |-
         always()
         && (steps.step-6.outcome == 'success')
-    - id: 'step-15'
-      name: 'Test - wsl-bash_${{ matrix.distributions.distribution6.user-id }} should use the correct distribution'
-      shell: 'wsl-bash_Ubuntu-22.04 {0}'
-      run: |-
-        cat <(lsb_release -a || true) <(uname -a || true) <([ -d /etc ] && find /etc -maxdepth 1 -type f \( -name '*release' -or -name 'issue*' \) -exec cat {} + || true) <([ -d /etc/products.d ] && find /etc/products.d -maxdepth 1 -type f -name '*.prod' -exec cat {} + || true) <([ -f /proc/version ] && cat /proc/version || true)
-        [[ "$(cat <(lsb_release -a || true) <(uname -a || true) <([ -d /etc ] && find /etc -maxdepth 1 -type f \( -name '*release' -or -name 'issue*' \) -exec cat {} + || true) <([ -d /etc/products.d ] && find /etc/products.d -maxdepth 1 -type f -name '*.prod' -exec cat {} + || true) <([ -f /proc/version ] && cat /proc/version || true))" == ${{ matrix.distributions.distribution6.match-pattern }} ]]
-      if: |-
-        (
-            always()
-            && (steps.step-7.outcome == 'success')
-        )
-        && (matrix.distributions.distribution6.user-id != 'Ubuntu-20.04')
     - id: 'step-16'
       name: 'Test - wsl-bash_${{ matrix.distributions.distribution6.user-id }} should use the correct distribution'
-      shell: 'wsl-bash_Ubuntu-20.04 {0}'
+      shell: 'wsl-bash_Ubuntu-24.04 {0}'
       run: |-
         cat <(lsb_release -a || true) <(uname -a || true) <([ -d /etc ] && find /etc -maxdepth 1 -type f \( -name '*release' -or -name 'issue*' \) -exec cat {} + || true) <([ -d /etc/products.d ] && find /etc/products.d -maxdepth 1 -type f -name '*.prod' -exec cat {} + || true) <([ -f /proc/version ] && cat /proc/version || true)
         [[ "$(cat <(lsb_release -a || true) <(uname -a || true) <([ -d /etc ] && find /etc -maxdepth 1 -type f \( -name '*release' -or -name 'issue*' \) -exec cat {} + || true) <([ -d /etc/products.d ] && find /etc/products.d -maxdepth 1 -type f -name '*.prod' -exec cat {} + || true) <([ -f /proc/version ] && cat /proc/version || true))" == ${{ matrix.distributions.distribution6.match-pattern }} ]]
       if: |-
-        (
-            always()
-            && (steps.step-7.outcome == 'success')
-        )
-        && (matrix.distributions.distribution6.user-id != 'Ubuntu-22.04')
+        always()
+        && (steps.step-7.outcome == 'success')
     - id: 'step-17'
       name: 'Test - wsl-bash_${{ matrix.distributions.distribution7.user-id }} should use the correct distribution'
-      shell: 'wsl-bash_Ubuntu-18.04 {0}'
+      shell: 'wsl-bash_Ubuntu-22.04 {0}'
       run: |-
         cat <(lsb_release -a || true) <(uname -a || true) <([ -d /etc ] && find /etc -maxdepth 1 -type f \( -name '*release' -or -name 'issue*' \) -exec cat {} + || true) <([ -d /etc/products.d ] && find /etc/products.d -maxdepth 1 -type f -name '*.prod' -exec cat {} + || true) <([ -f /proc/version ] && cat /proc/version || true)
         [[ "$(cat <(lsb_release -a || true) <(uname -a || true) <([ -d /etc ] && find /etc -maxdepth 1 -type f \( -name '*release' -or -name 'issue*' \) -exec cat {} + || true) <([ -d /etc/products.d ] && find /etc/products.d -maxdepth 1 -type f -name '*.prod' -exec cat {} + || true) <([ -f /proc/version ] && cat /proc/version || true))" == ${{ matrix.distributions.distribution7.match-pattern }} ]]
       if: |-
-        always()
-        && (steps.step-8.outcome == 'success')
+        (
+            always()
+            && (steps.step-8.outcome == 'success')
+        )
+        && (!contains(fromJSON('["Ubuntu-20.04"]'), matrix.distributions.distribution7.user-id))
     - id: 'step-18'
+      name: 'Test - wsl-bash_${{ matrix.distributions.distribution7.user-id }} should use the correct distribution'
+      shell: 'wsl-bash_Ubuntu-20.04 {0}'
+      run: |-
+        cat <(lsb_release -a || true) <(uname -a || true) <([ -d /etc ] && find /etc -maxdepth 1 -type f \( -name '*release' -or -name 'issue*' \) -exec cat {} + || true) <([ -d /etc/products.d ] && find /etc/products.d -maxdepth 1 -type f -name '*.prod' -exec cat {} + || true) <([ -f /proc/version ] && cat /proc/version || true)
+        [[ "$(cat <(lsb_release -a || true) <(uname -a || true) <([ -d /etc ] && find /etc -maxdepth 1 -type f \( -name '*release' -or -name 'issue*' \) -exec cat {} + || true) <([ -d /etc/products.d ] && find /etc/products.d -maxdepth 1 -type f -name '*.prod' -exec cat {} + || true) <([ -f /proc/version ] && cat /proc/version || true))" == ${{ matrix.distributions.distribution7.match-pattern }} ]]
+      if: |-
+        (
+            always()
+            && (steps.step-8.outcome == 'success')
+        )
+        && (!contains(fromJSON('["Ubuntu-22.04"]'), matrix.distributions.distribution7.user-id))
+    - id: 'step-19'
       name: 'Test - wsl-bash_${{ matrix.distributions.distribution8.user-id }} should use the correct distribution'
-      shell: 'wsl-bash_Ubuntu-16.04 {0}'
+      shell: 'wsl-bash_Ubuntu-18.04 {0}'
       run: |-
         cat <(lsb_release -a || true) <(uname -a || true) <([ -d /etc ] && find /etc -maxdepth 1 -type f \( -name '*release' -or -name 'issue*' \) -exec cat {} + || true) <([ -d /etc/products.d ] && find /etc/products.d -maxdepth 1 -type f -name '*.prod' -exec cat {} + || true) <([ -f /proc/version ] && cat /proc/version || true)
         [[ "$(cat <(lsb_release -a || true) <(uname -a || true) <([ -d /etc ] && find /etc -maxdepth 1 -type f \( -name '*release' -or -name 'issue*' \) -exec cat {} + || true) <([ -d /etc/products.d ] && find /etc/products.d -maxdepth 1 -type f -name '*.prod' -exec cat {} + || true) <([ -f /proc/version ] && cat /proc/version || true))" == ${{ matrix.distributions.distribution8.match-pattern }} ]]
       if: |-
         always()
         && (steps.step-9.outcome == 'success')
+    - id: 'step-20'
+      name: 'Test - wsl-bash_${{ matrix.distributions.distribution9.user-id }} should use the correct distribution'
+      shell: 'wsl-bash_Ubuntu-16.04 {0}'
+      run: |-
+        cat <(lsb_release -a || true) <(uname -a || true) <([ -d /etc ] && find /etc -maxdepth 1 -type f \( -name '*release' -or -name 'issue*' \) -exec cat {} + || true) <([ -d /etc/products.d ] && find /etc/products.d -maxdepth 1 -type f -name '*.prod' -exec cat {} + || true) <([ -f /proc/version ] && cat /proc/version || true)
+        [[ "$(cat <(lsb_release -a || true) <(uname -a || true) <([ -d /etc ] && find /etc -maxdepth 1 -type f \( -name '*release' -or -name 'issue*' \) -exec cat {} + || true) <([ -d /etc/products.d ] && find /etc/products.d -maxdepth 1 -type f -name '*.prod' -exec cat {} + || true) <([ -f /proc/version ] && cat /proc/version || true))" == ${{ matrix.distributions.distribution9.match-pattern }} ]]
+      if: |-
+        always()
+        && (steps.step-10.outcome == 'success')
