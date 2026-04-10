@@ -164,15 +164,13 @@ val ubuntu2404 = Distribution(
 )
 
 val ubuntu2204 = Distribution(
-    wslId = "Ubuntu",
-    userId = "Ubuntu-22.04",
+    wslId = "Ubuntu-22.04",
     matchPattern = "*Ubuntu*22.04*",
     defaultAbsentTool = "dos2unix"
 )
 
 val ubuntu2004 = Distribution(
-    wslId = "Ubuntu",
-    userId = "Ubuntu-20.04",
+    wslId = "Ubuntu-20.04",
     matchPattern = "*Ubuntu*20.04*",
     defaultAbsentTool = "dos2unix"
 )
@@ -1054,7 +1052,7 @@ workflowWithCopyright(
         )
         verifyInstalledDistribution(
             name = "Test - wsl-bash should use the last installed distribution with set-as-default true",
-            expectedPatternExpression = "matrix.distributions.distribution2.match-pattern"
+            expectedPatternExpression = expr("matrix.distributions.distribution2.match-pattern")
         )
     }
 
@@ -1157,7 +1155,7 @@ workflowWithCopyright(
         )
         verifyInstalledDistribution(
             name = """Test - "${expr("matrix.distribution2.user-id")}" should be the default distribution after installation""",
-            expectedPatternExpression = "matrix.distribution2.match-pattern"
+            expectedPatternExpression = expr("matrix.distribution2.match-pattern")
         )
         executeActionStep = usesSelfAfterSuccess(
             name = "Re-execute action",
@@ -1167,7 +1165,7 @@ workflowWithCopyright(
         )
         verifyInstalledDistribution(
             name = """Test - "${expr("matrix.distribution2.user-id")}" should still be the default distribution after re-running for "${expr("matrix.distribution.user-id")}"""",
-            expectedPatternExpression = "matrix.distribution2.match-pattern"
+            expectedPatternExpression = expr("matrix.distribution2.match-pattern")
         )
         executeActionStep = usesSelfAfterSuccess(
             name = "Set as default",
@@ -1183,74 +1181,41 @@ workflowWithCopyright(
 
     testJob(
         id = "test_distribution_specific_wsl_bash_scripts",
-        name = "Test distribution specific wsl-bash scripts on ${expr("matrix.environment")} (without ${expr("matrix.distributions.incompatibleUbuntu")})",
+        name = "Test distribution specific wsl-bash scripts on ${expr("matrix.environment")}",
         _customArguments = mapOf(
             "strategy" to mapOf(
                 "fail-fast" to false,
                 "matrix" to mapOf(
-                    "environment" to environments,
-                    // ubuntu2004 and ubuntu2204 currently have the same wsl-id
-                    // so their distribution specific wsl_bash scripts will clash
-                    // and thus cannot be tested together
-                    "distributions" to listOf(ubuntu2204, ubuntu2004)
-                        .map { incompatibleUbuntu ->
-                            distributions
-                                .filter { it != incompatibleUbuntu.asMap }
-                                .mapIndexed<Map<String, String>, Pair<String, Any>> { i, distribution ->
-                                    "distribution${i + 1}" to distribution
-                                }
-                                .toMutableList()
-                                .apply {
-                                    add(0, "incompatibleUbuntu" to incompatibleUbuntu.userId)
-                                }
-                                .toMap()
-                        }
+                    "environment" to environments
                 )
             )
         )
     ) {
-        (1 until distributions.size)
-            .associateWith {
-                usesSelf(
-                    name = "Execute action for ${expr("matrix.distributions.distribution$it.user-id")}",
+        distributions
+            .mapIndexed { i, distribution ->
+                distribution to usesSelf(
+                    name = "Execute action for ${distribution["user-id"]}",
                     action = SetupWsl(
-                        distribution = SetupWsl.Distribution.Custom(expr("matrix.distributions.distribution$it.user-id")),
-                        additionalPackages = listOf(
-                            expr(
-                                """
-                                    (${getOnDistributionCondition(it, *alpineDistributions.toTypedArray())})
-                                    && 'bash'
-                                    || ''
-                                """.trimIndent()
-                            )
+                        distribution = SetupWsl.Distribution.Custom(distribution["user-id"]!!),
+                        additionalPackages = listOfNotNull(
+                            if (
+                                alpineDistributions.any {
+                                    it.userId == distribution["user-id"]
+                                }
+                            ) "bash" else null,
                         ),
-                        setAsDefault = if (it >= 3) false else null,
+                        setAsDefault = if (i >= 2) false else null,
                         wslVersion = 1
                     )
                 )
             }
-            .forEach { (i, localExecuteActionStep) ->
+            .forEach { (distribution, localExecuteActionStep) ->
                 executeActionStep = localExecuteActionStep
                 verifyInstalledDistribution(
-                    name = "Test - wsl-bash_${expr("matrix.distributions.distribution$i.user-id")} should use the correct distribution",
-                    conditionTransformer = if (distributions[i] == ubuntu2004.asMap) {
-                        { executeActionStep.getSuccessNotOnDistributionCondition(i, ubuntu2004) }
-                    } else {
-                        { it }
-                    },
-                    // the formula adds 1 to the indices from ubuntu2004 on
-                    // to mitigate the double entry for the previous index
-                    shell = Shell.Custom("wsl-bash_${distributions[min(1, i / (distributions.indexOf(ubuntu2004.asMap) + 1)) + i - 1]["user-id"]} {0}"),
-                    expectedPatternExpression = "matrix.distributions.distribution$i.match-pattern"
+                    name = "Test - wsl-bash_${distribution["user-id"]} should use the correct distribution",
+                    shell = Shell.Custom("wsl-bash_${distribution["user-id"]} {0}"),
+                    expectedPatternExpression = distribution["match-pattern"]!!
                 )
-                if (distributions[i] == ubuntu2004.asMap) {
-                    verifyInstalledDistribution(
-                        name = "Test - wsl-bash_${expr("matrix.distributions.distribution$i.user-id")} should use the correct distribution",
-                        conditionTransformer = { executeActionStep.getSuccessNotOnDistributionCondition(i, ubuntu2204) },
-                        shell = Shell.Custom("wsl-bash_${distributions[i]["user-id"]} {0}"),
-                        expectedPatternExpression = "matrix.distributions.distribution$i.match-pattern"
-                    )
-                }
             }
     }
 }
@@ -1398,7 +1363,7 @@ fun JobBuilder<*>.verifyInstalledDistribution(
     name: String,
     conditionTransformer: (String) -> String = { it },
     shell: Shell = wslBash,
-    expectedPatternExpression: String = "matrix.distribution.match-pattern"
+    expectedPatternExpression: String = expr("matrix.distribution.match-pattern")
 ) = verifyCommandResult(
     name = name,
     conditionTransformer = conditionTransformer,
@@ -1411,7 +1376,7 @@ fun JobBuilder<*>.verifyInstalledDistribution(
         <([ -f /proc/version ] && cat /proc/version || true)
     """.trimIndent().replace("\n", " "),
     shell = shell,
-    expectedPattern = expr(expectedPatternExpression)
+    expectedPattern = expectedPatternExpression
 )
 
 fun JobBuilder<*>.verifyCommandResult(

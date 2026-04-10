@@ -24,9 +24,6 @@ inputs:
     distribution:
         description: |
             The WSL distribution to install, update, or configure.
-            'Ubuntu-22.04' and 'Ubuntu-20.04' can not be used together at the same time.
-            They use the same WSL distribution ID, so the second that is used will not be installed
-            as the first one will be found as already installed by WSL distribution ID.
             Valid values:
                 - 'Alpine-3.23'
                 - 'Alpine-3.22'
