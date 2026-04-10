@@ -28,7 +28,7 @@
 @file:DependsOn("actions:checkout___major:[v6,v7-alpha)")
 @file:DependsOn("actions:setup-java___major:[v5,v6-alpha)")
 @file:DependsOn("gradle:actions__setup-gradle___major:[v6,v7-alpha)")
-@file:DependsOn("Vampire:setup-wsl:RELEASE")
+@file:DependsOn("Vampire:setup-wsl___major:RELEASE")
 
 import io.github.typesafegithub.workflows.actions.actions.CacheRestore
 import io.github.typesafegithub.workflows.actions.actions.CacheSave
@@ -39,7 +39,7 @@ import io.github.typesafegithub.workflows.actions.gradle.ActionsSetupGradle
 import io.github.typesafegithub.workflows.actions.gradle.ActionsSetupGradle.BuildScanTermsOfUseAgree.Yes
 import io.github.typesafegithub.workflows.actions.gradle.ActionsSetupGradle.BuildScanTermsOfUseUrl.HttpsGradleComHelpLegalTermsOfUse
 import io.github.typesafegithub.workflows.actions.vampire.SetupWsl
-import io.github.typesafegithub.workflows.actions.vampire.SetupWsl.Distribution.Debian
+import io.github.typesafegithub.workflows.actions.vampire.SetupWsl.Distribution.Debian11
 import io.github.typesafegithub.workflows.actions.vampire.SetupWsl.Distribution.Ubuntu1604
 import io.github.typesafegithub.workflows.actions.vampire.SetupWsl.Distribution.Ubuntu1804
 import io.github.typesafegithub.workflows.domain.AbstractResult.Status.Success
@@ -378,7 +378,7 @@ workflowWithCopyright(
     ) {
         executeActionStep = usesSelf(
             action = executeAction.copy(
-                distribution = Debian,
+                distribution = Debian11,
                 wslVersion = null,
                 wslVersion_Untyped = expr("matrix.wsl-version")
             ),
@@ -911,7 +911,7 @@ workflowWithCopyright(
     ) {
         usesSelf(
             action = executeAction.copy(
-                distribution = Debian,
+                distribution = Debian11,
                 wslVersion = 1
             )
         )
@@ -935,7 +935,7 @@ workflowWithCopyright(
                 <(wsl.exe --list --verbose || true | iconv -f UTF-16LE -t UTF-8)
                 | sort -u
             """.trimIndent().replace("\n", " "),
-            expectedPattern = """*${debian.wslId}*\ 1*${ubuntu1604.wslId}*\ 2*${ubuntu1804.wslId}*\ 1*"""
+            expectedPattern = """*${debian11.wslId}*\ 1*${ubuntu1604.wslId}*\ 2*${ubuntu1804.wslId}*\ 1*"""
         )
     }
 

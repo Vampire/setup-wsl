@@ -158,7 +158,7 @@ jobs:
       continue-on-error: true
       uses: './'
       with:
-        distribution: 'Debian'
+        distribution: 'Debian-11'
         wsl-version: '${{ matrix.wsl-version }}'
     - id: 'step-3'
       name: 'Test - action should fail if an invalid WSL version is given'
@@ -1677,7 +1677,7 @@ jobs:
       name: 'Execute action'
       uses: './'
       with:
-        distribution: 'Debian'
+        distribution: 'Debian-11'
         wsl-version: '1'
     - id: 'step-3'
       name: 'Execute action'
