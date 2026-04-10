@@ -38,6 +38,7 @@ import semver.SemVer
 val distributions = listOf(
     Alpine,
     Debian,
+    Debian11,
     Kali,
     OpenSuseLeap15_2,
     Ubuntu1604,
@@ -302,13 +303,84 @@ object Ubuntu1604 : AptGetBasedDistribution(
     installerFile = "ubuntu1604.exe"
 )
 
-object Debian : AptGetBasedDistribution(
-    wslId = "Debian",
-    distributionName = "Debian",
-    version = SemVer("1.0.0"),
-    downloadUrl = URL("https://aka.ms/wsl-debian-gnulinux"),
-    installerFile = "debian.exe"
-) {
+abstract class DebianDistribution : AptGetBasedDistribution {
+    constructor(
+        wslId: String,
+        distributionName: String,
+        version: SemVer,
+        downloadUrl: URL,
+        installerFile: String
+    ) : super(wslId, distributionName, version, downloadUrl, installerFile)
+
+    constructor(
+        wslId: String,
+        userId: String,
+        distributionName: String,
+        version: SemVer,
+        downloadUrl: URL,
+        installerFile: String
+    ) : super(wslId, userId, distributionName, version, downloadUrl, installerFile)
+
+    constructor(
+        wslId: String,
+        distributionName: String,
+        version: SemVer,
+        productId: String,
+        installerFile: String
+    ) : super(wslId, distributionName, version, productId, installerFile)
+
+    constructor(
+        wslId: String,
+        userId: String,
+        distributionName: String,
+        version: SemVer,
+        productId: String,
+        installerFile: String
+    ) : super(wslId, userId, distributionName, version, productId, installerFile)
+
+    override suspend fun update() {
+        refresh()
+        retry(5) {
+            update(false)
+        }
+    }
+}
+
+abstract class ArchivedDebianDistribution : DebianDistribution {
+    constructor(
+        wslId: String,
+        distributionName: String,
+        version: SemVer,
+        downloadUrl: URL,
+        installerFile: String
+    ) : super(wslId, distributionName, version, downloadUrl, installerFile)
+
+    constructor(
+        wslId: String,
+        userId: String,
+        distributionName: String,
+        version: SemVer,
+        downloadUrl: URL,
+        installerFile: String
+    ) : super(wslId, userId, distributionName, version, downloadUrl, installerFile)
+
+    constructor(
+        wslId: String,
+        distributionName: String,
+        version: SemVer,
+        productId: String,
+        installerFile: String
+    ) : super(wslId, distributionName, version, productId, installerFile)
+
+    constructor(
+        wslId: String,
+        userId: String,
+        distributionName: String,
+        version: SemVer,
+        productId: String,
+        installerFile: String
+    ) : super(wslId, userId, distributionName, version, productId, installerFile)
+
     override suspend fun refresh() {
         exec(
             commandLine = "wsl",
@@ -323,14 +395,24 @@ object Debian : AptGetBasedDistribution(
         )
         super.refresh()
     }
-
-    override suspend fun update() {
-        refresh()
-        retry(5) {
-            update(false)
-        }
-    }
 }
+
+object Debian : ArchivedDebianDistribution(
+    wslId = "Debian",
+    distributionName = "Debian",
+    version = SemVer("1.0.0"),
+    downloadUrl = URL("https://aka.ms/wsl-debian-gnulinux"),
+    installerFile = "debian.exe"
+)
+
+object Debian11 : ArchivedDebianDistribution(
+    wslId = "Debian",
+    userId = "Debian-11",
+    distributionName = "Debian",
+    version = SemVer("1.0.0"),
+    downloadUrl = URL("https://aka.ms/wsl-debian-gnulinux"),
+    installerFile = "debian.exe"
+)
 
 object Kali : AptGetBasedDistribution(
     wslId = "MyDistribution",

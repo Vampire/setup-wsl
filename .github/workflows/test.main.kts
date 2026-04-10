@@ -66,17 +66,22 @@ val environments = listOf(
     "windows-latest"
 )
 
-val debian = Distribution(
-    wslId = "Debian",
-    userId = "Debian",
-    matchPattern = "*Debian*",
+val alpine = Distribution(
+    wslId = "Alpine",
+    matchPattern = "*Alpine*",
     defaultAbsentTool = "dos2unix"
 )
 
-val alpine = Distribution(
-    wslId = "Alpine",
-    userId = "Alpine",
-    matchPattern = "*Alpine*",
+val debian11 = Distribution(
+    wslId = "Debian",
+    userId = "Debian-11",
+    matchPattern = "*Debian*11*",
+    defaultAbsentTool = "dos2unix"
+)
+
+val debian = Distribution(
+    wslId = "Debian",
+    matchPattern = "*Debian*11*",
     defaultAbsentTool = "dos2unix"
 )
 
@@ -89,14 +94,12 @@ val kali = Distribution(
 
 val openSuseLeap15_2 = Distribution(
     wslId = "openSUSE-Leap-15.2",
-    userId = "openSUSE-Leap-15.2",
     matchPattern = "*openSUSE*Leap*15.2*",
     defaultAbsentTool = "which"
 )
 
 val ubuntu2404 = Distribution(
     wslId = "Ubuntu-24.04",
-    userId = "Ubuntu-24.04",
     matchPattern = "*Ubuntu*24.04*",
     defaultAbsentTool = "dos2unix"
 )
@@ -117,22 +120,21 @@ val ubuntu2004 = Distribution(
 
 val ubuntu1804 = Distribution(
     wslId = "Ubuntu-18.04",
-    userId = "Ubuntu-18.04",
     matchPattern = "*Ubuntu*18.04*",
     defaultAbsentTool = "dos2unix"
 )
 
 val ubuntu1604 = Distribution(
     wslId = "Ubuntu-16.04",
-    userId = "Ubuntu-16.04",
     matchPattern = "*Ubuntu*16.04*",
     defaultAbsentTool = "dos2unix"
 )
 
 val distributions = listOf(
-    debian,
     // disable testing on Alpine for the time being due to https://github.com/Vampire/setup-wsl/issues/82
     //alpine,
+    debian11,
+    debian,
     kali,
     openSuseLeap15_2,
     ubuntu2404,
@@ -901,34 +903,34 @@ workflowWithCopyright(
                     "environment" to environments,
                     "distributions" to listOf(
                         mapOf(
-                            "distribution1" to debian,
+                            "distribution1" to debian11,
                             "distribution2" to ubuntu2004,
                             "distribution3" to ubuntu1804
                         ),
                         mapOf(
-                            "distribution1" to debian,
+                            "distribution1" to debian11,
                             "distribution2" to ubuntu1804,
                             "distribution3" to ubuntu2004
                         ),
                         mapOf(
                             "distribution1" to ubuntu2004,
-                            "distribution2" to debian,
+                            "distribution2" to debian11,
                             "distribution3" to ubuntu1804
                         ),
                         mapOf(
                             "distribution1" to ubuntu2004,
                             "distribution2" to ubuntu1804,
-                            "distribution3" to debian
+                            "distribution3" to debian11
                         ),
                         mapOf(
                             "distribution1" to ubuntu1804,
-                            "distribution2" to debian,
+                            "distribution2" to debian11,
                             "distribution3" to ubuntu2004
                         ),
                         mapOf(
                             "distribution1" to ubuntu1804,
                             "distribution2" to ubuntu2004,
-                            "distribution3" to debian
+                            "distribution3" to debian11
                         )
                     ).map {
                         it.mapValues { (_, distribution) -> distribution.asMap }
@@ -991,18 +993,18 @@ workflowWithCopyright(
                 "matrix" to mapOf(
                     "environment" to environments,
                     "distribution" to distributions,
-                    "distribution2" to listOf(debian).map { it.asMap },
+                    "distribution2" to listOf(debian11).map { it.asMap },
                     "exclude" to environments.map {
                         mapOf(
                             "environment" to it,
-                            "distribution" to debian.asMap,
-                            "distribution2" to debian.asMap
+                            "distribution" to debian11.asMap,
+                            "distribution2" to debian11.asMap
                         )
                     },
                     "include" to environments.map {
                         mapOf(
                             "environment" to it,
-                            "distribution" to debian.asMap,
+                            "distribution" to debian11.asMap,
                             "distribution2" to ubuntu2004.asMap
                         )
                     }
@@ -1394,7 +1396,7 @@ fun getWslVersionExpression(vararg wsl2Distributions: Distribution) = """
 
 data class Distribution(
     val wslId: String,
-    val userId: String,
+    val userId: String = wslId,
     val matchPattern: String,
     val defaultAbsentTool: String
 ) {

@@ -1,4 +1,4 @@
-# Copyright 2022 Piotr Krzemiński
+# Copyright 2022-2026 Piotr Krzemiński & Björn Kautler
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -18,6 +18,7 @@ inputs:
         type: enum
         allowed-values:
             - Alpine
+            - Debian-11
             - Debian
             - kali-linux
             - openSUSE-Leap-15.2

@@ -107,8 +107,21 @@ val wslHelp = GlobalScope.async(start = LAZY) {
 
 val distribution by lazy {
     val distributionId = getInput("distribution", InputOptions(required = true))
+    val distribution = distributions[distributionId]
 
-    return@lazy requireNotNull(distributions[distributionId]) {
+    when (distribution) {
+        Debian -> warning(
+            """
+                'Debian' distribution is deprecated.
+                Please migrate to a versioned distribution such as 'Debian-11'.
+                'Debian-11' is a drop-in replacement, except for the wsl-shell-distribution-wrapper name.
+            """.trimIndent()
+        )
+
+        else -> Unit
+    }
+
+    return@lazy requireNotNull(distribution) {
         "'${distributionId}' is not a valid distribution. Valid values: ${
             distributions.keys.sortedWith(String.CASE_INSENSITIVE_ORDER).joinToString()
         }"
