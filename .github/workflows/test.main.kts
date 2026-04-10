@@ -66,6 +66,48 @@ val environments = listOf(
     "windows-latest"
 )
 
+val alpine323 = Distribution(
+    wslId = "Alpine-3.23",
+    matchPattern = "*Alpine*3.23*",
+    defaultAbsentTool = "dos2unix",
+    createTestUserCommand = "adduser -D test"
+)
+
+val alpine322 = Distribution(
+    wslId = "Alpine-3.22",
+    matchPattern = "*Alpine*3.22*",
+    defaultAbsentTool = "dos2unix",
+    createTestUserCommand = "adduser -D test"
+)
+
+val alpine321 = Distribution(
+    wslId = "Alpine-3.21",
+    matchPattern = "*Alpine*3.21*",
+    defaultAbsentTool = "dos2unix",
+    createTestUserCommand = "adduser -D test"
+)
+
+val alpine320 = Distribution(
+    wslId = "Alpine-3.20",
+    matchPattern = "*Alpine*3.20*",
+    defaultAbsentTool = "dos2unix",
+    createTestUserCommand = "adduser -D test"
+)
+
+val alpine319 = Distribution(
+    wslId = "Alpine-3.19",
+    matchPattern = "*Alpine*3.19*",
+    defaultAbsentTool = "dos2unix",
+    createTestUserCommand = "adduser -D test"
+)
+
+val alpine318 = Distribution(
+    wslId = "Alpine-3.18",
+    matchPattern = "*Alpine*3.18*",
+    defaultAbsentTool = "dos2unix",
+    createTestUserCommand = "adduser -D test"
+)
+
 val alpine317 = Distribution(
     wslId = "Alpine",
     userId = "Alpine-3.17",
@@ -82,6 +124,12 @@ val alpine = Distribution(
 )
 
 val alpineDistributions = listOf(
+    alpine323,
+    alpine322,
+    alpine321,
+    alpine320,
+    alpine319,
+    alpine318,
     alpine317,
     alpine
 )

@@ -27,6 +27,12 @@ import semver.SemVer
 val distributions = listOf(
     Alpine,
     Alpine317,
+    Alpine318,
+    Alpine319,
+    Alpine320,
+    Alpine321,
+    Alpine322,
+    Alpine323,
     Debian,
     Debian11,
     Kali,
@@ -501,4 +507,46 @@ object Alpine317 : AlpineDistribution(
     distributionName = "Alpine",
     version = SemVer("3.17.10"),
     downloadUrl = URL("https://dl-cdn.alpinelinux.org/alpine/v3.17/releases/x86_64/alpine-minirootfs-3.17.10-x86_64.tar.gz")
+)
+
+object Alpine318 : AlpineDistribution(
+    wslId = "Alpine-3.18",
+    distributionName = "Alpine",
+    version = SemVer("3.18.12"),
+    downloadUrl = URL("https://dl-cdn.alpinelinux.org/alpine/v3.18/releases/x86_64/alpine-minirootfs-3.18.12-x86_64.tar.gz")
+)
+
+object Alpine319 : AlpineDistribution(
+    wslId = "Alpine-3.19",
+    distributionName = "Alpine",
+    version = SemVer("3.19.9"),
+    downloadUrl = URL("https://dl-cdn.alpinelinux.org/alpine/v3.19/releases/x86_64/alpine-minirootfs-3.19.9-x86_64.tar.gz")
+)
+
+object Alpine320 : AlpineDistribution(
+    wslId = "Alpine-3.20",
+    distributionName = "Alpine",
+    version = SemVer("3.20.9"),
+    downloadUrl = URL("https://dl-cdn.alpinelinux.org/alpine/v3.20/releases/x86_64/alpine-minirootfs-3.20.9-x86_64.tar.gz"),
+)
+
+object Alpine321 : AlpineDistribution(
+    wslId = "Alpine-3.21",
+    distributionName = "Alpine",
+    version = SemVer("3.21.6"),
+    downloadUrl = URL("https://dl-cdn.alpinelinux.org/alpine/v3.21/releases/x86_64/alpine-minirootfs-3.21.6-x86_64.tar.gz"),
+)
+
+object Alpine322 : AlpineDistribution(
+    wslId = "Alpine-3.22",
+    distributionName = "Alpine",
+    version = SemVer("3.22.3"),
+    downloadUrl = URL("https://dl-cdn.alpinelinux.org/alpine/v3.22/releases/x86_64/alpine-minirootfs-3.22.3-x86_64.tar.gz"),
+)
+
+object Alpine323 : AlpineDistribution(
+    wslId = "Alpine-3.23",
+    distributionName = "Alpine",
+    version = SemVer("3.23.3"),
+    downloadUrl = URL("https://dl-cdn.alpinelinux.org/alpine/v3.23/releases/x86_64/alpine-minirootfs-3.23.3-x86_64.tar.gz"),
 )

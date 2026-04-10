@@ -116,7 +116,7 @@ val distribution by lazy {
         Alpine -> warning(
             """
                 'Alpine' distribution is deprecated.
-                Please migrate to a versioned distribution such as 'Alpine-3.17'.
+                Please migrate to a versioned distribution such as 'Alpine-3.23'.
                 'Alpine-3.17' is a drop-in replacement, except for the wsl-shell-distribution-wrapper name.
             """.trimIndent()
         )
