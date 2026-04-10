@@ -109,8 +109,7 @@ val alpine318 = Distribution(
 )
 
 val alpine317 = Distribution(
-    wslId = "Alpine",
-    userId = "Alpine-3.17",
+    wslId = "Alpine-3.17",
     matchPattern = "*Alpine*3.17*",
     defaultAbsentTool = "dos2unix",
     createTestUserCommand = "adduser -D test"

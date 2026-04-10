@@ -503,8 +503,7 @@ abstract class AlpineDistribution : ApkBasedDistribution {
 }
 
 object Alpine317 : AlpineDistribution(
-    wslId = "Alpine",
-    userId = "Alpine-3.17",
+    wslId = "Alpine-3.17",
     distributionName = "Alpine",
     version = SemVer("3.17.10"),
     downloadUrl = URL("https://dl-cdn.alpinelinux.org/alpine/v3.17/releases/x86_64/alpine-minirootfs-3.17.10-x86_64.tar.gz")
