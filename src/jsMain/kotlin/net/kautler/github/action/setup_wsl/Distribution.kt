@@ -183,27 +183,24 @@ abstract class AptGetBasedDistribution : Distribution {
 object Ubuntu2404 : AptGetBasedDistribution(
     wslId = "Ubuntu-24.04",
     distributionName = "Ubuntu",
-    version = SemVer("24.4.0"),
-    downloadUrl = URL("https://wslstorestorage.blob.core.windows.net/wslblob/Ubuntu2404-240425.AppxBundle"),
-    installerFile = "ubuntu2404.exe"
+    version = SemVer("24.4.4"),
+    downloadUrl = URL("https://releases.ubuntu.com/24.04.4/ubuntu-24.04.4-wsl-amd64.wsl")
 )
 
 object Ubuntu2204 : AptGetBasedDistribution(
     wslId = "Ubuntu",
     userId = "Ubuntu-22.04",
     distributionName = "Ubuntu",
-    version = SemVer("22.4.0"),
-    downloadUrl = URL("https://aka.ms/wslubuntu2204"),
-    installerFile = "ubuntu.exe"
+    version = SemVer("22.4.5"),
+    downloadUrl = URL("https://releases.ubuntu.com/jammy/ubuntu-22.04.5-wsl-amd64.wsl")
 )
 
 object Ubuntu2004 : AptGetBasedDistribution(
     wslId = "Ubuntu",
     userId = "Ubuntu-20.04",
     distributionName = "Ubuntu",
-    version = SemVer("20.4.0"),
-    downloadUrl = URL("https://aka.ms/wslubuntu2004"),
-    installerFile = "ubuntu.exe"
+    version = SemVer("20.4.6"),
+    downloadUrl = URL("https://releases.ubuntu.com/focal/ubuntu-20.04.6-wsl-amd64.wsl")
 )
 
 object Ubuntu1804 : AptGetBasedDistribution(
