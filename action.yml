@@ -35,7 +35,6 @@ inputs:
                 - 'Alpine-3.19'
                 - 'Alpine-3.18'
                 - 'Alpine-3.17'
-                - 'Alpine' (deprecated, 'Alpine-3.17' is a drop-in replacement, except for the wsl-shell-distribution-wrapper name)
                 - 'Debian-13'
                 - 'Debian-12'
                 - 'Debian-11'

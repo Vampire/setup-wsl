@@ -116,13 +116,6 @@ val alpine317 = Distribution(
     createTestUserCommand = "adduser -D test"
 )
 
-val alpine = Distribution(
-    wslId = "Alpine",
-    matchPattern = "*Alpine*3.17*",
-    defaultAbsentTool = "dos2unix",
-    createTestUserCommand = "adduser -D test"
-)
-
 val alpineDistributions = listOf(
     alpine323,
     alpine322,
@@ -130,8 +123,7 @@ val alpineDistributions = listOf(
     alpine320,
     alpine319,
     alpine318,
-    alpine317,
-    alpine
+    alpine317
 )
 
 val debian13 = Distribution(

@@ -26,7 +26,6 @@ import org.w3c.dom.url.URL
 import semver.SemVer
 
 val distributions = listOf(
-    Alpine,
     Alpine317,
     Alpine318,
     Alpine319,
@@ -502,13 +501,6 @@ abstract class AlpineDistribution : ApkBasedDistribution {
         )
     }
 }
-
-object Alpine : AlpineDistribution(
-    wslId = "Alpine",
-    distributionName = "Alpine",
-    version = SemVer("3.17.10"),
-    downloadUrl = URL("https://dl-cdn.alpinelinux.org/alpine/v3.17/releases/x86_64/alpine-minirootfs-3.17.10-x86_64.tar.gz")
-)
 
 object Alpine317 : AlpineDistribution(
     wslId = "Alpine",
