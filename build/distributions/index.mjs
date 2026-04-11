@@ -87984,16 +87984,16 @@ initMetadataForClass(IteratorImpl, 'IteratorImpl');
 initMetadataForClass(AbstractMutableList, 'AbstractMutableList', VOID, AbstractMutableCollection, [Collection, KtList]);
 initMetadataForClass(AbstractMap, 'AbstractMap', VOID, VOID, [KtMap]);
 initMetadataForClass(AbstractMutableMap, 'AbstractMutableMap', VOID, AbstractMap, [KtMap]);
-initMetadataForClass(AbstractMutableSet, 'AbstractMutableSet', VOID, AbstractMutableCollection, [Collection, KtSet]);
+initMetadataForClass(AbstractMutableSet, 'AbstractMutableSet', VOID, AbstractMutableCollection, [KtSet, Collection]);
 initMetadataForCompanion(Companion_1);
 initMetadataForClass(ArrayList, 'ArrayList', ArrayList_init_$Create$, AbstractMutableList, [Collection, KtList]);
 initMetadataForClass(HashMap, 'HashMap', HashMap_init_$Create$, AbstractMutableMap, [KtMap]);
-initMetadataForClass(HashMapKeys, 'HashMapKeys', VOID, AbstractMutableSet, [Collection, KtSet]);
-initMetadataForClass(HashMapEntrySetBase, 'HashMapEntrySetBase', VOID, AbstractMutableSet, [Collection, KtSet]);
+initMetadataForClass(HashMapKeys, 'HashMapKeys', VOID, AbstractMutableSet, [KtSet, Collection]);
+initMetadataForClass(HashMapEntrySetBase, 'HashMapEntrySetBase', VOID, AbstractMutableSet, [KtSet, Collection]);
 initMetadataForClass(HashMapEntrySet, 'HashMapEntrySet', VOID, HashMapEntrySetBase);
 initMetadataForClass(HashMapKeysDefault$iterator$1);
 initMetadataForClass(HashMapKeysDefault, 'HashMapKeysDefault', VOID, AbstractMutableSet);
-initMetadataForClass(HashSet, 'HashSet', HashSet_init_$Create$, AbstractMutableSet, [Collection, KtSet]);
+initMetadataForClass(HashSet, 'HashSet', HashSet_init_$Create$, AbstractMutableSet, [KtSet, Collection]);
 initMetadataForCompanion(Companion_2);
 initMetadataForClass(Itr, 'Itr');
 initMetadataForClass(KeysItr, 'KeysItr', VOID, Itr);
@@ -88037,7 +88037,7 @@ function containsAllEntries(m) {
 initMetadataForInterface(InternalMap, 'InternalMap');
 initMetadataForClass(InternalHashMap, 'InternalHashMap', InternalHashMap_init_$Create$, VOID, [InternalMap]);
 initMetadataForClass(LinkedHashMap, 'LinkedHashMap', LinkedHashMap_init_$Create$, HashMap, [KtMap]);
-initMetadataForClass(LinkedHashSet, 'LinkedHashSet', LinkedHashSet_init_$Create$, HashSet, [Collection, KtSet]);
+initMetadataForClass(LinkedHashSet, 'LinkedHashSet', LinkedHashSet_init_$Create$, HashSet, [KtSet, Collection]);
 initMetadataForInterface(Continuation, 'Continuation');
 initMetadataForClass(InterceptedCoroutine, 'InterceptedCoroutine', VOID, VOID, [Continuation]);
 initMetadataForClass(CoroutineImpl, 'CoroutineImpl', VOID, InterceptedCoroutine, [Continuation]);
@@ -88297,7 +88297,6 @@ initMetadataForCoroutine($updateCOROUTINE$_0, CoroutineImpl);
 initMetadataForClass(DebianDistribution, 'DebianDistribution', VOID, AptGetBasedDistribution, VOID, [0, 1]);
 initMetadataForCoroutine($refreshCOROUTINE$_0, CoroutineImpl);
 initMetadataForClass(ArchivedDebianDistribution, 'ArchivedDebianDistribution', VOID, DebianDistribution, VOID, [0, 1]);
-initMetadataForObject(Debian, 'Debian', VOID, ArchivedDebianDistribution, VOID, [0, 1]);
 initMetadataForObject(Debian11, 'Debian11', VOID, ArchivedDebianDistribution, VOID, [0, 1]);
 initMetadataForObject(Debian12, 'Debian12', VOID, DebianDistribution, VOID, [0, 1]);
 initMetadataForObject(Debian13, 'Debian13', VOID, DebianDistribution, VOID, [0, 1]);
@@ -88315,7 +88314,6 @@ initMetadataForCoroutine($installCOROUTINE$_1, CoroutineImpl);
 initMetadataForClass(ApkBasedDistribution, 'ApkBasedDistribution', VOID, Distribution, VOID, [0, 1]);
 initMetadataForCoroutine($createUserCOROUTINE$_0, CoroutineImpl);
 initMetadataForClass(AlpineDistribution, 'AlpineDistribution', VOID, ApkBasedDistribution, VOID, [1, 0]);
-initMetadataForObject(Alpine, 'Alpine', VOID, AlpineDistribution, VOID, [1, 0]);
 initMetadataForObject(Alpine317, 'Alpine317', VOID, AlpineDistribution, VOID, [1, 0]);
 initMetadataForObject(Alpine318, 'Alpine318', VOID, AlpineDistribution, VOID, [1, 0]);
 initMetadataForObject(Alpine319, 'Alpine319', VOID, AlpineDistribution, VOID, [1, 0]);
@@ -100713,7 +100711,7 @@ function AptGetBasedDistribution() {
 }
 function Ubuntu2404() {
   Ubuntu2404_instance = this;
-  AptGetBasedDistribution_init_$Init$('Ubuntu-24.04', 'Ubuntu', new node_modules_semver.SemVer('24.4.0'), new URL('https://wslstorestorage.blob.core.windows.net/wslblob/Ubuntu2404-240425.AppxBundle'), 'ubuntu2404.exe', this);
+  AptGetBasedDistribution_init_$Init$('Ubuntu-24.04', 'Ubuntu', new node_modules_semver.SemVer('24.4.4'), new URL('https://releases.ubuntu.com/24.04.4/ubuntu-24.04.4-wsl-amd64.wsl'), VOID, this);
 }
 var Ubuntu2404_instance;
 function Ubuntu2404_getInstance() {
@@ -100723,7 +100721,7 @@ function Ubuntu2404_getInstance() {
 }
 function Ubuntu2204() {
   Ubuntu2204_instance = this;
-  AptGetBasedDistribution_init_$Init$_0('Ubuntu', 'Ubuntu-22.04', 'Ubuntu', new node_modules_semver.SemVer('22.4.0'), new URL('https://aka.ms/wslubuntu2204'), 'ubuntu.exe', this);
+  AptGetBasedDistribution_init_$Init$('Ubuntu-22.04', 'Ubuntu', new node_modules_semver.SemVer('22.4.5'), new URL('https://releases.ubuntu.com/jammy/ubuntu-22.04.5-wsl-amd64.wsl'), VOID, this);
 }
 var Ubuntu2204_instance;
 function Ubuntu2204_getInstance() {
@@ -100733,7 +100731,7 @@ function Ubuntu2204_getInstance() {
 }
 function Ubuntu2004() {
   Ubuntu2004_instance = this;
-  AptGetBasedDistribution_init_$Init$_0('Ubuntu', 'Ubuntu-20.04', 'Ubuntu', new node_modules_semver.SemVer('20.4.0'), new URL('https://aka.ms/wslubuntu2004'), 'ubuntu.exe', this);
+  AptGetBasedDistribution_init_$Init$('Ubuntu-20.04', 'Ubuntu', new node_modules_semver.SemVer('20.4.6'), new URL('https://releases.ubuntu.com/focal/ubuntu-20.04.6-wsl-amd64.wsl'), VOID, this);
 }
 var Ubuntu2004_instance;
 function Ubuntu2004_getInstance() {
@@ -100884,13 +100882,7 @@ protoOf(DebianDistribution).su = function ($completion) {
 };
 function DebianDistribution() {
 }
-function ArchivedDebianDistribution_init_$Init$(wslId, distributionName, version, downloadUrl, installerFile, $this) {
-  installerFile = installerFile === VOID ? null : installerFile;
-  DebianDistribution_init_$Init$(wslId, distributionName, version, downloadUrl, installerFile, $this);
-  ArchivedDebianDistribution.call($this);
-  return $this;
-}
-function ArchivedDebianDistribution_init_$Init$_0(wslId, userId, distributionName, version, downloadUrl, installerFile, $this) {
+function ArchivedDebianDistribution_init_$Init$(wslId, userId, distributionName, version, downloadUrl, installerFile, $this) {
   installerFile = installerFile === VOID ? null : installerFile;
   DebianDistribution_init_$Init$_0(wslId, userId, distributionName, version, downloadUrl, installerFile, $this);
   ArchivedDebianDistribution.call($this);
@@ -100949,19 +100941,9 @@ protoOf(ArchivedDebianDistribution).vv = function ($completion) {
 };
 function ArchivedDebianDistribution() {
 }
-function Debian() {
-  Debian_instance = this;
-  ArchivedDebianDistribution_init_$Init$('Debian', 'Debian', new node_modules_semver.SemVer('1.0.0'), new URL('https://aka.ms/wsl-debian-gnulinux'), 'debian.exe', this);
-}
-var Debian_instance;
-function Debian_getInstance() {
-  if (Debian_instance == null)
-    new Debian();
-  return Debian_instance;
-}
 function Debian11() {
   Debian11_instance = this;
-  ArchivedDebianDistribution_init_$Init$_0('Debian', 'Debian-11', 'Debian', new node_modules_semver.SemVer('1.0.0'), new URL('https://aka.ms/wsl-debian-gnulinux'), 'debian.exe', this);
+  ArchivedDebianDistribution_init_$Init$('Debian', 'Debian-11', 'Debian', new node_modules_semver.SemVer('1.0.0'), new URL('https://aka.ms/wsl-debian-gnulinux'), 'debian.exe', this);
 }
 var Debian11_instance;
 function Debian11_getInstance() {
@@ -101321,12 +101303,6 @@ function ApkBasedDistribution_init_$Init$(wslId, distributionName, version, down
   ApkBasedDistribution.call($this);
   return $this;
 }
-function ApkBasedDistribution_init_$Init$_0(wslId, userId, distributionName, version, downloadUrl, installerFile, $this) {
-  installerFile = installerFile === VOID ? null : installerFile;
-  Distribution.call($this, wslId, userId, distributionName, version, downloadUrl, installerFile);
-  ApkBasedDistribution.call($this);
-  return $this;
-}
 function refresh($this, $completion) {
   var tmp = new $refreshCOROUTINE$_4($this, $completion);
   tmp.g5_1 = Unit_instance;
@@ -101481,12 +101457,6 @@ function AlpineDistribution_init_$Init$(wslId, distributionName, version, downlo
   AlpineDistribution.call($this);
   return $this;
 }
-function AlpineDistribution_init_$Init$_0(wslId, userId, distributionName, version, downloadUrl, installerFile, $this) {
-  installerFile = installerFile === VOID ? null : installerFile;
-  ApkBasedDistribution_init_$Init$_0(wslId, userId, distributionName, version, downloadUrl, installerFile, $this);
-  AlpineDistribution.call($this);
-  return $this;
-}
 function $createUserCOROUTINE$_0(_this__u8e3s4, username, resultContinuation) {
   CoroutineImpl.call(this, resultContinuation);
   this.l12_1 = _this__u8e3s4;
@@ -101533,19 +101503,9 @@ protoOf(AlpineDistribution).ru = function (username, $completion) {
 };
 function AlpineDistribution() {
 }
-function Alpine() {
-  Alpine_instance = this;
-  AlpineDistribution_init_$Init$('Alpine', 'Alpine', new node_modules_semver.SemVer('3.17.10'), new URL('https://dl-cdn.alpinelinux.org/alpine/v3.17/releases/x86_64/alpine-minirootfs-3.17.10-x86_64.tar.gz'), VOID, this);
-}
-var Alpine_instance;
-function Alpine_getInstance() {
-  if (Alpine_instance == null)
-    new Alpine();
-  return Alpine_instance;
-}
 function Alpine317() {
   Alpine317_instance = this;
-  AlpineDistribution_init_$Init$_0('Alpine', 'Alpine-3.17', 'Alpine', new node_modules_semver.SemVer('3.17.10'), new URL('https://dl-cdn.alpinelinux.org/alpine/v3.17/releases/x86_64/alpine-minirootfs-3.17.10-x86_64.tar.gz'), VOID, this);
+  AlpineDistribution_init_$Init$('Alpine-3.17', 'Alpine', new node_modules_semver.SemVer('3.17.10'), new URL('https://dl-cdn.alpinelinux.org/alpine/v3.17/releases/x86_64/alpine-minirootfs-3.17.10-x86_64.tar.gz'), VOID, this);
 }
 var Alpine317_instance;
 function Alpine317_getInstance() {
@@ -101630,7 +101590,7 @@ function _init_properties_Distribution_kt__4d9u58() {
   if (!properties_initialized_Distribution_kt_qdwpiy) {
     properties_initialized_Distribution_kt_qdwpiy = true;
     // Inline function 'kotlin.collections.associateBy' call
-    var this_0 = listOf_0([Alpine_getInstance(), Alpine317_getInstance(), Alpine318_getInstance(), Alpine319_getInstance(), Alpine320_getInstance(), Alpine321_getInstance(), Alpine322_getInstance(), Alpine323_getInstance(), Debian_getInstance(), Debian11_getInstance(), Debian12_getInstance(), Debian13_getInstance(), Kali_getInstance(), OpenSuseLeap15_2_getInstance(), Ubuntu1604_getInstance(), Ubuntu1804_getInstance(), Ubuntu2004_getInstance(), Ubuntu2204_getInstance(), Ubuntu2404_getInstance()]);
+    var this_0 = listOf_0([Alpine317_getInstance(), Alpine318_getInstance(), Alpine319_getInstance(), Alpine320_getInstance(), Alpine321_getInstance(), Alpine322_getInstance(), Alpine323_getInstance(), Debian11_getInstance(), Debian12_getInstance(), Debian13_getInstance(), Kali_getInstance(), OpenSuseLeap15_2_getInstance(), Ubuntu1604_getInstance(), Ubuntu1804_getInstance(), Ubuntu2004_getInstance(), Ubuntu2204_getInstance(), Ubuntu2404_getInstance()]);
     var capacity = coerceAtLeast(mapCapacity(collectionSizeOrDefault(this_0, 10)), 16);
     // Inline function 'kotlin.collections.associateByTo' call
     var destination = LinkedHashMap_init_$Create$_0(capacity);
@@ -101926,20 +101886,15 @@ function distribution$delegate$lambda() {
   // Inline function 'actions.core.actions_core_InputOptions_Companion_1b5u4w_invoke_jkqnwo' call
   var tmp$ret$0 = {required: true};
   var distributionId = getInput('distribution', tmp$ret$0);
-  var distribution = get_distributions().a1(distributionId);
-  if (equals(distribution, Alpine_getInstance())) {
-    warning("'Alpine' distribution is deprecated.\nPlease migrate to a versioned distribution such as 'Alpine-3.23'.\n'Alpine-3.17' is a drop-in replacement, except for the wsl-shell-distribution-wrapper name.");
-  } else if (equals(distribution, Debian_getInstance())) {
-    warning("'Debian' distribution is deprecated.\nPlease migrate to a versioned distribution such as 'Debian-13'.\n'Debian-11' is a drop-in replacement, except for the wsl-shell-distribution-wrapper name.");
-  }
+  var tmp0 = get_distributions().a1(distributionId);
   var tmp$ret$2;
   $l$block: {
     // Inline function 'kotlin.requireNotNull' call
-    if (distribution == null) {
+    if (tmp0 == null) {
       var message = "'" + distributionId + "' is not a valid distribution. Valid values: " + joinToString_0(sortedWith(get_distributions().b1(), get_CASE_INSENSITIVE_ORDER(StringCompanionObject_instance)));
       throw IllegalArgumentException_init_$Create$_0(toString_1(message));
     } else {
-      tmp$ret$2 = distribution;
+      tmp$ret$2 = tmp0;
       break $l$block;
     }
   }

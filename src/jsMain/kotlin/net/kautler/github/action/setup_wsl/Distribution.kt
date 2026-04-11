@@ -26,7 +26,6 @@ import org.w3c.dom.url.URL
 import semver.SemVer
 
 val distributions = listOf(
-    Alpine,
     Alpine317,
     Alpine318,
     Alpine319,
@@ -34,7 +33,6 @@ val distributions = listOf(
     Alpine321,
     Alpine322,
     Alpine323,
-    Debian,
     Debian11,
     Debian12,
     Debian13,
@@ -185,27 +183,22 @@ abstract class AptGetBasedDistribution : Distribution {
 object Ubuntu2404 : AptGetBasedDistribution(
     wslId = "Ubuntu-24.04",
     distributionName = "Ubuntu",
-    version = SemVer("24.4.0"),
-    downloadUrl = URL("https://wslstorestorage.blob.core.windows.net/wslblob/Ubuntu2404-240425.AppxBundle"),
-    installerFile = "ubuntu2404.exe"
+    version = SemVer("24.4.4"),
+    downloadUrl = URL("https://releases.ubuntu.com/24.04.4/ubuntu-24.04.4-wsl-amd64.wsl")
 )
 
 object Ubuntu2204 : AptGetBasedDistribution(
-    wslId = "Ubuntu",
-    userId = "Ubuntu-22.04",
+    wslId = "Ubuntu-22.04",
     distributionName = "Ubuntu",
-    version = SemVer("22.4.0"),
-    downloadUrl = URL("https://aka.ms/wslubuntu2204"),
-    installerFile = "ubuntu.exe"
+    version = SemVer("22.4.5"),
+    downloadUrl = URL("https://releases.ubuntu.com/jammy/ubuntu-22.04.5-wsl-amd64.wsl")
 )
 
 object Ubuntu2004 : AptGetBasedDistribution(
-    wslId = "Ubuntu",
-    userId = "Ubuntu-20.04",
+    wslId = "Ubuntu-20.04",
     distributionName = "Ubuntu",
-    version = SemVer("20.4.0"),
-    downloadUrl = URL("https://aka.ms/wslubuntu2004"),
-    installerFile = "ubuntu.exe"
+    version = SemVer("20.4.6"),
+    downloadUrl = URL("https://releases.ubuntu.com/focal/ubuntu-20.04.6-wsl-amd64.wsl")
 )
 
 object Ubuntu1804 : AptGetBasedDistribution(
@@ -283,14 +276,6 @@ abstract class ArchivedDebianDistribution : DebianDistribution {
         super.refresh()
     }
 }
-
-object Debian : ArchivedDebianDistribution(
-    wslId = "Debian",
-    distributionName = "Debian",
-    version = SemVer("1.0.0"),
-    downloadUrl = URL("https://aka.ms/wsl-debian-gnulinux"),
-    installerFile = "debian.exe"
-)
 
 object Debian11 : ArchivedDebianDistribution(
     wslId = "Debian",
@@ -512,16 +497,8 @@ abstract class AlpineDistribution : ApkBasedDistribution {
     }
 }
 
-object Alpine : AlpineDistribution(
-    wslId = "Alpine",
-    distributionName = "Alpine",
-    version = SemVer("3.17.10"),
-    downloadUrl = URL("https://dl-cdn.alpinelinux.org/alpine/v3.17/releases/x86_64/alpine-minirootfs-3.17.10-x86_64.tar.gz")
-)
-
 object Alpine317 : AlpineDistribution(
-    wslId = "Alpine",
-    userId = "Alpine-3.17",
+    wslId = "Alpine-3.17",
     distributionName = "Alpine",
     version = SemVer("3.17.10"),
     downloadUrl = URL("https://dl-cdn.alpinelinux.org/alpine/v3.17/releases/x86_64/alpine-minirootfs-3.17.10-x86_64.tar.gz")

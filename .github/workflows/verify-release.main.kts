@@ -24,7 +24,7 @@
 
 @file:Repository("https://bindings.krzeminski.it/")
 @file:DependsOn("actions:checkout___major:[v6,v7-alpha)")
-@file:DependsOn("Vampire:setup-wsl:RELEASE")
+@file:DependsOn("Vampire:setup-wsl___major:RELEASE")
 
 import io.github.typesafegithub.workflows.actions.vampire.SetupWsl
 import io.github.typesafegithub.workflows.domain.RunnerType.WindowsLatest

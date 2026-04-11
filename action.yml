@@ -24,9 +24,6 @@ inputs:
     distribution:
         description: |
             The WSL distribution to install, update, or configure.
-            'Ubuntu-22.04' and 'Ubuntu-20.04' can not be used together at the same time.
-            They use the same WSL distribution ID, so the second that is used will not be installed
-            as the first one will be found as already installed by WSL distribution ID.
             Valid values:
                 - 'Alpine-3.23'
                 - 'Alpine-3.22'
@@ -35,11 +32,9 @@ inputs:
                 - 'Alpine-3.19'
                 - 'Alpine-3.18'
                 - 'Alpine-3.17'
-                - 'Alpine' (deprecated, 'Alpine-3.17' is a drop-in replacement, except for the wsl-shell-distribution-wrapper name)
                 - 'Debian-13'
                 - 'Debian-12'
                 - 'Debian-11'
-                - 'Debian' (deprecated, 'Debian-11' is a drop-in replacement, except for the wsl-shell-distribution-wrapper name)
                 - 'kali-linux'
                 - 'openSUSE-Leap-15.2'
                 - 'Ubuntu-24.04'
@@ -48,7 +43,7 @@ inputs:
                 - 'Ubuntu-18.04'
                 - 'Ubuntu-16.04'
         required: false
-        default: Debian
+        default: Debian-13
 
     use-cache:
         description: |
@@ -141,5 +136,5 @@ outputs:
             wsl-shell-command is not set explicitly and the script already exists, this output will be set.
 
 runs:
-    using: node20
+    using: node24
     main: build/distributions/index.mjs
