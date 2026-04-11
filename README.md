@@ -52,7 +52,7 @@ To use this action with all inputs set to their default value, just use its name
 _**Example:**_
 
 ```yaml
-- uses: Vampire/setup-wsl@v6
+- uses: Vampire/setup-wsl@v7
 ```
 
 This will first check whether the distribution is installed already. If not, it will be installed and also
@@ -115,7 +115,7 @@ defaults:
         shell: wsl-bash {0}
 
 steps:
-    - uses: Vampire/setup-wsl@v6
+    - uses: Vampire/setup-wsl@v7
 
     - run: |
           npm ci
@@ -140,10 +140,6 @@ The first installed WSL distribution is automatically the default one, independe
 
 Either way, the wsl-shell wrapper scripts are created or overwritten according to the current action configuration.
 
-`Ubuntu-22.04` and `Ubuntu-20.04` can not be used together at the same time. They use the same WSL distribution ID,
-so the second that is used will not be installed as the first one will be found as already installed by
-WSL distribution ID.
-
 The values currently supported by this action are:
 * `Alpine-3.23`
 * `Alpine-3.22`
@@ -152,11 +148,9 @@ The values currently supported by this action are:
 * `Alpine-3.19`
 * `Alpine-3.18`
 * `Alpine-3.17`
-* `Alpine` _(deprecated, 'Alpine-3.17' is a drop-in replacement, except for the wsl-shell-distribution-wrapper name)_
-* `Debian-13`
+* `Debian-13` **(default)**
 * `Debian-12`
 * `Debian-11`
-* `Debian` **(default)** _(deprecated, 'Debian-11' is a drop-in replacement, except for the wsl-shell-distribution-wrapper name)_
 * `kali-linux`
 * `openSUSE-Leap-15.2`
 * `Ubuntu-24.04`
@@ -167,7 +161,7 @@ The values currently supported by this action are:
 
 _**Example:**_
 ```yaml
-- uses: Vampire/setup-wsl@v6
+- uses: Vampire/setup-wsl@v7
   with:
       distribution: Ubuntu-18.04
 ```
@@ -184,7 +178,7 @@ space of the repository. Refer to [`actions/cache` documentation][actions/cache 
 
 _**Example:**_
 ```yaml
-- uses: Vampire/setup-wsl@v6
+- uses: Vampire/setup-wsl@v7
   with:
       use-cache: 'false'
 ```
@@ -205,7 +199,7 @@ its contents in your configured value.
 
 _**Example:**_
 ```yaml
-- uses: Vampire/setup-wsl@v6
+- uses: Vampire/setup-wsl@v7
   with:
       wsl-conf: |
           [automount]
@@ -224,7 +218,7 @@ This can also be used if the distribution is installed already.
 
 _**Example:**_
 ```yaml
-- uses: Vampire/setup-wsl@v6
+- uses: Vampire/setup-wsl@v7
   with:
       set-as-default: 'false'
 ```
@@ -238,7 +232,7 @@ This can also be used if the distribution is installed already.
 
 _**Example:**_
 ```yaml
-- uses: Vampire/setup-wsl@v6
+- uses: Vampire/setup-wsl@v7
   with:
       update: 'true'
 ```
@@ -252,7 +246,7 @@ This can also be used if the distribution is installed already.
 
 _**Example:**_
 ```yaml
-- uses: Vampire/setup-wsl@v6
+- uses: Vampire/setup-wsl@v7
   with:
       additional-packages:
           dos2unix
@@ -270,7 +264,7 @@ it is automatically added.
 
 _**Example:**_
 ```yaml
-- uses: Vampire/setup-wsl@v6
+- uses: Vampire/setup-wsl@v7
   with:
       wsl-shell-user: test
 ```
@@ -301,7 +295,7 @@ scripts, the [`wsl-shell-wrapper-path` output](#wsl-shell-wrapper-path) and
 
 _**Examples:**_
 ```yaml
-- uses: Vampire/setup-wsl@v6
+- uses: Vampire/setup-wsl@v7
   with:
       wsl-shell-command: ash -eu
 
@@ -312,21 +306,21 @@ _**Examples:**_
   run: |
       useradd -m -p 4qBD5NWD3IkbU test
 
-- uses: Vampire/setup-wsl@v6
+- uses: Vampire/setup-wsl@v7
   with:
       wsl-shell-command: bash -c "sudo -u test bash --noprofile --norc -euo pipefail "\
 
 - shell: wsl-bash {0}
   run: id
 
-- uses: Vampire/setup-wsl@v6
+- uses: Vampire/setup-wsl@v7
   with:
       wsl-shell-command: bash -c "sudo -u test bash --noprofile --norc -euo pipefail '{0}'"
 
 - shell: wsl-bash {0}
   run: id
 
-- uses: Vampire/setup-wsl@v6
+- uses: Vampire/setup-wsl@v7
   with:
     wsl-shell-command: bash -c "cd && bash --noprofile --norc -euo pipefail '{0}'"
 
@@ -348,7 +342,7 @@ so that proper tests can be added and the warning for that version removed.
 
 _**Example:**_
 ```yaml
-- uses: Vampire/setup-wsl@v6
+- uses: Vampire/setup-wsl@v7
   with:
     wsl-version: 1
 ```
