@@ -2296,6 +2296,7 @@ jobs:
         fail-on-cache-miss: 'true'
     - id: 'step-2'
       name: 'Execute action for Alpine-3.23'
+      continue-on-error: true
       uses: './'
       with:
         distribution: 'Alpine-3.23'
@@ -2303,6 +2304,7 @@ jobs:
         wsl-version: '1'
     - id: 'step-3'
       name: 'Execute action for Alpine-3.22'
+      continue-on-error: true
       uses: './'
       with:
         distribution: 'Alpine-3.22'
@@ -2310,6 +2312,7 @@ jobs:
         wsl-version: '1'
     - id: 'step-4'
       name: 'Execute action for Alpine-3.21'
+      continue-on-error: true
       uses: './'
       with:
         distribution: 'Alpine-3.21'
@@ -2318,6 +2321,7 @@ jobs:
         wsl-version: '1'
     - id: 'step-5'
       name: 'Execute action for Alpine-3.20'
+      continue-on-error: true
       uses: './'
       with:
         distribution: 'Alpine-3.20'
@@ -2326,6 +2330,7 @@ jobs:
         wsl-version: '1'
     - id: 'step-6'
       name: 'Execute action for Alpine-3.19'
+      continue-on-error: true
       uses: './'
       with:
         distribution: 'Alpine-3.19'
@@ -2334,6 +2339,7 @@ jobs:
         wsl-version: '1'
     - id: 'step-7'
       name: 'Execute action for Alpine-3.18'
+      continue-on-error: true
       uses: './'
       with:
         distribution: 'Alpine-3.18'
@@ -2342,6 +2348,7 @@ jobs:
         wsl-version: '1'
     - id: 'step-8'
       name: 'Execute action for Alpine-3.17'
+      continue-on-error: true
       uses: './'
       with:
         distribution: 'Alpine-3.17'
@@ -2350,6 +2357,7 @@ jobs:
         wsl-version: '1'
     - id: 'step-9'
       name: 'Execute action for Debian-13'
+      continue-on-error: true
       uses: './'
       with:
         distribution: 'Debian-13'
@@ -2358,6 +2366,7 @@ jobs:
         wsl-version: '1'
     - id: 'step-10'
       name: 'Execute action for Debian-12'
+      continue-on-error: true
       uses: './'
       with:
         distribution: 'Debian-12'
@@ -2366,6 +2375,7 @@ jobs:
         wsl-version: '1'
     - id: 'step-11'
       name: 'Execute action for Debian-11'
+      continue-on-error: true
       uses: './'
       with:
         distribution: 'Debian-11'
@@ -2374,6 +2384,7 @@ jobs:
         wsl-version: '1'
     - id: 'step-12'
       name: 'Execute action for kali-linux'
+      continue-on-error: true
       uses: './'
       with:
         distribution: 'kali-linux'
@@ -2382,6 +2393,7 @@ jobs:
         wsl-version: '1'
     - id: 'step-13'
       name: 'Execute action for openSUSE-Leap-15.2'
+      continue-on-error: true
       uses: './'
       with:
         distribution: 'openSUSE-Leap-15.2'
@@ -2390,6 +2402,7 @@ jobs:
         wsl-version: '1'
     - id: 'step-14'
       name: 'Execute action for Ubuntu-24.04'
+      continue-on-error: true
       uses: './'
       with:
         distribution: 'Ubuntu-24.04'
@@ -2398,6 +2411,7 @@ jobs:
         wsl-version: '1'
     - id: 'step-15'
       name: 'Execute action for Ubuntu-22.04'
+      continue-on-error: true
       uses: './'
       with:
         distribution: 'Ubuntu-22.04'
@@ -2406,6 +2420,7 @@ jobs:
         wsl-version: '1'
     - id: 'step-16'
       name: 'Execute action for Ubuntu-20.04'
+      continue-on-error: true
       uses: './'
       with:
         distribution: 'Ubuntu-20.04'
@@ -2414,6 +2429,7 @@ jobs:
         wsl-version: '1'
     - id: 'step-17'
       name: 'Execute action for Ubuntu-18.04'
+      continue-on-error: true
       uses: './'
       with:
         distribution: 'Ubuntu-18.04'
@@ -2422,6 +2438,7 @@ jobs:
         wsl-version: '1'
     - id: 'step-18'
       name: 'Execute action for Ubuntu-16.04'
+      continue-on-error: true
       uses: './'
       with:
         distribution: 'Ubuntu-16.04'

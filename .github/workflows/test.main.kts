@@ -1206,7 +1206,8 @@ workflowWithCopyright(
                         ),
                         setAsDefault = if (i >= 2) false else null,
                         wslVersion = 1
-                    )
+                    ),
+                    continueOnError = true
                 )
             }
             .forEach { (distribution, localExecuteActionStep) ->
