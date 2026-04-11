@@ -45,6 +45,7 @@ import wooga.gradle.github.base.tasks.Github
 import wooga.gradle.github.base.tasks.internal.AbstractGithubTask
 import wooga.gradle.github.publish.PublishMethod.update
 import wooga.gradle.github.publish.tasks.GithubPublish
+import java.net.URI
 
 plugins {
     // needed for accessing majorVersion
@@ -264,6 +265,11 @@ tasks.checkoutMergeToReleaseBranch {
 
 val preprocessVerifyReleaseWorkflow by tasks.existing {
     mustRunAfter(createMajorBranch)
+    doFirst("Refresh version listing") {
+        URI("https://bindings.krzeminski.it/refresh/Vampire/setup-wsl___major/maven-metadata.xml")
+            .toURL()
+            .readBytes()
+    }
 }
 
 tasks.preTagCommit {
