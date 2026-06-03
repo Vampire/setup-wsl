@@ -58,7 +58,6 @@ import io.github.typesafegithub.workflows.domain.triggers.Schedule
 import io.github.typesafegithub.workflows.dsl.JobBuilder
 import io.github.typesafegithub.workflows.dsl.WorkflowBuilder
 import io.github.typesafegithub.workflows.dsl.expressions.expr
-import kotlin.math.min
 
 val environments = listOf(
     "windows-2022",
@@ -289,7 +288,7 @@ workflowWithCopyright(
         _customArguments = _customArguments
     ) {
         // work-around for https://github.com/actions/cache/issues/1622
-        // and https://github.com/actions/partner-runner-images/issues/99
+        // and https://github.com/actions/runner-images/issues/14081
         run(
             name = "Install zstd on windows-11-arm",
             shell = Cmd,
@@ -389,7 +388,7 @@ workflowWithCopyright(
         executeActionStep = usesSelf(
             action = SetupWsl(
                 update = true,
-                wslVersion = 1
+                wslVersion = 2
             )
         )
         commonTests()
@@ -1101,7 +1100,7 @@ workflowWithCopyright(
                 // and https://bugs.kali.org/view.php?id=6672
                 // and https://bugs.launchpad.net/ubuntu/+source/systemd/+bug/2069555
                 wslVersion = null,
-                wslVersion_Untyped = expr(getWslVersionExpression(ubuntu2404))
+                wslVersion_Untyped = expr(getWslVersionExpression(debian13, ubuntu2404))
             )
         )
         usesSelf(
@@ -1115,10 +1114,13 @@ workflowWithCopyright(
             condition = """
                 |(matrix.distribution.user-id != '${kali.userId}')
                 |&& (
-                |    (matrix.distribution.user-id != '${ubuntu2404.userId}')
+                |    (
+                |        (matrix.distribution.user-id != '${debian13.userId}')
+                |        && (matrix.distribution.user-id != '${ubuntu2404.userId}')
+                |    )
                 |    || (
                 |        (
-                             ${getWslVersionExpression(ubuntu2404).prependIndent("|        ")}
+                             ${getWslVersionExpression(debian13, ubuntu2404).prependIndent("|            ")}
                 |        ) == '2'
                 |    )
                 |)
@@ -1474,8 +1476,8 @@ fun getWslVersionExpression(vararg wsl2Distributions: Distribution) = """
     |(
          ${
              wsl2Distributions.joinToString(
-                 separator = "\n|        || ",
-                 prefix = "|        "
+                 separator = "\n|    || ",
+                 prefix = "|    "
              ) { "(matrix.distribution.user-id == '${it.userId}')" }
          }
     |)

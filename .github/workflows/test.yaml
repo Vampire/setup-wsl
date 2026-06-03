@@ -203,7 +203,7 @@ jobs:
       uses: './'
       with:
         update: 'true'
-        wsl-version: '1'
+        wsl-version: '2'
     - id: 'step-3'
       name: 'Test - wsl-bash should be available as custom shell'
       shell: 'wsl-bash {0}'
@@ -497,7 +497,7 @@ jobs:
         use-cache: 'false'
         wsl-version: |-
           ${{ (
-                  (matrix.distribution.user-id == 'kali-linux')
+              (matrix.distribution.user-id == 'kali-linux')
           )
           && '2'
           || '1' }}
@@ -1434,7 +1434,7 @@ jobs:
         additional-packages: '${{ matrix.distribution.default-absent-tool }} bash'
         wsl-version: |-
           ${{ (
-                  (matrix.distribution.user-id == 'kali-linux')
+              (matrix.distribution.user-id == 'kali-linux')
           )
           && '2'
           || '1' }}
@@ -2172,7 +2172,8 @@ jobs:
           || '' }}
         wsl-version: |-
           ${{ (
-                  (matrix.distribution.user-id == 'Ubuntu-24.04')
+              (matrix.distribution.user-id == 'Debian-13')
+              || (matrix.distribution.user-id == 'Ubuntu-24.04')
           )
           && '2'
           || '1' }}
@@ -2185,14 +2186,18 @@ jobs:
       if: |-
         (matrix.distribution.user-id != 'kali-linux')
         && (
-            (matrix.distribution.user-id != 'Ubuntu-24.04')
+            (
+                (matrix.distribution.user-id != 'Debian-13')
+                && (matrix.distribution.user-id != 'Ubuntu-24.04')
+            )
             || (
                 (
-                (
-                        (matrix.distribution.user-id == 'Ubuntu-24.04')
-                )
-                && '2'
-                || '1'
+                    (
+                        (matrix.distribution.user-id == 'Debian-13')
+                        || (matrix.distribution.user-id == 'Ubuntu-24.04')
+                    )
+                    && '2'
+                    || '1'
                 ) == '2'
             )
         )
