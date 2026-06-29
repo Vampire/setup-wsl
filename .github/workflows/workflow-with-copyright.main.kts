@@ -17,6 +17,10 @@
 @file:Repository("https://repo.maven.apache.org/maven2/")
 @file:DependsOn("io.github.typesafegithub:github-workflows-kt:3.7.0")
 
+@file:Repository("https://bindings.krzeminski.it/")
+@file:DependsOn("fwilhe2:setup-kotlin___major:[v1,v2-alpha)")
+
+import io.github.typesafegithub.workflows.actions.fwilhe2.SetupKotlin
 import io.github.typesafegithub.workflows.domain.Concurrency
 import io.github.typesafegithub.workflows.domain.triggers.Trigger
 import io.github.typesafegithub.workflows.dsl.WorkflowBuilder
@@ -45,7 +49,14 @@ fun workflowWithCopyright(
             cancelInProgress = true
         ),
         consistencyCheckJobConfig = DEFAULT_CONSISTENCY_CHECK_JOB_CONFIG.copy(
-            checkoutActionVersion = InferFromClasspath()
+            checkoutActionVersion = InferFromClasspath(),
+            additionalSteps = {
+                // work-around for https://youtrack.jetbrains.com/issue/KT-86352
+                uses(
+                    name = "Install Kotlin 2.3.10",
+                    action = SetupKotlin(version = "2.3.10")
+                )
+            }
         ),
         preamble = WithOriginalAfter(
             """

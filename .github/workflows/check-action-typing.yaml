@@ -32,9 +32,14 @@ jobs:
       name: 'Check out'
       uses: 'actions/checkout@v6'
     - id: 'step-1'
+      name: 'Install Kotlin 2.3.10'
+      uses: 'fwilhe2/setup-kotlin@v1'
+      with:
+        version: '2.3.10'
+    - id: 'step-2'
       name: 'Execute script'
       run: 'rm ''.github/workflows/check-action-typing.yaml'' && ''.github/workflows/check-action-typing.main.kts'''
-    - id: 'step-2'
+    - id: 'step-3'
       name: 'Consistency check'
       run: 'git diff --exit-code ''.github/workflows/check-action-typing.yaml'''
   check_action_typing:
