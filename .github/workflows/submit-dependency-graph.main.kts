@@ -70,7 +70,7 @@ workflowWithCopyright(
                     "--info",
                     "--stacktrace",
                     "--show-version"
-                ).joinToString(" "),
+                ),
                 buildScanPublish = true,
                 buildScanTermsOfUseUrl = HttpsGradleComHelpLegalTermsOfUse,
                 buildScanTermsOfUseAgree = Yes
