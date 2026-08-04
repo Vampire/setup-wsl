@@ -422,9 +422,11 @@ suspend fun installDistribution() {
         && (process.env["RUNNER_ARCH"] == "X64")
         && (process.env["RUNNER_ENVIRONMENT"] == "github-hosted")
     ) {
+        // work-around for intermittent Store 403 on GHA (Vampire/setup-wsl#72);
+        // --web-download uses the public CDN instead of the Microsoft Store path
         retry(10) {
             executeWslCommand(
-                wslArguments = arrayOf("--update")
+                wslArguments = arrayOf("--update", "--web-download")
             )
         }
         waitForWslStatusNotContaining("WSL is finishing an upgrade...")
