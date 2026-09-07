@@ -269,7 +269,7 @@ abstract class ArchivedDebianDistribution : DebianDistribution {
                 wslId,
                 "sed",
                 "-i",
-                "s/ftp.debian.org/archive.debian.org/",
+                """s/\\\(ftp\\\|deb\\\)\\\.debian\\\.org/archive.debian.org/""",
                 "/etc/apt/sources.list"
             )
         )
