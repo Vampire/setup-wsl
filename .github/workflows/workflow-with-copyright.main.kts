@@ -20,14 +20,12 @@
 @file:Repository("https://bindings.krzeminski.it/")
 @file:DependsOn("fwilhe2:setup-kotlin___major:[v2,v3-alpha)")
 
-import io.github.typesafegithub.workflows.actions.fwilhe2.SetupKotlin
 import io.github.typesafegithub.workflows.domain.Concurrency
 import io.github.typesafegithub.workflows.domain.triggers.Trigger
 import io.github.typesafegithub.workflows.dsl.WorkflowBuilder
 import io.github.typesafegithub.workflows.dsl.expressions.Contexts.github
 import io.github.typesafegithub.workflows.dsl.expressions.expr
 import io.github.typesafegithub.workflows.dsl.workflow
-import io.github.typesafegithub.workflows.yaml.DEFAULT_CONSISTENCY_CHECK_JOB_CONFIG
 import io.github.typesafegithub.workflows.yaml.Preamble.WithOriginalAfter
 import java.io.File
 
@@ -46,15 +44,6 @@ fun workflowWithCopyright(
         concurrency = Concurrency(
             group = "${expr { github.workflow }}-${expr("${github.eventPullRequest.pull_request.number} || ${github.ref}")}",
             cancelInProgress = true
-        ),
-        consistencyCheckJobConfig = DEFAULT_CONSISTENCY_CHECK_JOB_CONFIG.copy(
-            additionalSteps = {
-                // work-around for https://youtrack.jetbrains.com/issue/KT-86352 until GHA agents bundle 2.4.10
-                uses(
-                    name = "Install Kotlin 2.4.10",
-                    action = SetupKotlin(version = "2.4.10")
-                )
-            }
         ),
         preamble = WithOriginalAfter(
             """
