@@ -277,7 +277,41 @@ abstract class ArchivedDebianDistribution : DebianDistribution {
     }
 }
 
-object Debian11 : ArchivedDebianDistribution(
+abstract class SecurityArchivedDebianDistribution : ArchivedDebianDistribution {
+    constructor(
+        wslId: String,
+        distributionName: String,
+        version: SemVer,
+        downloadUrl: URL,
+        installerFile: String? = null
+    ) : super(wslId, distributionName, version, downloadUrl, installerFile)
+
+    constructor(
+        wslId: String,
+        userId: String,
+        distributionName: String,
+        version: SemVer,
+        downloadUrl: URL,
+        installerFile: String? = null
+    ) : super(wslId, userId, distributionName, version, downloadUrl, installerFile)
+
+    override suspend fun refresh() {
+        exec(
+            commandLine = "wsl",
+            args = arrayOf(
+                "--distribution",
+                wslId,
+                "sed",
+                "-i",
+                """s/security\\\.debian\\\.org/archive.debian.org/""",
+                "/etc/apt/sources.list"
+            )
+        )
+        super.refresh()
+    }
+}
+
+object Debian11 : SecurityArchivedDebianDistribution(
     wslId = "Debian",
     userId = "Debian-11",
     distributionName = "Debian",
