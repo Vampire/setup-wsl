@@ -562,8 +562,8 @@ object Alpine320 : AlpineDistribution(
 object Alpine321 : AlpineDistribution(
     wslId = "Alpine-3.21",
     distributionName = "Alpine",
-    version = SemVer("3.21.6"),
-    downloadUrl = URL("https://dl-cdn.alpinelinux.org/alpine/v3.21/releases/x86_64/alpine-minirootfs-3.21.6-x86_64.tar.gz"),
+    version = SemVer("3.21.8"),
+    downloadUrl = URL("https://dl-cdn.alpinelinux.org/alpine/v3.21/releases/x86_64/alpine-minirootfs-3.21.8-x86_64.tar.gz"),
 )
 
 object Alpine322 : AlpineDistribution(
