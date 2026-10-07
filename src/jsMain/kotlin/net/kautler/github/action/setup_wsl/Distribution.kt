@@ -183,8 +183,8 @@ abstract class AptGetBasedDistribution : Distribution {
 object Ubuntu2404 : AptGetBasedDistribution(
     wslId = "Ubuntu-24.04",
     distributionName = "Ubuntu",
-    version = SemVer("24.4.4"),
-    downloadUrl = URL("https://releases.ubuntu.com/24.04.4/ubuntu-24.04.4-wsl-amd64.wsl")
+    version = SemVer("24.4.5"),
+    downloadUrl = URL("https://releases.ubuntu.com/24.04.5/ubuntu-24.04.5-wsl-amd64.wsl")
 )
 
 object Ubuntu2204 : AptGetBasedDistribution(
