@@ -43,7 +43,8 @@ val distributions = listOf(
     Ubuntu1804,
     Ubuntu2004,
     Ubuntu2204,
-    Ubuntu2404
+    Ubuntu2404,
+    Ubuntu2604
 ).associateBy { it.userId }
 
 enum class InstallMethod { APP_BUNDLE, TARBALL, WSL_FILE }
@@ -180,6 +181,13 @@ abstract class AptGetBasedDistribution : Distribution {
         )
     }
 }
+
+object Ubuntu2604 : AptGetBasedDistribution(
+    wslId = "Ubuntu-26.04",
+    distributionName = "Ubuntu",
+    version = SemVer("26.4.1"),
+    downloadUrl = URL("https://releases.ubuntu.com/26.04.1/ubuntu-26.04.1-wsl-amd64.wsl")
+)
 
 object Ubuntu2404 : AptGetBasedDistribution(
     wslId = "Ubuntu-24.04",
