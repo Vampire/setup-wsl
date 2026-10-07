@@ -18,7 +18,6 @@ import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
 plugins {
     `kotlin-dsl`
-    alias(libs.plugins.versions)
     id(libs.plugins.dependency.analysis.get().pluginId)
 }
 
@@ -61,8 +60,9 @@ tasks.withType<KotlinCompile>().configureEach {
 }
 
 tasks.dependencyUpdates {
-    checkForGradleUpdate = false
     checkConstraints = true
+    checkBuildEnvironmentConstraints = true
+    rejectPreReleases = true
 }
 
 fun plugin(plugin: Provider<PluginDependency>) = plugin.map {
