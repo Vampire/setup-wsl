@@ -330,8 +330,8 @@ object Debian12 : DebianDistribution(
 object Debian13 : DebianDistribution(
     wslId = "Debian-13",
     distributionName = "Debian",
-    version = SemVer("1.24.0"),
-    downloadUrl = URL("https://salsa.debian.org/debian/WSL/-/jobs/9229125/artifacts/raw/Debian_WSL_AMD64_v1.24.0.0.wsl")
+    version = SemVer("1.26.0"),
+    downloadUrl = URL("https://salsa.debian.org/debian/WSL/-/jobs/9606244/artifacts/raw/Debian_WSL_AMD64_v1.26.0.0.wsl")
 )
 
 object Kali : AptGetBasedDistribution(
