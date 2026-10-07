@@ -18,7 +18,6 @@ import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
 plugins {
     `kotlin-dsl`
-    alias(libs.plugins.convention.dependency.updates.report.aggregatee)
     id(libs.plugins.dependency.analysis.get().pluginId)
 }
 
@@ -32,15 +31,11 @@ dependencies {
     implementation(plugin(libs.plugins.grgit))
     implementation(plugin(libs.plugins.github))
     implementation(plugin(libs.plugins.kotlin.multiplatform))
-    implementation(":dependency-updates-report-aggregation")
     implementation(platform(libs.build.kotlinx.serialization.bom))
     implementation(libs.build.kotlinx.serialization.json)
     implementation(libs.build.github.api)
     implementation(libs.build.snakeyaml)
-    compileOnly(libs.build.inject)
     compileOnly(embeddedKotlin("compiler-embeddable"))
-    // just to get update notifications by versions plugin
-    compileOnly(plugin(libs.plugins.refresh.versions))
 }
 
 tasks.withType<KotlinCompile>().configureEach {
@@ -55,9 +50,9 @@ dependencyAnalysis {
             includeDependency("com.autonomousapps.dependency-analysis:com.autonomousapps.dependency-analysis.gradle.plugin")
             includeDependency("com.autonomousapps:dependency-analysis-gradle-plugin")
         }
-        bundle("com.github.ben-manes.versions.gradle.plugin") {
-            includeDependency("com.github.ben-manes.versions:com.github.ben-manes.versions.gradle.plugin")
-            includeDependency("com.github.ben-manes:gradle-versions-plugin")
+        bundle("io.github.ben-manes.versions.gradle.plugin") {
+            includeDependency("io.github.ben-manes.versions.settings:io.github.ben-manes.versions.settings.gradle.plugin")
+            includeDependency("io.github.ben-manes:gradle-versions-plugin")
         }
         bundle("net.researchgate.release.gradle.plugin") {
             includeDependency("net.researchgate.release:net.researchgate.release.gradle.plugin")
@@ -105,6 +100,12 @@ tasks.buildHealth {
 
 tasks.check {
     dependsOn(tasks.buildHealth)
+}
+
+tasks.dependencyUpdates {
+    checkConstraints = true
+    checkBuildEnvironmentConstraints = true
+    rejectPreReleases = true
 }
 
 fun plugin(plugin: Provider<PluginDependency>) = plugin.map {

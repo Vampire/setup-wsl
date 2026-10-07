@@ -1,5 +1,5 @@
 /*
- * Copyright 2020-2023 Björn Kautler
+ * Copyright 2020-2026 Björn Kautler
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -27,5 +27,6 @@ val Result.withUpdatedCounts: Result
         DependenciesGroup(exceeded.dependencies.size, exceeded.dependencies),
         DependenciesGroup(undeclared.dependencies.size, undeclared.dependencies),
         DependenciesGroup(unresolved.dependencies.size, unresolved.dependencies),
-        gradle
+        gradle,
+        skipped
     )

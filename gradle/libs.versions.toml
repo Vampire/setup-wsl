@@ -19,8 +19,7 @@ build-gradle-plugin-github = "4.0.0"
 build-gradle-plugin-grgit = "5.3.3"
 build-gradle-plugin-refresh-versions = "0.60.6"
 build-gradle-plugin-release = "3.1.0"
-build-gradle-plugin-versions = "0.53.0"
-build-inject = "1"
+build-gradle-plugin-versions = "0.65.0"
 build-kotlinx-serialization = "1.11.0"
 build-node = "24.14.1"
 build-snakeyaml = "2.6"
@@ -30,9 +29,7 @@ workflows-kotlin = "2.3.20"
 
 [libraries]
 build-github-api = { module = "org.kohsuke:github-api", version.ref = "build-github-api" }
-build-inject = { module = "javax.inject:javax.inject", version.ref = "build-inject" }
 build-kotlinx-serialization-bom = { module = "org.jetbrains.kotlinx:kotlinx-serialization-bom", version.ref = "build-kotlinx-serialization" }
-build-kotlinx-serialization-core = { module = "org.jetbrains.kotlinx:kotlinx-serialization-core" }
 build-kotlinx-serialization-json = { module = "org.jetbrains.kotlinx:kotlinx-serialization-json" }
 build-snakeyaml = { module = "org.yaml:snakeyaml", version.ref = "build-snakeyaml" }
 kotlinx-coroutines-core = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-core", version.ref = "kotlinx-coroutines" }
@@ -43,7 +40,6 @@ workflows-kotlin-scripting-compiler = { module = "org.jetbrains.kotlin:kotlin-sc
 
 [plugins]
 convention-dependencies = { id = "net.kautler.dependencies" }
-convention-dependency-updates-report-aggregatee = { id = "net.kautler.dependency-updates-report-aggregatee" }
 convention-github_actions = { id = "net.kautler.github_actions" }
 convention-ncc-packer = { id = "net.kautler.ncc_packer" }
 convention-node = { id = "net.kautler.node" }
@@ -55,4 +51,4 @@ grgit = { id = "org.ajoberstar.grgit.service", version.ref = "build-gradle-plugi
 kotlin-multiplatform = { id = "org.jetbrains.kotlin.multiplatform", version.ref = "kotlin" }
 refresh-versions = { id = "de.fayard.refreshVersions", version.ref = "build-gradle-plugin-refresh-versions" }
 release = { id = "net.researchgate.release", version.ref = "build-gradle-plugin-release" }
-versions = { id = "com.github.ben-manes.versions", version.ref = "build-gradle-plugin-versions" }
+versions = { id = "io.github.ben-manes.versions.settings", version.ref = "build-gradle-plugin-versions" }

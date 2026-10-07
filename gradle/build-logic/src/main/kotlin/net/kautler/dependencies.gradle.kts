@@ -16,22 +16,22 @@
 
 package net.kautler
 
+import com.github.benmanes.gradle.versions.reporter.PlainTextReporter
+import com.github.benmanes.gradle.versions.updates.DependencyUpdatesTask
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.JsonObject
 import kotlinx.serialization.json.jsonArray
 import kotlinx.serialization.json.jsonPrimitive
+import net.kautler.util.IgnoredDependency
 import net.kautler.util.NullOutputStream
-import net.kautler.util.PreliminaryReleaseFilter
 import net.kautler.util.ProblemsProvider
-import net.kautler.util.add
-import net.kautler.util.ignoredDependencies
-import org.gradle.kotlin.dsl.newInstance
+import net.kautler.util.matches
+import net.kautler.util.withUpdatedCounts
 import java.security.DigestInputStream
 import java.security.MessageDigest
 
 plugins {
     `lifecycle-base`
-    id("net.kautler.dependency-updates-report-aggregator")
     // part of work-around for https://github.com/autonomousapps/dependency-analysis-gradle-plugin/issues/1672
     //id("com.autonomousapps.dependency-analysis")
 }
@@ -93,32 +93,132 @@ val validateGradleWrapperJar by tasks.registering {
     }
 }
 
-tasks.dependencyUpdates {
+val dependencyUpdatesAggregation by configurations.existing
+dependencies {
+    dependencyUpdatesAggregation(":build-logic")
+    dependencyUpdatesAggregation(":conditional-refresh-versions")
+}
+
+val dependencyUpdates by tasks.existing(DependencyUpdatesTask::class) {
     dependsOn(validateGradleWrapperJar)
 
-    rejectVersionIf {
-        if (PreliminaryReleaseFilter.reject(this)) {
-            reject("preliminary release")
-        }
+    checkConstraints = true
+    checkBuildEnvironmentConstraints = true
+    rejectPreReleases = true
 
-        // branches above already rejected with appropriate reason
-        return@rejectVersionIf false
+    filterDeclaredConfigurations = Spec<String> { name ->
+        val isKgpInternal = name in setOf(
+            "kotlinCompilerClasspath",
+            "kotlinBuildToolsApiClasspath",
+            "kotlinAbiValidationCompatClasspath",
+            "kotlinKlibCommonizerClasspath",
+            "kotlinBouncyCastleConfiguration"
+        ) || (
+            name.startsWith("kotlinCompilerPluginClasspath") &&
+                name != "kotlinCompilerPluginClasspath"
+            )
+        !isKgpInternal
     }
 
-    ignoredDependencies {
-        // This plugin should always be used without version as it is tightly
-        // tied to the Gradle version that is building the precompiled script plugins
-        add(group = "org.gradle.kotlin.kotlin-dsl", name = "org.gradle.kotlin.kotlin-dsl.gradle.plugin")
+    val ignoredDependencies = listOf<IgnoredDependency>(
         // These dependencies are used in the build logic so should match the
         // embedded Kotlin version and not be upgraded independently
-        add(group = "org.jetbrains.kotlin", name = "kotlin-assignment-compiler-plugin-embeddable")
-        add(group = "org.jetbrains.kotlin", name = "kotlin-build-tools-compat")
-        add(group = "org.jetbrains.kotlin", name = "kotlin-build-tools-impl")
-        add(group = "org.jetbrains.kotlin", name = "kotlin-compiler-embeddable")
-        add(group = "org.jetbrains.kotlin", name = "kotlin-reflect")
-        add(group = "org.jetbrains.kotlin", name = "kotlin-sam-with-receiver-compiler-plugin-embeddable")
-        add(group = "org.jetbrains.kotlin", name = "kotlin-scripting-compiler-embeddable")
-        add(group = "org.jetbrains.kotlin", name = "kotlin-stdlib")
+        IgnoredDependency(group = "org.jetbrains.kotlin", name = "kotlin-compiler-embeddable", oldVersion = embeddedKotlinVersion),
+    )
+
+    val projectPath = project.path
+    val problemReporter = objects.newInstance<ProblemsProvider>().problems.reporter
+    outputFormatter {
+        val ignored = outdated
+            .dependencies
+            .filter { ignoredDependencies.any(it::matches) }
+
+        outdated.dependencies.removeAll(ignored.toSet())
+
+        val result = withUpdatedCounts
+
+        PlainTextReporter(projectPath, revision, gradleReleaseChannel, logger.isInfoEnabled)
+            .write(System.out, result)
+
+        if (ignored.isNotEmpty()) {
+            println("\nThe following dependencies have later $revision versions but were ignored:")
+            ignored.forEach {
+                println(" - ${it.group}:${it.name} [${it.version} -> ${it.available[revision]}]")
+                it.projectUrl?.let { println("     $it") }
+            }
+        }
+
+        val problems = buildList {
+            val dependenciesGroup = ProblemGroup.create("dependency-updates", "Dependency updates")
+
+            if (gradle.current.isFailure) {
+                add(
+                    problemReporter.create(
+                        ProblemId.create(
+                            "gradle-version-could-not-be-checked",
+                            "Gradle version could not be checked",
+                            dependenciesGroup
+                        )
+                    ) {
+                        solution("Retry later")
+                        solution("Check the concrete error above")
+                        severity(Severity.ERROR)
+                    }
+                )
+            }
+
+            if (result.unresolved.count != 0) {
+                add(
+                    problemReporter.create(
+                        ProblemId.create(
+                            "unresolved-libraries-found",
+                            "Unresolved libraries found",
+                            dependenciesGroup
+                        )
+                    ) {
+                        solution("Retry later")
+                        solution("Check the concrete error above")
+                        solution("Find out why resolution failed")
+                        severity(Severity.ERROR)
+                    }
+                )
+            }
+
+            if (gradle.current.isUpdateAvailable) {
+                add(
+                    problemReporter.create(
+                        ProblemId.create(
+                            "gradle-version-is-outdated",
+                            "Gradle version is outdated",
+                            dependenciesGroup
+                        )
+                    ) {
+                        solution("Update Gradle")
+                        severity(Severity.ERROR)
+                    }
+                )
+            }
+
+            if (result.outdated.count != 0) {
+                add(
+                    problemReporter.create(
+                        ProblemId.create(
+                            "outdated-libraries-found",
+                            "Outdated libraries found",
+                            dependenciesGroup
+                        )
+                    ) {
+                        solution("Update the libraries")
+                        solution("Add the outdated libraries to the list of ignored libraries")
+                        severity(Severity.ERROR)
+                    }
+                )
+            }
+        }
+
+        if (problems.isNotEmpty()) {
+            throw problemReporter.throwing(IllegalStateException(), problems)
+        }
     }
 }
 

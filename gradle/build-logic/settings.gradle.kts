@@ -20,7 +20,6 @@ import org.gradle.api.initialization.resolve.RepositoriesMode.FAIL_ON_PROJECT_RE
 import org.gradle.api.initialization.resolve.RulesMode.FAIL_ON_PROJECT_RULES
 
 pluginManagement {
-    includeBuild("../dependency-updates-report-aggregation")
     includeBuild("../conditional-refresh-versions")
     repositories {
         mavenCentral()
@@ -35,6 +34,7 @@ plugins {
     id("org.gradle.toolchains.foojay-resolver-convention") version "1.0.0"
     id("com.gradle.develocity") version "4.4.0"
     id("com.gradle.common-custom-user-data-gradle-plugin") version "2.6.0"
+    id("io.github.ben-manes.versions.settings") version "0.65.0"
 }
 
 conditionalRefreshVersions {
