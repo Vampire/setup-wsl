@@ -33,6 +33,7 @@ val distributions = listOf(
     Alpine321,
     Alpine322,
     Alpine323,
+    Alpine324,
     Debian11,
     Debian12,
     Debian13,
@@ -578,4 +579,11 @@ object Alpine323 : AlpineDistribution(
     distributionName = "Alpine",
     version = SemVer("3.23.6"),
     downloadUrl = URL("https://dl-cdn.alpinelinux.org/alpine/v3.23/releases/x86_64/alpine-minirootfs-3.23.6-x86_64.tar.gz"),
+)
+
+object Alpine324 : AlpineDistribution(
+    wslId = "Alpine-3.24",
+    distributionName = "Alpine",
+    version = SemVer("3.24.2"),
+    downloadUrl = URL("https://dl-cdn.alpinelinux.org/alpine/v3.24/releases/x86_64/alpine-minirootfs-3.24.2-x86_64.tar.gz"),
 )

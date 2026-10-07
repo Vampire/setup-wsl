@@ -141,6 +141,7 @@ The first installed WSL distribution is automatically the default one, independe
 Either way, the wsl-shell wrapper scripts are created or overwritten according to the current action configuration.
 
 The values currently supported by this action are:
+* `Alpine-3.24`
 * `Alpine-3.23`
 * `Alpine-3.22`
 * `Alpine-3.21`
