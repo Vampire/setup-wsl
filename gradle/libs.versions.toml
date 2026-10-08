@@ -25,7 +25,7 @@ build-node = "24.14.1"
 build-snakeyaml = "2.6"
 kotlin = "2.3.20"
 kotlinx-coroutines = "1.10.2"
-workflows-kotlin = "2.3.20"
+workflows-kotlin = "2.4.21"
 
 [libraries]
 build-github-api = { module = "org.kohsuke:github-api", version.ref = "build-github-api" }
