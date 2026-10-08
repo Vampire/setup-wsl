@@ -47,9 +47,7 @@ dependencies {
     compilerEmbeddableRuntime(libs.workflows.kotlin.compiler.embeddable)
     compilerRuntime(libs.workflows.kotlin.compiler)
     compilerRuntime(libs.workflows.kotlin.scripting.compiler)
-    scriptRuntime(libs.workflows.kotlin.main.kts) {
-        isTransitive = false
-    }
+    scriptRuntime(libs.workflows.kotlin.main.kts)
 }
 
 val preprocessWorkflows by tasks.registering {
