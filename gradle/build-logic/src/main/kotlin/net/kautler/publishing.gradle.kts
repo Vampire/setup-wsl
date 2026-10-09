@@ -76,7 +76,7 @@ extra["release.useAutomaticVersion"] = boolean("release.useAutomaticVersion").ge
 extra["release.releaseVersion"] = optionalString("release.releaseVersion").getValue()
 extra["release.newVersion"] = optionalString("release.newVersion").getValue()
 
-val majorVersion: String by project
+internal val majorVersion: String by project
 
 release {
     pushReleaseVersionBranch = "v$majorVersion"
@@ -87,13 +87,13 @@ release {
     }
 }
 
-val releaseTagName = cachedProvider {
+internal val releaseTagName = cachedProvider {
     plugins.findPlugin(ReleasePlugin::class)!!.tagName()
 }
 
-val releaseVersion get() = !"$version".endsWith("-SNAPSHOT")
+internal val releaseVersion get() = !"$version".endsWith("-SNAPSHOT")
 
-val removeDistributionsFromGit by tasks.registering {
+internal val removeDistributionsFromGit by tasks.registering {
     mustRunAfter(tasks.checkoutMergeFromReleaseBranch)
 
     val grgitService = grgitService.service
@@ -113,7 +113,7 @@ tasks.updateVersion {
     dependsOn(removeDistributionsFromGit)
 }
 
-val gitHubToken by optionalString("github.token")
+internal val gitHubToken by optionalString("github.token")
 
 github {
     token = provider { gitHubToken }
@@ -171,12 +171,12 @@ tasks.githubPublish {
     draft = true
 }
 
-val undraftGithubRelease by tasks.registering(GithubPublish::class) {
+internal val undraftGithubRelease by tasks.registering(GithubPublish::class) {
     mustRunAfter(tasks.createReleaseTag)
     publishMethod = update
 }
 
-val finishMilestone by tasks.registering(Github::class) {
+internal val finishMilestone by tasks.registering(Github::class) {
     val releaseVersion = provider { releaseVersion }
     onlyIf { releaseVersion.get() }
 
@@ -195,7 +195,7 @@ val finishMilestone by tasks.registering(Github::class) {
     }
 }
 
-val addDistributionsToGit by tasks.registering {
+internal val addDistributionsToGit by tasks.registering {
     dependsOn(tasks.named("assemble"))
 
     val grgitService = grgitService.service
@@ -236,7 +236,7 @@ listOf(finishMilestone).forEach {
     }
 }
 
-val createMajorBranch by tasks.registering {
+internal val createMajorBranch by tasks.registering {
     val grgitService = grgitService.service
     usesService(grgitService)
 
@@ -263,7 +263,7 @@ tasks.checkoutMergeToReleaseBranch {
     dependsOn(createMajorBranch)
 }
 
-val preprocessVerifyReleaseWorkflow by tasks.existing {
+internal val preprocessVerifyReleaseWorkflow by tasks.existing {
     mustRunAfter(createMajorBranch)
     doFirst("Refresh version listing") {
         URI("https://bindings.krzeminski.it/refresh/Vampire/setup-wsl___major/maven-metadata.xml")
@@ -286,7 +286,7 @@ tasks.updateVersion {
     dependsOn(undraftGithubRelease)
 }
 
-val checkBranchProtectionCompatibility by tasks.registering(Github::class) {
+internal val checkBranchProtectionCompatibility by tasks.registering(Github::class) {
     val problemReporter = objects.newInstance<ProblemsProvider>().problems.reporter
     val branchName = release.git.requireBranch
     doLast {

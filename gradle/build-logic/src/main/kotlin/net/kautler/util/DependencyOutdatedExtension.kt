@@ -18,7 +18,7 @@ package net.kautler.util
 
 import com.github.benmanes.gradle.versions.reporter.result.DependencyOutdated
 
-fun DependencyOutdated.matches(
+internal fun DependencyOutdated.matches(
     group: String,
     name: String,
     project: String? = null,
@@ -30,7 +30,7 @@ fun DependencyOutdated.matches(
     && oldVersion?.let { it == version } ?: true
     && newVersion?.let { it == available.milestone } ?: true
 
-fun DependencyOutdated.matches(ignored: IgnoredDependency) = matches(
+internal fun DependencyOutdated.matches(ignored: IgnoredDependency) = matches(
     ignored.group,
     ignored.name,
     ignored.project,

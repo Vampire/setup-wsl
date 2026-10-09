@@ -30,8 +30,8 @@ plugins {
     kotlin("multiplatform")
 }
 
-val libs = the<LibrariesForLibs>()
-val kotlinWrappers = the<LibrariesForKotlinWrappers>()
+internal val libs = the<LibrariesForLibs>()
+internal val kotlinWrappers = the<LibrariesForKotlinWrappers>()
 
 kotlin {
     js {
@@ -70,7 +70,7 @@ tasks.withType<IncrementalSyncTask>().configureEach {
     }
 }
 
-val inputDefaultValues by lazy {
+internal val inputDefaultValues by lazy {
     file("action.yml")
         .inputStream()
         .use { Yaml().loadAs(it, GitHubAction::class.java) }
@@ -123,8 +123,8 @@ configurations.consumable("executable") {
     )
 }
 
-val setupWslDistribution = configurations.dependencyScope("setupWslDistribution")
-val setupWslDistributionFiles = configurations.resolvable("setupWslDistributionFiles") {
+internal val setupWslDistribution = configurations.dependencyScope("setupWslDistribution")
+internal val setupWslDistributionFiles = configurations.resolvable("setupWslDistributionFiles") {
     extendsFrom(setupWslDistribution)
 }
 
@@ -132,7 +132,7 @@ dependencies {
     setupWslDistribution(project(path = ":ncc-packer", configuration = "setupWslDistribution"))
 }
 
-val syncDistribution by tasks.registering(Sync::class) {
+internal val syncDistribution by tasks.registering(Sync::class) {
     from(setupWslDistributionFiles)
     into(layout.buildDirectory.dir("distributions"))
     // work-around for https://github.com/actions/toolkit/issues/1925

@@ -26,22 +26,22 @@ plugins {
     id("org.ajoberstar.grgit.service")
 }
 
-val compilerEmbeddableRuntime = configurations.dependencyScope("compilerEmbeddableRuntime")
-val compilerEmbeddableClasspath = configurations.resolvable("compilerEmbeddableClasspath") {
+internal val compilerEmbeddableRuntime = configurations.dependencyScope("compilerEmbeddableRuntime")
+internal val compilerEmbeddableClasspath = configurations.resolvable("compilerEmbeddableClasspath") {
     extendsFrom(compilerEmbeddableRuntime)
 }
 
-val compilerRuntime = configurations.dependencyScope("compilerRuntime")
-val compilerClasspath = configurations.resolvable("compilerClasspath") {
+internal val compilerRuntime = configurations.dependencyScope("compilerRuntime")
+internal val compilerClasspath = configurations.resolvable("compilerClasspath") {
     extendsFrom(compilerRuntime)
 }
 
-val scriptRuntime = configurations.dependencyScope("scriptRuntime")
-val scriptClasspath = configurations.resolvable("scriptClasspath") {
+internal val scriptRuntime = configurations.dependencyScope("scriptRuntime")
+internal val scriptClasspath = configurations.resolvable("scriptClasspath") {
     extendsFrom(scriptRuntime)
 }
 
-val libs = the<LibrariesForLibs>()
+internal val libs = the<LibrariesForLibs>()
 
 dependencies {
     compilerEmbeddableRuntime(libs.workflows.kotlin.compiler.embeddable)
@@ -50,7 +50,7 @@ dependencies {
     scriptRuntime(libs.workflows.kotlin.main.kts)
 }
 
-val preprocessWorkflows by tasks.registering {
+internal val preprocessWorkflows by tasks.registering {
     group = "github actions"
 }
 file(".github/workflows")
@@ -87,8 +87,8 @@ file(".github/workflows")
         }
     }
 
-val majorVersion: String by project
-val preprocessVerifyReleaseWorkflow by tasks.existing(PreprocessGithubWorkflow::class) {
+internal val majorVersion: String by project
+internal val preprocessVerifyReleaseWorkflow by tasks.existing(PreprocessGithubWorkflow::class) {
     val grgitService = grgitService.service
     usesService(grgitService)
 

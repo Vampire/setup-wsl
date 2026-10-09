@@ -26,12 +26,12 @@ plugins {
     `lifecycle-base`
 }
 
-val majorVersion: String by project
-val readmeTemplateFilePath = "readme/README_template.md"
-val readmeFilePath = "README.md"
-val readmeChecksumFilePath = "readme/$readmeFilePath.sha256"
+internal val majorVersion: String by project
+internal val readmeTemplateFilePath = "readme/README_template.md"
+internal val readmeFilePath = "README.md"
+internal val readmeChecksumFilePath = "readme/$readmeFilePath.sha256"
 
-val verifyReadme by tasks.registering(ReadmeTask::class) {
+internal val verifyReadme by tasks.registering(ReadmeTask::class) {
     val majorVersion = majorVersion
     inputs.property("majorVersion", majorVersion)
     val readmeTemplateFile = file(readmeTemplateFilePath)
@@ -80,7 +80,7 @@ tasks.check {
     dependsOn(verifyReadme)
 }
 
-val updateReadme by tasks.registering(ReadmeTask::class) {
+internal val updateReadme by tasks.registering(ReadmeTask::class) {
     dependsOn(verifyReadme)
 
     val majorVersion = majorVersion

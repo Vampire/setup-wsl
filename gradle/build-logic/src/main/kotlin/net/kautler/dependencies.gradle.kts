@@ -36,9 +36,9 @@ plugins {
     //id("com.autonomousapps.dependency-analysis")
 }
 
-val majorVersion by extra("$version".substringBefore('.'))
+internal val majorVersion by extra("$version".substringBefore('.'))
 
-val validateGradleWrapperJar by tasks.registering {
+internal val validateGradleWrapperJar by tasks.registering {
     val offlineBuild = gradle.startParameter.isOffline
     onlyIf { !offlineBuild }
 
@@ -93,13 +93,13 @@ val validateGradleWrapperJar by tasks.registering {
     }
 }
 
-val dependencyUpdatesAggregation by configurations.existing
+internal val dependencyUpdatesAggregation by configurations.existing
 dependencies {
     dependencyUpdatesAggregation(":build-logic")
     dependencyUpdatesAggregation(":conditional-refresh-versions")
 }
 
-val dependencyUpdates by tasks.existing(DependencyUpdatesTask::class) {
+internal val dependencyUpdates by tasks.existing(DependencyUpdatesTask::class) {
     dependsOn(validateGradleWrapperJar)
 
     checkConstraints = true
@@ -118,7 +118,12 @@ val dependencyUpdates by tasks.existing(DependencyUpdatesTask::class) {
             name.startsWith("kotlinCompilerPluginClasspath") &&
                 name != "kotlinCompilerPluginClasspath"
             )
-        !isKgpInternal
+
+        val isDagpInternal = name in setOf(
+            "dependencyAnalysisKotlinMetadata"
+        )
+
+        !isKgpInternal && !isDagpInternal
     }
 
     val ignoredDependencies = listOf(
@@ -245,7 +250,7 @@ val dependencyUpdates by tasks.existing(DependencyUpdatesTask::class) {
 //}
 //
 //tasks.buildHealth {
-val buildHealth by tasks.registering {
+internal val buildHealth by tasks.registering {
     dependsOn(gradle.includedBuilds.map { it.task(":buildHealth") })
 }
 

@@ -46,31 +46,13 @@ tasks.withType<KotlinCompile>().configureEach {
 
 dependencyAnalysis {
     structure {
-        bundle("com.autonomousapps.dependency-analysis.gradle.plugin") {
-            includeDependency("com.autonomousapps.dependency-analysis:com.autonomousapps.dependency-analysis.gradle.plugin")
-            includeDependency("com.autonomousapps:dependency-analysis-gradle-plugin")
-        }
-        bundle("io.github.ben-manes.versions.gradle.plugin") {
-            includeDependency("io.github.ben-manes.versions:io.github.ben-manes.versions.gradle.plugin")
-            includeDependency("io.github.ben-manes:gradle-versions-plugin")
-        }
-        bundle("net.researchgate.release.gradle.plugin") {
-            includeDependency("net.researchgate.release:net.researchgate.release.gradle.plugin")
-            includeDependency("net.researchgate:gradle-release")
-        }
-        bundle("net.wooga.github.gradle.plugin") {
-            includeDependency("net.wooga.github:net.wooga.github.gradle.plugin")
-            includeDependency("net.wooga.gradle:github")
-        }
         bundle("org.ajoberstar.grgit.service.gradle.plugin") {
             includeDependency("org.ajoberstar.grgit.service:org.ajoberstar.grgit.service.gradle.plugin")
-            includeDependency("org.ajoberstar.grgit:grgit-gradle")
             includeDependency("org.ajoberstar.grgit:grgit-core")
         }
         bundle("org.jetbrains.kotlin.multiplatform.gradle.plugin") {
             includeDependency("org.jetbrains.kotlin.multiplatform:org.jetbrains.kotlin.multiplatform.gradle.plugin")
             includeDependency("org.jetbrains.kotlin:kotlin-gradle-plugin-api")
-            includeDependency("org.jetbrains.kotlin:kotlin-gradle-plugin")
         }
     }
     issues {
@@ -82,10 +64,20 @@ dependencyAnalysis {
                 // work-around for https://github.com/autonomousapps/dependency-analysis-gradle-plugin/issues/1629
                 severity("fail")
                 // present in kotlin-compiler-embeddable and kotlin-gradle-plugin
-                exclude("org/jetbrains/kotlin/cli/common/messages/MessageCollector")
-                exclude("org/jetbrains/kotlin/cli/common/messages/MessageCollector\$Companion")
-                exclude("org/jetbrains/kotlin/com/intellij/openapi/Disposable")
-                exclude("org/jetbrains/kotlin/com/intellij/openapi/util/Disposer")
+                exclude("org/jetbrains/kotlin/cli/jvm/compiler/CliCompilerUtilsKt")
+                exclude("org/jetbrains/kotlin/cli/jvm/compiler/CompileEnvironmentException")
+                exclude("org/jetbrains/kotlin/cli/jvm/compiler/CompileEnvironmentUtil")
+                exclude("org/jetbrains/kotlin/cli/jvm/compiler/FindMainClassKt")
+                exclude("org/jetbrains/kotlin/cli/jvm/compiler/FirFindMainClassKt")
+                exclude("org/jetbrains/kotlin/cli/jvm/compiler/FirMainClassFinder")
+                exclude("org/jetbrains/kotlin/cli/jvm/compiler/KotlinToJVMBytecodeCompiler")
+                exclude($$"org/jetbrains/kotlin/cli/jvm/compiler/KotlinToJVMBytecodeCompiler$BackendInputForMultiModuleChunk")
+                exclude($$"org/jetbrains/kotlin/cli/jvm/compiler/KotlinToJVMBytecodeCompiler$DirectoriesScope")
+                exclude($$"org/jetbrains/kotlin/cli/jvm/compiler/KotlinToJVMBytecodeCompiler$analyze$1$1")
+                exclude("org/jetbrains/kotlin/cli/jvm/compiler/KotlinToJVMBytecodeCompilerKt")
+                exclude("org/jetbrains/kotlin/cli/jvm/compiler/PsiBasedProjectFileSearchScope")
+                exclude("org/jetbrains/kotlin/cli/jvm/compiler/VfsBasedProjectEnvironment")
+                exclude("org/jetbrains/kotlin/cli/jvm/compiler/VfsBasedProjectEnvironmentKt")
             }
         }
     }

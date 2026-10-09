@@ -31,8 +31,8 @@ plugins {
     kotlin("multiplatform")
 }
 
-val libs = the<LibrariesForLibs>()
-val kotlinWrappers = the<LibrariesForKotlinWrappers>()
+internal val libs = the<LibrariesForLibs>()
+internal val kotlinWrappers = the<LibrariesForKotlinWrappers>()
 
 kotlin {
     js {
@@ -72,8 +72,8 @@ configure<NodeJsEnvSpec> {
     downloadBaseUrl = provider { null }
 }
 
-val setupWslExecutable = configurations.dependencyScope("setupWslExecutable")
-val setupWslExecutableFile = configurations.resolvable("setupWslExecutableFile") {
+internal val setupWslExecutable = configurations.dependencyScope("setupWslExecutable")
+internal val setupWslExecutableFile = configurations.resolvable("setupWslExecutableFile") {
     extendsFrom(setupWslExecutable)
 }
 

@@ -32,41 +32,41 @@ import org.gradle.kotlin.dsl.named
 import org.gradle.kotlin.dsl.register
 
 // part of work-around for https://github.com/researchgate/gradle-release/issues/304
-val Project.release: ReleaseExtension
+internal val Project.release: ReleaseExtension
     get() = extensions.getByName<ReleaseExtension>("release")
 
-fun Project.release(configure: Action<ReleaseExtension>): Unit =
+internal fun Project.release(configure: Action<ReleaseExtension>): Unit =
     extensions.configure("release", configure)
 
-val TaskContainer.release: TaskProvider<GradleBuild>
+internal val TaskContainer.release: TaskProvider<GradleBuild>
     get() = named<GradleBuild>("release")
 
-val TaskContainer.runBuildTasks: TaskProvider<GradleBuild>
+internal val TaskContainer.runBuildTasks: TaskProvider<GradleBuild>
     get() = named<GradleBuild>("runBuildTasks")
 
-val TaskContainer.checkoutMergeFromReleaseBranch: TaskProvider<Task>
+internal val TaskContainer.checkoutMergeFromReleaseBranch: TaskProvider<Task>
     get() = named("checkoutMergeFromReleaseBranch")
 
-val TaskContainer.checkoutMergeToReleaseBranch: TaskProvider<Task>
+internal val TaskContainer.checkoutMergeToReleaseBranch: TaskProvider<Task>
     get() = named("checkoutMergeToReleaseBranch")
 
-val TaskContainer.updateVersion: TaskProvider<UpdateVersion>
+internal val TaskContainer.updateVersion: TaskProvider<UpdateVersion>
     get() = named<UpdateVersion>("updateVersion")
 
-val TaskContainer.afterReleaseBuild: TaskProvider<Task>
+internal val TaskContainer.afterReleaseBuild: TaskProvider<Task>
     get() = named("afterReleaseBuild")
 
-val TaskContainer.preTagCommit: TaskProvider<PreTagCommit>
+internal val TaskContainer.preTagCommit: TaskProvider<PreTagCommit>
     get() = named<PreTagCommit>("preTagCommit")
 
-val TaskContainer.createReleaseTag: TaskProvider<CreateReleaseTag>
+internal val TaskContainer.createReleaseTag: TaskProvider<CreateReleaseTag>
     get() = named<CreateReleaseTag>("createReleaseTag")
 
-val TaskContainer.beforeReleaseBuild: TaskProvider<Task>
+internal val TaskContainer.beforeReleaseBuild: TaskProvider<Task>
     get() = named("beforeReleaseBuild")
 
 // part of work-around for https://github.com/researchgate/gradle-release/pull/405
-inline fun <reified T : Task> TaskContainer.registerMockTask(name: String) = register<T>(name) {
+internal inline fun <reified T : Task> TaskContainer.registerMockTask(name: String) = register<T>(name) {
     group = getRELEASE_GROUP()
     // fail as soon as the task gets configured except while IntelliJ IDEA sync
     if (!System.getProperty("idea.sync.active").toBoolean()) {
