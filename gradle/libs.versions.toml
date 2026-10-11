@@ -24,7 +24,7 @@ build-kotlinx-serialization = "1.11.0"
 build-node = "24.14.1"
 build-snakeyaml = "2.6"
 kotlin = "2.4.21"
-kotlinx-coroutines = "1.10.2"
+kotlinx-coroutines = "1.11.0"
 workflows-kotlin = "2.4.21"
 
 [libraries]
