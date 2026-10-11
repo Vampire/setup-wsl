@@ -16,7 +16,6 @@
 
 package net.kautler
 
-import net.kautler.util.BuildFeaturesProvider
 import net.kautler.util.InitJGit
 import net.kautler.util.ProblemsProvider
 import net.kautler.util.Property.Companion.boolean
@@ -24,20 +23,13 @@ import net.kautler.util.Property.Companion.optionalString
 import net.kautler.util.ReleaseBody
 import net.kautler.util.afterReleaseBuild
 import net.kautler.util.beforeReleaseBuild
-import net.kautler.util.cachedProvider
 import net.kautler.util.checkoutMergeFromReleaseBranch
 import net.kautler.util.checkoutMergeToReleaseBranch
 import net.kautler.util.createReleaseTag
 import net.kautler.util.preTagCommit
-import net.kautler.util.registerMockTask
 import net.kautler.util.release
 import net.kautler.util.runBuildTasks
 import net.kautler.util.updateVersion
-import net.researchgate.release.ReleaseExtension
-import net.researchgate.release.ReleasePlugin
-import net.researchgate.release.tasks.CreateReleaseTag
-import net.researchgate.release.tasks.PreTagCommit
-import net.researchgate.release.tasks.UpdateVersion
 import org.ajoberstar.grgit.operation.BranchListOp.Mode.ALL
 import org.gradle.tooling.GradleConnector
 import org.kohsuke.github.GHIssueState.OPEN
@@ -46,6 +38,7 @@ import wooga.gradle.github.base.tasks.internal.AbstractGithubTask
 import wooga.gradle.github.publish.PublishMethod.update
 import wooga.gradle.github.publish.tasks.GithubPublish
 import java.net.URI
+import kotlin.text.Charsets.ISO_8859_1
 
 plugins {
     // needed for accessing majorVersion
@@ -55,22 +48,8 @@ plugins {
     id("net.kautler.readme")
 }
 
-// part of work-around for https://github.com/researchgate/gradle-release/pull/405
-if (objects.newInstance<BuildFeaturesProvider>().buildFeatures.configurationCache.active.get()) {
-    extensions.create<ReleaseExtension>("release", project, emptyMap<String, Any>())
-    tasks.registerMockTask<GradleBuild>("release")
-    tasks.registerMockTask<GradleBuild>("runBuildTasks")
-    tasks.registerMockTask<Task>("checkoutMergeFromReleaseBranch")
-    tasks.registerMockTask<Task>("checkoutMergeToReleaseBranch")
-    tasks.registerMockTask<UpdateVersion>("updateVersion")
-    tasks.registerMockTask<Task>("afterReleaseBuild")
-    tasks.registerMockTask<PreTagCommit>("preTagCommit")
-    tasks.registerMockTask<CreateReleaseTag>("createReleaseTag")
-    tasks.registerMockTask<Task>("beforeReleaseBuild")
-} else {
-    // part of work-around for https://github.com/researchgate/gradle-release/issues/304
-    apply(plugin = "net.researchgate.release")
-}
+// part of work-around for https://github.com/researchgate/gradle-release/issues/304
+apply(plugin = "net.researchgate.release")
 
 extra["release.useAutomaticVersion"] = boolean("release.useAutomaticVersion").getValue()
 extra["release.releaseVersion"] = optionalString("release.releaseVersion").getValue()
@@ -79,6 +58,7 @@ extra["release.newVersion"] = optionalString("release.newVersion").getValue()
 internal val majorVersion: String by project
 
 release {
+    versionPropertyFileEncoding = ISO_8859_1.name()
     pushReleaseVersionBranch = "v$majorVersion"
     tagTemplate = "v\$version"
     git {
@@ -87,9 +67,7 @@ release {
     }
 }
 
-internal val releaseTagName = cachedProvider {
-    plugins.findPlugin(ReleasePlugin::class)!!.tagName()
-}
+internal val releaseTagName = tasks.createReleaseTag.flatMap { provider { it.tagName() } }
 
 internal val releaseVersion get() = !"$version".endsWith("-SNAPSHOT")
 
@@ -123,10 +101,12 @@ github {
 configure(listOf(tasks.release, tasks.runBuildTasks)) {
     configure {
         actions.clear()
+        var projectDirectory = layout.projectDirectory.asFile
+        var excludedTaskNames = gradle.startParameter.excludedTaskNames
         doLast {
             GradleConnector
                 .newConnector()
-                .forProjectDirectory(layout.projectDirectory.asFile)
+                .forProjectDirectory(projectDirectory)
                 .connect()
                 .use { projectConnection ->
                     val buildLauncher = projectConnection
@@ -136,7 +116,7 @@ configure(listOf(tasks.release, tasks.runBuildTasks)) {
                         .setStandardOutput(System.out)
                         .setStandardError(System.err)
                         .addArguments("--no-configuration-cache")
-                    gradle.startParameter.excludedTaskNames.forEach {
+                    excludedTaskNames.forEach {
                         buildLauncher.addArguments("-x", it)
                     }
                     buildLauncher.run()
