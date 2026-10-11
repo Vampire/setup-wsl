@@ -103,7 +103,7 @@ dependencyResolutionManagement {
         }
 
         val kotlinWrappers by registering {
-            from("org.jetbrains.kotlin-wrappers:kotlin-wrappers-catalog:2025.5.2")
+            from("org.jetbrains.kotlin-wrappers:kotlin-wrappers-catalog:2026.10.0")
         }
     }
 }
