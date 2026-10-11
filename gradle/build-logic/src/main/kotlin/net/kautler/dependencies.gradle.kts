@@ -130,6 +130,7 @@ internal val dependencyUpdates by tasks.existing(DependencyUpdatesTask::class) {
         // These dependencies are used in the build logic so should match the
         // embedded Kotlin version and not be upgraded independently
         IgnoredDependency(group = "org.jetbrains.kotlin", name = "kotlin-compiler-embeddable", project = ":build-logic", oldVersion = embeddedKotlinVersion),
+        IgnoredDependency(group = "org.jetbrains.kotlin", name = "kotlin-stdlib", project = ":build-logic", oldVersion = "2.3.20"),
         IgnoredDependency(group = "org.jetbrains.kotlin.jvm", name = "org.jetbrains.kotlin.jvm.gradle.plugin", oldVersion = embeddedKotlinVersion)
     )
 
