@@ -138,7 +138,7 @@ val syncDistribution by tasks.registering(Sync::class) {
     // work-around for https://github.com/actions/toolkit/issues/1925
     filesMatching("index.mjs") {
         filter {
-            it.replace("stats = yield exports.stat", "stats = yield exports.lstat")
+            it.replace("stats = yield stat", "stats = yield lstat")
         }
     }
 }
