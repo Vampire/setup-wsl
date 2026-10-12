@@ -112,14 +112,15 @@ configure<YarnRootEnvSpec> {
 }
 
 configurations.consumable("executable") {
-    val jsProductionExecutableCompileSync by tasks.existing(IncrementalSyncTask::class)
     outgoing.artifact(
-        jsProductionExecutableCompileSync.map {
-            it
-                .destinationDirectory
-                .get()
-                .resolve("${project.name}.mjs")
-        }
+        tasks
+            .named<IncrementalSyncTask>("jsProductionExecutableCompileSync")
+            .map {
+                it
+                    .destinationDirectory
+                    .get()
+                    .resolve("${project.name}.mjs")
+            }
     )
 }
 
@@ -132,7 +133,7 @@ dependencies {
     setupWslDistribution(project(path = ":ncc-packer", configuration = "setupWslDistribution"))
 }
 
-internal val syncDistribution by tasks.registering(Sync::class) {
+internal val syncDistribution = tasks.register<Sync>("syncDistribution") {
     from(setupWslDistributionFiles)
     into(layout.buildDirectory.dir("distributions"))
     // work-around for https://github.com/actions/toolkit/issues/1925

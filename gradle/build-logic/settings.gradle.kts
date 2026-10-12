@@ -52,7 +52,7 @@ conditionalRefreshVersions {
 
 // work-around for https://github.com/Splitties/refreshVersions/issues/596
 gradle.rootProject {
-    val copyVersionCatalog by tasks.registering {
+    val copyVersionCatalog = tasks.register("copyVersionCatalog") {
         val fs = objects.newInstance<FileSystemOperationsProvider>().fs
         val versionCatalog = gradle.parent!!.rootProject.file("gradle/libs.versions.toml")
         doLast {
@@ -98,11 +98,11 @@ dependencyResolutionManagement {
     rulesMode = FAIL_ON_PROJECT_RULES
 
     versionCatalogs {
-        val libs by registering {
+        register("libs") {
             from(files("../libs.versions.toml"))
         }
 
-        val kotlinWrappers by registering {
+        register("kotlinWrappers") {
             from("org.jetbrains.kotlin-wrappers:kotlin-wrappers-catalog:2026.10.0")
         }
     }
@@ -123,6 +123,8 @@ rootProject.buildFileName = "build-logic.gradle.kts"
 
 enableFeaturePreview("TYPESAFE_PROJECT_ACCESSORS")
 enableFeaturePreview("STABLE_CONFIGURATION_CACHE")
+enableFeaturePreview("NO_IMPLICIT_LOOKUP_IN_PARENT_PROJECTS")
+enableFeaturePreview("ENHANCED_GRAPH_ORDERING")
 
 interface FileSystemOperationsProvider {
     @get:Inject

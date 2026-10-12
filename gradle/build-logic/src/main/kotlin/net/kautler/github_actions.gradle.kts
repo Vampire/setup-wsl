@@ -50,7 +50,7 @@ dependencies {
     scriptRuntime(libs.workflows.kotlin.main.kts)
 }
 
-internal val preprocessWorkflows by tasks.registering {
+internal val preprocessWorkflows = tasks.register("preprocessWorkflows") {
     group = "github actions"
 }
 file(".github/workflows")
@@ -87,12 +87,11 @@ file(".github/workflows")
         }
     }
 
-internal val majorVersion: String by project
-internal val preprocessVerifyReleaseWorkflow by tasks.existing(PreprocessGithubWorkflow::class) {
+tasks.named<PreprocessGithubWorkflow>("preprocessVerifyReleaseWorkflow") {
     val grgitService = grgitService.service
     usesService(grgitService)
 
-    val majorVersion = majorVersion
+    val majorVersion = project.property("majorVersion") as String
     inputs.property("majorVersion", majorVersion)
 
     doLast {

@@ -36,9 +36,10 @@ plugins {
     //id("com.autonomousapps.dependency-analysis")
 }
 
-internal val majorVersion by extra("$version".substringBefore('.'))
+internal val majorVersion = "$version".substringBefore('.')
+extra["majorVersion"] = majorVersion
 
-internal val validateGradleWrapperJar by tasks.registering {
+internal val validateGradleWrapperJar = tasks.register("validateGradleWrapperJar") {
     val offlineBuild = gradle.startParameter.isOffline
     onlyIf { !offlineBuild }
 
@@ -87,19 +88,18 @@ internal val validateGradleWrapperJar by tasks.registering {
                 )
             ) {
                 solution("Update the wrapper to the version of Gradle or newer")
-                severity(Severity.ERROR)
             }
         }
     }
 }
 
-internal val dependencyUpdatesAggregation by configurations.existing
+internal val dependencyUpdatesAggregation = configurations.named("dependencyUpdatesAggregation")
 dependencies {
     dependencyUpdatesAggregation(":build-logic")
     dependencyUpdatesAggregation(":conditional-refresh-versions")
 }
 
-internal val dependencyUpdates by tasks.existing(DependencyUpdatesTask::class) {
+tasks.named<DependencyUpdatesTask>("dependencyUpdates") {
     dependsOn(validateGradleWrapperJar)
 
     checkConstraints = true
@@ -130,7 +130,6 @@ internal val dependencyUpdates by tasks.existing(DependencyUpdatesTask::class) {
         // These dependencies are used in the build logic so should match the
         // embedded Kotlin version and not be upgraded independently
         IgnoredDependency(group = "org.jetbrains.kotlin", name = "kotlin-compiler-embeddable", project = ":build-logic", oldVersion = embeddedKotlinVersion),
-        IgnoredDependency(group = "org.jetbrains.kotlin", name = "kotlin-stdlib", project = ":build-logic", oldVersion = "2.3.20"),
         IgnoredDependency(group = "org.jetbrains.kotlin.jvm", name = "org.jetbrains.kotlin.jvm.gradle.plugin", oldVersion = embeddedKotlinVersion)
     )
 
@@ -172,7 +171,6 @@ internal val dependencyUpdates by tasks.existing(DependencyUpdatesTask::class) {
                     ) {
                         solution("Retry later")
                         solution("Check the concrete error above")
-                        severity(Severity.ERROR)
                     }
                 )
             }
@@ -189,7 +187,6 @@ internal val dependencyUpdates by tasks.existing(DependencyUpdatesTask::class) {
                         solution("Retry later")
                         solution("Check the concrete error above")
                         solution("Find out why resolution failed")
-                        severity(Severity.ERROR)
                     }
                 )
             }
@@ -204,7 +201,6 @@ internal val dependencyUpdates by tasks.existing(DependencyUpdatesTask::class) {
                         )
                     ) {
                         solution("Update Gradle")
-                        severity(Severity.ERROR)
                     }
                 )
             }
@@ -220,7 +216,6 @@ internal val dependencyUpdates by tasks.existing(DependencyUpdatesTask::class) {
                     ) {
                         solution("Update the libraries")
                         solution("Add the outdated libraries to the list of ignored libraries")
-                        severity(Severity.ERROR)
                     }
                 )
             }
@@ -251,7 +246,7 @@ internal val dependencyUpdates by tasks.existing(DependencyUpdatesTask::class) {
 //}
 //
 //tasks.buildHealth {
-internal val buildHealth by tasks.registering {
+internal val buildHealth = tasks.register("buildHealth") {
     dependsOn(gradle.includedBuilds.map { it.task(":buildHealth") })
 }
 

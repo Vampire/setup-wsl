@@ -55,11 +55,9 @@ extra["release.useAutomaticVersion"] = boolean("release.useAutomaticVersion").ge
 extra["release.releaseVersion"] = optionalString("release.releaseVersion").getValue()
 extra["release.newVersion"] = optionalString("release.newVersion").getValue()
 
-internal val majorVersion: String by project
-
 release {
     versionPropertyFileEncoding = ISO_8859_1.name()
-    pushReleaseVersionBranch = "v$majorVersion"
+    pushReleaseVersionBranch = "v${project.property("majorVersion")}"
     tagTemplate = "v\$version"
     git {
         requireBranch = "master"
@@ -71,7 +69,7 @@ internal val releaseTagName = tasks.createReleaseTag.flatMap { provider { it.tag
 
 internal val releaseVersion get() = !"$version".endsWith("-SNAPSHOT")
 
-internal val removeDistributionsFromGit by tasks.registering {
+internal val removeDistributionsFromGit = tasks.register("removeDistributionsFromGit") {
     mustRunAfter(tasks.checkoutMergeFromReleaseBranch)
 
     val grgitService = grgitService.service
@@ -116,6 +114,7 @@ configure(listOf(tasks.release, tasks.runBuildTasks)) {
                         .setStandardOutput(System.out)
                         .setStandardError(System.err)
                         .addArguments("--no-configuration-cache")
+                        .addArguments("--no-isolated-projects")
                     excludedTaskNames.forEach {
                         buildLauncher.addArguments("-x", it)
                     }
@@ -151,12 +150,12 @@ tasks.githubPublish {
     draft = true
 }
 
-internal val undraftGithubRelease by tasks.registering(GithubPublish::class) {
+internal val undraftGithubRelease = tasks.register<GithubPublish>("undraftGithubRelease") {
     mustRunAfter(tasks.createReleaseTag)
     publishMethod = update
 }
 
-internal val finishMilestone by tasks.registering(Github::class) {
+internal val finishMilestone = tasks.register<Github>("finishMilestone") {
     val releaseVersion = provider { releaseVersion }
     onlyIf { releaseVersion.get() }
 
@@ -175,7 +174,7 @@ internal val finishMilestone by tasks.registering(Github::class) {
     }
 }
 
-internal val addDistributionsToGit by tasks.registering {
+internal val addDistributionsToGit = tasks.register("addDistributionsToGit") {
     dependsOn(tasks.named("assemble"))
 
     val grgitService = grgitService.service
@@ -216,11 +215,11 @@ listOf(finishMilestone).forEach {
     }
 }
 
-internal val createMajorBranch by tasks.registering {
+internal val createMajorBranch = tasks.register("createMajorBranch") {
     val grgitService = grgitService.service
     usesService(grgitService)
 
-    val majorVersion = majorVersion
+    val majorVersion = project.property("majorVersion") as String
     doLast {
         val grgit = grgitService.get().grgit
 
@@ -243,7 +242,7 @@ tasks.checkoutMergeToReleaseBranch {
     dependsOn(createMajorBranch)
 }
 
-internal val preprocessVerifyReleaseWorkflow by tasks.existing {
+internal val preprocessVerifyReleaseWorkflow = tasks.named("preprocessVerifyReleaseWorkflow") {
     mustRunAfter(createMajorBranch)
     doFirst("Refresh version listing") {
         URI("https://bindings.krzeminski.it/refresh/Vampire/setup-wsl___major/maven-metadata.xml")
@@ -253,8 +252,7 @@ internal val preprocessVerifyReleaseWorkflow by tasks.existing {
 }
 
 tasks.preTagCommit {
-    val updateReadme by tasks.existing
-    dependsOn(updateReadme)
+    dependsOn(tasks.named("updateReadme"))
     dependsOn(createMajorBranch)
     dependsOn(preprocessVerifyReleaseWorkflow)
 }
@@ -266,7 +264,7 @@ tasks.updateVersion {
     dependsOn(undraftGithubRelease)
 }
 
-internal val checkBranchProtectionCompatibility by tasks.registering(Github::class) {
+internal val checkBranchProtectionCompatibility = tasks.register<Github>("checkBranchProtectionCompatibility") {
     val problemReporter = objects.newInstance<ProblemsProvider>().problems.reporter
     val branchName = release.git.requireBranch
     doLast {
@@ -285,8 +283,7 @@ internal val checkBranchProtectionCompatibility by tasks.registering(Github::cla
                 )
             ) {
                 solution("Disable branch protection for administrators before triggering a release")
-                solution("gh api 'repos/{owner}/{repo}/branches/${branchName.get()}/protection/enforce_admins' -X DELETE")
-                severity(Severity.ERROR)
+                solution("""Execute: "gh api 'repos/{owner}/{repo}/branches/${branchName.get()}/protection/enforce_admins' -X DELETE"""")
             }
         }
     }

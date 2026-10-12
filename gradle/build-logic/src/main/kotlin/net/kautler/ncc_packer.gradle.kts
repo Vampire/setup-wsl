@@ -83,9 +83,8 @@ dependencies {
 
 // work-around for https://youtrack.jetbrains.com/issue/KT-56305
 tasks.withType<NodeJsExec>().configureEach {
-    val output by extra {
-        layout.buildDirectory.dir("distributions/$name")
-    }
+    val output = layout.buildDirectory.dir("distributions/$name")
+    extra["output"] = output
 
     abstract class ArgumentProvider @Inject constructor(
         setupWslExecutableFile: Provider<File>,
@@ -124,11 +123,9 @@ tasks.withType<NodeJsExec>().configureEach {
 }
 
 configurations.consumable("setupWslDistribution") {
-    val jsNodeProductionRun by tasks.existing
     outgoing.artifact(
-        jsNodeProductionRun.map {
-            val output: Provider<Directory> by it.extra
-            output.get()
-        }
+        tasks
+            .named("jsNodeProductionRun")
+            .map { it.extra["output"] }
     )
 }

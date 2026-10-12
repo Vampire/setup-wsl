@@ -102,7 +102,7 @@ dependencyResolutionManagement {
     rulesMode = FAIL_ON_PROJECT_RULES
 
     versionCatalogs {
-        val kotlinWrappers by registering {
+        register("kotlinWrappers") {
             from("org.jetbrains.kotlin-wrappers:kotlin-wrappers-catalog:2026.10.0")
         }
     }
@@ -126,3 +126,5 @@ rootProject.name = "setup-wsl"
 
 enableFeaturePreview("TYPESAFE_PROJECT_ACCESSORS")
 enableFeaturePreview("STABLE_CONFIGURATION_CACHE")
+enableFeaturePreview("NO_IMPLICIT_LOOKUP_IN_PARENT_PROJECTS")
+enableFeaturePreview("ENHANCED_GRAPH_ORDERING")

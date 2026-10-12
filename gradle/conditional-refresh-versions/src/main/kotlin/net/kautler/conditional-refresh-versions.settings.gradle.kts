@@ -31,7 +31,6 @@ if (gradle.rootBuild.startParameter.taskNames.count { it.endsWith("refreshVersio
         )
     ) {
         solution("Only request one refreshVersions task per Gradle run")
-        severity(Severity.ERROR)
     }
 }
 
