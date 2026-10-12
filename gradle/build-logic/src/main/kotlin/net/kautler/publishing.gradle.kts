@@ -16,11 +16,11 @@
 
 package net.kautler
 
-import net.kautler.util.InitJGit
 import net.kautler.util.ProblemsProvider
 import net.kautler.util.Property.Companion.boolean
 import net.kautler.util.Property.Companion.optionalString
 import net.kautler.util.ReleaseBody
+import net.kautler.util.RepositoryName
 import net.kautler.util.afterReleaseBuild
 import net.kautler.util.beforeReleaseBuild
 import net.kautler.util.checkoutMergeFromReleaseBranch
@@ -33,10 +33,7 @@ import net.kautler.util.updateVersion
 import org.ajoberstar.grgit.operation.BranchListOp.Mode.ALL
 import org.gradle.tooling.GradleConnector
 import org.kohsuke.github.GHIssueState.OPEN
-import wooga.gradle.github.base.tasks.Github
-import wooga.gradle.github.base.tasks.internal.AbstractGithubTask
-import wooga.gradle.github.publish.PublishMethod.update
-import wooga.gradle.github.publish.tasks.GithubPublish
+import org.kohsuke.github.GitHubBuilder
 import java.net.URI
 import kotlin.text.Charsets.ISO_8859_1
 
@@ -44,8 +41,8 @@ plugins {
     // needed for accessing majorVersion
     id("net.kautler.dependencies")
     id("org.ajoberstar.grgit.service")
-    id("net.wooga.github")
     id("net.kautler.readme")
+    publishing
 }
 
 // part of work-around for https://github.com/researchgate/gradle-release/issues/304
@@ -89,12 +86,6 @@ tasks.updateVersion {
     dependsOn(removeDistributionsFromGit)
 }
 
-internal val gitHubToken by optionalString("github.token")
-
-github {
-    token = provider { gitHubToken }
-}
-
 // part of work-around for https://github.com/researchgate/gradle-release/issues/304
 configure(listOf(tasks.release, tasks.runBuildTasks)) {
     configure {
@@ -124,53 +115,82 @@ configure(listOf(tasks.release, tasks.runBuildTasks)) {
     }
 }
 
-// work-around for GitHub plugin using JGit without a ValueSource
-// in non-configurable property branchName
-providers.of(InitJGit::class) {
+internal val githubToken by optionalString("github.token")
+internal val githubRepositoryName = providers.of(RepositoryName::class) {
     parameters {
+        explictGithubRepositoryName = optionalString("github.repositoryName").getValue()
         projectDirectory = layout.projectDirectory
     }
-}.get()
-
-tasks.withType<GithubPublish>().configureEach {
-    onlyIf { releaseVersion }
-    tagName = releaseTagName
-    releaseName = releaseTagName
 }
 
-tasks.githubPublish {
-    body = providers.of(ReleaseBody::class) {
-        parameters {
-            projectDirectory = layout.projectDirectory
-            githubToken = github.token
-            repositoryName = github.repositoryName
-            branchName = release.git.requireBranch
-        }
+internal val githubPublish = tasks.register("githubPublish") {
+    onlyIf {
+        releaseVersion
     }
-    draft = true
+
+    doLast("Create draft GitHub release") {
+        GitHubBuilder()
+            .withOAuthToken(githubToken)
+            .build()
+            .getRepository(githubRepositoryName.get())
+            .createRelease(releaseTagName.get())
+            .name(releaseTagName.get())
+            .body(providers.of(ReleaseBody::class) {
+                val githubToken = githubToken
+                parameters {
+                    projectDirectory = layout.projectDirectory
+                    this.githubToken = githubToken
+                    repositoryName = githubRepositoryName
+                    branchName = release.git.requireBranch
+                }
+            }.get())
+            .draft(true)
+            .create()
+    }
 }
 
-internal val undraftGithubRelease = tasks.register<GithubPublish>("undraftGithubRelease") {
+internal val undraftGithubRelease = tasks.register("undraftGithubRelease") {
     mustRunAfter(tasks.createReleaseTag)
-    publishMethod = update
+
+    onlyIf {
+        releaseVersion
+    }
+
+    doLast("Unraft GitHub release") {
+        GitHubBuilder()
+            .withOAuthToken(githubToken)
+            .build()
+            .getRepository(githubRepositoryName.get())
+            .listReleases()
+            .find { it.tagName == releaseTagName.get() }!!
+            .update()
+            .draft(false)
+            .update()
+    }
 }
 
-internal val finishMilestone = tasks.register<Github>("finishMilestone") {
-    val releaseVersion = provider { releaseVersion }
-    onlyIf { releaseVersion.get() }
+internal val finishMilestone = tasks.register("finishMilestone") {
+    onlyIf {
+        releaseVersion
+    }
 
     val releaseTagName = releaseTagName
-    doLast("finish milestone") {
-        repository.apply {
-            listMilestones(OPEN)
-                .find { it.title == "Next Version" }!!
-                .apply {
-                    title = releaseTagName.get()
-                    close()
-                }
+    doLast("Finish milestone") {
+        var repository = GitHubBuilder()
+            .withOAuthToken(githubToken)
+            .build()
+            .getRepository(githubRepositoryName.get())
 
-            createMilestone("Next Version", null)
-        }
+        repository
+            .listMilestones(OPEN)
+            .find { it.title == "Next Version" }!!
+            .apply {
+                title = releaseTagName.get()
+                close()
+            }
+
+        repository
+            .createMilestone("Next Version", null)
     }
 }
 
@@ -199,6 +219,7 @@ internal val addDistributionsToGit = tasks.register("addDistributionsToGit") {
 
 tasks.publish {
     dependsOn(addDistributionsToGit)
+    dependsOn(githubPublish)
 }
 
 tasks.afterReleaseBuild {
@@ -264,11 +285,14 @@ tasks.updateVersion {
     dependsOn(undraftGithubRelease)
 }
 
-internal val checkBranchProtectionCompatibility = tasks.register<Github>("checkBranchProtectionCompatibility") {
+internal val checkBranchProtectionCompatibility = tasks.register("checkBranchProtectionCompatibility") {
     val problemReporter = objects.newInstance<ProblemsProvider>().problems.reporter
     val branchName = release.git.requireBranch
     doLast {
-        if (repository
+        if (GitHubBuilder()
+                .withOAuthToken(githubToken)
+                .build()
+                .getRepository(githubRepositoryName.get())
                 .getBranch(branchName.get())
                 .protection
                 .enforceAdmins
@@ -287,10 +311,6 @@ internal val checkBranchProtectionCompatibility = tasks.register<Github>("checkB
             }
         }
     }
-}
-
-tasks.withType<AbstractGithubTask<*>>().configureEach {
-    notCompatibleWithConfigurationCache("Plugin is unmaintained and contains not-serializable state in tasks")
 }
 
 tasks.beforeReleaseBuild {

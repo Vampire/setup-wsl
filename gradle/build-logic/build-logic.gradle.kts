@@ -29,7 +29,6 @@ dependencies {
     //implementation(plugin(libs.plugins.dependency.analysis))
     implementation(plugin(libs.plugins.release))
     implementation(plugin(libs.plugins.grgit))
-    implementation(plugin(libs.plugins.github))
     implementation(plugin(libs.plugins.kotlin.multiplatform))
     implementation(platform(libs.build.kotlinx.serialization.bom))
     implementation(libs.build.kotlinx.serialization.json)
