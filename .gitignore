@@ -22,7 +22,4 @@
 /gradle/conditional-refresh-versions/.gradle/
 /gradle/conditional-refresh-versions/.kotlin/
 /gradle/conditional-refresh-versions/build/
-/gradle/dependency-updates-report-aggregation/.gradle/
-/gradle/dependency-updates-report-aggregation/.kotlin/
-/gradle/dependency-updates-report-aggregation/build/
 /ncc-packer/build/

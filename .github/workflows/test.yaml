@@ -98,11 +98,6 @@ jobs:
           label: 'null'
     steps:
     - id: 'step-0'
-      name: 'Install zstd on windows-11-arm'
-      shell: 'cmd'
-      run: 'choco install zstandard'
-      if: 'matrix.environment == ''windows-11-arm'''
-    - id: 'step-1'
       name: 'Restore built artifacts from cache'
       uses: 'actions/cache/restore@v5'
       with:
@@ -111,17 +106,17 @@ jobs:
           build/distributions/
         key: '${{ github.run_id }}'
         fail-on-cache-miss: 'true'
-    - id: 'step-2'
+    - id: 'step-1'
       name: 'Execute action'
       continue-on-error: true
       uses: './'
       with:
         distribution: '${{ matrix.distribution.user-id }}'
         wsl-version: '1'
-    - id: 'step-3'
+    - id: 'step-2'
       name: 'Test - action should fail if an invalid distribution is given'
       shell: 'cmd'
-      run: 'if ''${{ steps.step-2.outcome }}'' NEQ ''failure'' exit 1'
+      run: 'if ''${{ steps.step-1.outcome }}'' NEQ ''failure'' exit 1'
   test_invalid_wsl_version:
     name: 'Test requesting WSL version ${{ matrix.wsl-version }} on ${{ matrix.environment }}'
     runs-on: '${{ matrix.environment }}'
@@ -140,11 +135,6 @@ jobs:
         - '0'
     steps:
     - id: 'step-0'
-      name: 'Install zstd on windows-11-arm'
-      shell: 'cmd'
-      run: 'choco install zstandard'
-      if: 'matrix.environment == ''windows-11-arm'''
-    - id: 'step-1'
       name: 'Restore built artifacts from cache'
       uses: 'actions/cache/restore@v5'
       with:
@@ -153,17 +143,17 @@ jobs:
           build/distributions/
         key: '${{ github.run_id }}'
         fail-on-cache-miss: 'true'
-    - id: 'step-2'
+    - id: 'step-1'
       name: 'Execute action'
       continue-on-error: true
       uses: './'
       with:
         distribution: 'Debian-11'
         wsl-version: '${{ matrix.wsl-version }}'
-    - id: 'step-3'
+    - id: 'step-2'
       name: 'Test - action should fail if an invalid WSL version is given'
       shell: 'cmd'
-      run: 'if ''${{ steps.step-2.outcome }}'' NEQ ''failure'' exit 1'
+      run: 'if ''${{ steps.step-1.outcome }}'' NEQ ''failure'' exit 1'
   test_default_distribution:
     name: 'Test default distribution on ${{ matrix.environment }}'
     runs-on: '${{ matrix.environment }}'
@@ -185,11 +175,6 @@ jobs:
           create-test-user-command: 'useradd -m -p 4qBD5NWD3IkbU test'
     steps:
     - id: 'step-0'
-      name: 'Install zstd on windows-11-arm'
-      shell: 'cmd'
-      run: 'choco install zstandard'
-      if: 'matrix.environment == ''windows-11-arm'''
-    - id: 'step-1'
       name: 'Restore built artifacts from cache'
       uses: 'actions/cache/restore@v5'
       with:
@@ -198,35 +183,35 @@ jobs:
           build/distributions/
         key: '${{ github.run_id }}'
         fail-on-cache-miss: 'true'
-    - id: 'step-2'
+    - id: 'step-1'
       name: 'Execute action'
       uses: './'
       with:
         update: 'true'
-        wsl-version: '1'
-    - id: 'step-3'
+        wsl-version: '2'
+    - id: 'step-2'
       name: 'Test - wsl-bash should be available as custom shell'
       shell: 'wsl-bash {0}'
       run: ':'
       if: |-
         always()
-        && (steps.step-2.outcome == 'success')
-    - id: 'step-4'
+        && (steps.step-1.outcome == 'success')
+    - id: 'step-3'
       name: 'Test - wsl-bash should fail if the script fails (provocation)'
       continue-on-error: true
       shell: 'wsl-bash {0}'
       run: 'false'
       if: |-
         always()
-        && (steps.step-2.outcome == 'success')
-    - id: 'step-5'
+        && (steps.step-1.outcome == 'success')
+    - id: 'step-4'
       name: 'Test - wsl-bash should fail if the script fails (verification)'
       shell: 'cmd'
-      run: 'IF ''${{ steps.step-4.outcome }}'' NEQ ''failure'' EXIT /B 1'
+      run: 'IF ''${{ steps.step-3.outcome }}'' NEQ ''failure'' EXIT /B 1'
       if: |-
         always()
-        && (steps.step-2.outcome == 'success')
-    - id: 'step-6'
+        && (steps.step-1.outcome == 'success')
+    - id: 'step-5'
       name: 'Test - wsl-bash should fail if one of the commands fails (provocation)'
       continue-on-error: true
       shell: 'wsl-bash {0}'
@@ -235,45 +220,45 @@ jobs:
         :
       if: |-
         always()
-        && (steps.step-2.outcome == 'success')
-    - id: 'step-7'
+        && (steps.step-1.outcome == 'success')
+    - id: 'step-6'
       name: 'Test - wsl-bash should fail if one of the commands fails (verification)'
       shell: 'wsl-bash {0}'
-      run: '[ ''${{ steps.step-6.outcome }}'' == ''failure'' ] || exit 1'
+      run: '[ ''${{ steps.step-5.outcome }}'' == ''failure'' ] || exit 1'
       if: |-
         always()
-        && (steps.step-2.outcome == 'success')
-    - id: 'step-8'
+        && (steps.step-1.outcome == 'success')
+    - id: 'step-7'
       name: 'Test - wsl-bash should fail if an undefined variable is used (provocation)'
       continue-on-error: true
       shell: 'wsl-bash {0}'
       run: '$foo'
       if: |-
         always()
-        && (steps.step-2.outcome == 'success')
-    - id: 'step-9'
+        && (steps.step-1.outcome == 'success')
+    - id: 'step-8'
       name: 'Test - wsl-bash should fail if an undefined variable is used (verification)'
       shell: 'wsl-bash {0}'
-      run: '[ ''${{ steps.step-8.outcome }}'' == ''failure'' ]'
+      run: '[ ''${{ steps.step-7.outcome }}'' == ''failure'' ]'
       if: |-
         always()
-        && (steps.step-2.outcome == 'success')
-    - id: 'step-10'
+        && (steps.step-1.outcome == 'success')
+    - id: 'step-9'
       name: 'Test - wsl-bash should fail if any command in a pipe fails (provocation)'
       continue-on-error: true
       shell: 'wsl-bash {0}'
       run: 'false | true'
       if: |-
         always()
-        && (steps.step-2.outcome == 'success')
-    - id: 'step-11'
+        && (steps.step-1.outcome == 'success')
+    - id: 'step-10'
       name: 'Test - wsl-bash should fail if any command in a pipe fails (verification)'
       shell: 'wsl-bash {0}'
-      run: '[ ''${{ steps.step-10.outcome }}'' == ''failure'' ]'
+      run: '[ ''${{ steps.step-9.outcome }}'' == ''failure'' ]'
       if: |-
         always()
-        && (steps.step-2.outcome == 'success')
-    - id: 'step-12'
+        && (steps.step-1.outcome == 'success')
+    - id: 'step-11'
       name: 'Test - the default distribution should be correct'
       shell: 'wsl-bash {0}'
       run: |-
@@ -281,8 +266,8 @@ jobs:
         [[ "$(cat <(wsl.exe --list || true) <(wsl.exe --list || true | iconv -f UTF-16LE -t UTF-8) <(wslconfig.exe /list || true) <(wslconfig.exe /list || true | iconv -f UTF-16LE -t UTF-8))" == *${{ matrix.distribution.wsl-id }}\ \(Default\)* ]]
       if: |-
         always()
-        && (steps.step-2.outcome == 'success')
-    - id: 'step-13'
+        && (steps.step-1.outcome == 'success')
+    - id: 'step-12'
       name: 'Test - wsl-bash should use the correct distribution'
       shell: 'wsl-bash {0}'
       run: |-
@@ -290,8 +275,8 @@ jobs:
         [[ "$(cat <(lsb_release -a || true) <(uname -a || true) <([ -d /etc ] && find /etc -maxdepth 1 -type f \( -name '*release' -or -name 'issue*' \) -exec cat {} + || true) <([ -d /etc/products.d ] && find /etc/products.d -maxdepth 1 -type f -name '*.prod' -exec cat {} + || true) <([ -f /proc/version ] && cat /proc/version || true))" == ${{ matrix.distribution.match-pattern }} ]]
       if: |-
         always()
-        && (steps.step-2.outcome == 'success')
-    - id: 'step-14'
+        && (steps.step-1.outcome == 'success')
+    - id: 'step-13'
       name: 'Test - multi-line commands should not be disturbed by CRLF line endings'
       shell: 'wsl-bash {0}'
       run: |-
@@ -299,82 +284,82 @@ jobs:
         ! grep -q $'\r' "$0" # this comment catches the CR if present
       if: |-
         always()
-        && (steps.step-2.outcome == 'success')
-    - id: 'step-15'
+        && (steps.step-1.outcome == 'success')
+    - id: 'step-14'
       name: 'Test - wsl-bash should fail if no script file is given (provocation)'
       continue-on-error: true
       shell: 'wsl-bash'
       run: ':'
       if: |-
         always()
-        && (steps.step-2.outcome == 'success')
-    - id: 'step-16'
+        && (steps.step-1.outcome == 'success')
+    - id: 'step-15'
       name: 'Test - wsl-bash should fail if no script file is given (verification)'
       shell: 'wsl-bash {0}'
-      run: '[ ''${{ steps.step-15.outcome }}'' == ''failure'' ]'
+      run: '[ ''${{ steps.step-14.outcome }}'' == ''failure'' ]'
       if: |-
         always()
-        && (steps.step-2.outcome == 'success')
-    - id: 'step-17'
+        && (steps.step-1.outcome == 'success')
+    - id: 'step-16'
       name: 'Test - wsl-bash should fail if more than one parameter is given and first is not -u (provocation)'
       continue-on-error: true
       shell: 'wsl-bash user {0}'
       run: ':'
       if: |-
         always()
-        && (steps.step-2.outcome == 'success')
-    - id: 'step-18'
+        && (steps.step-1.outcome == 'success')
+    - id: 'step-17'
       name: 'Test - wsl-bash should fail if more than one parameter is given and first is not -u (verification)'
       shell: 'wsl-bash {0}'
-      run: '[ ''${{ steps.step-17.outcome }}'' == ''failure'' ]'
+      run: '[ ''${{ steps.step-16.outcome }}'' == ''failure'' ]'
       if: |-
         always()
-        && (steps.step-2.outcome == 'success')
-    - id: 'step-19'
+        && (steps.step-1.outcome == 'success')
+    - id: 'step-18'
       name: 'Test - wsl-bash should fail if only user is given (provocation)'
       continue-on-error: true
       shell: 'wsl-bash -u {0}'
       run: ':'
       if: |-
         always()
-        && (steps.step-2.outcome == 'success')
-    - id: 'step-20'
+        && (steps.step-1.outcome == 'success')
+    - id: 'step-19'
       name: 'Test - wsl-bash should fail if only user is given (verification)'
       shell: 'wsl-bash {0}'
-      run: '[ ''${{ steps.step-19.outcome }}'' == ''failure'' ]'
+      run: '[ ''${{ steps.step-18.outcome }}'' == ''failure'' ]'
       if: |-
         always()
-        && (steps.step-2.outcome == 'success')
-    - id: 'step-21'
+        && (steps.step-1.outcome == 'success')
+    - id: 'step-20'
       name: 'Test - wsl-bash should fail if excess argument is given (provocation)'
       continue-on-error: true
       shell: 'wsl-bash -u user {0} foo'
       run: ':'
       if: |-
         always()
-        && (steps.step-2.outcome == 'success')
-    - id: 'step-22'
+        && (steps.step-1.outcome == 'success')
+    - id: 'step-21'
       name: 'Test - wsl-bash should fail if excess argument is given (verification)'
       shell: 'wsl-bash {0}'
-      run: '[ ''${{ steps.step-21.outcome }}'' == ''failure'' ]'
+      run: '[ ''${{ steps.step-20.outcome }}'' == ''failure'' ]'
       if: |-
         always()
-        && (steps.step-2.outcome == 'success')
-    - id: 'step-23'
+        && (steps.step-1.outcome == 'success')
+    - id: 'step-22'
       name: 'Test - wsl-bash should fail if given script file does not exist (provocation)'
       continue-on-error: true
       shell: 'wsl-bash -u user {0}foo'
       run: ':'
       if: |-
         always()
-        && (steps.step-2.outcome == 'success')
-    - id: 'step-24'
+        && (steps.step-1.outcome == 'success')
+    - id: 'step-23'
       name: 'Test - wsl-bash should fail if given script file does not exist (verification)'
       shell: 'wsl-bash {0}'
-      run: '[ ''${{ steps.step-23.outcome }}'' == ''failure'' ]'
+      run: '[ ''${{ steps.step-22.outcome }}'' == ''failure'' ]'
       if: |-
         always()
-        && (steps.step-2.outcome == 'success')
+        && (steps.step-1.outcome == 'success')
   test:
     name: 'Test "${{ matrix.distribution.user-id }}" distribution on ${{ matrix.environment }}'
     runs-on: '${{ matrix.environment }}'
@@ -389,6 +374,11 @@ jobs:
         - 'windows-2025'
         - 'windows-latest'
         distribution:
+        - wsl-id: 'Alpine-3.24'
+          user-id: 'Alpine-3.24'
+          match-pattern: '*Alpine*3.24*'
+          default-absent-tool: 'dos2unix'
+          create-test-user-command: 'adduser -D test'
         - wsl-id: 'Alpine-3.23'
           user-id: 'Alpine-3.23'
           match-pattern: '*Alpine*3.23*'
@@ -476,11 +466,6 @@ jobs:
           create-test-user-command: 'useradd -m -p 4qBD5NWD3IkbU test'
     steps:
     - id: 'step-0'
-      name: 'Install zstd on windows-11-arm'
-      shell: 'cmd'
-      run: 'choco install zstandard'
-      if: 'matrix.environment == ''windows-11-arm'''
-    - id: 'step-1'
       name: 'Restore built artifacts from cache'
       uses: 'actions/cache/restore@v5'
       with:
@@ -489,7 +474,7 @@ jobs:
           build/distributions/
         key: '${{ github.run_id }}'
         fail-on-cache-miss: 'true'
-    - id: 'step-2'
+    - id: 'step-1'
       name: 'Execute action'
       uses: './'
       with:
@@ -497,11 +482,11 @@ jobs:
         use-cache: 'false'
         wsl-version: |-
           ${{ (
-                  (matrix.distribution.user-id == 'kali-linux')
+              (matrix.distribution.user-id == 'kali-linux')
           )
           && '2'
           || '1' }}
-    - id: 'step-3'
+    - id: 'step-2'
       name: 'Test - wsl-bash should fail if bash is not present by default (provocation)'
       continue-on-error: true
       shell: 'wsl-bash {0}'
@@ -509,29 +494,29 @@ jobs:
       if: |-
         (
             always()
-            && (steps.step-2.outcome == 'success')
+            && (steps.step-1.outcome == 'success')
         )
-        && (contains(fromJSON('["Alpine-3.23", "Alpine-3.22", "Alpine-3.21", "Alpine-3.20", "Alpine-3.19", "Alpine-3.18", "Alpine-3.17"]'), matrix.distribution.user-id))
-    - id: 'step-4'
+        && (contains(fromJSON('["Alpine-3.24", "Alpine-3.23", "Alpine-3.22", "Alpine-3.21", "Alpine-3.20", "Alpine-3.19", "Alpine-3.18", "Alpine-3.17"]'), matrix.distribution.user-id))
+    - id: 'step-3'
       name: 'Test - wsl-bash should fail if bash is not present by default (verification)'
-      run: 'wsl sh -euc "[ ''${{ steps.step-3.outcome }}'' = ''failure'' ]"'
+      run: 'wsl sh -euc "[ ''${{ steps.step-2.outcome }}'' = ''failure'' ]"'
       if: |-
         (
             always()
-            && (steps.step-2.outcome == 'success')
+            && (steps.step-1.outcome == 'success')
         )
-        && (contains(fromJSON('["Alpine-3.23", "Alpine-3.22", "Alpine-3.21", "Alpine-3.20", "Alpine-3.19", "Alpine-3.18", "Alpine-3.17"]'), matrix.distribution.user-id))
-    - id: 'step-5'
+        && (contains(fromJSON('["Alpine-3.24", "Alpine-3.23", "Alpine-3.22", "Alpine-3.21", "Alpine-3.20", "Alpine-3.19", "Alpine-3.18", "Alpine-3.17"]'), matrix.distribution.user-id))
+    - id: 'step-4'
       name: 'Delete wsl-bash'
       shell: 'cmd'
-      run: 'DEL /F "${{ steps.step-2.outputs.wsl-shell-wrapper-path }}"'
+      run: 'DEL /F "${{ steps.step-1.outputs.wsl-shell-wrapper-path }}"'
       if: |-
         (
             always()
-            && (steps.step-2.outcome == 'success')
+            && (steps.step-1.outcome == 'success')
         )
-        && (contains(fromJSON('["Alpine-3.23", "Alpine-3.22", "Alpine-3.21", "Alpine-3.20", "Alpine-3.19", "Alpine-3.18", "Alpine-3.17"]'), matrix.distribution.user-id))
-    - id: 'step-6'
+        && (contains(fromJSON('["Alpine-3.24", "Alpine-3.23", "Alpine-3.22", "Alpine-3.21", "Alpine-3.20", "Alpine-3.19", "Alpine-3.18", "Alpine-3.17"]'), matrix.distribution.user-id))
+    - id: 'step-5'
       name: 'Install Bash on Alpine'
       uses: './'
       with:
@@ -540,32 +525,32 @@ jobs:
       if: |-
         (
             always()
-            && (steps.step-2.outcome == 'success')
+            && (steps.step-1.outcome == 'success')
         )
-        && (contains(fromJSON('["Alpine-3.23", "Alpine-3.22", "Alpine-3.21", "Alpine-3.20", "Alpine-3.19", "Alpine-3.18", "Alpine-3.17"]'), matrix.distribution.user-id))
-    - id: 'step-7'
+        && (contains(fromJSON('["Alpine-3.24", "Alpine-3.23", "Alpine-3.22", "Alpine-3.21", "Alpine-3.20", "Alpine-3.19", "Alpine-3.18", "Alpine-3.17"]'), matrix.distribution.user-id))
+    - id: 'step-6'
       name: 'Test - wsl-bash should be available as custom shell'
       shell: 'wsl-bash {0}'
       run: ':'
       if: |-
         always()
-        && (steps.step-2.outcome == 'success')
-    - id: 'step-8'
+        && (steps.step-1.outcome == 'success')
+    - id: 'step-7'
       name: 'Test - wsl-bash should fail if the script fails (provocation)'
       continue-on-error: true
       shell: 'wsl-bash {0}'
       run: 'false'
       if: |-
         always()
-        && (steps.step-2.outcome == 'success')
-    - id: 'step-9'
+        && (steps.step-1.outcome == 'success')
+    - id: 'step-8'
       name: 'Test - wsl-bash should fail if the script fails (verification)'
       shell: 'cmd'
-      run: 'IF ''${{ steps.step-8.outcome }}'' NEQ ''failure'' EXIT /B 1'
+      run: 'IF ''${{ steps.step-7.outcome }}'' NEQ ''failure'' EXIT /B 1'
       if: |-
         always()
-        && (steps.step-2.outcome == 'success')
-    - id: 'step-10'
+        && (steps.step-1.outcome == 'success')
+    - id: 'step-9'
       name: 'Test - wsl-bash should fail if one of the commands fails (provocation)'
       continue-on-error: true
       shell: 'wsl-bash {0}'
@@ -574,45 +559,45 @@ jobs:
         :
       if: |-
         always()
-        && (steps.step-2.outcome == 'success')
-    - id: 'step-11'
+        && (steps.step-1.outcome == 'success')
+    - id: 'step-10'
       name: 'Test - wsl-bash should fail if one of the commands fails (verification)'
       shell: 'wsl-bash {0}'
-      run: '[ ''${{ steps.step-10.outcome }}'' == ''failure'' ] || exit 1'
+      run: '[ ''${{ steps.step-9.outcome }}'' == ''failure'' ] || exit 1'
       if: |-
         always()
-        && (steps.step-2.outcome == 'success')
-    - id: 'step-12'
+        && (steps.step-1.outcome == 'success')
+    - id: 'step-11'
       name: 'Test - wsl-bash should fail if an undefined variable is used (provocation)'
       continue-on-error: true
       shell: 'wsl-bash {0}'
       run: '$foo'
       if: |-
         always()
-        && (steps.step-2.outcome == 'success')
-    - id: 'step-13'
+        && (steps.step-1.outcome == 'success')
+    - id: 'step-12'
       name: 'Test - wsl-bash should fail if an undefined variable is used (verification)'
       shell: 'wsl-bash {0}'
-      run: '[ ''${{ steps.step-12.outcome }}'' == ''failure'' ]'
+      run: '[ ''${{ steps.step-11.outcome }}'' == ''failure'' ]'
       if: |-
         always()
-        && (steps.step-2.outcome == 'success')
-    - id: 'step-14'
+        && (steps.step-1.outcome == 'success')
+    - id: 'step-13'
       name: 'Test - wsl-bash should fail if any command in a pipe fails (provocation)'
       continue-on-error: true
       shell: 'wsl-bash {0}'
       run: 'false | true'
       if: |-
         always()
-        && (steps.step-2.outcome == 'success')
-    - id: 'step-15'
+        && (steps.step-1.outcome == 'success')
+    - id: 'step-14'
       name: 'Test - wsl-bash should fail if any command in a pipe fails (verification)'
       shell: 'wsl-bash {0}'
-      run: '[ ''${{ steps.step-14.outcome }}'' == ''failure'' ]'
+      run: '[ ''${{ steps.step-13.outcome }}'' == ''failure'' ]'
       if: |-
         always()
-        && (steps.step-2.outcome == 'success')
-    - id: 'step-16'
+        && (steps.step-1.outcome == 'success')
+    - id: 'step-15'
       name: 'Test - the default distribution should be correct'
       shell: 'wsl-bash {0}'
       run: |-
@@ -620,8 +605,8 @@ jobs:
         [[ "$(cat <(wsl.exe --list || true) <(wsl.exe --list || true | iconv -f UTF-16LE -t UTF-8) <(wslconfig.exe /list || true) <(wslconfig.exe /list || true | iconv -f UTF-16LE -t UTF-8))" == *${{ matrix.distribution.wsl-id }}\ \(Default\)* ]]
       if: |-
         always()
-        && (steps.step-2.outcome == 'success')
-    - id: 'step-17'
+        && (steps.step-1.outcome == 'success')
+    - id: 'step-16'
       name: 'Test - wsl-bash should use the correct distribution'
       shell: 'wsl-bash {0}'
       run: |-
@@ -629,8 +614,8 @@ jobs:
         [[ "$(cat <(lsb_release -a || true) <(uname -a || true) <([ -d /etc ] && find /etc -maxdepth 1 -type f \( -name '*release' -or -name 'issue*' \) -exec cat {} + || true) <([ -d /etc/products.d ] && find /etc/products.d -maxdepth 1 -type f -name '*.prod' -exec cat {} + || true) <([ -f /proc/version ] && cat /proc/version || true))" == ${{ matrix.distribution.match-pattern }} ]]
       if: |-
         always()
-        && (steps.step-2.outcome == 'success')
-    - id: 'step-18'
+        && (steps.step-1.outcome == 'success')
+    - id: 'step-17'
       name: 'Test - multi-line commands should not be disturbed by CRLF line endings'
       shell: 'wsl-bash {0}'
       run: |-
@@ -638,52 +623,52 @@ jobs:
         ! grep -q $'\r' "$0" # this comment catches the CR if present
       if: |-
         always()
-        && (steps.step-2.outcome == 'success')
-    - id: 'step-19'
+        && (steps.step-1.outcome == 'success')
+    - id: 'step-18'
       name: 'Test - ${{ matrix.distribution.default-absent-tool }} should not be installed by default (provocation)'
       continue-on-error: true
       shell: 'wsl-bash {0}'
       run: '${{ matrix.distribution.default-absent-tool }} --version'
       if: |-
         always()
-        && (steps.step-2.outcome == 'success')
-    - id: 'step-20'
+        && (steps.step-1.outcome == 'success')
+    - id: 'step-19'
       name: 'Test - ${{ matrix.distribution.default-absent-tool }} should not be installed by default (verification)'
       shell: 'wsl-bash {0}'
-      run: '[ ''${{ steps.step-19.outcome }}'' == ''failure'' ]'
+      run: '[ ''${{ steps.step-18.outcome }}'' == ''failure'' ]'
       if: |-
         always()
-        && (steps.step-2.outcome == 'success')
-    - id: 'step-21'
+        && (steps.step-1.outcome == 'success')
+    - id: 'step-20'
       name: 'Test - bash should be installed by default'
       shell: 'wsl-bash {0}'
       run: 'bash -c true'
       if: |-
         always()
-        && (steps.step-2.outcome == 'success')
-    - id: 'step-22'
+        && (steps.step-1.outcome == 'success')
+    - id: 'step-21'
       name: 'Test - sh should be installed by default'
       shell: 'wsl-bash {0}'
       run: 'sh -c true'
       if: |-
         always()
-        && (steps.step-2.outcome == 'success')
-    - id: 'step-23'
+        && (steps.step-1.outcome == 'success')
+    - id: 'step-22'
       name: 'Test - wsl-sh should not be present (provocation)'
       continue-on-error: true
       shell: 'wsl-sh {0}'
       run: ':'
       if: |-
         always()
-        && (steps.step-2.outcome == 'success')
-    - id: 'step-24'
+        && (steps.step-1.outcome == 'success')
+    - id: 'step-23'
       name: 'Test - wsl-sh should not be present (verification)'
       shell: 'wsl-bash {0}'
-      run: '[ ''${{ steps.step-23.outcome }}'' == ''failure'' ]'
+      run: '[ ''${{ steps.step-22.outcome }}'' == ''failure'' ]'
       if: |-
         always()
-        && (steps.step-2.outcome == 'success')
-    - id: 'step-25'
+        && (steps.step-1.outcome == 'success')
+    - id: 'step-24'
       name: 'Add wsl-sh wrapper'
       uses: './'
       with:
@@ -691,15 +676,15 @@ jobs:
         wsl-shell-command: 'sh -eu'
       if: |-
         always()
-        && (steps.step-2.outcome == 'success')
-    - id: 'step-26'
+        && (steps.step-1.outcome == 'success')
+    - id: 'step-25'
       name: 'Test - wsl-sh should be present'
       shell: 'wsl-sh {0}'
       run: ':'
       if: |-
         always()
-        && (steps.step-25.outcome == 'success')
-    - id: 'step-27'
+        && (steps.step-24.outcome == 'success')
+    - id: 'step-26'
       name: 'Test - wsl-bash should use bash'
       shell: 'wsl-bash {0}'
       run: |-
@@ -707,8 +692,8 @@ jobs:
         [ "$(ps -o pid='' -o comm='' 2>/dev/null | grep "^\s\+$$\s\+" | grep -o '\S\+$')" == 'bash' ]
       if: |-
         always()
-        && (steps.step-25.outcome == 'success')
-    - id: 'step-28'
+        && (steps.step-24.outcome == 'success')
+    - id: 'step-27'
       name: 'Test - wsl-sh should use sh'
       shell: 'wsl-sh {0}'
       run: |-
@@ -716,45 +701,45 @@ jobs:
         [ "$(ps -o pid='' -o comm='' 2>/dev/null | grep "^\s\+$$\s\+" | grep -o '\S\+$')" = 'sh' ]
       if: |-
         always()
-        && (steps.step-25.outcome == 'success')
-    - id: 'step-29'
+        && (steps.step-24.outcome == 'success')
+    - id: 'step-28'
       name: 'Delete wsl-bash'
       shell: 'cmd'
-      run: 'DEL /F "${{ steps.step-2.outputs.wsl-shell-wrapper-path }}"'
+      run: 'DEL /F "${{ steps.step-1.outputs.wsl-shell-wrapper-path }}"'
       if: |-
         always()
-        && (steps.step-25.outcome == 'success')
-    - id: 'step-30'
+        && (steps.step-24.outcome == 'success')
+    - id: 'step-29'
       name: 'Test - wsl-bash should not be present (provocation)'
       continue-on-error: true
       shell: 'wsl-bash {0}'
       run: ':'
       if: |-
         always()
-        && (steps.step-25.outcome == 'success')
-    - id: 'step-31'
+        && (steps.step-24.outcome == 'success')
+    - id: 'step-30'
       name: 'Test - wsl-bash should not be present (verification)'
       shell: 'wsl-sh {0}'
-      run: '[ ''${{ steps.step-30.outcome }}'' = ''failure'' ]'
+      run: '[ ''${{ steps.step-29.outcome }}'' = ''failure'' ]'
       if: |-
         always()
-        && (steps.step-25.outcome == 'success')
-    - id: 'step-32'
+        && (steps.step-24.outcome == 'success')
+    - id: 'step-31'
       name: 'Re-add wsl-bash wrapper'
       uses: './'
       with:
         distribution: '${{ matrix.distribution.user-id }}'
       if: |-
         always()
-        && (steps.step-25.outcome == 'success')
-    - id: 'step-33'
+        && (steps.step-24.outcome == 'success')
+    - id: 'step-32'
       name: 'Test - wsl-bash should be present'
       shell: 'wsl-bash {0}'
       run: ':'
       if: |-
         always()
-        && (steps.step-32.outcome == 'success')
-    - id: 'step-34'
+        && (steps.step-31.outcome == 'success')
+    - id: 'step-33'
       name: 'Test - wsl-bash should use bash'
       shell: 'wsl-bash {0}'
       run: |-
@@ -762,8 +747,8 @@ jobs:
         [ "$(ps -o pid='' -o comm='' 2>/dev/null | grep "^\s\+$$\s\+" | grep -o '\S\+$')" == 'bash' ]
       if: |-
         always()
-        && (steps.step-32.outcome == 'success')
-    - id: 'step-35'
+        && (steps.step-31.outcome == 'success')
+    - id: 'step-34'
       name: 'Test - wsl-bash should use root as default user'
       shell: 'wsl-bash {0}'
       run: |-
@@ -771,15 +756,15 @@ jobs:
         [ "$(whoami)" == 'root' ]
       if: |-
         always()
-        && (steps.step-32.outcome == 'success')
-    - id: 'step-36'
+        && (steps.step-31.outcome == 'success')
+    - id: 'step-35'
       name: 'Add user test'
       shell: 'wsl-bash {0}'
       run: '${{ matrix.distribution.create-test-user-command }}'
       if: |-
         always()
-        && (steps.step-32.outcome == 'success')
-    - id: 'step-37'
+        && (steps.step-31.outcome == 'success')
+    - id: 'step-36'
       name: 'Set wsl-bash wrapper to use user test by default'
       uses: './'
       with:
@@ -789,10 +774,10 @@ jobs:
       if: |-
         (
             always()
-            && (steps.step-32.outcome == 'success')
+            && (steps.step-31.outcome == 'success')
         )
         && (matrix.distribution.user-id != 'kali-linux')
-    - id: 'step-38'
+    - id: 'step-37'
       name: 'Test - wsl-bash should use test as default user'
       shell: 'wsl-bash {0}'
       run: |-
@@ -801,10 +786,10 @@ jobs:
       if: |-
         (
             always()
-            && (steps.step-37.outcome == 'success')
+            && (steps.step-36.outcome == 'success')
         )
         && (matrix.distribution.user-id != 'kali-linux')
-    - id: 'step-39'
+    - id: 'step-38'
       name: 'Set wsl-bash wrapper to use user test by default with inline script usage'
       uses: './'
       with:
@@ -813,10 +798,10 @@ jobs:
       if: |-
         (
             always()
-            && (steps.step-37.outcome == 'success')
+            && (steps.step-36.outcome == 'success')
         )
         && (matrix.distribution.user-id != 'kali-linux')
-    - id: 'step-40'
+    - id: 'step-39'
       name: 'Test - wsl-bash should use test as default user with inline script usage'
       shell: 'wsl-bash {0}'
       run: |-
@@ -824,23 +809,23 @@ jobs:
         [ "$(whoami)" == 'test' ]
       if: |-
         always()
-        && (steps.step-39.outcome == 'success')
-    - id: 'step-41'
+        && (steps.step-38.outcome == 'success')
+    - id: 'step-40'
       name: 'Delete wsl-bash'
       shell: 'cmd'
-      run: 'DEL /F "${{ steps.step-39.outputs.wsl-shell-wrapper-path }}"'
+      run: 'DEL /F "${{ steps.step-38.outputs.wsl-shell-wrapper-path }}"'
       if: |-
         always()
-        && (steps.step-39.outcome == 'success')
-    - id: 'step-42'
+        && (steps.step-38.outcome == 'success')
+    - id: 'step-41'
       name: 'Set wsl-bash wrapper to use default user by default'
       uses: './'
       with:
         distribution: '${{ matrix.distribution.user-id }}'
       if: |-
         always()
-        && (steps.step-39.outcome == 'success')
-    - id: 'step-43'
+        && (steps.step-38.outcome == 'success')
+    - id: 'step-42'
       name: 'Test - wsl-bash should use root as default user'
       shell: 'wsl-bash {0}'
       run: |-
@@ -848,22 +833,22 @@ jobs:
         [ "$(whoami)" == 'root' ]
       if: |-
         always()
-        && (steps.step-42.outcome == 'success')
-    - id: 'step-44'
+        && (steps.step-41.outcome == 'success')
+    - id: 'step-43'
       name: 'Test - test user does already exist'
       shell: 'wsl-bash {0}'
       run: 'id -u test'
       if: |-
         always()
-        && (steps.step-42.outcome == 'success')
-    - id: 'step-45'
+        && (steps.step-41.outcome == 'success')
+    - id: 'step-44'
       name: 'Delete wsl-bash'
       shell: 'cmd'
-      run: 'DEL /F "${{ steps.step-42.outputs.wsl-shell-wrapper-path }}"'
+      run: 'DEL /F "${{ steps.step-41.outputs.wsl-shell-wrapper-path }}"'
       if: |-
         always()
-        && (steps.step-42.outcome == 'success')
-    - id: 'step-46'
+        && (steps.step-41.outcome == 'success')
+    - id: 'step-45'
       name: 'Set wsl-bash wrapper to use existing user test by default with extra parameter'
       uses: './'
       with:
@@ -871,8 +856,8 @@ jobs:
         wsl-shell-user: 'test'
       if: |-
         always()
-        && (steps.step-42.outcome == 'success')
-    - id: 'step-47'
+        && (steps.step-41.outcome == 'success')
+    - id: 'step-46'
       name: 'Test - wsl-bash should use existing user test as default user with extra parameter'
       shell: 'wsl-bash {0}'
       run: |-
@@ -880,22 +865,22 @@ jobs:
         [ "$(whoami)" == 'test' ]
       if: |-
         always()
-        && (steps.step-46.outcome == 'success')
-    - id: 'step-48'
+        && (steps.step-45.outcome == 'success')
+    - id: 'step-47'
       name: 'Test - test2 user does not exist'
       shell: 'wsl-bash {0}'
       run: '! id -u test2'
       if: |-
         always()
-        && (steps.step-46.outcome == 'success')
-    - id: 'step-49'
+        && (steps.step-45.outcome == 'success')
+    - id: 'step-48'
       name: 'Delete wsl-bash'
       shell: 'cmd'
-      run: 'DEL /F "${{ steps.step-46.outputs.wsl-shell-wrapper-path }}"'
+      run: 'DEL /F "${{ steps.step-45.outputs.wsl-shell-wrapper-path }}"'
       if: |-
         always()
-        && (steps.step-46.outcome == 'success')
-    - id: 'step-50'
+        && (steps.step-45.outcome == 'success')
+    - id: 'step-49'
       name: 'Set wsl-bash wrapper to use non-existing user test2 by default with extra parameter'
       uses: './'
       with:
@@ -903,8 +888,8 @@ jobs:
         wsl-shell-user: 'test2'
       if: |-
         always()
-        && (steps.step-46.outcome == 'success')
-    - id: 'step-51'
+        && (steps.step-45.outcome == 'success')
+    - id: 'step-50'
       name: 'Test - wsl-bash should use auto-generated user test2 as default user'
       shell: 'wsl-bash {0}'
       run: |-
@@ -912,8 +897,8 @@ jobs:
         [ "$(whoami)" == 'test2' ]
       if: |-
         always()
-        && (steps.step-50.outcome == 'success')
-    - id: 'step-52'
+        && (steps.step-49.outcome == 'success')
+    - id: 'step-51'
       name: 'Test - wsl-bash should use ad-hoc user test'
       shell: 'wsl-bash -u test {0}'
       run: |-
@@ -921,8 +906,8 @@ jobs:
         [ "$(whoami)" == 'test' ]
       if: |-
         always()
-        && (steps.step-50.outcome == 'success')
-    - id: 'step-53'
+        && (steps.step-49.outcome == 'success')
+    - id: 'step-52'
       name: 'Test - wsl-bash should use ad-hoc user root'
       shell: 'wsl-bash -u root {0}'
       run: |-
@@ -930,16 +915,16 @@ jobs:
         [ "$(whoami)" == 'root' ]
       if: |-
         always()
-        && (steps.step-50.outcome == 'success')
-    - id: 'step-54'
+        && (steps.step-49.outcome == 'success')
+    - id: 'step-53'
       name: 'Make a no-op execution of the action'
       uses: './'
       with:
         distribution: '${{ matrix.distribution.user-id }}'
       if: |-
         always()
-        && (steps.step-50.outcome == 'success')
-    - id: 'step-55'
+        && (steps.step-49.outcome == 'success')
+    - id: 'step-54'
       name: 'Test - wsl-bash should still use test2 as default user'
       shell: 'wsl-bash {0}'
       run: |-
@@ -947,7 +932,7 @@ jobs:
         [ "$(whoami)" == 'test2' ]
       if: |-
         always()
-        && (steps.step-54.outcome == 'success')
+        && (steps.step-53.outcome == 'success')
   test_wsl-conf_on_initial_execution:
     name: 'Test /etc/wsl.conf handling on initial execution for "${{ matrix.distribution.user-id }}" distribution on ${{ matrix.environment }}'
     runs-on: '${{ matrix.environment }}'
@@ -962,6 +947,11 @@ jobs:
         - 'windows-2025'
         - 'windows-latest'
         distribution:
+        - wsl-id: 'Alpine-3.24'
+          user-id: 'Alpine-3.24'
+          match-pattern: '*Alpine*3.24*'
+          default-absent-tool: 'dos2unix'
+          create-test-user-command: 'adduser -D test'
         - wsl-id: 'Alpine-3.23'
           user-id: 'Alpine-3.23'
           match-pattern: '*Alpine*3.23*'
@@ -1049,11 +1039,6 @@ jobs:
           create-test-user-command: 'useradd -m -p 4qBD5NWD3IkbU test'
     steps:
     - id: 'step-0'
-      name: 'Install zstd on windows-11-arm'
-      shell: 'cmd'
-      run: 'choco install zstandard'
-      if: 'matrix.environment == ''windows-11-arm'''
-    - id: 'step-1'
       name: 'Restore built artifacts from cache'
       uses: 'actions/cache/restore@v5'
       with:
@@ -1062,7 +1047,7 @@ jobs:
           build/distributions/
         key: '${{ github.run_id }}'
         fail-on-cache-miss: 'true'
-    - id: 'step-2'
+    - id: 'step-1'
       name: 'Execute action'
       uses: './'
       with:
@@ -1071,17 +1056,17 @@ jobs:
           [automount]
           options = uid=1000
         wsl-version: '1'
-    - id: 'step-3'
+    - id: 'step-2'
       name: 'Delete wsl-bash'
       shell: 'cmd'
-      run: 'DEL /F "${{ steps.step-2.outputs.wsl-shell-wrapper-path }}"'
+      run: 'DEL /F "${{ steps.step-1.outputs.wsl-shell-wrapper-path }}"'
       if: |-
         (
             always()
-            && (steps.step-2.outcome == 'success')
+            && (steps.step-1.outcome == 'success')
         )
-        && (contains(fromJSON('["Alpine-3.23", "Alpine-3.22", "Alpine-3.21", "Alpine-3.20", "Alpine-3.19", "Alpine-3.18", "Alpine-3.17"]'), matrix.distribution.user-id))
-    - id: 'step-4'
+        && (contains(fromJSON('["Alpine-3.24", "Alpine-3.23", "Alpine-3.22", "Alpine-3.21", "Alpine-3.20", "Alpine-3.19", "Alpine-3.18", "Alpine-3.17"]'), matrix.distribution.user-id))
+    - id: 'step-3'
       name: 'Install Bash on Alpine'
       uses: './'
       with:
@@ -1090,10 +1075,10 @@ jobs:
       if: |-
         (
             always()
-            && (steps.step-2.outcome == 'success')
+            && (steps.step-1.outcome == 'success')
         )
-        && (contains(fromJSON('["Alpine-3.23", "Alpine-3.22", "Alpine-3.21", "Alpine-3.20", "Alpine-3.19", "Alpine-3.18", "Alpine-3.17"]'), matrix.distribution.user-id))
-    - id: 'step-5'
+        && (contains(fromJSON('["Alpine-3.24", "Alpine-3.23", "Alpine-3.22", "Alpine-3.21", "Alpine-3.20", "Alpine-3.19", "Alpine-3.18", "Alpine-3.17"]'), matrix.distribution.user-id))
+    - id: 'step-4'
       name: 'Test - /etc/wsl.conf should have expected content'
       shell: 'wsl-bash {0}'
       run: |-
@@ -1101,8 +1086,8 @@ jobs:
         diff -u <(echo -e '[automount]\noptions = uid=1000') /etc/wsl.conf
       if: |-
         always()
-        && (steps.step-2.outcome == 'success')
-    - id: 'step-6'
+        && (steps.step-1.outcome == 'success')
+    - id: 'step-5'
       name: 'Test - /mnt/c should be mounted with uid 1000'
       shell: 'wsl-bash {0}'
       run: |-
@@ -1110,7 +1095,7 @@ jobs:
         [[ "$(stat -c %u /mnt/c)" == 1000 ]]
       if: |-
         always()
-        && (steps.step-2.outcome == 'success')
+        && (steps.step-1.outcome == 'success')
   test_wsl-conf_on_subsequent_execution:
     name: 'Test /etc/wsl.conf handling on subsequent execution for "${{ matrix.distribution.user-id }}" distribution on ${{ matrix.environment }}'
     runs-on: '${{ matrix.environment }}'
@@ -1125,6 +1110,11 @@ jobs:
         - 'windows-2025'
         - 'windows-latest'
         distribution:
+        - wsl-id: 'Alpine-3.24'
+          user-id: 'Alpine-3.24'
+          match-pattern: '*Alpine*3.24*'
+          default-absent-tool: 'dos2unix'
+          create-test-user-command: 'adduser -D test'
         - wsl-id: 'Alpine-3.23'
           user-id: 'Alpine-3.23'
           match-pattern: '*Alpine*3.23*'
@@ -1212,11 +1202,6 @@ jobs:
           create-test-user-command: 'useradd -m -p 4qBD5NWD3IkbU test'
     steps:
     - id: 'step-0'
-      name: 'Install zstd on windows-11-arm'
-      shell: 'cmd'
-      run: 'choco install zstandard'
-      if: 'matrix.environment == ''windows-11-arm'''
-    - id: 'step-1'
       name: 'Restore built artifacts from cache'
       uses: 'actions/cache/restore@v5'
       with:
@@ -1225,23 +1210,23 @@ jobs:
           build/distributions/
         key: '${{ github.run_id }}'
         fail-on-cache-miss: 'true'
-    - id: 'step-2'
+    - id: 'step-1'
       name: 'Execute action'
       uses: './'
       with:
         distribution: '${{ matrix.distribution.user-id }}'
         wsl-version: '1'
-    - id: 'step-3'
+    - id: 'step-2'
       name: 'Delete wsl-bash'
       shell: 'cmd'
-      run: 'DEL /F "${{ steps.step-2.outputs.wsl-shell-wrapper-path }}"'
+      run: 'DEL /F "${{ steps.step-1.outputs.wsl-shell-wrapper-path }}"'
       if: |-
         (
             always()
-            && (steps.step-2.outcome == 'success')
+            && (steps.step-1.outcome == 'success')
         )
-        && (contains(fromJSON('["Alpine-3.23", "Alpine-3.22", "Alpine-3.21", "Alpine-3.20", "Alpine-3.19", "Alpine-3.18", "Alpine-3.17"]'), matrix.distribution.user-id))
-    - id: 'step-4'
+        && (contains(fromJSON('["Alpine-3.24", "Alpine-3.23", "Alpine-3.22", "Alpine-3.21", "Alpine-3.20", "Alpine-3.19", "Alpine-3.18", "Alpine-3.17"]'), matrix.distribution.user-id))
+    - id: 'step-3'
       name: 'Install Bash on Alpine'
       uses: './'
       with:
@@ -1250,10 +1235,10 @@ jobs:
       if: |-
         (
             always()
-            && (steps.step-2.outcome == 'success')
+            && (steps.step-1.outcome == 'success')
         )
-        && (contains(fromJSON('["Alpine-3.23", "Alpine-3.22", "Alpine-3.21", "Alpine-3.20", "Alpine-3.19", "Alpine-3.18", "Alpine-3.17"]'), matrix.distribution.user-id))
-    - id: 'step-5'
+        && (contains(fromJSON('["Alpine-3.24", "Alpine-3.23", "Alpine-3.22", "Alpine-3.21", "Alpine-3.20", "Alpine-3.19", "Alpine-3.18", "Alpine-3.17"]'), matrix.distribution.user-id))
+    - id: 'step-4'
       name: 'Test - /etc/wsl.conf should not exist or not have the content we will put there'
       shell: 'wsl-bash {0}'
       run: |-
@@ -1264,8 +1249,8 @@ jobs:
         fi
       if: |-
         always()
-        && (steps.step-2.outcome == 'success')
-    - id: 'step-6'
+        && (steps.step-1.outcome == 'success')
+    - id: 'step-5'
       name: 'Test - C: should be mounted at /mnt/c'
       shell: 'wsl-bash {0}'
       run: |-
@@ -1273,8 +1258,8 @@ jobs:
         mount | grep 'C:.* on /mnt/c'
       if: |-
         always()
-        && (steps.step-2.outcome == 'success')
-    - id: 'step-7'
+        && (steps.step-1.outcome == 'success')
+    - id: 'step-6'
       name: 'Test - /mnt/c should be mounted with uid 0'
       shell: 'wsl-bash {0}'
       run: |-
@@ -1282,8 +1267,8 @@ jobs:
         [[ "$(stat -c %u /mnt/c)" == 0 ]]
       if: |-
         always()
-        && (steps.step-2.outcome == 'success')
-    - id: 'step-8'
+        && (steps.step-1.outcome == 'success')
+    - id: 'step-7'
       name: 'Execute action'
       uses: './'
       with:
@@ -1293,8 +1278,8 @@ jobs:
           root = /
       if: |-
         always()
-        && (steps.step-2.outcome == 'success')
-    - id: 'step-9'
+        && (steps.step-1.outcome == 'success')
+    - id: 'step-8'
       name: 'Test - /etc/wsl.conf should have expected content'
       shell: 'wsl-bash {0}'
       run: |-
@@ -1302,8 +1287,8 @@ jobs:
         diff -u <(echo -e '[automount]\nroot = /') /etc/wsl.conf
       if: |-
         always()
-        && (steps.step-8.outcome == 'success')
-    - id: 'step-10'
+        && (steps.step-7.outcome == 'success')
+    - id: 'step-9'
       name: 'Test - C: should be mounted at /c'
       shell: 'wsl-bash {0}'
       run: |-
@@ -1311,7 +1296,7 @@ jobs:
         mount | grep 'C:.* on /c'
       if: |-
         always()
-        && (steps.step-8.outcome == 'success')
+        && (steps.step-7.outcome == 'success')
   test_additional_packages:
     name: 'Test additional packages for "${{ matrix.distribution.user-id }}" distribution on ${{ matrix.environment }}'
     runs-on: '${{ matrix.environment }}'
@@ -1326,6 +1311,11 @@ jobs:
         - 'windows-2025'
         - 'windows-latest'
         distribution:
+        - wsl-id: 'Alpine-3.24'
+          user-id: 'Alpine-3.24'
+          match-pattern: '*Alpine*3.24*'
+          default-absent-tool: 'dos2unix'
+          create-test-user-command: 'adduser -D test'
         - wsl-id: 'Alpine-3.23'
           user-id: 'Alpine-3.23'
           match-pattern: '*Alpine*3.23*'
@@ -1413,11 +1403,6 @@ jobs:
           create-test-user-command: 'useradd -m -p 4qBD5NWD3IkbU test'
     steps:
     - id: 'step-0'
-      name: 'Install zstd on windows-11-arm'
-      shell: 'cmd'
-      run: 'choco install zstandard'
-      if: 'matrix.environment == ''windows-11-arm'''
-    - id: 'step-1'
       name: 'Restore built artifacts from cache'
       uses: 'actions/cache/restore@v5'
       with:
@@ -1426,7 +1411,7 @@ jobs:
           build/distributions/
         key: '${{ github.run_id }}'
         fail-on-cache-miss: 'true'
-    - id: 'step-2'
+    - id: 'step-1'
       name: 'Execute action'
       uses: './'
       with:
@@ -1434,29 +1419,29 @@ jobs:
         additional-packages: '${{ matrix.distribution.default-absent-tool }} bash'
         wsl-version: |-
           ${{ (
-                  (matrix.distribution.user-id == 'kali-linux')
+              (matrix.distribution.user-id == 'kali-linux')
           )
           && '2'
           || '1' }}
       if: 'matrix.distribution.user-id != ''kali-linux'''
-    - id: 'step-3'
+    - id: 'step-2'
       name: 'Test - ${{ matrix.distribution.default-absent-tool }} should be installed'
       shell: 'wsl-bash {0}'
       run: '${{ matrix.distribution.default-absent-tool }} --version'
       if: |-
         (
             always()
-            && (steps.step-2.outcome == 'success')
+            && (steps.step-1.outcome == 'success')
         )
         && (matrix.distribution.user-id != 'kali-linux')
-    - id: 'step-4'
+    - id: 'step-3'
       name: 'Test - bash should be installed'
       shell: 'wsl-bash {0}'
       run: 'bash -c true'
       if: |-
         (
             always()
-            && (steps.step-2.outcome == 'success')
+            && (steps.step-1.outcome == 'success')
         )
         && (matrix.distribution.user-id != 'kali-linux')
   test_installation_on_wsl_version:
@@ -1473,6 +1458,11 @@ jobs:
         - 'windows-2025'
         - 'windows-latest'
         distribution:
+        - wsl-id: 'Alpine-3.24'
+          user-id: 'Alpine-3.24'
+          match-pattern: '*Alpine*3.24*'
+          default-absent-tool: 'dos2unix'
+          create-test-user-command: 'adduser -D test'
         - wsl-id: 'Alpine-3.23'
           user-id: 'Alpine-3.23'
           match-pattern: '*Alpine*3.23*'
@@ -1563,11 +1553,6 @@ jobs:
         - 2
     steps:
     - id: 'step-0'
-      name: 'Install zstd on windows-11-arm'
-      shell: 'cmd'
-      run: 'choco install zstandard'
-      if: 'matrix.environment == ''windows-11-arm'''
-    - id: 'step-1'
       name: 'Restore built artifacts from cache'
       uses: 'actions/cache/restore@v5'
       with:
@@ -1576,17 +1561,17 @@ jobs:
           build/distributions/
         key: '${{ github.run_id }}'
         fail-on-cache-miss: 'true'
-    - id: 'step-2'
+    - id: 'step-1'
       name: 'Execute action'
       uses: './'
       with:
         distribution: '${{ matrix.distribution.user-id }}'
         additional-packages: |-
-          ${{ (contains(fromJSON('["Alpine-3.23", "Alpine-3.22", "Alpine-3.21", "Alpine-3.20", "Alpine-3.19", "Alpine-3.18", "Alpine-3.17"]'), matrix.distribution.user-id))
+          ${{ (contains(fromJSON('["Alpine-3.24", "Alpine-3.23", "Alpine-3.22", "Alpine-3.21", "Alpine-3.20", "Alpine-3.19", "Alpine-3.18", "Alpine-3.17"]'), matrix.distribution.user-id))
           && 'bash'
           || '' }}
         wsl-version: '${{ matrix.wsl-version }}'
-    - id: 'step-3'
+    - id: 'step-2'
       name: 'Test - distribution should be running on WSLv${{ matrix.wsl-version }}'
       shell: 'wsl-bash {0}'
       run: |-
@@ -1594,7 +1579,7 @@ jobs:
         [[ "$(cat <(wsl.exe --list --verbose || true) <(wsl.exe --list --verbose || true | iconv -f UTF-16LE -t UTF-8))" == *${{ matrix.distribution.wsl-id }}*\ ${{ matrix.wsl-version }}* ]]
       if: |-
         always()
-        && (steps.step-2.outcome == 'success')
+        && (steps.step-1.outcome == 'success')
   test_switching_wsl_version_for_different_distributions:
     name: 'Test switching WSL version for different distributions on ${{ matrix.environment }}'
     runs-on: '${{ matrix.environment }}'
@@ -1610,11 +1595,6 @@ jobs:
         - 'windows-latest'
     steps:
     - id: 'step-0'
-      name: 'Install zstd on windows-11-arm'
-      shell: 'cmd'
-      run: 'choco install zstandard'
-      if: 'matrix.environment == ''windows-11-arm'''
-    - id: 'step-1'
       name: 'Restore built artifacts from cache'
       uses: 'actions/cache/restore@v5'
       with:
@@ -1623,25 +1603,25 @@ jobs:
           build/distributions/
         key: '${{ github.run_id }}'
         fail-on-cache-miss: 'true'
-    - id: 'step-2'
+    - id: 'step-1'
       name: 'Execute action'
       uses: './'
       with:
         distribution: 'Debian-11'
         wsl-version: '1'
-    - id: 'step-3'
+    - id: 'step-2'
       name: 'Execute action'
       uses: './'
       with:
         distribution: 'Ubuntu-16.04'
         wsl-version: '2'
-    - id: 'step-4'
+    - id: 'step-3'
       name: 'Execute action'
       uses: './'
       with:
         distribution: 'Ubuntu-18.04'
         wsl-version: '1'
-    - id: 'step-5'
+    - id: 'step-4'
       name: 'Test - distributions should be running on their respective WSL version'
       shell: 'wsl-bash {0}'
       run: |-
@@ -1649,7 +1629,7 @@ jobs:
         [[ "$(cat <(wsl.exe --list --verbose || true) <(wsl.exe --list --verbose || true | iconv -f UTF-16LE -t UTF-8) | sort -u)" == *Debian*\ 1*Ubuntu-16.04*\ 2*Ubuntu-18.04*\ 1* ]]
       if: |-
         always()
-        && (steps.step-4.outcome == 'success')
+        && (steps.step-3.outcome == 'success')
   test_default_wsl_version:
     name: 'Test default WSL version for "${{ matrix.distribution.user-id }}" distribution on ${{ matrix.environment }}'
     runs-on: '${{ matrix.environment }}'
@@ -1664,6 +1644,11 @@ jobs:
         - 'windows-2025'
         - 'windows-latest'
         distribution:
+        - wsl-id: 'Alpine-3.24'
+          user-id: 'Alpine-3.24'
+          match-pattern: '*Alpine*3.24*'
+          default-absent-tool: 'dos2unix'
+          create-test-user-command: 'adduser -D test'
         - wsl-id: 'Alpine-3.23'
           user-id: 'Alpine-3.23'
           match-pattern: '*Alpine*3.23*'
@@ -1751,11 +1736,6 @@ jobs:
           create-test-user-command: 'useradd -m -p 4qBD5NWD3IkbU test'
     steps:
     - id: 'step-0'
-      name: 'Install zstd on windows-11-arm'
-      shell: 'cmd'
-      run: 'choco install zstandard'
-      if: 'matrix.environment == ''windows-11-arm'''
-    - id: 'step-1'
       name: 'Restore built artifacts from cache'
       uses: 'actions/cache/restore@v5'
       with:
@@ -1764,16 +1744,16 @@ jobs:
           build/distributions/
         key: '${{ github.run_id }}'
         fail-on-cache-miss: 'true'
-    - id: 'step-2'
+    - id: 'step-1'
       name: 'Execute action'
       uses: './'
       with:
         distribution: '${{ matrix.distribution.user-id }}'
         additional-packages: |-
-          ${{ (contains(fromJSON('["Alpine-3.23", "Alpine-3.22", "Alpine-3.21", "Alpine-3.20", "Alpine-3.19", "Alpine-3.18", "Alpine-3.17"]'), matrix.distribution.user-id))
+          ${{ (contains(fromJSON('["Alpine-3.24", "Alpine-3.23", "Alpine-3.22", "Alpine-3.21", "Alpine-3.20", "Alpine-3.19", "Alpine-3.18", "Alpine-3.17"]'), matrix.distribution.user-id))
           && 'bash'
           || '' }}
-    - id: 'step-3'
+    - id: 'step-2'
       name: 'Test - default WSL version should be WSLv2'
       shell: 'wsl-bash {0}'
       run: |-
@@ -1781,7 +1761,7 @@ jobs:
         [[ "$(cat <(wsl.exe --list --verbose || true) <(wsl.exe --list --verbose || true | iconv -f UTF-16LE -t UTF-8))" == *${{ matrix.distribution.wsl-id }}*\ 2* ]]
       if: |-
         always()
-        && (steps.step-2.outcome == 'success')
+        && (steps.step-1.outcome == 'success')
   test_multiple_usage_with_different_distributions:
     name: 'Test multiple usage with different distributions ("${{ matrix.distributions.distribution1.user-id }}" / "${{ matrix.distributions.distribution2.user-id }}" / "${{ matrix.distributions.distribution3.user-id }}") on ${{ matrix.environment }}'
     runs-on: '${{ matrix.environment }}'
@@ -1906,11 +1886,6 @@ jobs:
             create-test-user-command: 'useradd -m -p 4qBD5NWD3IkbU test'
     steps:
     - id: 'step-0'
-      name: 'Install zstd on windows-11-arm'
-      shell: 'cmd'
-      run: 'choco install zstandard'
-      if: 'matrix.environment == ''windows-11-arm'''
-    - id: 'step-1'
       name: 'Restore built artifacts from cache'
       uses: 'actions/cache/restore@v5'
       with:
@@ -1919,31 +1894,31 @@ jobs:
           build/distributions/
         key: '${{ github.run_id }}'
         fail-on-cache-miss: 'true'
-    - id: 'step-2'
+    - id: 'step-1'
       name: 'Execute action for ${{ matrix.distributions.distribution1.user-id }}'
       uses: './'
       with:
         distribution: '${{ matrix.distributions.distribution1.user-id }}'
         wsl-version: '1'
-    - id: 'step-3'
+    - id: 'step-2'
       name: 'Execute action for ${{ matrix.distributions.distribution2.user-id }}'
       uses: './'
       with:
         distribution: '${{ matrix.distributions.distribution2.user-id }}'
         wsl-version: '1'
-    - id: 'step-4'
+    - id: 'step-3'
       name: 'Execute action for ${{ matrix.distributions.distribution3.user-id }}'
       uses: './'
       with:
         distribution: '${{ matrix.distributions.distribution3.user-id }}'
         set-as-default: 'false'
         wsl-version: '1'
-    - id: 'step-5'
+    - id: 'step-4'
       name: 'Execute action for ${{ matrix.distributions.distribution1.user-id }} again'
       uses: './'
       with:
         distribution: '${{ matrix.distributions.distribution1.user-id }}'
-    - id: 'step-6'
+    - id: 'step-5'
       name: 'Test - the default distribution should be the last installed distribution with set-as-default true'
       shell: 'wsl-bash {0}'
       run: |-
@@ -1951,8 +1926,8 @@ jobs:
         [[ "$(cat <(wsl.exe --list || true) <(wsl.exe --list || true | iconv -f UTF-16LE -t UTF-8) <(wslconfig.exe /list || true) <(wslconfig.exe /list || true | iconv -f UTF-16LE -t UTF-8))" == *${{ matrix.distributions.distribution2.wsl-id }}\ \(Default\)* ]]
       if: |-
         always()
-        && (steps.step-5.outcome == 'success')
-    - id: 'step-7'
+        && (steps.step-4.outcome == 'success')
+    - id: 'step-6'
       name: 'Test - wsl-bash should use the last installed distribution with set-as-default true'
       shell: 'wsl-bash {0}'
       run: |-
@@ -1960,7 +1935,7 @@ jobs:
         [[ "$(cat <(lsb_release -a || true) <(uname -a || true) <([ -d /etc ] && find /etc -maxdepth 1 -type f \( -name '*release' -or -name 'issue*' \) -exec cat {} + || true) <([ -d /etc/products.d ] && find /etc/products.d -maxdepth 1 -type f -name '*.prod' -exec cat {} + || true) <([ -f /proc/version ] && cat /proc/version || true))" == ${{ matrix.distributions.distribution2.match-pattern }} ]]
       if: |-
         always()
-        && (steps.step-5.outcome == 'success')
+        && (steps.step-4.outcome == 'success')
   test_multiple_usage_with_same_distribution:
     name: 'Test multiple usage with "${{ matrix.distribution.user-id }}" distribution on ${{ matrix.environment }}'
     runs-on: '${{ matrix.environment }}'
@@ -1975,6 +1950,11 @@ jobs:
         - 'windows-2025'
         - 'windows-latest'
         distribution:
+        - wsl-id: 'Alpine-3.24'
+          user-id: 'Alpine-3.24'
+          match-pattern: '*Alpine*3.24*'
+          default-absent-tool: 'dos2unix'
+          create-test-user-command: 'adduser -D test'
         - wsl-id: 'Alpine-3.23'
           user-id: 'Alpine-3.23'
           match-pattern: '*Alpine*3.23*'
@@ -2148,11 +2128,6 @@ jobs:
             create-test-user-command: 'useradd -m -p 4qBD5NWD3IkbU test'
     steps:
     - id: 'step-0'
-      name: 'Install zstd on windows-11-arm'
-      shell: 'cmd'
-      run: 'choco install zstandard'
-      if: 'matrix.environment == ''windows-11-arm'''
-    - id: 'step-1'
       name: 'Restore built artifacts from cache'
       uses: 'actions/cache/restore@v5'
       with:
@@ -2161,7 +2136,7 @@ jobs:
           build/distributions/
         key: '${{ github.run_id }}'
         fail-on-cache-miss: 'true'
-    - id: 'step-2'
+    - id: 'step-1'
       name: 'Execute action'
       uses: './'
       with:
@@ -2172,11 +2147,12 @@ jobs:
           || '' }}
         wsl-version: |-
           ${{ (
-                  (matrix.distribution.user-id == 'Ubuntu-24.04')
+              (matrix.distribution.user-id == 'Debian-13')
+              || (matrix.distribution.user-id == 'Ubuntu-24.04')
           )
           && '2'
           || '1' }}
-    - id: 'step-3'
+    - id: 'step-2'
       name: 'Update distribution'
       uses: './'
       with:
@@ -2185,35 +2161,39 @@ jobs:
       if: |-
         (matrix.distribution.user-id != 'kali-linux')
         && (
-            (matrix.distribution.user-id != 'Ubuntu-24.04')
+            (
+                (matrix.distribution.user-id != 'Debian-13')
+                && (matrix.distribution.user-id != 'Ubuntu-24.04')
+            )
             || (
                 (
-                (
-                        (matrix.distribution.user-id == 'Ubuntu-24.04')
-                )
-                && '2'
-                || '1'
+                    (
+                        (matrix.distribution.user-id == 'Debian-13')
+                        || (matrix.distribution.user-id == 'Ubuntu-24.04')
+                    )
+                    && '2'
+                    || '1'
                 ) == '2'
             )
         )
-    - id: 'step-4'
+    - id: 'step-3'
       name: 'Install default absent tool'
       uses: './'
       with:
         distribution: '${{ matrix.distribution.user-id }}'
         additional-packages: '${{ matrix.distribution.default-absent-tool }}'
       if: '(matrix.distribution.user-id != ''kali-linux'')'
-    - id: 'step-5'
+    - id: 'step-4'
       name: 'Test - ${{ matrix.distribution.default-absent-tool }} should be installed'
       shell: 'wsl-bash {0}'
       run: '${{ matrix.distribution.default-absent-tool }} --version'
       if: |-
         (
             always()
-            && (steps.step-4.outcome == 'success')
+            && (steps.step-3.outcome == 'success')
         )
         && (matrix.distribution.user-id != 'kali-linux')
-    - id: 'step-6'
+    - id: 'step-5'
       name: 'Execute action for ${{ matrix.distribution2.user-id }}'
       uses: './'
       with:
@@ -2221,8 +2201,8 @@ jobs:
         wsl-version: '1'
       if: |-
         always()
-        && (steps.step-4.outcome == 'success')
-    - id: 'step-7'
+        && (steps.step-3.outcome == 'success')
+    - id: 'step-6'
       name: 'Test - "${{ matrix.distribution2.user-id }}" should be the default distribution after installation'
       shell: 'wsl-bash {0}'
       run: |-
@@ -2230,16 +2210,16 @@ jobs:
         [[ "$(cat <(lsb_release -a || true) <(uname -a || true) <([ -d /etc ] && find /etc -maxdepth 1 -type f \( -name '*release' -or -name 'issue*' \) -exec cat {} + || true) <([ -d /etc/products.d ] && find /etc/products.d -maxdepth 1 -type f -name '*.prod' -exec cat {} + || true) <([ -f /proc/version ] && cat /proc/version || true))" == ${{ matrix.distribution2.match-pattern }} ]]
       if: |-
         always()
-        && (steps.step-6.outcome == 'success')
-    - id: 'step-8'
+        && (steps.step-5.outcome == 'success')
+    - id: 'step-7'
       name: 'Re-execute action'
       uses: './'
       with:
         distribution: '${{ matrix.distribution.user-id }}'
       if: |-
         always()
-        && (steps.step-6.outcome == 'success')
-    - id: 'step-9'
+        && (steps.step-5.outcome == 'success')
+    - id: 'step-8'
       name: 'Test - "${{ matrix.distribution2.user-id }}" should still be the default distribution after re-running for "${{ matrix.distribution.user-id }}"'
       shell: 'wsl-bash {0}'
       run: |-
@@ -2247,8 +2227,8 @@ jobs:
         [[ "$(cat <(lsb_release -a || true) <(uname -a || true) <([ -d /etc ] && find /etc -maxdepth 1 -type f \( -name '*release' -or -name 'issue*' \) -exec cat {} + || true) <([ -d /etc/products.d ] && find /etc/products.d -maxdepth 1 -type f -name '*.prod' -exec cat {} + || true) <([ -f /proc/version ] && cat /proc/version || true))" == ${{ matrix.distribution2.match-pattern }} ]]
       if: |-
         always()
-        && (steps.step-8.outcome == 'success')
-    - id: 'step-10'
+        && (steps.step-7.outcome == 'success')
+    - id: 'step-9'
       name: 'Set as default'
       uses: './'
       with:
@@ -2256,8 +2236,8 @@ jobs:
         set-as-default: 'true'
       if: |-
         always()
-        && (steps.step-8.outcome == 'success')
-    - id: 'step-11'
+        && (steps.step-7.outcome == 'success')
+    - id: 'step-10'
       name: 'Test - "${{ matrix.distribution.user-id }}" should be the default distribution after re-running with set-as-default true'
       shell: 'wsl-bash {0}'
       run: |-
@@ -2265,7 +2245,7 @@ jobs:
         [[ "$(cat <(lsb_release -a || true) <(uname -a || true) <([ -d /etc ] && find /etc -maxdepth 1 -type f \( -name '*release' -or -name 'issue*' \) -exec cat {} + || true) <([ -d /etc/products.d ] && find /etc/products.d -maxdepth 1 -type f -name '*.prod' -exec cat {} + || true) <([ -f /proc/version ] && cat /proc/version || true))" == ${{ matrix.distribution.match-pattern }} ]]
       if: |-
         always()
-        && (steps.step-10.outcome == 'success')
+        && (steps.step-9.outcome == 'success')
   test_distribution_specific_wsl_bash_scripts:
     name: 'Test distribution specific wsl-bash scripts on ${{ matrix.environment }}'
     runs-on: '${{ matrix.environment }}'
@@ -2281,11 +2261,6 @@ jobs:
         - 'windows-latest'
     steps:
     - id: 'step-0'
-      name: 'Install zstd on windows-11-arm'
-      shell: 'cmd'
-      run: 'choco install zstandard'
-      if: 'matrix.environment == ''windows-11-arm'''
-    - id: 'step-1'
       name: 'Restore built artifacts from cache'
       uses: 'actions/cache/restore@v5'
       with:
@@ -2294,6 +2269,14 @@ jobs:
           build/distributions/
         key: '${{ github.run_id }}'
         fail-on-cache-miss: 'true'
+    - id: 'step-1'
+      name: 'Execute action for Alpine-3.24'
+      continue-on-error: true
+      uses: './'
+      with:
+        distribution: 'Alpine-3.24'
+        additional-packages: 'bash'
+        wsl-version: '1'
     - id: 'step-2'
       name: 'Execute action for Alpine-3.23'
       continue-on-error: true
@@ -2308,6 +2291,7 @@ jobs:
       uses: './'
       with:
         distribution: 'Alpine-3.22'
+        set-as-default: 'false'
         additional-packages: 'bash'
         wsl-version: '1'
     - id: 'step-4'
@@ -2446,6 +2430,15 @@ jobs:
         additional-packages: ''
         wsl-version: '1'
     - id: 'step-19'
+      name: 'Test - wsl-bash_Alpine-3.24 should use the correct distribution'
+      shell: 'wsl-bash_Alpine-3.24 {0}'
+      run: |-
+        cat <(lsb_release -a || true) <(uname -a || true) <([ -d /etc ] && find /etc -maxdepth 1 -type f \( -name '*release' -or -name 'issue*' \) -exec cat {} + || true) <([ -d /etc/products.d ] && find /etc/products.d -maxdepth 1 -type f -name '*.prod' -exec cat {} + || true) <([ -f /proc/version ] && cat /proc/version || true)
+        [[ "$(cat <(lsb_release -a || true) <(uname -a || true) <([ -d /etc ] && find /etc -maxdepth 1 -type f \( -name '*release' -or -name 'issue*' \) -exec cat {} + || true) <([ -d /etc/products.d ] && find /etc/products.d -maxdepth 1 -type f -name '*.prod' -exec cat {} + || true) <([ -f /proc/version ] && cat /proc/version || true))" == *Alpine*3.24* ]]
+      if: |-
+        always()
+        && (steps.step-1.outcome == 'success')
+    - id: 'step-20'
       name: 'Test - wsl-bash_Alpine-3.23 should use the correct distribution'
       shell: 'wsl-bash_Alpine-3.23 {0}'
       run: |-
@@ -2454,7 +2447,7 @@ jobs:
       if: |-
         always()
         && (steps.step-2.outcome == 'success')
-    - id: 'step-20'
+    - id: 'step-21'
       name: 'Test - wsl-bash_Alpine-3.22 should use the correct distribution'
       shell: 'wsl-bash_Alpine-3.22 {0}'
       run: |-
@@ -2463,7 +2456,7 @@ jobs:
       if: |-
         always()
         && (steps.step-3.outcome == 'success')
-    - id: 'step-21'
+    - id: 'step-22'
       name: 'Test - wsl-bash_Alpine-3.21 should use the correct distribution'
       shell: 'wsl-bash_Alpine-3.21 {0}'
       run: |-
@@ -2472,7 +2465,7 @@ jobs:
       if: |-
         always()
         && (steps.step-4.outcome == 'success')
-    - id: 'step-22'
+    - id: 'step-23'
       name: 'Test - wsl-bash_Alpine-3.20 should use the correct distribution'
       shell: 'wsl-bash_Alpine-3.20 {0}'
       run: |-
@@ -2481,7 +2474,7 @@ jobs:
       if: |-
         always()
         && (steps.step-5.outcome == 'success')
-    - id: 'step-23'
+    - id: 'step-24'
       name: 'Test - wsl-bash_Alpine-3.19 should use the correct distribution'
       shell: 'wsl-bash_Alpine-3.19 {0}'
       run: |-
@@ -2490,7 +2483,7 @@ jobs:
       if: |-
         always()
         && (steps.step-6.outcome == 'success')
-    - id: 'step-24'
+    - id: 'step-25'
       name: 'Test - wsl-bash_Alpine-3.18 should use the correct distribution'
       shell: 'wsl-bash_Alpine-3.18 {0}'
       run: |-
@@ -2499,7 +2492,7 @@ jobs:
       if: |-
         always()
         && (steps.step-7.outcome == 'success')
-    - id: 'step-25'
+    - id: 'step-26'
       name: 'Test - wsl-bash_Alpine-3.17 should use the correct distribution'
       shell: 'wsl-bash_Alpine-3.17 {0}'
       run: |-
@@ -2508,7 +2501,7 @@ jobs:
       if: |-
         always()
         && (steps.step-8.outcome == 'success')
-    - id: 'step-26'
+    - id: 'step-27'
       name: 'Test - wsl-bash_Debian-13 should use the correct distribution'
       shell: 'wsl-bash_Debian-13 {0}'
       run: |-
@@ -2517,7 +2510,7 @@ jobs:
       if: |-
         always()
         && (steps.step-9.outcome == 'success')
-    - id: 'step-27'
+    - id: 'step-28'
       name: 'Test - wsl-bash_Debian-12 should use the correct distribution'
       shell: 'wsl-bash_Debian-12 {0}'
       run: |-
@@ -2526,7 +2519,7 @@ jobs:
       if: |-
         always()
         && (steps.step-10.outcome == 'success')
-    - id: 'step-28'
+    - id: 'step-29'
       name: 'Test - wsl-bash_Debian-11 should use the correct distribution'
       shell: 'wsl-bash_Debian-11 {0}'
       run: |-
@@ -2535,7 +2528,7 @@ jobs:
       if: |-
         always()
         && (steps.step-11.outcome == 'success')
-    - id: 'step-29'
+    - id: 'step-30'
       name: 'Test - wsl-bash_kali-linux should use the correct distribution'
       shell: 'wsl-bash_kali-linux {0}'
       run: |-
@@ -2544,7 +2537,7 @@ jobs:
       if: |-
         always()
         && (steps.step-12.outcome == 'success')
-    - id: 'step-30'
+    - id: 'step-31'
       name: 'Test - wsl-bash_openSUSE-Leap-15.2 should use the correct distribution'
       shell: 'wsl-bash_openSUSE-Leap-15.2 {0}'
       run: |-
@@ -2553,7 +2546,7 @@ jobs:
       if: |-
         always()
         && (steps.step-13.outcome == 'success')
-    - id: 'step-31'
+    - id: 'step-32'
       name: 'Test - wsl-bash_Ubuntu-24.04 should use the correct distribution'
       shell: 'wsl-bash_Ubuntu-24.04 {0}'
       run: |-
@@ -2562,7 +2555,7 @@ jobs:
       if: |-
         always()
         && (steps.step-14.outcome == 'success')
-    - id: 'step-32'
+    - id: 'step-33'
       name: 'Test - wsl-bash_Ubuntu-22.04 should use the correct distribution'
       shell: 'wsl-bash_Ubuntu-22.04 {0}'
       run: |-
@@ -2571,7 +2564,7 @@ jobs:
       if: |-
         always()
         && (steps.step-15.outcome == 'success')
-    - id: 'step-33'
+    - id: 'step-34'
       name: 'Test - wsl-bash_Ubuntu-20.04 should use the correct distribution'
       shell: 'wsl-bash_Ubuntu-20.04 {0}'
       run: |-
@@ -2580,7 +2573,7 @@ jobs:
       if: |-
         always()
         && (steps.step-16.outcome == 'success')
-    - id: 'step-34'
+    - id: 'step-35'
       name: 'Test - wsl-bash_Ubuntu-18.04 should use the correct distribution'
       shell: 'wsl-bash_Ubuntu-18.04 {0}'
       run: |-
@@ -2589,7 +2582,7 @@ jobs:
       if: |-
         always()
         && (steps.step-17.outcome == 'success')
-    - id: 'step-35'
+    - id: 'step-36'
       name: 'Test - wsl-bash_Ubuntu-16.04 should use the correct distribution'
       shell: 'wsl-bash_Ubuntu-16.04 {0}'
       run: |-

@@ -18,7 +18,6 @@ import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
 plugins {
     `kotlin-dsl`
-    alias(libs.plugins.convention.dependency.updates.report.aggregatee)
     id(libs.plugins.dependency.analysis.get().pluginId)
 }
 
@@ -30,17 +29,12 @@ dependencies {
     //implementation(plugin(libs.plugins.dependency.analysis))
     implementation(plugin(libs.plugins.release))
     implementation(plugin(libs.plugins.grgit))
-    implementation(plugin(libs.plugins.github))
     implementation(plugin(libs.plugins.kotlin.multiplatform))
-    implementation(":dependency-updates-report-aggregation")
     implementation(platform(libs.build.kotlinx.serialization.bom))
     implementation(libs.build.kotlinx.serialization.json)
     implementation(libs.build.github.api)
     implementation(libs.build.snakeyaml)
-    compileOnly(libs.build.inject)
     compileOnly(embeddedKotlin("compiler-embeddable"))
-    // just to get update notifications by versions plugin
-    compileOnly(plugin(libs.plugins.refresh.versions))
 }
 
 tasks.withType<KotlinCompile>().configureEach {
@@ -51,31 +45,13 @@ tasks.withType<KotlinCompile>().configureEach {
 
 dependencyAnalysis {
     structure {
-        bundle("com.autonomousapps.dependency-analysis.gradle.plugin") {
-            includeDependency("com.autonomousapps.dependency-analysis:com.autonomousapps.dependency-analysis.gradle.plugin")
-            includeDependency("com.autonomousapps:dependency-analysis-gradle-plugin")
-        }
-        bundle("com.github.ben-manes.versions.gradle.plugin") {
-            includeDependency("com.github.ben-manes.versions:com.github.ben-manes.versions.gradle.plugin")
-            includeDependency("com.github.ben-manes:gradle-versions-plugin")
-        }
-        bundle("net.researchgate.release.gradle.plugin") {
-            includeDependency("net.researchgate.release:net.researchgate.release.gradle.plugin")
-            includeDependency("net.researchgate:gradle-release")
-        }
-        bundle("net.wooga.github.gradle.plugin") {
-            includeDependency("net.wooga.github:net.wooga.github.gradle.plugin")
-            includeDependency("net.wooga.gradle:github")
-        }
         bundle("org.ajoberstar.grgit.service.gradle.plugin") {
             includeDependency("org.ajoberstar.grgit.service:org.ajoberstar.grgit.service.gradle.plugin")
-            includeDependency("org.ajoberstar.grgit:grgit-gradle")
             includeDependency("org.ajoberstar.grgit:grgit-core")
         }
         bundle("org.jetbrains.kotlin.multiplatform.gradle.plugin") {
             includeDependency("org.jetbrains.kotlin.multiplatform:org.jetbrains.kotlin.multiplatform.gradle.plugin")
             includeDependency("org.jetbrains.kotlin:kotlin-gradle-plugin-api")
-            includeDependency("org.jetbrains.kotlin:kotlin-gradle-plugin")
         }
     }
     issues {
@@ -87,10 +63,70 @@ dependencyAnalysis {
                 // work-around for https://github.com/autonomousapps/dependency-analysis-gradle-plugin/issues/1629
                 severity("fail")
                 // present in kotlin-compiler-embeddable and kotlin-gradle-plugin
-                exclude("org/jetbrains/kotlin/cli/common/messages/MessageCollector")
-                exclude("org/jetbrains/kotlin/cli/common/messages/MessageCollector\$Companion")
-                exclude("org/jetbrains/kotlin/com/intellij/openapi/Disposable")
-                exclude("org/jetbrains/kotlin/com/intellij/openapi/util/Disposer")
+                exclude("org/jetbrains/kotlin/cli/jvm/compiler/AllJavaSourcesInProjectScope")
+                exclude("org/jetbrains/kotlin/cli/jvm/compiler/ClasspathRootsResolver")
+                exclude($$"org/jetbrains/kotlin/cli/jvm/compiler/ClasspathRootsResolver$Companion")
+                exclude($$"org/jetbrains/kotlin/cli/jvm/compiler/ClasspathRootsResolver$RootWithPrefix")
+                exclude($$"org/jetbrains/kotlin/cli/jvm/compiler/ClasspathRootsResolver$RootsAndModules")
+                exclude($$$"org/jetbrains/kotlin/cli/jvm/compiler/ClasspathRootsResolver$tryLoadVersionSpecificModuleInfo$$inlined$sortedBy$1")
+                exclude("org/jetbrains/kotlin/cli/jvm/compiler/CliBindingTrace")
+                exclude("org/jetbrains/kotlin/cli/jvm/compiler/CliJavaModuleUtilsKt")
+                exclude("org/jetbrains/kotlin/cli/jvm/compiler/CliMetadataFinderFactory")
+                exclude("org/jetbrains/kotlin/cli/jvm/compiler/CliTraceHolder")
+                exclude("org/jetbrains/kotlin/cli/jvm/compiler/CliVirtualFileFinder")
+                exclude("org/jetbrains/kotlin/cli/jvm/compiler/CliVirtualFileFinderFactory")
+                exclude("org/jetbrains/kotlin/cli/jvm/compiler/CompatKt")
+                exclude("org/jetbrains/kotlin/cli/jvm/compiler/CompileEnvironmentException")
+                exclude("org/jetbrains/kotlin/cli/jvm/compiler/CompileEnvironmentUtil")
+                exclude("org/jetbrains/kotlin/cli/jvm/compiler/CoreEnvironmentUtilsKt")
+                exclude($$"org/jetbrains/kotlin/cli/jvm/compiler/CoreEnvironmentUtilsKt$allSourceFilesSequence$1")
+                exclude("org/jetbrains/kotlin/cli/jvm/compiler/DumbJavaModuleGraphHelper")
+                exclude("org/jetbrains/kotlin/cli/jvm/compiler/DummyJavaFileCodeStyleFacadeFactory")
+                exclude($$"org/jetbrains/kotlin/cli/jvm/compiler/DummyJavaFileCodeStyleFacadeFactory$DummyJavaFileCodeStyleFacade")
+                exclude("org/jetbrains/kotlin/cli/jvm/compiler/EnvironmentConfigFiles")
+                exclude("org/jetbrains/kotlin/cli/jvm/compiler/IdeaExtensionPoints")
+                exclude("org/jetbrains/kotlin/cli/jvm/compiler/IdeaStandaloneExecutionSetup")
+                exclude("org/jetbrains/kotlin/cli/jvm/compiler/IncrementalCompilationContextUtilsKt")
+                exclude("org/jetbrains/kotlin/cli/jvm/compiler/JavaLanguageLevelKt")
+                exclude($$"org/jetbrains/kotlin/cli/jvm/compiler/JavaLanguageLevelKt$EntriesMappings")
+                exclude("org/jetbrains/kotlin/cli/jvm/compiler/JvmPackagePartProvider")
+                exclude("org/jetbrains/kotlin/cli/jvm/compiler/JvmPackagePartProviderKt")
+                exclude("org/jetbrains/kotlin/cli/jvm/compiler/KotlinCliJavaFileManagerImpl")
+                exclude($$"org/jetbrains/kotlin/cli/jvm/compiler/KotlinCliJavaFileManagerImpl$Companion")
+                exclude($$"org/jetbrains/kotlin/cli/jvm/compiler/KotlinCliJavaFileManagerImpl$findPackage$3")
+                exclude("org/jetbrains/kotlin/cli/jvm/compiler/KotlinCliJavaFileManagerImplKt")
+                exclude("org/jetbrains/kotlin/cli/jvm/compiler/KotlinCoreApplicationEnvironment")
+                exclude($$"org/jetbrains/kotlin/cli/jvm/compiler/KotlinCoreApplicationEnvironment$Companion")
+                exclude("org/jetbrains/kotlin/cli/jvm/compiler/KotlinCoreApplicationEnvironmentMode")
+                exclude($$"org/jetbrains/kotlin/cli/jvm/compiler/KotlinCoreApplicationEnvironmentMode$Companion")
+                exclude($$"org/jetbrains/kotlin/cli/jvm/compiler/KotlinCoreApplicationEnvironmentMode$Production")
+                exclude($$"org/jetbrains/kotlin/cli/jvm/compiler/KotlinCoreApplicationEnvironmentMode$UnitTest")
+                exclude("org/jetbrains/kotlin/cli/jvm/compiler/KotlinCoreEnvironment")
+                exclude("org/jetbrains/kotlin/cli/jvm/compiler/KotlinCoreEnvironment$2")
+                exclude($$"org/jetbrains/kotlin/cli/jvm/compiler/KotlinCoreEnvironment$Companion")
+                exclude($$"org/jetbrains/kotlin/cli/jvm/compiler/KotlinCoreEnvironment$Companion$getOrCreateApplicationEnvironment$1$2")
+                exclude($$"org/jetbrains/kotlin/cli/jvm/compiler/KotlinCoreEnvironment$ProjectEnvironment")
+                exclude($$$"org/jetbrains/kotlin/cli/jvm/compiler/KotlinCoreEnvironment$special$$inlined$sortBy$1")
+                exclude("org/jetbrains/kotlin/cli/jvm/compiler/KotlinCoreProjectEnvironment")
+                exclude("org/jetbrains/kotlin/cli/jvm/compiler/KotlinCoreUnitTestApplication")
+                exclude("org/jetbrains/kotlin/cli/jvm/compiler/MockExternalAnnotationsManager")
+                exclude("org/jetbrains/kotlin/cli/jvm/compiler/MockInferredAnnotationsManager")
+                exclude($$"org/jetbrains/kotlin/cli/jvm/compiler/MockInferredAnnotationsManager$Companion")
+                exclude("org/jetbrains/kotlin/cli/jvm/compiler/NoScopeRecordCliBindingTrace")
+                exclude("org/jetbrains/kotlin/cli/jvm/compiler/PlatformWriteAccessSupport")
+                exclude("org/jetbrains/kotlin/cli/jvm/compiler/PsiBasedProjectFileSearchScope")
+                exclude("org/jetbrains/kotlin/cli/jvm/compiler/SourceFileWithModule")
+                exclude("org/jetbrains/kotlin/cli/jvm/compiler/ValidSourceFilesFilter")
+                exclude("org/jetbrains/kotlin/cli/jvm/compiler/VfsBasedProjectEnvironment")
+                exclude($$"org/jetbrains/kotlin/cli/jvm/compiler/VfsBasedProjectEnvironment$ClassPathScope")
+                exclude($$"org/jetbrains/kotlin/cli/jvm/compiler/VfsBasedProjectEnvironment$DirectoriesScope")
+                exclude("org/jetbrains/kotlin/cli/jvm/compiler/VfsBasedProjectEnvironmentKt")
+                exclude("org/jetbrains/kotlin/com/intellij/mock/MockProject")
+                exclude("org/jetbrains/kotlin/com/intellij/openapi/util/ObjectNode")
+                exclude("org/jetbrains/kotlin/com/intellij/openapi/util/ObjectNode$1")
+                exclude($$"org/jetbrains/kotlin/com/intellij/openapi/util/ObjectNode$ListNodeChildren")
+                exclude($$"org/jetbrains/kotlin/com/intellij/openapi/util/ObjectNode$MapNodeChildren")
+                exclude($$"org/jetbrains/kotlin/com/intellij/openapi/util/ObjectNode$NodeChildren")
             }
         }
     }
@@ -105,6 +141,12 @@ tasks.buildHealth {
 
 tasks.check {
     dependsOn(tasks.buildHealth)
+}
+
+tasks.dependencyUpdates {
+    checkConstraints = true
+    checkBuildEnvironmentConstraints = true
+    rejectPreReleases = true
 }
 
 fun plugin(plugin: Provider<PluginDependency>) = plugin.map {

@@ -26,13 +26,12 @@ plugins {
     `lifecycle-base`
 }
 
-val majorVersion: String by project
-val readmeTemplateFilePath = "readme/README_template.md"
-val readmeFilePath = "README.md"
-val readmeChecksumFilePath = "readme/$readmeFilePath.sha256"
+internal val readmeTemplateFilePath = "readme/README_template.md"
+internal val readmeFilePath = "README.md"
+internal val readmeChecksumFilePath = "readme/$readmeFilePath.sha256"
 
-val verifyReadme by tasks.registering(ReadmeTask::class) {
-    val majorVersion = majorVersion
+internal val verifyReadme = tasks.register<ReadmeTask>("verifyReadme") {
+    val majorVersion = project.property("majorVersion") as String
     inputs.property("majorVersion", majorVersion)
     val readmeTemplateFile = file(readmeTemplateFilePath)
     inputs.file(readmeTemplateFile).withPropertyName("readmeTemplate")
@@ -62,7 +61,6 @@ val verifyReadme by tasks.registering(ReadmeTask::class) {
                 solution("Modify the ${readmeTemplateFile.path} file instead")
                 solution("Revert the tampered ${readmeFile.path} file")
                 solution("Overwrite the tampered ${readmeFile.path} file using the 'updateReadme' task")
-                severity(Severity.ERROR)
             }
         }
 
@@ -80,10 +78,10 @@ tasks.check {
     dependsOn(verifyReadme)
 }
 
-val updateReadme by tasks.registering(ReadmeTask::class) {
+tasks.register<ReadmeTask>("updateReadme") {
     dependsOn(verifyReadme)
 
-    val majorVersion = majorVersion
+    val majorVersion = project.property("majorVersion") as String
     inputs.property("majorVersion", majorVersion)
     val readmeTemplateFile = file(readmeTemplateFilePath)
     inputs.file(readmeTemplateFile).withPropertyName("readmeTemplate")

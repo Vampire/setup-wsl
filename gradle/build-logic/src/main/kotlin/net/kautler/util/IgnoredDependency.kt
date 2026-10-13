@@ -1,5 +1,5 @@
 /*
- * Copyright 2026 Björn Kautler
+ * Copyright 2020-2026 Björn Kautler
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,10 +16,10 @@
 
 package net.kautler.util
 
-import org.gradle.api.configuration.BuildFeatures
-import javax.inject.Inject
-
-interface BuildFeaturesProvider {
-    @get:Inject
-    val buildFeatures: BuildFeatures
-}
+data class IgnoredDependency(
+    val group: String,
+    val name: String,
+    val project: String? = null,
+    val oldVersion: String? = null,
+    val newVersion: String? = null
+)

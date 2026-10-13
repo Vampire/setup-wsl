@@ -18,22 +18,14 @@ import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
 plugins {
     `kotlin-dsl`
-    alias(libs.plugins.versions)
     id(libs.plugins.dependency.analysis.get().pluginId)
 }
 
 dependencies {
-    implementation(plugin(libs.plugins.refresh.versions))
+    api(plugin(libs.plugins.refresh.versions))
 }
 
 dependencyAnalysis {
-    structure {
-        bundle("de.fayard.refreshVersions.gradle.plugin") {
-            includeDependency("de.fayard.refreshVersions:de.fayard.refreshVersions.gradle.plugin")
-            includeDependency("de.fayard.refreshVersions:refreshVersions")
-            includeDependency("de.fayard.refreshVersions:refreshVersions-core")
-        }
-    }
     issues {
         all {
             onAny {
@@ -42,6 +34,11 @@ dependencyAnalysis {
             // work-around for https://github.com/autonomousapps/dependency-analysis-gradle-plugin/issues/1629
             onDuplicateClassWarnings {
                 severity("fail")
+            }
+            onUsedTransitiveDependencies {
+                // nothing is used directly, but there is an inline function called by
+                // refreshVersions which is inlined into our code and thus counts as usage
+                exclude("de.fayard.refreshVersions:refreshVersions-core")
             }
         }
     }
@@ -61,8 +58,9 @@ tasks.withType<KotlinCompile>().configureEach {
 }
 
 tasks.dependencyUpdates {
-    checkForGradleUpdate = false
     checkConstraints = true
+    checkBuildEnvironmentConstraints = true
+    rejectPreReleases = true
 }
 
 fun plugin(plugin: Provider<PluginDependency>) = plugin.map {

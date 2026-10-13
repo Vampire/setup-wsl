@@ -33,6 +33,7 @@ val distributions = listOf(
     Alpine321,
     Alpine322,
     Alpine323,
+    Alpine324,
     Debian11,
     Debian12,
     Debian13,
@@ -183,8 +184,8 @@ abstract class AptGetBasedDistribution : Distribution {
 object Ubuntu2404 : AptGetBasedDistribution(
     wslId = "Ubuntu-24.04",
     distributionName = "Ubuntu",
-    version = SemVer("24.4.4"),
-    downloadUrl = URL("https://releases.ubuntu.com/24.04.4/ubuntu-24.04.4-wsl-amd64.wsl")
+    version = SemVer("24.4.5"),
+    downloadUrl = URL("https://releases.ubuntu.com/24.04.5/ubuntu-24.04.5-wsl-amd64.wsl")
 )
 
 object Ubuntu2204 : AptGetBasedDistribution(
@@ -269,7 +270,7 @@ abstract class ArchivedDebianDistribution : DebianDistribution {
                 wslId,
                 "sed",
                 "-i",
-                "s/ftp.debian.org/archive.debian.org/",
+                """s/\\\(ftp\\\|deb\\\)\\\.debian\\\.org/archive.debian.org/""",
                 "/etc/apt/sources.list"
             )
         )
@@ -277,7 +278,41 @@ abstract class ArchivedDebianDistribution : DebianDistribution {
     }
 }
 
-object Debian11 : ArchivedDebianDistribution(
+abstract class SecurityArchivedDebianDistribution : ArchivedDebianDistribution {
+    constructor(
+        wslId: String,
+        distributionName: String,
+        version: SemVer,
+        downloadUrl: URL,
+        installerFile: String? = null
+    ) : super(wslId, distributionName, version, downloadUrl, installerFile)
+
+    constructor(
+        wslId: String,
+        userId: String,
+        distributionName: String,
+        version: SemVer,
+        downloadUrl: URL,
+        installerFile: String? = null
+    ) : super(wslId, userId, distributionName, version, downloadUrl, installerFile)
+
+    override suspend fun refresh() {
+        exec(
+            commandLine = "wsl",
+            args = arrayOf(
+                "--distribution",
+                wslId,
+                "sed",
+                "-i",
+                """s/security\\\.debian\\\.org/archive.debian.org/""",
+                "/etc/apt/sources.list"
+            )
+        )
+        super.refresh()
+    }
+}
+
+object Debian11 : SecurityArchivedDebianDistribution(
     wslId = "Debian",
     userId = "Debian-11",
     distributionName = "Debian",
@@ -296,8 +331,8 @@ object Debian12 : DebianDistribution(
 object Debian13 : DebianDistribution(
     wslId = "Debian-13",
     distributionName = "Debian",
-    version = SemVer("1.24.0"),
-    downloadUrl = URL("https://salsa.debian.org/debian/WSL/-/jobs/9229125/artifacts/raw/Debian_WSL_AMD64_v1.24.0.0.wsl")
+    version = SemVer("1.26.0"),
+    downloadUrl = URL("https://salsa.debian.org/debian/WSL/-/jobs/9606244/artifacts/raw/Debian_WSL_AMD64_v1.26.0.0.wsl")
 )
 
 object Kali : AptGetBasedDistribution(
@@ -521,27 +556,34 @@ object Alpine319 : AlpineDistribution(
 object Alpine320 : AlpineDistribution(
     wslId = "Alpine-3.20",
     distributionName = "Alpine",
-    version = SemVer("3.20.9"),
-    downloadUrl = URL("https://dl-cdn.alpinelinux.org/alpine/v3.20/releases/x86_64/alpine-minirootfs-3.20.9-x86_64.tar.gz"),
+    version = SemVer("3.20.10"),
+    downloadUrl = URL("https://dl-cdn.alpinelinux.org/alpine/v3.20/releases/x86_64/alpine-minirootfs-3.20.10-x86_64.tar.gz"),
 )
 
 object Alpine321 : AlpineDistribution(
     wslId = "Alpine-3.21",
     distributionName = "Alpine",
-    version = SemVer("3.21.6"),
-    downloadUrl = URL("https://dl-cdn.alpinelinux.org/alpine/v3.21/releases/x86_64/alpine-minirootfs-3.21.6-x86_64.tar.gz"),
+    version = SemVer("3.21.8"),
+    downloadUrl = URL("https://dl-cdn.alpinelinux.org/alpine/v3.21/releases/x86_64/alpine-minirootfs-3.21.8-x86_64.tar.gz"),
 )
 
 object Alpine322 : AlpineDistribution(
     wslId = "Alpine-3.22",
     distributionName = "Alpine",
-    version = SemVer("3.22.3"),
-    downloadUrl = URL("https://dl-cdn.alpinelinux.org/alpine/v3.22/releases/x86_64/alpine-minirootfs-3.22.3-x86_64.tar.gz"),
+    version = SemVer("3.22.6"),
+    downloadUrl = URL("https://dl-cdn.alpinelinux.org/alpine/v3.22/releases/x86_64/alpine-minirootfs-3.22.6-x86_64.tar.gz"),
 )
 
 object Alpine323 : AlpineDistribution(
     wslId = "Alpine-3.23",
     distributionName = "Alpine",
-    version = SemVer("3.23.3"),
-    downloadUrl = URL("https://dl-cdn.alpinelinux.org/alpine/v3.23/releases/x86_64/alpine-minirootfs-3.23.3-x86_64.tar.gz"),
+    version = SemVer("3.23.6"),
+    downloadUrl = URL("https://dl-cdn.alpinelinux.org/alpine/v3.23/releases/x86_64/alpine-minirootfs-3.23.6-x86_64.tar.gz"),
+)
+
+object Alpine324 : AlpineDistribution(
+    wslId = "Alpine-3.24",
+    distributionName = "Alpine",
+    version = SemVer("3.24.2"),
+    downloadUrl = URL("https://dl-cdn.alpinelinux.org/alpine/v3.24/releases/x86_64/alpine-minirootfs-3.24.2-x86_64.tar.gz"),
 )

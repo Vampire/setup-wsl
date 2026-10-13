@@ -34,8 +34,9 @@ plugins {
     //id("com.autonomousapps.build-health") version "3.6.1"
     //kotlin("multiplatform") version "2.1.20" apply false
     id("org.gradle.toolchains.foojay-resolver-convention") version "1.0.0"
-    id("com.gradle.develocity") version "4.4.0"
-    id("com.gradle.common-custom-user-data-gradle-plugin") version "2.6.0"
+    id("com.gradle.develocity") version "4.6.0"
+    id("com.gradle.common-custom-user-data-gradle-plugin") version "2.8.0"
+    id("io.github.ben-manes.versions") version "0.66.0"
 }
 
 conditionalRefreshVersions {
@@ -101,8 +102,8 @@ dependencyResolutionManagement {
     rulesMode = FAIL_ON_PROJECT_RULES
 
     versionCatalogs {
-        val kotlinWrappers by registering {
-            from("org.jetbrains.kotlin-wrappers:kotlin-wrappers-catalog:2026.4.5")
+        register("kotlinWrappers") {
+            from("org.jetbrains.kotlin-wrappers:kotlin-wrappers-catalog:2026.10.0")
         }
     }
 }
@@ -125,3 +126,5 @@ rootProject.name = "setup-wsl"
 
 enableFeaturePreview("TYPESAFE_PROJECT_ACCESSORS")
 enableFeaturePreview("STABLE_CONFIGURATION_CACHE")
+enableFeaturePreview("NO_IMPLICIT_LOOKUP_IN_PARENT_PROJECTS")
+enableFeaturePreview("ENHANCED_GRAPH_ORDERING")

@@ -16,22 +16,40 @@
 
 package net.kautler.util
 
-import net.kautler.util.InitJGit.Parameters
+import net.kautler.util.RepositoryName.Parameters
 import org.ajoberstar.grgit.Grgit
 import org.gradle.api.file.DirectoryProperty
+import org.gradle.api.provider.Property
 import org.gradle.api.provider.ValueSource
 import org.gradle.api.provider.ValueSourceParameters
 
-abstract class InitJGit : ValueSource<Unit, Parameters> {
-    override fun obtain() {
-        runCatching {
+abstract class RepositoryName : ValueSource<String, Parameters> {
+    override fun obtain() = parameters
+        .explictGithubRepositoryName
+        .orNull
+        ?: runCatching {
             Grgit.open {
                 currentDir = parameters.projectDirectory.get().asFile
             }
         }
-    }
+            .getOrNull()
+            ?.use {
+                it
+                    .remote
+                    .list()
+                    .find {
+                        (it.name == "origin") &&
+                            it.url.lowercase().contains("github.com")
+                    }
+                    ?.url
+                    ?.substringAfter("github.com")
+                    ?.drop(1)
+                    ?.removeSuffix(".git")
+            }
+        ?: error("Could not determine GitHub repository name")
 
     interface Parameters : ValueSourceParameters {
+        val explictGithubRepositoryName: Property<String>
         val projectDirectory: DirectoryProperty
     }
 }

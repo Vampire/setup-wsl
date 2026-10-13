@@ -367,7 +367,6 @@ fun String?.verifyPropertyIsSet(problemReporter: ProblemReporter, propertyName: 
             solution("Set the project property '$propertyName'")
             solution("Set the project property '$rootProjectName.$propertyName'")
             solution("If both are set, the latter will be effective")
-            severity(Severity.ERROR)
         }
     }
 }

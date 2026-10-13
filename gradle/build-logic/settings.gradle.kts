@@ -20,7 +20,6 @@ import org.gradle.api.initialization.resolve.RepositoriesMode.FAIL_ON_PROJECT_RE
 import org.gradle.api.initialization.resolve.RulesMode.FAIL_ON_PROJECT_RULES
 
 pluginManagement {
-    includeBuild("../dependency-updates-report-aggregation")
     includeBuild("../conditional-refresh-versions")
     repositories {
         mavenCentral()
@@ -30,11 +29,12 @@ pluginManagement {
 
 plugins {
     id("net.kautler.conditional-refresh-versions")
-    id("com.autonomousapps.build-health") version "3.6.1"
+    id("com.autonomousapps.build-health") version "3.19.2"
     embeddedKotlin("jvm") apply false
     id("org.gradle.toolchains.foojay-resolver-convention") version "1.0.0"
-    id("com.gradle.develocity") version "4.4.0"
-    id("com.gradle.common-custom-user-data-gradle-plugin") version "2.6.0"
+    id("com.gradle.develocity") version "4.6.0"
+    id("com.gradle.common-custom-user-data-gradle-plugin") version "2.8.0"
+    id("io.github.ben-manes.versions") version "0.66.0"
 }
 
 conditionalRefreshVersions {
@@ -52,7 +52,7 @@ conditionalRefreshVersions {
 
 // work-around for https://github.com/Splitties/refreshVersions/issues/596
 gradle.rootProject {
-    val copyVersionCatalog by tasks.registering {
+    val copyVersionCatalog = tasks.register("copyVersionCatalog") {
         val fs = objects.newInstance<FileSystemOperationsProvider>().fs
         val versionCatalog = gradle.parent!!.rootProject.file("gradle/libs.versions.toml")
         doLast {
@@ -98,12 +98,12 @@ dependencyResolutionManagement {
     rulesMode = FAIL_ON_PROJECT_RULES
 
     versionCatalogs {
-        val libs by registering {
+        register("libs") {
             from(files("../libs.versions.toml"))
         }
 
-        val kotlinWrappers by registering {
-            from("org.jetbrains.kotlin-wrappers:kotlin-wrappers-catalog:2025.5.2")
+        register("kotlinWrappers") {
+            from("org.jetbrains.kotlin-wrappers:kotlin-wrappers-catalog:2026.10.0")
         }
     }
 }
@@ -123,6 +123,8 @@ rootProject.buildFileName = "build-logic.gradle.kts"
 
 enableFeaturePreview("TYPESAFE_PROJECT_ACCESSORS")
 enableFeaturePreview("STABLE_CONFIGURATION_CACHE")
+enableFeaturePreview("NO_IMPLICIT_LOOKUP_IN_PARENT_PROJECTS")
+enableFeaturePreview("ENHANCED_GRAPH_ORDERING")
 
 interface FileSystemOperationsProvider {
     @get:Inject

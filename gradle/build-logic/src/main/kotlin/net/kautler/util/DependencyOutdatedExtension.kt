@@ -1,5 +1,5 @@
 /*
- * Copyright 2020-2023 Björn Kautler
+ * Copyright 2020-2026 Björn Kautler
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,19 +18,22 @@ package net.kautler.util
 
 import com.github.benmanes.gradle.versions.reporter.result.DependencyOutdated
 
-fun DependencyOutdated.matches(
+internal fun DependencyOutdated.matches(
     group: String,
     name: String,
+    project: String? = null,
     oldVersion: String? = null,
     newVersion: String? = null
 ) = (this.group == group)
-        && (this.name == name)
-        && oldVersion?.let { it == version } ?: true
-        && newVersion?.let { it == available.milestone } ?: true
+    && (this.name == name)
+    && project?.let { projects?.contains(it) ?: false } ?: true
+    && oldVersion?.let { it == version } ?: true
+    && newVersion?.let { it == available.milestone } ?: true
 
-fun DependencyOutdated.matches(ignored: IgnoredDependency) = matches(
+internal fun DependencyOutdated.matches(ignored: IgnoredDependency) = matches(
     ignored.group,
     ignored.name,
+    ignored.project,
     ignored.oldVersion,
     ignored.newVersion
 )

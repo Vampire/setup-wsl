@@ -20,7 +20,7 @@
 
 @file:Repository("https://repo.maven.apache.org/maven2/")
 // work-around for https://youtrack.jetbrains.com/issue/KT-69145
-@file:DependsOn("io.github.typesafegithub:github-workflows-kt:3.7.0")
+@file:DependsOn("io.github.typesafegithub:github-workflows-kt:4.0.0")
 
 @file:Repository("https://bindings.krzeminski.it/")
 @file:DependsOn("actions:cache__restore___major:[v5,v6-alpha)")
@@ -58,12 +58,18 @@ import io.github.typesafegithub.workflows.domain.triggers.Schedule
 import io.github.typesafegithub.workflows.dsl.JobBuilder
 import io.github.typesafegithub.workflows.dsl.WorkflowBuilder
 import io.github.typesafegithub.workflows.dsl.expressions.expr
-import kotlin.math.min
 
 val environments = listOf(
     "windows-2022",
     "windows-2025",
     "windows-latest"
+)
+
+val alpine324 = Distribution(
+    wslId = "Alpine-3.24",
+    matchPattern = "*Alpine*3.24*",
+    defaultAbsentTool = "dos2unix",
+    createTestUserCommand = "adduser -D test"
 )
 
 val alpine323 = Distribution(
@@ -116,6 +122,7 @@ val alpine317 = Distribution(
 )
 
 val alpineDistributions = listOf(
+    alpine324,
     alpine323,
     alpine322,
     alpine321,
@@ -288,15 +295,6 @@ workflowWithCopyright(
         runsOn = RunnerType.Custom(expr("matrix.environment")),
         _customArguments = _customArguments
     ) {
-        // work-around for https://github.com/actions/cache/issues/1622
-        // and https://github.com/actions/partner-runner-images/issues/99
-        run(
-            name = "Install zstd on windows-11-arm",
-            shell = Cmd,
-            command = "choco install zstandard",
-            condition = "matrix.environment == 'windows-11-arm'"
-        )
-
         uses(
             name = "Restore built artifacts from cache",
             action = CacheRestore(
@@ -389,7 +387,7 @@ workflowWithCopyright(
         executeActionStep = usesSelf(
             action = SetupWsl(
                 update = true,
-                wslVersion = 1
+                wslVersion = 2
             )
         )
         commonTests()
@@ -1101,7 +1099,7 @@ workflowWithCopyright(
                 // and https://bugs.kali.org/view.php?id=6672
                 // and https://bugs.launchpad.net/ubuntu/+source/systemd/+bug/2069555
                 wslVersion = null,
-                wslVersion_Untyped = expr(getWslVersionExpression(ubuntu2404))
+                wslVersion_Untyped = expr(getWslVersionExpression(debian13, ubuntu2404))
             )
         )
         usesSelf(
@@ -1115,10 +1113,13 @@ workflowWithCopyright(
             condition = """
                 |(matrix.distribution.user-id != '${kali.userId}')
                 |&& (
-                |    (matrix.distribution.user-id != '${ubuntu2404.userId}')
+                |    (
+                |        (matrix.distribution.user-id != '${debian13.userId}')
+                |        && (matrix.distribution.user-id != '${ubuntu2404.userId}')
+                |    )
                 |    || (
                 |        (
-                             ${getWslVersionExpression(ubuntu2404).prependIndent("|        ")}
+                             ${getWslVersionExpression(debian13, ubuntu2404).prependIndent("|            ")}
                 |        ) == '2'
                 |    )
                 |)
@@ -1474,8 +1475,8 @@ fun getWslVersionExpression(vararg wsl2Distributions: Distribution) = """
     |(
          ${
              wsl2Distributions.joinToString(
-                 separator = "\n|        || ",
-                 prefix = "|        "
+                 separator = "\n|    || ",
+                 prefix = "|    "
              ) { "(matrix.distribution.user-id == '${it.userId}')" }
          }
     |)
