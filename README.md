@@ -154,6 +154,7 @@ The values currently supported by this action are:
 * `Debian-11`
 * `kali-linux`
 * `openSUSE-Leap-15.2`
+* `Ubuntu-26.04`
 * `Ubuntu-24.04`
 * `Ubuntu-22.04`
 * `Ubuntu-20.04`
