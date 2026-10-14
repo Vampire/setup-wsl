@@ -164,6 +164,12 @@ val openSuseLeap15_2 = Distribution(
     defaultAbsentTool = "which"
 )
 
+val ubuntu2604 = Distribution(
+    wslId = "Ubuntu-26.04",
+    matchPattern = "*Ubuntu*26.04*",
+    defaultAbsentTool = "dos2unix"
+)
+
 val ubuntu2404 = Distribution(
     wslId = "Ubuntu-24.04",
     matchPattern = "*Ubuntu*24.04*",
@@ -201,6 +207,7 @@ val distributions = listOf(
     debian11,
     kali,
     openSuseLeap15_2,
+    ubuntu2604,
     ubuntu2404,
     ubuntu2204,
     ubuntu2004,
@@ -431,7 +438,7 @@ workflowWithCopyright(
                 useCache = false,
                 // part of work-around for https://bugs.kali.org/view.php?id=8921
                 wslVersion = null,
-                wslVersion_Untyped = expr(getWslVersionExpression(kali))
+                wslVersion_Untyped = expr(getWslVersionExpression(kali, ubuntu2604))
             )
         )
         verifyFailure(
@@ -804,7 +811,7 @@ workflowWithCopyright(
                 ),
                 // part of work-around for https://bugs.kali.org/view.php?id=8921
                 wslVersion = null,
-                wslVersion_Untyped = expr(getWslVersionExpression(kali))
+                wslVersion_Untyped = expr(getWslVersionExpression(kali, ubuntu2604))
             ),
             // part of work-around for https://bugs.kali.org/view.php?id=8921
             condition = "matrix.distribution.user-id != '${kali.userId}'"
@@ -1099,7 +1106,13 @@ workflowWithCopyright(
                 // and https://bugs.kali.org/view.php?id=6672
                 // and https://bugs.launchpad.net/ubuntu/+source/systemd/+bug/2069555
                 wslVersion = null,
-                wslVersion_Untyped = expr(getWslVersionExpression(debian13, ubuntu2404))
+                wslVersion_Untyped = expr(
+                    getWslVersionExpression(
+                        debian13,
+                        ubuntu2404,
+                        ubuntu2604
+                    )
+                )
             )
         )
         usesSelf(
@@ -1116,10 +1129,11 @@ workflowWithCopyright(
                 |    (
                 |        (matrix.distribution.user-id != '${debian13.userId}')
                 |        && (matrix.distribution.user-id != '${ubuntu2404.userId}')
+                |        && (matrix.distribution.user-id != '${ubuntu2604.userId}')
                 |    )
                 |    || (
                 |        (
-                             ${getWslVersionExpression(debian13, ubuntu2404).prependIndent("|            ")}
+                             ${getWslVersionExpression(debian13, ubuntu2404, ubuntu2604).prependIndent("|            ")}
                 |        ) == '2'
                 |    )
                 |)

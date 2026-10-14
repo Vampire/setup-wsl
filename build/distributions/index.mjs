@@ -96988,6 +96988,7 @@ initMetadataForCoroutine($refreshCOROUTINE$, CoroutineImpl);
 initMetadataForCoroutine($updateCOROUTINE$, CoroutineImpl);
 initMetadataForCoroutine($installCOROUTINE$, CoroutineImpl);
 initMetadataForClass(AptGetBasedDistribution, 'AptGetBasedDistribution', VOID, Distribution, VOID, [0, 1]);
+initMetadataForObject(Ubuntu2604, 'Ubuntu2604', VOID, AptGetBasedDistribution, VOID, [0, 1]);
 initMetadataForObject(Ubuntu2404, 'Ubuntu2404', VOID, AptGetBasedDistribution, VOID, [0, 1]);
 initMetadataForObject(Ubuntu2204, 'Ubuntu2204', VOID, AptGetBasedDistribution, VOID, [0, 1]);
 initMetadataForObject(Ubuntu2004, 'Ubuntu2004', VOID, AptGetBasedDistribution, VOID, [0, 1]);
@@ -109536,6 +109537,16 @@ protoOf(AptGetBasedDistribution).yu = function (packages, $completion) {
 };
 function AptGetBasedDistribution() {
 }
+function Ubuntu2604() {
+  Ubuntu2604_instance = this;
+  AptGetBasedDistribution_init_$Init$('Ubuntu-26.04', 'Ubuntu', new node_modules_semver.SemVer('26.4.1'), new URL('https://releases.ubuntu.com/26.04.1/ubuntu-26.04.1-wsl-amd64.wsl'), VOID, this);
+}
+var Ubuntu2604_instance;
+function Ubuntu2604_getInstance() {
+  if (Ubuntu2604_instance == null)
+    new Ubuntu2604();
+  return Ubuntu2604_instance;
+}
 function Ubuntu2404() {
   Ubuntu2404_instance = this;
   AptGetBasedDistribution_init_$Init$('Ubuntu-24.04', 'Ubuntu', new node_modules_semver.SemVer('24.4.5'), new URL('https://releases.ubuntu.com/24.04.5/ubuntu-24.04.5-wsl-amd64.wsl'), VOID, this);
@@ -110486,7 +110497,7 @@ function _init_properties_Distribution_kt__4d9u58() {
   if (!properties_initialized_Distribution_kt_qdwpiy) {
     properties_initialized_Distribution_kt_qdwpiy = true;
     // Inline function 'kotlin.collections.associateBy' call
-    var this_0 = listOf_0([Alpine317_getInstance(), Alpine318_getInstance(), Alpine319_getInstance(), Alpine320_getInstance(), Alpine321_getInstance(), Alpine322_getInstance(), Alpine323_getInstance(), Alpine324_getInstance(), Debian11_getInstance(), Debian12_getInstance(), Debian13_getInstance(), Kali_getInstance(), OpenSuseLeap15_2_getInstance(), Ubuntu1604_getInstance(), Ubuntu1804_getInstance(), Ubuntu2004_getInstance(), Ubuntu2204_getInstance(), Ubuntu2404_getInstance()]);
+    var this_0 = listOf_0([Alpine317_getInstance(), Alpine318_getInstance(), Alpine319_getInstance(), Alpine320_getInstance(), Alpine321_getInstance(), Alpine322_getInstance(), Alpine323_getInstance(), Alpine324_getInstance(), Debian11_getInstance(), Debian12_getInstance(), Debian13_getInstance(), Kali_getInstance(), OpenSuseLeap15_2_getInstance(), Ubuntu1604_getInstance(), Ubuntu1804_getInstance(), Ubuntu2004_getInstance(), Ubuntu2204_getInstance(), Ubuntu2404_getInstance(), Ubuntu2604_getInstance()]);
     var capacity = coerceAtLeast(mapCapacity(collectionSizeOrDefault(this_0, 10)), 16);
     // Inline function 'kotlin.collections.associateByTo' call
     var destination = LinkedHashMap_init_$Create$_0(capacity);
