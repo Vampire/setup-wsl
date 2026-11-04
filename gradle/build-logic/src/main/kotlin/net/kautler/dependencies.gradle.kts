@@ -60,25 +60,18 @@ internal val validateGradleWrapperJar = tasks.register("validateGradleWrapperJar
             "%02x".repeat(it.size).format(*it.toTypedArray())
         }
 
-        val gradleVersionOfWrapper = resources.text.fromUri("https://services.gradle.org/versions/all")
+        val wrapperVersionOutdated = resources.text.fromUri("https://services.gradle.org/versions/all")
             .asString()
             .let(Json.Default::parseToJsonElement)
             .jsonArray
             .asSequence()
             .filterIsInstance<JsonObject>()
-            .find {
-                it["wrapperChecksumUrl"]
-                    ?.jsonPrimitive
-                    ?.content
-                    ?.let(resources.text::fromUri)
-                    ?.asString() == currentWrapperChecksum
-            }
-            ?.get("version")
-            ?.jsonPrimitive
-            ?.content
-            ?.let(GradleVersion::version)
+            .filter { it["wrapperChecksum"]?.jsonPrimitive?.content == currentWrapperChecksum }
+            .map { it["version"]!!.jsonPrimitive.content }
+            .map(GradleVersion::version)
+            .none { it >= GradleVersion.current() }
 
-        if((gradleVersionOfWrapper == null) || (gradleVersionOfWrapper < GradleVersion.current())) {
+        if (wrapperVersionOutdated) {
             throw problemReporter.throwing(
                 IllegalStateException(),
                 ProblemId.create(
