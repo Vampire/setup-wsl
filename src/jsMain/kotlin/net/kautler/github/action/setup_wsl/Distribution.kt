@@ -22,6 +22,7 @@ import js.objects.recordOf
 import net.kautler.github.action.setup_wsl.InstallMethod.APP_BUNDLE
 import net.kautler.github.action.setup_wsl.InstallMethod.TARBALL
 import net.kautler.github.action.setup_wsl.InstallMethod.WSL_FILE
+import node.process.process
 import org.w3c.dom.url.URL
 import semver.SemVer
 
@@ -54,27 +55,43 @@ sealed class Distribution(
     val userId: String,
     val distributionName: String,
     val version: SemVer,
-    val downloadUrl: URL,
-    val installerFile: String? = null
+    private val amd64DownloadUrl: URL,
+    val installerFile: String? = null,
+    private val arm64DownloadUrl: URL? = null
 ) {
     constructor(
         wslId: String,
         distributionName: String,
         version: SemVer,
         downloadUrl: URL,
-        installerFile: String? = null
-    ) : this(wslId, wslId, distributionName, version, downloadUrl, installerFile)
+        installerFile: String? = null,
+        arm64DownloadUrl: URL? = null
+    ) : this(wslId, wslId, distributionName, version, downloadUrl, installerFile, arm64DownloadUrl)
 
-    val downloadFileName = downloadUrl
-        .pathname
-        .substringAfterLast('/')
-        .substringBefore('?')
+    val downloadUrl by lazy {
+        if (process.env["RUNNER_ARCH"] == "ARM64") {
+            requireNotNull(arm64DownloadUrl) {
+                "Distribution '$userId' is not available for ARM64"
+            }
+        } else {
+            amd64DownloadUrl
+        }
+    }
 
-    val installMethod = when {
-        installerFile != null -> APP_BUNDLE
-        downloadFileName.endsWith(".wsl") -> WSL_FILE
-        downloadFileName.endsWith(".tar.gz") || downloadFileName.endsWith(".tgz") -> TARBALL
-        else -> error("Unknown install method for download URL '$downloadUrl'")
+    val downloadFileName by lazy {
+        downloadUrl
+            .pathname
+            .substringAfterLast('/')
+            .substringBefore('?')
+    }
+
+    val installMethod by lazy {
+        when {
+            installerFile != null -> APP_BUNDLE
+            downloadFileName.endsWith(".wsl") -> WSL_FILE
+            downloadFileName.endsWith(".tar.gz") || downloadFileName.endsWith(".tgz") -> TARBALL
+            else -> error("Unknown install method for download URL '$downloadUrl'")
+        }
     }
 
     open suspend fun createUser(username: String) {
@@ -103,8 +120,9 @@ abstract class AptGetBasedDistribution : Distribution {
         distributionName: String,
         version: SemVer,
         downloadUrl: URL,
-        installerFile: String? = null
-    ) : super(wslId, distributionName, version, downloadUrl, installerFile)
+        installerFile: String? = null,
+        arm64DownloadUrl: URL? = null
+    ) : super(wslId, distributionName, version, downloadUrl, installerFile, arm64DownloadUrl)
 
     constructor(
         wslId: String,
@@ -112,8 +130,9 @@ abstract class AptGetBasedDistribution : Distribution {
         distributionName: String,
         version: SemVer,
         downloadUrl: URL,
-        installerFile: String? = null
-    ) : super(wslId, userId, distributionName, version, downloadUrl, installerFile)
+        installerFile: String? = null,
+        arm64DownloadUrl: URL? = null
+    ) : super(wslId, userId, distributionName, version, downloadUrl, installerFile, arm64DownloadUrl)
 
     protected open suspend fun refresh() {
         exec(
@@ -186,28 +205,32 @@ object Ubuntu2604 : AptGetBasedDistribution(
     wslId = "Ubuntu-26.04",
     distributionName = "Ubuntu",
     version = SemVer("26.4.1"),
-    downloadUrl = URL("https://releases.ubuntu.com/26.04.1/ubuntu-26.04.1-wsl-amd64.wsl")
+    downloadUrl = URL("https://releases.ubuntu.com/26.04.1/ubuntu-26.04.1-wsl-amd64.wsl"),
+    arm64DownloadUrl = URL("https://cdimages.ubuntu.com/releases/26.04.1/release/ubuntu-26.04.1-wsl-arm64.wsl")
 )
 
 object Ubuntu2404 : AptGetBasedDistribution(
     wslId = "Ubuntu-24.04",
     distributionName = "Ubuntu",
     version = SemVer("24.4.5"),
-    downloadUrl = URL("https://releases.ubuntu.com/24.04.5/ubuntu-24.04.5-wsl-amd64.wsl")
+    downloadUrl = URL("https://releases.ubuntu.com/24.04.5/ubuntu-24.04.5-wsl-amd64.wsl"),
+    arm64DownloadUrl = URL("https://cdimages.ubuntu.com/releases/24.04.5/release/ubuntu-24.04.5-wsl-arm64.wsl")
 )
 
 object Ubuntu2204 : AptGetBasedDistribution(
     wslId = "Ubuntu-22.04",
     distributionName = "Ubuntu",
     version = SemVer("22.4.5"),
-    downloadUrl = URL("https://releases.ubuntu.com/jammy/ubuntu-22.04.5-wsl-amd64.wsl")
+    downloadUrl = URL("https://releases.ubuntu.com/jammy/ubuntu-22.04.5-wsl-amd64.wsl"),
+    arm64DownloadUrl = URL("https://cdimage.ubuntu.com/ubuntu/releases/jammy/release/ubuntu-22.04.5-wsl-arm64.wsl")
 )
 
 object Ubuntu2004 : AptGetBasedDistribution(
     wslId = "Ubuntu-20.04",
     distributionName = "Ubuntu",
     version = SemVer("20.4.6"),
-    downloadUrl = URL("https://releases.ubuntu.com/focal/ubuntu-20.04.6-wsl-amd64.wsl")
+    downloadUrl = URL("https://releases.ubuntu.com/focal/ubuntu-20.04.6-wsl-amd64.wsl"),
+    arm64DownloadUrl = URL("https://cdimage.ubuntu.com/ubuntu/releases/focal/release/ubuntu-20.04.6-wsl-arm64.wsl")
 )
 
 object Ubuntu1804 : AptGetBasedDistribution(

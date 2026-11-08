@@ -161,6 +161,8 @@ The values currently supported by this action are:
 * `Ubuntu-18.04`
 * `Ubuntu-16.04`
 
+On Windows ARM64, only `Ubuntu-26.04`, `Ubuntu-24.04`, `Ubuntu-22.04`, and `Ubuntu-20.04` are supported.
+
 _**Example:**_
 ```yaml
 - uses: Vampire/setup-wsl@v$majorVersion
@@ -340,7 +342,12 @@ work or break, so issues a warning for the action run. Currently, WSLv1 and WSLv
 issue a warning. If a new WSL version is available and your workflow works with it, please report an issue
 so that proper tests can be added and the warning for that version removed.
 
-**Default value:** `2`
+GitHub-hosted Windows ARM64 runners do not support the nested virtualization required by WSLv2. The action uses
+WSLv1 by default on those runners and warns if a later WSL version is requested.
+
+**Default value:**
+* `1` on GitHub-hosted Windows ARM64 runners
+* `2` otherwise
 
 _**Example:**_
 ```yaml

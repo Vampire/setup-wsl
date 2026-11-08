@@ -1607,6 +1607,71 @@ jobs:
       if: |-
         always()
         && (steps.step-1.outcome == 'success')
+  test_arm64_wsl1:
+    name: 'Test "${{ matrix.distribution.user-id }}" on WSLv1 for Windows ARM64'
+    runs-on: '${{ matrix.environment }}'
+    needs:
+    - 'build'
+    - 'check_yaml_consistency'
+    strategy:
+      fail-fast: false
+      matrix:
+        environment:
+        - 'windows-11-arm'
+        distribution:
+        - wsl-id: 'Ubuntu-26.04'
+          user-id: 'Ubuntu-26.04'
+          match-pattern: '*Ubuntu*26.04*'
+          default-absent-tool: 'dos2unix'
+          create-test-user-command: 'useradd -m -p 4qBD5NWD3IkbU test'
+        - wsl-id: 'Ubuntu-24.04'
+          user-id: 'Ubuntu-24.04'
+          match-pattern: '*Ubuntu*24.04*'
+          default-absent-tool: 'dos2unix'
+          create-test-user-command: 'useradd -m -p 4qBD5NWD3IkbU test'
+        - wsl-id: 'Ubuntu-22.04'
+          user-id: 'Ubuntu-22.04'
+          match-pattern: '*Ubuntu*22.04*'
+          default-absent-tool: 'dos2unix'
+          create-test-user-command: 'useradd -m -p 4qBD5NWD3IkbU test'
+        - wsl-id: 'Ubuntu-20.04'
+          user-id: 'Ubuntu-20.04'
+          match-pattern: '*Ubuntu*20.04*'
+          default-absent-tool: 'dos2unix'
+          create-test-user-command: 'useradd -m -p 4qBD5NWD3IkbU test'
+    steps:
+    - id: 'step-0'
+      name: 'Restore built artifacts from cache'
+      uses: 'actions/cache/restore@v5'
+      with:
+        path: |-
+          action.yml
+          build/distributions/
+        key: '${{ github.run_id }}'
+        fail-on-cache-miss: 'true'
+    - id: 'step-1'
+      name: 'Execute action'
+      uses: './'
+      with:
+        distribution: '${{ matrix.distribution.user-id }}'
+    - id: 'step-2'
+      name: 'Test - distribution should use ARM64 on WSLv1'
+      shell: 'wsl-bash {0}'
+      run: |-
+        uname -m
+        [[ "$(uname -m)" == aarch64 ]]
+      if: |-
+        always()
+        && (steps.step-1.outcome == 'success')
+    - id: 'step-3'
+      name: 'Test - distribution should run on WSLv1'
+      shell: 'wsl-bash {0}'
+      run: |-
+        cat <(wsl.exe --list --verbose || true) <(wsl.exe --list --verbose || true | iconv -f UTF-16LE -t UTF-8)
+        [[ "$(cat <(wsl.exe --list --verbose || true) <(wsl.exe --list --verbose || true | iconv -f UTF-16LE -t UTF-8))" == *${{ matrix.distribution.wsl-id }}*\ 1* ]]
+      if: |-
+        always()
+        && (steps.step-1.outcome == 'success')
   test_switching_wsl_version_for_different_distributions:
     name: 'Test switching WSL version for different distributions on ${{ matrix.environment }}'
     runs-on: '${{ matrix.environment }}'

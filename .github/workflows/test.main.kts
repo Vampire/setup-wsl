@@ -215,6 +215,13 @@ val distributions = listOf(
     ubuntu1604
 ).map { it.asMap }
 
+val arm64Distributions = listOf(
+    ubuntu2604,
+    ubuntu2404,
+    ubuntu2204,
+    ubuntu2004
+).map { it.asMap }
+
 val wslBash = Shell.Custom("wsl-bash {0}")
 
 val wslSh = Shell.Custom("wsl-sh {0}")
@@ -881,6 +888,41 @@ workflowWithCopyright(
                 <(wsl.exe --list --verbose || true | iconv -f UTF-16LE -t UTF-8)
             """.trimIndent().replace("\n", " "),
             expectedPattern = """*${expr("matrix.distribution.wsl-id")}*\ ${expr("matrix.wsl-version")}*"""
+        )
+    }
+
+    testJob(
+        id = "test_arm64_wsl1",
+        name = """Test "${expr("matrix.distribution.user-id")}" on WSLv1 for Windows ARM64""",
+        _customArguments = mapOf(
+            "strategy" to mapOf(
+                "fail-fast" to false,
+                "matrix" to mapOf(
+                    "environment" to listOf("windows-11-arm"),
+                    "distribution" to arm64Distributions
+                )
+            )
+        )
+    ) {
+        executeActionStep = usesSelf(
+            action = executeAction.copy(
+                distribution = SetupWsl.Distribution.Custom(expr("matrix.distribution.user-id")),
+                wslVersion = null
+            )
+        )
+        verifyCommandResult(
+            name = "Test - distribution should use ARM64 on WSLv1",
+            actualCommand = "uname -m",
+            expectedPattern = "aarch64"
+        )
+        verifyCommandResult(
+            name = "Test - distribution should run on WSLv1",
+            actualCommand = """
+                cat
+                <(wsl.exe --list --verbose || true)
+                <(wsl.exe --list --verbose || true | iconv -f UTF-16LE -t UTF-8)
+            """.trimIndent().replace("\n", " "),
+            expectedPattern = """*${expr("matrix.distribution.wsl-id")}*\ 1*"""
         )
     }
 

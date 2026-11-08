@@ -121,8 +121,10 @@ inputs:
             work or break, so issues a warning for the action run. Currently, WSLv1 and WSLv2 are tested and do not
             issue a warning. If a new WSL version is available and your workflow works with it, please report an issue
             so that proper tests can be added and the warning for that version removed.
+            Defaults to WSLv1 on GitHub-hosted Windows ARM64 runners and warns if a later version is requested.
+            Defaults to WSLv2 otherwise.
         required: false
-        default: '2'
+        default: 1 | 2
 
 outputs:
     wsl-shell-wrapper-path:

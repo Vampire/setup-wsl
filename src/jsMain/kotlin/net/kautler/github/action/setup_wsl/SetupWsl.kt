@@ -184,7 +184,7 @@ val distributionDirectory = GlobalScope.async(start = LAZY) {
 
     cacheDirectory = toolCacheDir()
 
-    val cacheKey = "2:distributionDirectory_${distribution.distributionName}_${distribution.version}"
+    val cacheKey = "2:distributionDirectory_${distribution.distributionName}_${distribution.version}_${process.env["RUNNER_ARCH"]}"
 
     val installerFile = when (distribution.installMethod) {
         TARBALL, WSL_FILE -> distribution.downloadFileName
@@ -269,19 +269,30 @@ val wslShellCommand by lazy {
     getInput("wsl-shell-command")
 }
 
+val isGitHubHostedWindowsArm64 by lazy {
+    (process.env["RUNNER_ARCH"] == "ARM64")
+            && (process.env["RUNNER_ENVIRONMENT"] == "github-hosted")
+}
+
 val wslVersion = GlobalScope.async(start = LAZY) {
     val input = getInput("wsl-version", InputOptions(required = true))
-    input
-        .toUIntOrNull()
+    (if (input == "1 | 2") {
+        if (isGitHubHostedWindowsArm64) 1u else 2u
+    } else {
+        input.toUIntOrNull()
+    })
         .also { wslVersion ->
             when (wslVersion) {
                 null, 0u -> error("'$input' is not a valid positive integer for 'wsl-version'.")
                 1u -> Unit
                 else -> {
+                    if (isGitHubHostedWindowsArm64) {
+                        warning("GitHub-hosted Windows ARM64 runners only support WSLv1, but WSLv$wslVersion was requested")
+                    }
                     check(wslHelp().contains("--set-default-version")) {
                         "This Windows environment only has WSLv1 available but WSLv$wslVersion was requested, please verify your 'runs-on' and 'wsl-version' settings"
                     }
-                    if (wslVersion > 2u) {
+                    if (!isGitHubHostedWindowsArm64 && (wslVersion > 2u)) {
                         warning("WSLv$wslVersion is untested, if it works with your workflow please open an issue to get the version tested and this warning removed")
                     }
                 }
@@ -401,6 +412,7 @@ suspend fun verifyWindowsEnvironment() {
     check(which("wsl").isNotBlank() || which("wslconfig").isNotBlank()) {
         "This Windows environment does not have WSL enabled, please verify your 'runs-on' setting"
     }
+    wslVersion()
 }
 
 suspend fun installWsl() {
